@@ -1,52 +1,53 @@
-const { sequelize, Sequelize } = require('../config/db');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
 
 const User = sequelize.define('User', {
     id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         autoIncrement: true,
-        primaryKey: true,
+        primaryKey: true
     },
     username: {
-        type: Sequelize.STRING,
-        allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: false
     },
     email: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+        validate: {
+            isEmail: true
+        }
     },
     password: {
-        type: Sequelize.STRING,
-        allowNull: true, // Nullable for Google login
+        type: DataTypes.STRING,
+        allowNull: true // Nullable for Google login
     },
     role: {
-        type: Sequelize.ENUM('admin', 'consumer'),
+        type: DataTypes.ENUM('admin', 'consumer'),
         defaultValue: 'consumer',
-        allowNull: false,
+        allowNull: false
     },
-    profilePic: {
-        type: Sequelize.STRING, // Store file path
-        allowNull: true,
+    status: {
+        type: DataTypes.ENUM('active', 'inactive'),
+        defaultValue: 'active'
+    },
+    profileImage: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     googleId: {
-        type: Sequelize.STRING,
-        allowNull: true, // Required for Google login
-    },
-    resetToken: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: true,
+        unique: true
     },
-    resetTokenExpiry: {
-        type: Sequelize.DATE,
-        allowNull: true,
+    refreshToken: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     timestamps: true,
+    tableName: 'users'
 });
-
-// Sync table (Uncomment for first-time setup)
-// sequelize.sync({ alter: true })
-//     .then(() => console.log("User table synced"))
-//     .catch(err => console.log("Error syncing table:", err));
 
 module.exports = User;

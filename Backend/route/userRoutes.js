@@ -1,28 +1,42 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-require('../config/passport');
-const { register, login, googleAuth, googleAuthCallback, forgotPassword, upload, uploadProfilePic } = require('../controller/userController');
+require('../config/passport'); // Ensure passport is configured
+const { 
+    register, 
+    login, 
+    googleAuth, 
+    googleAuthCallback, 
+    forgotPassword, 
+    resetPassword, 
+    getCurrentUser,
+    updateUser, 
+    updatePassword,
+    deleteUser,
+    upload 
+} = require('../controller/userController');
+const { auth, authorize } = require('../middleware/auth');
 
-// Register & Login
+// Public routes
 router.post('/register', register);
 router.post('/login', login);
-
-// Start Google Auth
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-// Handle Callback & Return JSON Instead of HTML
-router.get('/auth/google/callback', passport.authenticate('google', { session: false }), (req, res) => {
-    res.json({
-        message: "Google Authentication Successful",
-        user: req.user
-    });
-});
-
-// Forgot password
 router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
-// Profile picture upload
-router.post('/upload-profile-pic', upload.single('profilePic'), uploadProfilePic);
+// Google authentication routes
+router.get('/auth/google', googleAuth);
+router.get('/auth/google/callback', googleAuthCallback);
+
+// Protected routes
+router.get('/me', auth, getCurrentUser);
+router.put('/update', auth, upload.single('profilePic'), updateUser);
+router.put('/update-password', auth, updatePassword);
+router.delete('/delete', auth, deleteUser);
+
+// Admin only routes
+router.get('/admin/users', auth, authorize(['admin']), (req, res) => {
+    // This is just a placeholder. You would implement admin functions here
+    res.json({ message: 'Admin only route' });
+});
 
 module.exports = router;
