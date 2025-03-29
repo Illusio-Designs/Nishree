@@ -1,0 +1,23 @@
+.hero-img img{
+    position: absolute;
+}
+.hero-text{
+    position: relative;
+    padding: 17% 0;
+    text-align: center;
+    align-items: center;
+}
+.hero-text h1{
+    color: #ffffff;
+    font-size: 80px;
+    padding-bottom: 50px;
+}
+.btn{
+    background: #F2F2F226;
+    border: 1px solid #F2F2F236;
+    border-radius: 15px;
+    backdrop-filter: blur(25.200000762939453px);
+    padding: 10px 30px;
+    font-size: 25px;
+    color: #ffffff;
+}

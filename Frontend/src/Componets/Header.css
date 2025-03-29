@@ -2,30 +2,34 @@
     margin: 0;
     padding: 0;
 }
-.back{
-    padding: 65px 10px;
-    height: auto;
-    width: 90%;
-    margin: 10px 6%; 
+.header{
     position: absolute;
-    border: 1px solid #000000;
-    background: #000000;
+    z-index: 1;
+}
+.back{
+    padding: 37px 5px;
+    height: auto;
+    width: 85%;
+    margin: 20px 7.5%; 
+    position: absolute;
+    border: 1px solid #F2F2F226;
+    background: #F2F2F226;
     backdrop-filter: blur(25.200000762939453px);
-    border-radius: 20px;
+    border-radius: 22px;
 }
 .container{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
-    width: 90%;
+    padding: 10px 60px 10px 20px;
+    width: 80%;
     margin: 10px auto; 
     background-color: #ffffff;
     position: relative;
     border-radius: 20px;
 }
 .logo img{
-    width: 80%;
+    width: 50%;
 }
 .logo{
     width:15%;
@@ -50,3 +54,4 @@
     text-decoration: underline;
     text-underline-offset: 5px;
 }
+
