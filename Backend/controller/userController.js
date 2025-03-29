@@ -5,7 +5,7 @@ const multer = require('multer');
 const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
-const User = require('../model/userModel');
+const User = require('../model/userModel'); // Adjust the path if needed
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 

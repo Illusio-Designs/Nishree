@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import "./index.css";
 import Home from "./pages/Home";
+import DashboardLogin from "./pages/Dashboard/Login";
 
 function App() {
   return (
-    <>
-      <Home />
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<DashboardLogin />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
