@@ -26,38 +26,14 @@ const createUploadMiddleware = (uploadDir, fieldName = 'image') => {
         }
     };
 
-    // Create multer instance
-    const upload = multer({ 
+    // Create and return the multer instance
+    return multer({ 
         storage, 
         fileFilter,
         limits: {
             fileSize: 5 * 1024 * 1024 // 5MB limit
         }
-    }).single(fieldName);
-
-    // Wrap multer middleware with error handling
-    return (req, res, next) => {
-        upload(req, res, (err) => {
-            if (err instanceof multer.MulterError) {
-                if (err.code === 'LIMIT_FILE_SIZE') {
-                    return res.status(400).json({ 
-                        message: 'File size too large. Maximum size is 5MB.',
-                        error: 'FILE_TOO_LARGE'
-                    });
-                }
-                return res.status(400).json({ 
-                    message: 'Error uploading file',
-                    error: err.message
-                });
-            } else if (err) {
-                return res.status(400).json({ 
-                    message: 'Invalid file type',
-                    error: err.message
-                });
-            }
-            next();
-        });
-    };
+    });
 };
 
 module.exports = createUploadMiddleware; 

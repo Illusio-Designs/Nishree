@@ -175,69 +175,6 @@
           }
         },
         {
-          "name": "Forgot Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:5000/api/users/forgot-password",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5000",
-              "path": ["api", "users", "forgot-password"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"email\": \"illusiodesigns@gmail.com\"\n}"
-            },
-            "event": [
-              {
-                "listen": "test",
-                "script": {
-                  "exec": [
-                    "var jsonData = pm.response.json();",
-                    "if (jsonData.resetToken) {",
-                    "    pm.environment.set('resetToken', jsonData.resetToken);",
-                    "    console.log('Reset token has been set successfully');",
-                    "} else {",
-                    "    console.error('No reset token found in response');",
-                    "}"
-                  ],
-                  "type": "text/javascript"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "name": "Reset Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:5000/api/users/reset-password",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5000",
-              "path": ["api", "users", "reset-password"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"resetToken\": \"{{resetToken}}\",\n    \"password\": \"Illusio@123\",\n    \"confirmPassword\": \"Illusio@123\"\n}"
-            }
-          }
-        },
-        {
           "name": "Get All Users (Admin)",
           "request": {
             "method": "GET",
@@ -297,6 +234,26 @@
                   "type": "text"
                 },
                 {
+                  "key": "parentId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "seoTitle",
+                  "value": "Test Category SEO Title",
+                  "type": "text"
+                },
+                {
+                  "key": "seoDescription",
+                  "value": "Test category SEO description",
+                  "type": "text"
+                },
+                {
+                  "key": "seoKeywords",
+                  "value": "test,category,keywords",
+                  "type": "text"
+                },
+                {
                   "key": "image",
                   "type": "file",
                   "src": []
@@ -319,15 +276,15 @@
           }
         },
         {
-          "name": "Get Category by ID",
+          "name": "Get Category by Name",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "http://localhost:5000/api/categories/1",
+              "raw": "http://localhost:5000/api/categories/name/test-category",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5000",
-              "path": ["api", "categories", "1"]
+              "path": ["api", "categories", "name", "test-category"]
             }
           }
         },
@@ -364,6 +321,26 @@
                 {
                   "key": "status",
                   "value": "active",
+                  "type": "text"
+                },
+                {
+                  "key": "parentId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "seoTitle",
+                  "value": "Updated Category SEO Title",
+                  "type": "text"
+                },
+                {
+                  "key": "seoDescription",
+                  "value": "Updated category SEO description",
+                  "type": "text"
+                },
+                {
+                  "key": "seoKeywords",
+                  "value": "updated,category,keywords",
                   "type": "text"
                 },
                 {
@@ -618,6 +595,11 @@
                   "type": "text"
                 },
                 {
+                  "key": "discount",
+                  "value": "{\"discountType\":\"percentage\",\"discountValue\":20,\"startDate\":\"2023-04-01T00:00:00.000Z\",\"endDate\":\"2023-12-31T23:59:59.000Z\",\"status\":\"active\"}",
+                  "type": "text"
+                },
+                {
                   "key": "images",
                   "type": "file",
                   "src": []
@@ -703,6 +685,11 @@
                   "type": "text"
                 },
                 {
+                  "key": "discount",
+                  "value": "{\"discountType\":\"percentage\",\"discountValue\":25,\"startDate\":\"2023-04-01T00:00:00.000Z\",\"endDate\":\"2023-12-31T23:59:59.000Z\",\"status\":\"active\"}",
+                  "type": "text"
+                },
+                {
                   "key": "images",
                   "type": "file",
                   "src": []
@@ -727,6 +714,284 @@
               "host": ["localhost"],
               "port": "5000",
               "path": ["api", "products", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Coupons",
+      "item": [
+        {
+          "name": "Create Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/coupons",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "coupons"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"WELCOME20\",\n    \"discountType\": \"percentage\",\n    \"discountValue\": 20,\n    \"minOrderAmount\": 50,\n    \"maxUsage\": 1000,\n    \"validFrom\": \"2023-04-01T00:00:00.000Z\",\n    \"validTo\": \"2023-12-31T23:59:59.000Z\",\n    \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Coupons",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/coupons",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "coupons"]
+            }
+          }
+        },
+        {
+          "name": "Get Coupon by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/coupons/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "coupons", "1"]
+            }
+          }
+        },
+        {
+          "name": "Validate Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/coupons/validate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "coupons", "validate"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"WELCOME20\",\n    \"orderAmount\": 100\n}"
+            }
+          }
+        },
+        {
+          "name": "Apply Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/coupons/apply",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "coupons", "apply"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"WELCOME20\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Coupon",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/coupons/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "coupons", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"discountValue\": 25,\n    \"minOrderAmount\": 75,\n    \"validTo\": \"2024-06-30T23:59:59.000Z\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Coupon",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/coupons/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "coupons", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishlist",
+      "item": [
+        {
+          "name": "Add Product to Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/wishlist",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "wishlist"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"productId\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Get User's Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/wishlist",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "wishlist"]
+            }
+          }
+        },
+        {
+          "name": "Check if Product is in Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/wishlist/check/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "wishlist", "check", "1"]
+            }
+          }
+        },
+        {
+          "name": "Remove Product from Wishlist",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/wishlist/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "wishlist", "1"]
+            }
+          }
+        },
+        {
+          "name": "Clear Wishlist",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/wishlist",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "wishlist"]
             }
           }
         }
@@ -761,4 +1026,4 @@
       "value": "your_reset_token_here"
     }
   ]
-}
+} 

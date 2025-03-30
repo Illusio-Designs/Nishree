@@ -8,15 +8,15 @@ const {
     deleteCategory,
     upload 
 } = require('../controller/categoryController');
-const { auth, authorize } = require('../middleware/auth');
+const { isAuthenticated, isAdmin } = require('../middleware/auth');
 
 // Public routes (no authentication required)
 router.get('/', getAllCategories);
 router.get('/name/:name', getCategoryByName);
 
 // Protected routes (require authentication)
-router.post('/', auth, authorize(['admin']), upload, createCategory);
-router.put('/:id', auth, authorize(['admin']), upload, updateCategory);
-router.delete('/:id', auth, authorize(['admin']), deleteCategory);
+router.post('/', isAuthenticated, isAdmin, upload.single('image'), createCategory);
+router.put('/:id', isAuthenticated, isAdmin, upload.single('image'), updateCategory);
+router.delete('/:id', isAuthenticated, isAdmin, deleteCategory);
 
 module.exports = router;

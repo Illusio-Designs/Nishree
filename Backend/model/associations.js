@@ -10,6 +10,9 @@ const ProductImage = require('./productImageModel');
 const ProductSEO = require('./productSEOModel');
 const ProductBadge = require('./productBadgeModel');
 const ProductBadgeMapping = require('./productBadgeMappingModel');
+const ProductDiscount = require('./productDiscountModel');
+const Coupon = require('./couponModel');
+const Wishlist = require('./wishlistModel');
 
 // Category Associations
 Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
@@ -55,6 +58,18 @@ AttributeValue.belongsToMany(ProductVariation, {
 Attribute.hasMany(AttributeValue, { foreignKey: 'attributeId' });
 AttributeValue.belongsTo(Attribute, { foreignKey: 'attributeId' });
 
+// Product Discount Associations
+Product.hasMany(ProductDiscount, { foreignKey: 'productId' });
+ProductDiscount.belongsTo(Product, { foreignKey: 'productId' });
+
+// Wishlist Associations
+User.belongsToMany(Product, { through: Wishlist, foreignKey: 'userId' });
+Product.belongsToMany(User, { through: Wishlist, foreignKey: 'productId' });
+User.hasMany(Wishlist, { foreignKey: 'userId' });
+Wishlist.belongsTo(User, { foreignKey: 'userId' });
+Product.hasMany(Wishlist, { foreignKey: 'productId' });
+Wishlist.belongsTo(Product, { foreignKey: 'productId' });
+
 module.exports = {
     User,
     Category,
@@ -67,5 +82,8 @@ module.exports = {
     ProductImage,
     ProductSEO,
     ProductBadge,
-    ProductBadgeMapping
+    ProductBadgeMapping,
+    ProductDiscount,
+    Coupon,
+    Wishlist
 }; 

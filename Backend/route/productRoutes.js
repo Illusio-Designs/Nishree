@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { auth, authorize } = require('../middleware/auth');
+const { isAuthenticated, isAdmin } = require('../middleware/auth');
 const {
     createProduct,
     getAllProducts,
@@ -15,8 +15,8 @@ router.get('/', getAllProducts);
 router.get('/:id', getProductById);
 
 // Protected routes (admin only)
-router.post('/', auth, authorize('admin'), upload.array('images', 5), createProduct);
-router.put('/:id', auth, authorize('admin'), upload.array('images', 5), updateProduct);
-router.delete('/:id', auth, authorize('admin'), deleteProduct);
+router.post('/', isAuthenticated, isAdmin, upload.array('images', 5), createProduct);
+router.put('/:id', isAuthenticated, isAdmin, upload.array('images', 5), updateProduct);
+router.delete('/:id', isAuthenticated, isAdmin, deleteProduct);
 
 module.exports = router; 

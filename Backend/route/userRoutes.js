@@ -14,7 +14,7 @@ const {
     upload,
     getAllUsers
 } = require('../controller/userController');
-const { auth, authorize } = require('../middleware/auth');
+const { isAuthenticated, isAdmin } = require('../middleware/auth');
 
 // Public routes
 router.post('/register', register);
@@ -47,12 +47,12 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
 });
 
 // Protected routes
-router.get('/me', auth, getCurrentUser);
-router.put('/update', auth, upload, updateUser);
-router.put('/update-password', auth, updatePassword);
-router.delete('/delete', auth, deleteUser);
+router.get('/me', isAuthenticated, getCurrentUser);
+router.put('/update', isAuthenticated, upload.single('profilePic'), updateUser);
+router.put('/update-password', isAuthenticated, updatePassword);
+router.delete('/delete', isAuthenticated, deleteUser);
 
 // Admin only routes
-router.get('/admin/users', auth, authorize(['admin']), getAllUsers);
+router.get('/admin/users', isAuthenticated, isAdmin, getAllUsers);
 
 module.exports = router;

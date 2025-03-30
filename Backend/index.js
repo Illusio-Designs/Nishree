@@ -8,6 +8,9 @@ require('./config/passport'); // Add passport configuration
 const categoryRoutes = require('./route/categoryRoutes');
 const userRoutes = require('./route/userRoutes'); // Make sure this path is correct
 const sliderRoutes = require('./route/sliderRoutes'); // Add slider routes
+const couponRoutes = require('./route/couponRoutes'); // Add coupon routes
+const wishlistRoutes = require('./route/wishlistRoutes'); // Add wishlist routes
+const productRoutes = require('./route/productRoutes'); // Add product routes
 
 const app = express();
 
@@ -42,6 +45,9 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/sliders', sliderRoutes); // Add slider routes
+app.use('/api/products', productRoutes); // Add product routes
+app.use('/api/coupons', couponRoutes); // Add coupon routes
+app.use('/api/wishlist', wishlistRoutes); // Add wishlist routes
 
 // Health Check Route
 app.get('/api/health', (req, res) => {

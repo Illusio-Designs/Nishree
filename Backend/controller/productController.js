@@ -1,9 +1,11 @@
-const { Product, ProductVariation, Attribute, AttributeValue, ProductVariationAttribute, ProductImage, ProductSEO, ProductBadge, ProductBadgeMapping } = require('../model');
+const { Product, ProductVariation, Attribute, AttributeValue, ProductVariationAttribute, ProductImage, ProductSEO, ProductBadge, ProductBadgeMapping, ProductDiscount } = require('../model/associations');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const ImageHandler = require('../utils/imageHandler');
 const createUploadMiddleware = require('../middleware/uploadMiddleware');
 const slugify = require('slugify');
+const sequelize = require('../config/db');
+const { Op } = require('sequelize');
 
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/products'));
@@ -44,6 +46,43 @@ const formatProductResponse = (product) => {
         }));
     }
 
+    // Add active discount details if any
+    if (productData.discounts && productData.discounts.length > 0) {
+        const now = new Date();
+        const activeDiscount = productData.discounts.find(discount => 
+            discount.status === 'active' && 
+            new Date(discount.startDate) <= now && 
+            new Date(discount.endDate) >= now
+        );
+        
+        if (activeDiscount) {
+            productData.activeDiscount = {
+                id: activeDiscount.id,
+                discountType: activeDiscount.discountType,
+                discountValue: activeDiscount.discountValue,
+                startDate: activeDiscount.startDate,
+                endDate: activeDiscount.endDate
+            };
+            
+            // Calculate discounted prices for variations if they exist
+            if (productData.variations) {
+                productData.variations = productData.variations.map(variation => {
+                    let discountedPrice = variation.price;
+                    if (activeDiscount.discountType === 'percentage') {
+                        discountedPrice = variation.price - (variation.price * activeDiscount.discountValue / 100);
+                    } else if (activeDiscount.discountType === 'fixed') {
+                        discountedPrice = Math.max(0, variation.price - activeDiscount.discountValue);
+                    }
+                    return {
+                        ...variation,
+                        originalPrice: variation.price,
+                        discountedPrice: parseFloat(discountedPrice.toFixed(2))
+                    };
+                });
+            }
+        }
+    }
+
     return productData;
 };
 
@@ -57,7 +96,8 @@ const createProduct = async (req, res) => {
             variations,
             attributes,
             seo,
-            badges
+            badges,
+            discount
         } = req.body;
 
         // Generate slug from name
@@ -153,6 +193,27 @@ const createProduct = async (req, res) => {
                 await Promise.all(badgePromises);
             }
 
+            // Handle product discount
+            if (discount) {
+                // Validate discount data
+                if (discount.discountType === 'percentage' && (discount.discountValue <= 0 || discount.discountValue > 100)) {
+                    throw new Error('Percentage discount must be between 0 and 100');
+                }
+
+                if (discount.discountType === 'fixed' && discount.discountValue <= 0) {
+                    throw new Error('Fixed discount value must be greater than 0');
+                }
+
+                await ProductDiscount.create({
+                    productId: product.id,
+                    discountType: discount.discountType,
+                    discountValue: discount.discountValue,
+                    startDate: discount.startDate || new Date(),
+                    endDate: discount.endDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+                    status: discount.status || 'active'
+                }, { transaction: t });
+            }
+
             return product;
         });
 
@@ -182,6 +243,10 @@ const createProduct = async (req, res) => {
                 {
                     model: ProductBadge,
                     as: 'badges'
+                },
+                {
+                    model: ProductDiscount,
+                    as: 'discounts'
                 }
             ]
         });
@@ -229,6 +294,16 @@ const getAllProducts = async (req, res) => {
                 {
                     model: ProductBadge,
                     as: 'badges'
+                },
+                {
+                    model: ProductDiscount,
+                    as: 'discounts',
+                    where: {
+                        status: 'active',
+                        startDate: { [Op.lte]: new Date() },
+                        endDate: { [Op.gte]: new Date() }
+                    },
+                    required: false
                 }
             ],
             order: [['createdAt', 'DESC']]
@@ -270,6 +345,16 @@ const getProductById = async (req, res) => {
                 {
                     model: ProductBadge,
                     as: 'badges'
+                },
+                {
+                    model: ProductDiscount,
+                    as: 'discounts',
+                    where: {
+                        status: 'active',
+                        startDate: { [Op.lte]: new Date() },
+                        endDate: { [Op.gte]: new Date() }
+                    },
+                    required: false
                 }
             ]
         });
@@ -281,7 +366,7 @@ const getProductById = async (req, res) => {
         const productResponse = formatProductResponse(product);
         res.status(200).json(productResponse);
     } catch (error) {
-        console.error('Get product error:', error);
+        console.error('Get product by ID error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -289,42 +374,60 @@ const getProductById = async (req, res) => {
 // Update Product
 const updateProduct = async (req, res) => {
     try {
+        const productId = req.params.id;
         const {
             name,
             description,
             status,
             variations,
-            attributes,
             seo,
-            badges
+            badges,
+            discount // New discount data
         } = req.body;
 
-        const product = await Product.findByPk(req.params.id);
-        if (!product) {
+        // Check if product exists
+        const existingProduct = await Product.findByPk(productId);
+        if (!existingProduct) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Start transaction
         await sequelize.transaction(async (t) => {
             // Update basic product info
-            if (name) {
-                product.slug = slugify(name, { lower: true, strict: true });
+            if (name || description || status) {
+                await existingProduct.update({
+                    name: name || existingProduct.name,
+                    slug: name ? slugify(name, { lower: true, strict: true }) : existingProduct.slug,
+                    description: description || existingProduct.description,
+                    status: status || existingProduct.status
+                }, { transaction: t });
             }
-            await product.update({
-                name: name || product.name,
-                description: description || product.description,
-                status: status || product.status
-            }, { transaction: t });
 
-            // Handle new images
+            // Handle images
             if (req.files && req.files.length > 0) {
+                // Get existing images
+                const existingImages = await ProductImage.findAll({
+                    where: { productId }
+                });
+
+                // Delete existing images from storage
+                for (const img of existingImages) {
+                    await imageHandler.deleteImage(img.imageName);
+                }
+
+                // Delete from database
+                await ProductImage.destroy({
+                    where: { productId },
+                    transaction: t
+                });
+
+                // Upload new images
                 const imagePromises = req.files.map(async (file, index) => {
                     const result = await imageHandler.processImage(file.path, {
                         width: 800,
                         height: 800,
                         quality: 80,
                         format: 'webp',
-                        filename: `product-${product.id}-${uuidv4()}`
+                        filename: `product-${productId}-${uuidv4()}`
                     });
 
                     if (!result.success) {
@@ -332,9 +435,9 @@ const updateProduct = async (req, res) => {
                     }
 
                     return ProductImage.create({
-                        productId: product.id,
+                        productId: productId,
                         imageName: result.filename,
-                        altText: `${product.name} - Image ${index + 1}`,
+                        altText: `${name || existingProduct.name} - Image ${index + 1}`,
                         isDefault: index === 0
                     }, { transaction: t });
                 });
@@ -342,24 +445,25 @@ const updateProduct = async (req, res) => {
                 await Promise.all(imagePromises);
             }
 
-            // Handle variations update
-            if (variations) {
-                // Delete existing variations
+            // Handle variations
+            if (variations && variations.length > 0) {
+                // Delete existing variations and their attributes
                 await ProductVariation.destroy({
-                    where: { productId: product.id },
+                    where: { productId },
                     transaction: t
                 });
 
                 // Create new variations
                 for (const variation of variations) {
                     const productVariation = await ProductVariation.create({
-                        productId: product.id,
+                        productId: productId,
                         sku: variation.sku,
                         price: variation.price,
                         stock: variation.stock,
                         status: variation.status || 'active'
                     }, { transaction: t });
 
+                    // Handle variation attributes
                     if (variation.attributes) {
                         const attributePromises = variation.attributes.map(async (attr) => {
                             const attributeValue = await AttributeValue.findOne({
@@ -383,35 +487,79 @@ const updateProduct = async (req, res) => {
                 }
             }
 
-            // Handle SEO update
+            // Handle SEO
             if (seo) {
                 await ProductSEO.upsert({
-                    productId: product.id,
+                    productId: productId,
                     ...seo
                 }, { transaction: t });
             }
 
-            // Handle badges update
+            // Handle badges
             if (badges) {
-                // Delete existing badge mappings
+                // Remove existing badge mappings
                 await ProductBadgeMapping.destroy({
-                    where: { productId: product.id },
+                    where: { productId },
                     transaction: t
                 });
 
-                // Create new badge mappings
-                const badgePromises = badges.map(badgeId =>
-                    ProductBadgeMapping.create({
-                        productId: product.id,
-                        badgeId
-                    }, { transaction: t })
-                );
-                await Promise.all(badgePromises);
+                // Add new badge mappings
+                if (badges.length > 0) {
+                    const badgePromises = badges.map(badgeId =>
+                        ProductBadgeMapping.create({
+                            productId: productId,
+                            badgeId
+                        }, { transaction: t })
+                    );
+                    await Promise.all(badgePromises);
+                }
+            }
+
+            // Handle product discount
+            if (discount) {
+                // Find existing active discount
+                const existingDiscount = await ProductDiscount.findOne({
+                    where: { 
+                        productId,
+                        status: 'active'
+                    },
+                    transaction: t
+                });
+
+                // Validate discount data
+                if (discount.discountType === 'percentage' && (discount.discountValue <= 0 || discount.discountValue > 100)) {
+                    throw new Error('Percentage discount must be between 0 and 100');
+                }
+
+                if (discount.discountType === 'fixed' && discount.discountValue <= 0) {
+                    throw new Error('Fixed discount value must be greater than 0');
+                }
+
+                if (existingDiscount) {
+                    // Update existing discount
+                    await existingDiscount.update({
+                        discountType: discount.discountType || existingDiscount.discountType,
+                        discountValue: discount.discountValue || existingDiscount.discountValue,
+                        startDate: discount.startDate || existingDiscount.startDate,
+                        endDate: discount.endDate || existingDiscount.endDate,
+                        status: discount.status || existingDiscount.status
+                    }, { transaction: t });
+                } else {
+                    // Create new discount
+                    await ProductDiscount.create({
+                        productId: productId,
+                        discountType: discount.discountType,
+                        discountValue: discount.discountValue,
+                        startDate: discount.startDate || new Date(),
+                        endDate: discount.endDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+                        status: discount.status || 'active'
+                    }, { transaction: t });
+                }
             }
         });
 
         // Get updated product with associations
-        const updatedProduct = await Product.findByPk(product.id, {
+        const updatedProduct = await Product.findByPk(productId, {
             include: [
                 {
                     model: ProductImage,
@@ -436,11 +584,17 @@ const updateProduct = async (req, res) => {
                 {
                     model: ProductBadge,
                     as: 'badges'
+                },
+                {
+                    model: ProductDiscount,
+                    as: 'discounts'
                 }
             ]
         });
 
+        // Format response
         const productResponse = formatProductResponse(updatedProduct);
+
         res.status(200).json({
             message: 'Product updated successfully',
             product: productResponse

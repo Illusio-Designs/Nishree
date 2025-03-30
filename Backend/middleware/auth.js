@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../model/userModel'); // Adjust path as needed
 
-const auth = async (req, res, next) => {
+const isAuthenticated = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         
@@ -24,6 +24,20 @@ const auth = async (req, res, next) => {
     }
 };
 
+const isAdmin = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+    }
+
+    next();
+};
+
+// For backward compatibility
+const auth = isAuthenticated;
 const authorize = (roles = []) => {
     return (req, res, next) => {
         if (!req.user) {
@@ -38,4 +52,4 @@ const authorize = (roles = []) => {
     };
 };
 
-module.exports = { auth, authorize };
+module.exports = { isAuthenticated, isAdmin, auth, authorize };
