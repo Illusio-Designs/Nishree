@@ -397,6 +397,342 @@
       ]
     },
     {
+      "name": "Slider Management",
+      "item": [
+        {
+          "name": "Create Slider",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/sliders",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "sliders"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Welcome to Nishree",
+                  "type": "text"
+                },
+                {
+                  "key": "tagline",
+                  "value": "Discover our amazing collection",
+                  "type": "text"
+                },
+                {
+                  "key": "buttonText",
+                  "value": "Shop Now",
+                  "type": "text"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "type": "text"
+                },
+                {
+                  "key": "order",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Sliders",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/sliders",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "sliders"]
+            }
+          }
+        },
+        {
+          "name": "Get Slider by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/sliders/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "sliders", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Slider",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/sliders/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "sliders", "1"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Updated Slider Title",
+                  "type": "text"
+                },
+                {
+                  "key": "tagline",
+                  "value": "Updated tagline text",
+                  "type": "text"
+                },
+                {
+                  "key": "buttonText",
+                  "value": "Explore Now",
+                  "type": "text"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "2",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "type": "text"
+                },
+                {
+                  "key": "order",
+                  "value": "2",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Slider",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/sliders/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "sliders", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product Management",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Classic T-Shirt",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "A comfortable and stylish t-shirt made from 100% cotton.",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "type": "text"
+                },
+                {
+                  "key": "variations",
+                  "value": "[{\"sku\":\"TS-RED-M\",\"price\":29.99,\"stock\":50,\"attributes\":[{\"attributeId\":1,\"value\":\"Medium\"},{\"attributeId\":2,\"value\":\"Red\"}]}]",
+                  "type": "text"
+                },
+                {
+                  "key": "seo",
+                  "value": "{\"metaTitle\":\"Classic T-Shirt - Premium Cotton\",\"metaDescription\":\"Shop our premium cotton t-shirt collection\",\"metaKeywords\":\"t-shirt,cotton,clothing\"}",
+                  "type": "text"
+                },
+                {
+                  "key": "badges",
+                  "value": "[1,2]",
+                  "type": "text"
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/products",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/products/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/products/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products", "1"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Updated Classic T-Shirt",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "An updated description for our classic t-shirt.",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "type": "text"
+                },
+                {
+                  "key": "variations",
+                  "value": "[{\"sku\":\"TS-RED-M\",\"price\":34.99,\"stock\":45,\"attributes\":[{\"attributeId\":1,\"value\":\"Medium\"},{\"attributeId\":2,\"value\":\"Red\"}]}]",
+                  "type": "text"
+                },
+                {
+                  "key": "seo",
+                  "value": "{\"metaTitle\":\"Updated Classic T-Shirt\",\"metaDescription\":\"Updated description for our premium t-shirt\",\"metaKeywords\":\"t-shirt,cotton,premium\"}",
+                  "type": "text"
+                },
+                {
+                  "key": "badges",
+                  "value": "[1,2,3]",
+                  "type": "text"
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/products/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "products", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Health Check",
       "item": [
         {

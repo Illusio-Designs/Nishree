@@ -23,7 +23,7 @@ const Slider = sequelize.define('Slider', {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'Categories',
+            model: 'categories',
             key: 'id'
         }
     },
@@ -41,7 +41,9 @@ const Slider = sequelize.define('Slider', {
     }
 }, {
     tableName: 'sliders',
-    timestamps: true
+    timestamps: true,
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_general_ci'
 });
 
 module.exports = Slider;

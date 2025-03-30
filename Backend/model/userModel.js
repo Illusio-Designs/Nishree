@@ -62,22 +62,4 @@ const User = sequelize.define('User', {
     ]
 });
 
-// Add model options
-User.options = {
-    indexes: [
-        {
-            unique: true,
-            fields: ['email']
-        },
-        {
-            unique: true,
-            fields: ['username']
-        },
-        {
-            unique: true,
-            fields: ['googleId']
-        }
-    ]
-};
-
 module.exports = User;
