@@ -47,22 +47,4 @@
 .products-heading{
     text-align: center;
 }
-.products-card{
-    display: flex;
-    justify-content: space-around;
-    padding: 30px;
-}
-.card{
-    background-color: #FFEADA;
-    border-radius: 20px;
-}
-.heart{
-    background-color: white;
-    padding: 20px;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    margin-left: 20%;
-    margin-top: 2%;
-    position: absolute;
-}
+

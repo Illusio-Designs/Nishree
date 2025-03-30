@@ -14,7 +14,6 @@ const User = sequelize.define('User', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: {
             isEmail: true
         }
@@ -38,8 +37,7 @@ const User = sequelize.define('User', {
     },
     googleId: {
         type: DataTypes.STRING,
-        allowNull: true,
-        unique: true
+        allowNull: true
     },
     refreshToken: {
         type: DataTypes.STRING,
@@ -47,7 +45,39 @@ const User = sequelize.define('User', {
     }
 }, {
     timestamps: true,
-    tableName: 'users'
+    tableName: 'users',
+    indexes: [
+        {
+            unique: true,
+            fields: ['email']
+        },
+        {
+            unique: true,
+            fields: ['username']
+        },
+        {
+            unique: true,
+            fields: ['googleId']
+        }
+    ]
 });
+
+// Add model options
+User.options = {
+    indexes: [
+        {
+            unique: true,
+            fields: ['email']
+        },
+        {
+            unique: true,
+            fields: ['username']
+        },
+        {
+            unique: true,
+            fields: ['googleId']
+        }
+    ]
+};
 
 module.exports = User;

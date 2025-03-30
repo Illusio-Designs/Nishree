@@ -1,44 +1,27 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const multer = require('multer');
-const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs');
-const User = require('../model/userModel'); // Adjust the path if needed
+const User = require('../model/userModel');
 const nodemailer = require('nodemailer');
+const ImageHandler = require('../utils/imageHandler');
+const createUploadMiddleware = require('../middleware/uploadMiddleware');
 require('dotenv').config();
 
-// Multer storage configuration
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadPath = 'uploads/user/';
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
+// Initialize image handler
+const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/user'));
 
-// File filter for images
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-        cb(null, true);
-    } else {
-        cb(new Error('Only image files are allowed!'), false);
+// Create upload middleware for profile pictures
+const upload = createUploadMiddleware(path.join(__dirname, '../uploads/user'), 'profilePic');
+
+// Helper function to add image URL to user response
+const addImageUrlToResponse = (userResponse) => {
+    if (userResponse.profileImage) {
+        userResponse.profileImageUrl = `/uploads/user/${userResponse.profileImage}`;
     }
+    return userResponse;
 };
-
-const upload = multer({ 
-    storage, 
-    fileFilter,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
-    }
-});
 
 // **User Registration**
 const register = async (req, res) => {
@@ -104,28 +87,29 @@ const login = async (req, res) => {
     }
 };
 
-// **Google login callback**
+// **Google Authentication**
 const googleAuth = passport.authenticate('google', {
     scope: ['profile', 'email']
 });
 
+// **Google Auth Callback**
 const googleAuthCallback = (req, res) => {
-    passport.authenticate('google', { session: false }, async (err, user) => {
-        if (err || !user) {
-            return res.status(400).json({ message: 'Authentication failed' });
-        }
+    try {
         const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role }, 
+            { id: req.user.id, email: req.user.email, role: req.user.role }, 
             process.env.JWT_SECRET, 
             { expiresIn: '1d' }
         );
         
         // Remove password from response
-        const userResponse = user.toJSON();
+        const userResponse = req.user.toJSON();
         delete userResponse.password;
         
-        res.json({ token, user: userResponse });
-    })(req, res);
+        res.json({ message: 'Google authentication successful', token, user: userResponse });
+    } catch (error) {
+        console.error('Google auth callback error:', error);
+        res.status(500).json({ message: 'Authentication failed', error: error.message });
+    }
 };
 
 // **Forgot Password**
@@ -146,11 +130,11 @@ const forgotPassword = async (req, res) => {
         await user.save();
 
         // Check if email credentials are properly set
-        if (!process.env.EMAIL || !process.env.EMAIL_PASS) {
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
             console.error('Email credentials not properly configured in .env file');
-            return res.status(500).json({ 
-                message: 'Server configuration error. Please contact administrator.',
-                debug: 'Email credentials missing in server configuration'
+            return res.json({ 
+                message: 'Reset token generated. Email not sent due to configuration.',
+                resetToken: resetToken
             });
         }
 
@@ -159,16 +143,16 @@ const forgotPassword = async (req, res) => {
             service: 'gmail',
             host: 'smtp.gmail.com',
             port: 587,
-            secure: false, // true for 465, false for other ports
+            secure: false,
             auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASS
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_APP_PASSWORD
             },
-            debug: true // Enable debug output
+            debug: true
         });
 
         const mailOptions = {
-            from: `"Your App Name" <${process.env.EMAIL}>`,
+            from: `"Illusio Designs" <${process.env.EMAIL_USER}>`,
             to: email,
             subject: 'Reset Password',
             html: `
@@ -183,13 +167,14 @@ const forgotPassword = async (req, res) => {
         // Send email with error handling
         try {
             await transporter.sendMail(mailOptions);
-            res.json({ message: 'Reset link sent to your email' });
+            res.json({ 
+                message: 'Reset link sent to your email',
+                resetToken: resetToken // Include token in response for testing
+            });
         } catch (emailError) {
             console.error('Email sending error:', emailError);
-            
-            // Store the reset token for testing purposes
-            res.status(207).json({ 
-                message: 'Account found, but email delivery failed. For testing purposes only, here is your token.',
+            res.json({ 
+                message: 'Reset token generated. Email delivery failed.',
                 resetToken: resetToken,
                 error: emailError.message
             });
@@ -241,8 +226,11 @@ const getCurrentUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        // Add image URL to response
+        const userResponse = addImageUrlToResponse(user.toJSON());
         
-        res.json(user);
+        res.json(userResponse);
     } catch (error) {
         console.error('Get user error:', error);
         res.status(500).json({ message: 'Failed to get user', error: error.message });
@@ -253,7 +241,7 @@ const getCurrentUser = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const updates = Object.keys(req.body);
-        const allowedUpdates = ['username', 'email']; // Removed password from allowed updates
+        const allowedUpdates = ['username', 'email'];
         const isValidOperation = updates.every(update => allowedUpdates.includes(update));
         
         if (!isValidOperation) {
@@ -272,25 +260,23 @@ const updateUser = async (req, res) => {
 
         // Handle profile picture upload
         if (req.file) {
-            const fileName = `${req.user.id}-${Date.now()}.webp`;
-            const webpPath = `uploads/user/${fileName}`;
-            
-            // Delete old profile pic if exists
-            if (user.profilePic && fs.existsSync(user.profilePic)) {
-                fs.unlinkSync(user.profilePic);
+            try {
+                // Process the new image using image handler
+                const filename = await imageHandler.handleProfileImage(
+                    user.profileImage,
+                    req.file.path,
+                    user.id
+                );
+
+                // Store only the filename in the database
+                user.profileImage = filename;
+            } catch (imageError) {
+                console.error('Error handling profile image:', imageError);
+                return res.status(500).json({ 
+                    message: 'Error processing profile picture', 
+                    error: imageError.message 
+                });
             }
-            
-            // Process and save new image
-            await sharp(req.file.path)
-                .resize(200, 200)
-                .toFormat('webp')
-                .toFile(webpPath);
-                
-            // Delete original uploaded file
-            fs.unlinkSync(req.file.path);
-            
-            // Update profile pic path in database
-            user.profilePic = webpPath;
         }
 
         await user.save();
@@ -300,8 +286,14 @@ const updateUser = async (req, res) => {
         delete userResponse.password;
         delete userResponse.resetToken;
         delete userResponse.resetTokenExpiry;
+
+        // Add image URL to response
+        const responseWithImage = addImageUrlToResponse(userResponse);
         
-        res.json({ message: 'User updated successfully', user: userResponse });
+        res.json({ 
+            message: 'User updated successfully', 
+            user: responseWithImage 
+        });
     } catch (error) {
         console.error('Update user error:', error);
         res.status(500).json({ message: 'Error updating user', error: error.message });
@@ -350,9 +342,9 @@ const deleteUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         
-        // Delete profile pic if exists
-        if (user.profilePic && fs.existsSync(user.profilePic)) {
-            fs.unlinkSync(user.profilePic);
+        // Delete profile image if exists
+        if (user.profileImage) {
+            await imageHandler.deleteFile(imageHandler.getImagePath(user.profileImage));
         }
         
         await user.destroy();
@@ -360,6 +352,23 @@ const deleteUser = async (req, res) => {
     } catch (error) {
         console.error('Delete user error:', error);
         res.status(500).json({ message: 'Failed to delete user', error: error.message });
+    }
+};
+
+// **Get All Users**
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.findAll({
+            attributes: { exclude: ['password', 'resetToken', 'resetTokenExpiry'] }
+        });
+
+        // Add image URLs to all user responses
+        const usersWithImages = users.map(user => addImageUrlToResponse(user.toJSON()));
+        
+        res.json(usersWithImages);
+    } catch (error) {
+        console.error('Get all users error:', error);
+        res.status(500).json({ message: 'Failed to get users', error: error.message });
     }
 };
 
@@ -374,5 +383,6 @@ module.exports = {
     updateUser, 
     updatePassword,
     deleteUser,
-    upload 
+    upload,
+    getAllUsers
 };

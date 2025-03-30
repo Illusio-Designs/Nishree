@@ -1,15 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const categoryController = require('../controller/categoryController');
-const auth = require('../middleware/auth');
+const { 
+    createCategory, 
+    getAllCategories, 
+    getCategoryByName, 
+    updateCategory, 
+    deleteCategory,
+    upload 
+} = require('../controller/categoryController');
+const { auth, authorize } = require('../middleware/auth');
 
-// Routes with auth
-router.post('/', auth, categoryController.createCategory);
-router.put('/:id', auth, categoryController.updateCategory);
-router.delete('/:id', auth, categoryController.deleteCategory);
+// Public routes (no authentication required)
+router.get('/', getAllCategories);
+router.get('/name/:name', getCategoryByName);
 
-// Routes without auth
-router.get('/', categoryController.getAllCategories);
-router.get('/:id', categoryController.getCategoryById);
+// Protected routes (require authentication)
+router.post('/', auth, authorize(['admin']), upload, createCategory);
+router.put('/:id', auth, authorize(['admin']), upload, updateCategory);
+router.delete('/:id', auth, authorize(['admin']), deleteCategory);
 
 module.exports = router;

@@ -1,77 +1,101 @@
 const Category = require('../model/categoryModel');
 const { v4: uuidv4 } = require('uuid');
-const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs').promises;
-const multer = require('multer');
+const fsSync = require('fs');
+const { Op } = require('sequelize');
+const sequelize = require('sequelize');
+const ImageHandler = require('../utils/imageHandler');
+const createUploadMiddleware = require('../middleware/uploadMiddleware');
 
-// Configure multer for image uploads
-const uploadPath = path.join(__dirname, '../uploads/category');
+// Initialize image handler
+const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/category'));
 
-// Create upload directory if it doesn't exist
-const createUploadDir = async () => {
-    try {
-        await fs.mkdir(uploadPath, { recursive: true });
-    } catch (error) {
-        console.error('Failed to create upload directory:', error);
-    }
+// Create upload middleware for category images
+const upload = createUploadMiddleware(path.join(__dirname, '../uploads/category'), 'image');
+
+// Helper function to format category response
+const formatCategoryResponse = (category) => {
+    const categoryData = category.toJSON();
+    categoryData.parentName = category.parent ? category.parent.name : null;
+    delete categoryData.parent;
+    return categoryData;
 };
-createUploadDir();
-
-// Configure multer storage
-const storage = multer.memoryStorage();
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only images are allowed!'));
-        }
-    }
-}).single('image');
 
 // Create Category
 const createCategory = async (req, res) => {
     try {
-        // Handle file upload with multer
-        upload(req, res, async (err) => {
-            if (err) {
-                return res.status(400).json({ message: err.message });
-            }
+        const { name, description, status, parentId, seoTitle, seoDescription, seoKeywords, slug, metaTags } = req.body;
+        
+        // Check for duplicate category name
+        const existingCategory = await Category.findOne({
+            where: { name }
+        });
 
+        if (existingCategory) {
+            return res.status(400).json({ 
+                message: 'Category with this name already exists',
+                error: 'DUPLICATE_CATEGORY_NAME'
+            });
+        }
+
+        let image = null;
+
+        if (req.file) {
             try {
-                const { name, description, status, parentId, seoTitle, seoDescription, seoKeywords, slug, metaTags } = req.body;
-                let image = null;
-
-                if (req.file) {
-                    const uniqueFilename = `category-${uuidv4()}.webp`;
-                    await sharp(req.file.buffer)
-                        .webp({ quality: 80 })
-                        .toFile(path.join(uploadPath, uniqueFilename));
-                    image = uniqueFilename;
-                }
-
-                const category = await Category.create({
-                    name,
-                    description,
-                    status,
-                    parentId,
-                    image,
-                    seoTitle,
-                    seoDescription,
-                    seoKeywords,
-                    slug,
-                    metaTags
+                const result = await imageHandler.processImage(req.file.path, {
+                    width: 800,
+                    height: 600,
+                    quality: 80,
+                    format: 'webp',
+                    filename: `category-${uuidv4()}`
                 });
 
-                res.status(201).json({ message: 'Category created successfully', category });
-            } catch (error) {
-                res.status(500).json({ message: error.message });
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                image = result.filename;
+            } catch (imageError) {
+                console.error('Error processing image:', imageError);
+                return res.status(500).json({ 
+                    message: 'Error processing image', 
+                    error: imageError.message 
+                });
             }
+        }
+
+        const category = await Category.create({
+            name,
+            description,
+            status,
+            parentId,
+            image,
+            seoTitle,
+            seoDescription,
+            seoKeywords,
+            slug,
+            metaTags
+        });
+
+        // Get category with parent info
+        const categoryWithParent = await Category.findByPk(category.id, {
+            include: [{
+                model: Category,
+                as: 'parent',
+                attributes: ['id', 'name']
+            }]
+        });
+
+        // Format response
+        const categoryResponse = formatCategoryResponse(categoryWithParent);
+
+        res.status(201).json({ 
+            message: 'Category created successfully', 
+            category: categoryResponse 
         });
     } catch (error) {
+        console.error('Create category error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -85,16 +109,39 @@ const getAllCategories = async (req, res) => {
         });
         res.status(200).json(categories);
     } catch (error) {
+        console.error('Get all categories error:', error);
         res.status(500).json({ message: error.message });
     }
 };
 
-// Get Category by ID
-const getCategoryById = async (req, res) => {
+// Get Category by Name
+const getCategoryByName = async (req, res) => {
     try {
-        const category = await Category.findByPk(req.params.id);
-        category ? res.status(200).json(category) : res.status(404).json({ message: 'Category not found' });
+        const { name } = req.params;
+        
+        const category = await Category.findOne({
+            where: {
+                name: {
+                    [sequelize.Op.iLike]: name // Case-insensitive search
+                }
+            },
+            include: [{
+                model: Category,
+                as: 'parent',
+                attributes: ['id', 'name']
+            }]
+        });
+
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        // Format response
+        const categoryResponse = formatCategoryResponse(category);
+
+        res.status(200).json(categoryResponse);
     } catch (error) {
+        console.error('Get category by name error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -102,55 +149,93 @@ const getCategoryById = async (req, res) => {
 // Update Category
 const updateCategory = async (req, res) => {
     try {
-        // Handle file upload with multer
-        upload(req, res, async (err) => {
-            if (err) {
-                return res.status(400).json({ message: err.message });
-            }
+        const category = await Category.findByPk(req.params.id);
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
 
+        const { name, description, status, parentId, seoTitle, seoDescription, seoKeywords, slug, metaTags } = req.body;
+        let image = category.image;
+
+        // Handle image update
+        if (req.file) {
             try {
-                const category = await Category.findByPk(req.params.id);
-                if (!category) return res.status(404).json({ message: 'Category not found' });
-
-                const { name, description, status, parentId, seoTitle, seoDescription, seoKeywords, slug, metaTags } = req.body;
-                let image = category.image;
-
-                if (req.file) {
-                    const uniqueFilename = `category-${uuidv4()}.webp`;
-                    await sharp(req.file.buffer)
-                        .webp({ quality: 80 })
-                        .toFile(path.join(uploadPath, uniqueFilename));
-                    
-                    if (image) {
-                        try {
-                            await fs.unlink(path.join(uploadPath, image));
-                        } catch (error) {
-                            console.log('Failed to delete old image:', error);
-                        }
-                    }
-                    
-                    image = uniqueFilename;
+                // Delete old image if exists
+                if (category.image) {
+                    await imageHandler.deleteFile(imageHandler.getImagePath(category.image));
                 }
 
-                await category.update({
-                    name,
-                    description,
-                    status,
-                    parentId,
-                    image,
-                    seoTitle,
-                    seoDescription,
-                    seoKeywords,
-                    slug,
-                    metaTags
+                // Process new image
+                const result = await imageHandler.processImage(req.file.path, {
+                    width: 800,
+                    height: 600,
+                    quality: 80,
+                    format: 'webp',
+                    filename: `category-${uuidv4()}`
                 });
 
-                res.status(200).json({ message: 'Category updated successfully', category });
-            } catch (error) {
-                res.status(500).json({ message: error.message });
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                image = result.filename;
+            } catch (imageError) {
+                console.error('Error processing image:', imageError);
+                return res.status(500).json({ 
+                    message: 'Error processing image', 
+                    error: imageError.message 
+                });
             }
+        }
+
+        // Check for duplicate name if name is being updated
+        if (name && name !== category.name) {
+            const existingCategory = await Category.findOne({
+                where: {
+                    name: name,
+                    id: { [Op.ne]: category.id } // Exclude current category
+                }
+            });
+
+            if (existingCategory) {
+                return res.status(400).json({ 
+                    message: 'Category with this name already exists',
+                    error: 'DUPLICATE_CATEGORY_NAME'
+                });
+            }
+        }
+
+        await category.update({
+            name,
+            description,
+            status,
+            parentId,
+            image,
+            seoTitle,
+            seoDescription,
+            seoKeywords,
+            slug,
+            metaTags
+        });
+
+        // Get updated category with parent info
+        const updatedCategory = await Category.findByPk(category.id, {
+            include: [{
+                model: Category,
+                as: 'parent',
+                attributes: ['id', 'name']
+            }]
+        });
+
+        // Format response
+        const categoryResponse = formatCategoryResponse(updatedCategory);
+
+        res.status(200).json({ 
+            message: 'Category updated successfully', 
+            category: categoryResponse 
         });
     } catch (error) {
+        console.error('Update category error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -159,19 +244,19 @@ const updateCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
     try {
         const category = await Category.findByPk(req.params.id);
-        if (!category) return res.status(404).json({ message: 'Category not found' });
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
 
+        // Delete image if exists
         if (category.image) {
-            try {
-                await fs.unlink(path.join(uploadPath, category.image));
-            } catch (error) {
-                console.log('Failed to delete image:', error);
-            }
+            await imageHandler.deleteFile(imageHandler.getImagePath(category.image));
         }
         
         await category.destroy();
         res.status(200).json({ message: 'Category deleted successfully' });
     } catch (error) {
+        console.error('Delete category error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -179,7 +264,8 @@ const deleteCategory = async (req, res) => {
 module.exports = {
     createCategory,
     getAllCategories,
-    getCategoryById,
+    getCategoryByName,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    upload
 };

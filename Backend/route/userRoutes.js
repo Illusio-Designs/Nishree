@@ -1,19 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-require('../config/passport'); // Ensure passport is configured
+const jwt = require('jsonwebtoken');
 const { 
     register, 
     login, 
-    googleAuth, 
-    googleAuthCallback, 
     forgotPassword, 
     resetPassword, 
     getCurrentUser,
     updateUser, 
     updatePassword,
     deleteUser,
-    upload 
+    upload,
+    getAllUsers
 } = require('../controller/userController');
 const { auth, authorize } = require('../middleware/auth');
 
@@ -24,19 +23,36 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 
 // Google authentication routes
-router.get('/auth/google', googleAuth);
-router.get('/auth/google/callback', googleAuthCallback);
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
+    try {
+        const token = jwt.sign(
+            { id: req.user.id, email: req.user.email, role: req.user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+
+        const userResponse = req.user.toJSON();
+        delete userResponse.password;
+
+        res.json({
+            message: 'Google authentication successful',
+            token,
+            user: userResponse
+        });
+    } catch (error) {
+        console.error('Google auth callback error:', error);
+        res.status(500).json({ message: 'Authentication failed', error: error.message });
+    }
+});
 
 // Protected routes
 router.get('/me', auth, getCurrentUser);
-router.put('/update', auth, upload.single('profilePic'), updateUser);
+router.put('/update', auth, upload, updateUser);
 router.put('/update-password', auth, updatePassword);
 router.delete('/delete', auth, deleteUser);
 
 // Admin only routes
-router.get('/admin/users', auth, authorize(['admin']), (req, res) => {
-    // This is just a placeholder. You would implement admin functions here
-    res.json({ message: 'Admin only route' });
-});
+router.get('/admin/users', auth, authorize(['admin']), getAllUsers);
 
 module.exports = router;
