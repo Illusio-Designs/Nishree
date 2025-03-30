@@ -53,12 +53,26 @@ const testConnection = async () => {
         const ProductSEO = require('../model/productSEOModel');
         const ProductBadge = require('../model/productBadgeModel');
         const ProductBadgeMapping = require('../model/productBadgeMappingModel');
+        const ProductDiscount = require('../model/productDiscountModel');
+        const Coupon = require('../model/couponModel');
+        const Wishlist = require('../model/wishlistModel');
+        
+        // New order management models
+        const Order = require('../model/orderModel');
+        const OrderItem = require('../model/orderItemModel');
+        const ShippingAddress = require('../model/shippingAddressModel');
+        const ShippingFee = require('../model/shippingFeeModel');
+        const OrderStatusHistory = require('../model/orderStatusHistoryModel');
+        const Payment = require('../model/paymentModel');
 
         // Explicitly log each model to verify it's loaded
         console.log("Models loaded:", 
             !!User, !!Category, !!Slider, !!Product, !!ProductVariation,
             !!Attribute, !!AttributeValue, !!ProductVariationAttribute,
-            !!ProductImage, !!ProductSEO, !!ProductBadge, !!ProductBadgeMapping
+            !!ProductImage, !!ProductSEO, !!ProductBadge, !!ProductBadgeMapping,
+            !!ProductDiscount, !!Coupon, !!Wishlist,
+            // New models
+            !!Order, !!OrderItem, !!ShippingAddress, !!ShippingFee, !!OrderStatusHistory, !!Payment
         );
 
         // Then require associations after all models are loaded
@@ -68,39 +82,18 @@ const testConnection = async () => {
         const [tables] = await sequelize.query('SHOW TABLES;');
         console.log('Existing tables before sync:', tables);
 
-        // Drop all tables and recreate them
-        await sequelize.sync({ force: true });
-        console.log('Database tables recreated successfully.');
+        // Sync all models with the database
+        // Use { alter: true } instead of { force: true } to prevent data loss in production
+        await sequelize.sync({ alter: true });
+        console.log('Database tables synchronized successfully.');
 
         // Check tables after sync
         const [tablesAfter] = await sequelize.query('SHOW TABLES;');
         console.log('Tables after sync:', tablesAfter);
 
-        // Log each expected table
-        const expectedTables = [
-            'users',
-            'categories',
-            'sliders',
-            'products',
-            'product_variations',
-            'attributes',
-            'attribute_values',
-            'product_variation_attributes',
-            'product_images',
-            'product_seo',
-            'product_badges',
-            'product_badge_mappings'
-        ];
-
-        // Check which tables exist
-        for (const table of expectedTables) {
-            const [result] = await sequelize.query(`SHOW TABLES LIKE '${table}';`);
-            console.log(`Table '${table}' exists:`, result.length > 0);
-        }
-
     } catch (error) {
-        console.error('Database sync failed:', error);
-        throw error; // Re-throw to handle in the application
+        console.error('Database connection/sync failed:', error);
+        // Log error but don't throw - this allows the app to start without DB
     }
 };
 

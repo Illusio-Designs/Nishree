@@ -12,46 +12,55 @@ const Coupon = sequelize.define('Coupon', {
         allowNull: false,
         unique: true
     },
-    discountType: {
-        type: DataTypes.ENUM('percentage', 'fixed'),
+    discount_type: {
+        type: DataTypes.ENUM('percentage', 'fixed_amount'),
         allowNull: false
     },
-    discountValue: {
+    discount_value: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },
-    minOrderAmount: {
+    minimum_order_value: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0.00
     },
-    maxUsage: {
+    max_uses: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 1
     },
-    usedCount: {
+    uses_per_user: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 0
+        defaultValue: 1
     },
-    validFrom: {
+    valid_from: {
         type: DataTypes.DATE,
         allowNull: false
     },
-    validTo: {
+    valid_to: {
         type: DataTypes.DATE,
         allowNull: false
     },
     status: {
-        type: DataTypes.ENUM('active', 'inactive'),
+        type: DataTypes.ENUM('active', 'expired'),
         defaultValue: 'active'
     }
 }, {
     tableName: 'coupons',
     timestamps: true,
     charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci'
+    collate: 'utf8mb4_general_ci',
+    indexes: [
+        {
+            unique: true,
+            fields: ['code']
+        },
+        {
+            fields: ['status']
+        }
+    ]
 });
 
 module.exports = Coupon; 

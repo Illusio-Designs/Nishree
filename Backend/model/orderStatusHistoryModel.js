@@ -1,13 +1,25 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const Wishlist = sequelize.define('Wishlist', {
+const OrderStatusHistory = sequelize.define('OrderStatusHistory', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    user_id: {
+    order_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'orders',
+            key: 'id'
+        }
+    },
+    status: {
+        type: DataTypes.ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled'),
+        allowNull: false
+    },
+    updated_by: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -15,30 +27,27 @@ const Wishlist = sequelize.define('Wishlist', {
             key: 'id'
         }
     },
-    product_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'products',
-            key: 'id'
-        }
-    },
-    created_at: {
+    updated_at: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW
     }
 }, {
-    tableName: 'wishlists',
-    timestamps: false, // using created_at instead
+    tableName: 'order_status_history',
+    timestamps: false, // Using updated_at instead
     charset: 'utf8mb4',
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            unique: true,
-            fields: ['user_id', 'product_id']
+            fields: ['order_id']
+        },
+        {
+            fields: ['status']
+        },
+        {
+            fields: ['updated_by']
         }
     ]
 });
 
-module.exports = Wishlist; 
+module.exports = OrderStatusHistory; 

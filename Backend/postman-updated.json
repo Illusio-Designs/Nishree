@@ -1014,6 +1014,471 @@
           }
         }
       ]
+    },
+    {
+      "name": "Order Management",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/orders",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "orders"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"shipping_address_id\": 1,\n    \"items\": [\n        {\n            \"product_id\": 1,\n            \"variation_id\": 1,\n            \"quantity\": 2\n        }\n    ],\n    \"payment_type\": \"cod\",\n    \"notes\": \"Please deliver before 7pm\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Orders (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/orders/admin",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "orders", "admin"]
+            }
+          }
+        },
+        {
+          "name": "Get User Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/orders",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/orders/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "orders", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/orders/1/status",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "orders", "1", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"processing\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/orders/1/cancel",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "orders", "1", "cancel"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"Changed my mind\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shipping Address",
+      "item": [
+        {
+          "name": "Add Shipping Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/shipping-addresses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "shipping-addresses"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"address\": \"123 Main St, Apt 4B\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"postal_code\": \"400001\",\n    \"country\": \"India\",\n    \"phone_number\": \"9876543210\",\n    \"is_default\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Get User Shipping Addresses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/shipping-addresses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "shipping-addresses"]
+            }
+          }
+        },
+        {
+          "name": "Update Shipping Address",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/shipping-addresses/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "shipping-addresses", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"address\": \"456 Park Avenue, Apt 7C\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"postal_code\": \"400002\",\n    \"country\": \"India\",\n    \"phone_number\": \"9876543210\",\n    \"is_default\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Shipping Address",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/shipping-addresses/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "shipping-addresses", "1"]
+            }
+          }
+        },
+        {
+          "name": "Set Default Shipping Address",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/shipping-addresses/1/default",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "shipping-addresses", "1", "default"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Process Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/payments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "payments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"order_id\": 1,\n    \"payment_type\": \"credit_card\",\n    \"payment_details\": {\n        \"card_number\": \"4111111111111111\",\n        \"expiry\": \"12/25\",\n        \"cvv\": \"123\",\n        \"name\": \"Test User\"\n    }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/payments/order/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "payments", "order", "1"]
+            }
+          }
+        },
+        {
+          "name": "Refund Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/payments/refund",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "payments", "refund"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"payment_id\": 1,\n    \"reason\": \"Customer requested refund\",\n    \"amount\": 100.00\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order Status History",
+      "item": [
+        {
+          "name": "Get Order Status History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/order-status/order/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "order-status", "order", "1"]
+            }
+          }
+        },
+        {
+          "name": "Add Order Status Entry (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/order-status/order/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "order-status", "order", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"processing\",\n    \"notes\": \"Order has been picked up by the shipping department\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shipping Fees",
+      "item": [
+        {
+          "name": "Get All Shipping Fees",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/shipping-fees",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "shipping-fees"]
+            }
+          }
+        },
+        {
+          "name": "Get Shipping Fee by Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/shipping-fees/cod",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "shipping-fees", "cod"]
+            }
+          }
+        },
+        {
+          "name": "Create/Update Shipping Fee (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/shipping-fees",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "shipping-fees"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"order_type\": \"cod\",\n    \"fee\": 5.99,\n    \"weight_based_fee\": 0,\n    \"location_based_fee\": 0\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Shipping Fee (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/shipping-fees/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "shipping-fees", "1"]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

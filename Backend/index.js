@@ -11,6 +11,11 @@ const sliderRoutes = require('./route/sliderRoutes'); // Add slider routes
 const couponRoutes = require('./route/couponRoutes'); // Add coupon routes
 const wishlistRoutes = require('./route/wishlistRoutes'); // Add wishlist routes
 const productRoutes = require('./route/productRoutes'); // Add product routes
+const orderRoutes = require('./route/orderRoutes'); // Add order routes
+const shippingAddressRoutes = require('./route/shippingAddressRoutes'); // Add shipping address routes
+const paymentRoutes = require('./route/paymentRoutes'); // Add payment routes
+const shippingFeeRoutes = require('./route/shippingFeeRoutes'); // Add shipping fee routes
+const orderStatusHistoryRoutes = require('./route/orderStatusHistoryRoutes'); // Add order status history routes
 
 const app = express();
 
@@ -48,6 +53,11 @@ app.use('/api/sliders', sliderRoutes); // Add slider routes
 app.use('/api/products', productRoutes); // Add product routes
 app.use('/api/coupons', couponRoutes); // Add coupon routes
 app.use('/api/wishlist', wishlistRoutes); // Add wishlist routes
+app.use('/api/orders', orderRoutes); // Add order routes
+app.use('/api/shipping-addresses', shippingAddressRoutes); // Add shipping address routes
+app.use('/api/payments', paymentRoutes); // Add payment routes
+app.use('/api/shipping-fees', shippingFeeRoutes); // Add shipping fee routes
+app.use('/api/order-status', orderStatusHistoryRoutes); // Add order status history routes
 
 // Health Check Route
 app.get('/api/health', (req, res) => {
