@@ -64,8 +64,6 @@ const Category = sequelize.define('Category', {
     collate: 'utf8mb4_general_ci'
 });
 
-// Self-referential relationship
-Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
-Category.hasMany(Category, { as: 'children', foreignKey: 'parentId' });
+// Note: Self-referential relationships are defined in associations.js
 
 module.exports = Category;

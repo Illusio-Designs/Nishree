@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
-const sequelize = require('./config/db');
+const db = require('./config/db');
 require('./config/passport'); // Add passport configuration
 const categoryRoutes = require('./route/categoryRoutes');
 const userRoutes = require('./route/userRoutes'); // Make sure this path is correct
@@ -62,8 +62,11 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Sync Database
-sequelize.sync({ alter: true }) // Using alter:true to update schema without dropping tables
+// Get the testConnection function
+const testConnection = require('./config/db').testConnection;
+
+// Test database connection and sync models
+testConnection()
     .then(() => {
         console.log('Database synced successfully');
         const PORT = process.env.PORT || 5000;

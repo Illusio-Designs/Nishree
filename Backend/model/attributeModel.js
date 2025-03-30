@@ -14,7 +14,9 @@ const Attribute = sequelize.define('Attribute', {
     }
 }, {
     tableName: 'attributes',
-    timestamps: true
+    timestamps: true,
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_general_ci'
 });
 
 module.exports = Attribute; 
