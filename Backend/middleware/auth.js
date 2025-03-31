@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 const User = require('../model/userModel'); // Adjust path as needed
 
+/**
+ * Authentication Middleware
+ * Verifies JWT token and attaches user to request
+ */
 const isAuthenticated = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -24,6 +28,10 @@ const isAuthenticated = async (req, res, next) => {
     }
 };
 
+/**
+ * Admin Authorization Middleware
+ * Checks if authenticated user has admin role
+ */
 const isAdmin = (req, res, next) => {
     if (!req.user) {
         return res.status(401).json({ message: 'Authentication required' });
@@ -36,8 +44,10 @@ const isAdmin = (req, res, next) => {
     next();
 };
 
-// For backward compatibility
-const auth = isAuthenticated;
+/**
+ * Role-based Authorization Middleware
+ * @param {string[]} roles - Array of allowed roles
+ */
 const authorize = (roles = []) => {
     return (req, res, next) => {
         if (!req.user) {
@@ -52,4 +62,12 @@ const authorize = (roles = []) => {
     };
 };
 
-module.exports = { isAuthenticated, isAdmin, auth, authorize };
+// For backward compatibility
+const auth = isAuthenticated;
+
+module.exports = {
+    isAuthenticated,
+    isAdmin,
+    authorize,
+    auth
+};

@@ -14,7 +14,7 @@ const {
     upload,
     getAllUsers
 } = require('../controller/userController');
-const { isAuthenticated, isAdmin } = require('../middleware/auth');
+const { isAuthenticated, authorize } = require('../middleware/auth');
 
 // Public routes
 router.post('/register', register);
@@ -52,7 +52,7 @@ router.put('/update', isAuthenticated, upload.single('profilePic'), updateUser);
 router.put('/update-password', isAuthenticated, updatePassword);
 router.delete('/delete', isAuthenticated, deleteUser);
 
-// Admin only routes
-router.get('/admin/users', isAuthenticated, isAdmin, getAllUsers);
+// Admin routes
+router.get('/admin/users', isAuthenticated, authorize(['admin']), getAllUsers);
 
 module.exports = router;

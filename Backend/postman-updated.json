@@ -1016,6 +1016,258 @@
       ]
     },
     {
+      "name": "Review Management",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "product_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "rating",
+                  "value": "5",
+                  "type": "text"
+                },
+                {
+                  "key": "review",
+                  "value": "This is an excellent product!",
+                  "type": "text"
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/reviews",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "Get Product Reviews",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/reviews/product/1?page=1&limit=10&sort=recent",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews", "product", "1"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "recent"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Review",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/reviews/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "rating",
+                  "value": "4",
+                  "type": "text"
+                },
+                {
+                  "key": "review",
+                  "value": "Updated review content",
+                  "type": "text"
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/reviews/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/reviews/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get User Reviews",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/reviews/user/me",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews", "user", "me"]
+            }
+          }
+        },
+        {
+          "name": "Add Comment to Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"I agree with this review!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/reviews/1/comment",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews", "1", "comment"]
+            }
+          }
+        },
+        {
+          "name": "Get Review Comments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5000/api/reviews/1/comments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews", "1", "comments"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Like Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/reviews/1/like",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews", "1", "like"]
+            }
+          }
+        },
+        {
+          "name": "Report Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"inappropriate\",\n  \"details\": \"This review contains offensive language\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/reviews/1/report",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "reviews", "1", "report"]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Order Management",
       "item": [
         {
@@ -1479,6 +1731,130 @@
           }
         }
       ]
+    },
+    {
+      "name": "SEO Management",
+      "item": [
+        {
+          "name": "Get SEO Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/seo?page_name=home",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "seo"],
+              "query": [
+                {
+                  "key": "page_name",
+                  "value": "home",
+                  "description": "Name of the page to get SEO data for"
+                }
+              ]
+            },
+            "description": "Get SEO metadata for a specific page"
+          }
+        },
+        {
+          "name": "Get All SEO Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/seo/all",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "seo", "all"]
+            },
+            "description": "Get SEO metadata for all pages (admin only)"
+          }
+        },
+        {
+          "name": "Create SEO Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"page_name\": \"blog\",\n    \"slug\": \"/blog\",\n    \"meta_title\": \"Blog - Nishree\",\n    \"meta_description\": \"Read our latest articles and updates on Nishree blog.\",\n    \"meta_keywords\": \"blog, articles, news, updates\",\n    \"canonical_url\": \"https://nishree.com/blog\",\n    \"meta_image\": \"blog-og-image.jpg\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/seo/create",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "seo", "create"]
+            },
+            "description": "Create new SEO metadata for a page (admin only)"
+          }
+        },
+        {
+          "name": "Update SEO Data",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"page_name\": \"home\",\n    \"meta_title\": \"Home - Nishree Store\",\n    \"meta_description\": \"Welcome to Nishree - your premium shopping destination for quality products.\",\n    \"meta_keywords\": \"shop, online store, premium products, nishree\",\n    \"canonical_url\": \"https://nishree.com\",\n    \"meta_image\": \"home-og-image.jpg\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/seo/update",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "seo", "update"]
+            },
+            "description": "Update SEO metadata for a page (admin only)"
+          }
+        },
+        {
+          "name": "Delete SEO Data",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/seo/blog",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "seo", "blog"]
+            },
+            "description": "Delete SEO metadata for a page (admin only)"
+          }
+        }
+      ],
+      "description": "Endpoints for managing SEO metadata for different pages"
     }
   ],
   "variable": [

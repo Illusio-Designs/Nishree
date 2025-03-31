@@ -1,17 +1,17 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 
-const Payment = sequelize.define('Payment', {
+const ReviewReport = sequelize.define('ReviewReport', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    order_id: {
+    review_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'orders',
+            model: 'reviews',
             key: 'id'
         }
     },
@@ -23,41 +23,35 @@ const Payment = sequelize.define('Payment', {
             key: 'id'
         }
     },
-    payment_type: {
-        type: DataTypes.ENUM('cod', 'credit_card', 'debit_card', 'upi', 'wallet'),
+    reason: {
+        type: DataTypes.ENUM('spam', 'offensive', 'fake', 'other'),
         allowNull: false
     },
-    transaction_id: {
-        type: DataTypes.STRING(100),
+    details: {
+        type: DataTypes.TEXT,
         allowNull: true
     },
-    amount_paid: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
-    },
     status: {
-        type: DataTypes.ENUM('pending', 'successful', 'failed', 'refunded'),
-        allowNull: false,
+        type: DataTypes.ENUM('pending', 'resolved', 'rejected'),
         defaultValue: 'pending'
     },
-    payment_gateway: {
-        type: DataTypes.STRING(100),
+    admin_notes: {
+        type: DataTypes.TEXT,
         allowNull: true
     }
 }, {
-    tableName: 'payments',
+    tableName: 'review_reports',
     timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     charset: 'utf8mb4',
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            fields: ['order_id']
+            fields: ['review_id']
         },
         {
             fields: ['user_id']
-        },
-        {
-            fields: ['transaction_id']
         },
         {
             fields: ['status']
@@ -65,4 +59,4 @@ const Payment = sequelize.define('Payment', {
     ]
 });
 
-module.exports = Payment; 
+module.exports = ReviewReport; 

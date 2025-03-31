@@ -6,14 +6,14 @@ const {
     getShippingFeeByType,
     deleteShippingFee
 } = require('../controller/shippingFeeController');
-const { isAuthenticated, isAdmin } = require('../middleware/auth');
+const { isAuthenticated, authorize } = require('../middleware/auth');
 
 // Public routes
 router.get('/', getAllShippingFees);
 router.get('/:type', getShippingFeeByType);
 
-// Admin only routes
-router.post('/', isAuthenticated, isAdmin, createOrUpdateShippingFee);
-router.delete('/:id', isAuthenticated, isAdmin, deleteShippingFee);
+// Admin routes
+router.post('/', isAuthenticated, authorize(['admin']), createOrUpdateShippingFee);
+router.delete('/:id', isAuthenticated, authorize(['admin']), deleteShippingFee);
 
 module.exports = router; 

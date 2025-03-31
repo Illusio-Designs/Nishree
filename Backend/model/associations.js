@@ -22,6 +22,13 @@ const ShippingFee = require('./shippingFeeModel');
 const OrderStatusHistory = require('./orderStatusHistoryModel');
 const Payment = require('./paymentModel');
 
+// Review system models
+const Review = require('./reviewModel');
+const ReviewImage = require('./reviewImageModel');
+const ReviewLike = require('./reviewLikeModel');
+const ReviewComment = require('./reviewCommentModel');
+const ReviewReport = require('./reviewReportModel');
+
 // Category Associations
 Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
 Category.hasMany(Category, { as: 'children', foreignKey: 'parentId' });
@@ -116,6 +123,43 @@ Payment.belongsTo(Order, { foreignKey: 'order_id' });
 User.hasMany(Payment, { foreignKey: 'user_id' });
 Payment.belongsTo(User, { foreignKey: 'user_id' });
 
+// Review system associations
+User.hasMany(Review, { foreignKey: 'user_id' });
+Review.belongsTo(User, { foreignKey: 'user_id' });
+
+Product.hasMany(Review, { foreignKey: 'product_id' });
+Review.belongsTo(Product, { foreignKey: 'product_id' });
+
+Order.hasMany(Review, { foreignKey: 'order_id' });
+Review.belongsTo(Order, { foreignKey: 'order_id' });
+
+Product.belongsTo(Review, { 
+    foreignKey: 'featured_review_id', 
+    as: 'FeaturedReview', 
+    constraints: false 
+});
+
+Review.hasMany(ReviewImage, { foreignKey: 'review_id' });
+ReviewImage.belongsTo(Review, { foreignKey: 'review_id' });
+
+Review.hasMany(ReviewLike, { foreignKey: 'review_id' });
+ReviewLike.belongsTo(Review, { foreignKey: 'review_id' });
+
+User.hasMany(ReviewLike, { foreignKey: 'user_id' });
+ReviewLike.belongsTo(User, { foreignKey: 'user_id' });
+
+Review.hasMany(ReviewComment, { foreignKey: 'review_id' });
+ReviewComment.belongsTo(Review, { foreignKey: 'review_id' });
+
+User.hasMany(ReviewComment, { foreignKey: 'user_id' });
+ReviewComment.belongsTo(User, { foreignKey: 'user_id' });
+
+Review.hasMany(ReviewReport, { foreignKey: 'review_id' });
+ReviewReport.belongsTo(Review, { foreignKey: 'review_id' });
+
+User.hasMany(ReviewReport, { foreignKey: 'user_id' });
+ReviewReport.belongsTo(User, { foreignKey: 'user_id' });
+
 module.exports = {
     User,
     Category,
@@ -137,5 +181,10 @@ module.exports = {
     ShippingAddress,
     ShippingFee,
     OrderStatusHistory,
-    Payment
+    Payment,
+    Review,
+    ReviewImage,
+    ReviewLike,
+    ReviewComment,
+    ReviewReport
 }; 

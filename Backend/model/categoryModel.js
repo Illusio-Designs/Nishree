@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const { sequelize } = require('../config/db');
 
 const Category = sequelize.define('Category', {
     id: {
@@ -13,8 +13,7 @@ const Category = sequelize.define('Category', {
     },
     slug: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     description: {
         type: DataTypes.TEXT,
@@ -58,6 +57,9 @@ const Category = sequelize.define('Category', {
     indexes: [
         {
             fields: ['parentId']
+        },
+        {
+            fields: ['status']
         }
     ],
     charset: 'utf8mb4',

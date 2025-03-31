@@ -3,19 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
-const db = require('./config/db');
+const { sequelize, testConnection, syncModels } = require('./config/db');
 require('./config/passport'); // Add passport configuration
-const categoryRoutes = require('./route/categoryRoutes');
-const userRoutes = require('./route/userRoutes'); // Make sure this path is correct
-const sliderRoutes = require('./route/sliderRoutes'); // Add slider routes
-const couponRoutes = require('./route/couponRoutes'); // Add coupon routes
-const wishlistRoutes = require('./route/wishlistRoutes'); // Add wishlist routes
-const productRoutes = require('./route/productRoutes'); // Add product routes
-const orderRoutes = require('./route/orderRoutes'); // Add order routes
-const shippingAddressRoutes = require('./route/shippingAddressRoutes'); // Add shipping address routes
-const paymentRoutes = require('./route/paymentRoutes'); // Add payment routes
-const shippingFeeRoutes = require('./route/shippingFeeRoutes'); // Add shipping fee routes
-const orderStatusHistoryRoutes = require('./route/orderStatusHistoryRoutes'); // Add order status history routes
+
+// Import combined routes
+const routes = require('./routes');
 
 const app = express();
 
@@ -46,28 +38,8 @@ app.use(passport.session());
 // Serve static files from uploads directory
 app.use('/uploads', express.static('uploads'));
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/sliders', sliderRoutes); // Add slider routes
-app.use('/api/products', productRoutes); // Add product routes
-app.use('/api/coupons', couponRoutes); // Add coupon routes
-app.use('/api/wishlist', wishlistRoutes); // Add wishlist routes
-app.use('/api/orders', orderRoutes); // Add order routes
-app.use('/api/shipping-addresses', shippingAddressRoutes); // Add shipping address routes
-app.use('/api/payments', paymentRoutes); // Add payment routes
-app.use('/api/shipping-fees', shippingFeeRoutes); // Add shipping fee routes
-app.use('/api/order-status', orderStatusHistoryRoutes); // Add order status history routes
-
-// Health Check Route
-app.get('/api/health', (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        uptime: process.uptime(),
-        message: 'Server is running',
-        timestamp: new Date()
-    });
-});
+// Mount all routes under /api
+app.use('/api', routes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -78,23 +50,31 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Get the testConnection function
-const testConnection = require('./config/db').testConnection;
+// Initialize database and start server
+const startServer = async () => {
+    try {
+        // Test database connection
+        const isConnected = await testConnection();
+        if (!isConnected) {
+            throw new Error('Failed to connect to database');
+        }
 
-// Test database connection and sync models
-testConnection()
-    .then(() => {
-        console.log('Database synced successfully');
-        const PORT = process.env.PORT || 5000;
-        app.listen(PORT, (err) => {
-            if (err) {
-                console.error(`Failed to start server on port ${PORT}:`, err);
-                process.exit(1);
-            }
-            console.log(`Server running on http://localhost:${PORT}`);
+        // Try to sync models
+        const isSynced = await syncModels();
+        if (!isSynced) {
+            console.warn('Warning: Database models could not be fully synchronized.');
+            console.warn('Some features may be limited. Please check your database configuration.');
+        }
+
+        // Start the server
+        const PORT = process.env.PORT || 5001;
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
         });
-    })
-    .catch(err => {
-        console.error('Database sync failed:', err);
+    } catch (error) {
+        console.error('Failed to start server:', error);
         process.exit(1);
-    });
+    }
+};
+
+startServer();

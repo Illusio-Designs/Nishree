@@ -1,11 +1,19 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 
-const Wishlist = sequelize.define('Wishlist', {
+const ReviewLike = sequelize.define('ReviewLike', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
+    },
+    review_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'reviews',
+            key: 'id'
+        }
     },
     user_id: {
         type: DataTypes.INTEGER,
@@ -14,31 +22,20 @@ const Wishlist = sequelize.define('Wishlist', {
             model: 'users',
             key: 'id'
         }
-    },
-    product_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'products',
-            key: 'id'
-        }
-    },
-    created_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
     }
 }, {
-    tableName: 'wishlists',
-    timestamps: false, // using created_at instead
+    tableName: 'review_likes',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: false,
     charset: 'utf8mb4',
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
             unique: true,
-            fields: ['user_id', 'product_id']
+            fields: ['review_id', 'user_id']
         }
     ]
 });
 
-module.exports = Wishlist; 
+module.exports = ReviewLike; 
