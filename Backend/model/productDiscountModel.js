@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const ProductDiscount = sequelize.define('ProductDiscount', {
     id: {
@@ -42,4 +42,4 @@ const ProductDiscount = sequelize.define('ProductDiscount', {
     collate: 'utf8mb4_general_ci'
 });
 
-module.exports = ProductDiscount; 
+export default ProductDiscount; // Use export default 

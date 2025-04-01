@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const { isAuthenticated, authorize } = require('../middleware/auth');
-const { 
+import express from 'express';
+import { isAuthenticated, authorize } from '../middleware/auth.js';
+import { 
     createSlider, 
     getAllSliders, 
     getSliderById, 
     updateSlider, 
     deleteSlider,
     upload 
-} = require('../controller/sliderController');
+} from '../controller/sliderController.js';
+
+const router = express.Router();
 
 // Public routes
 router.get('/', getAllSliders);
@@ -19,4 +20,4 @@ router.post('/', isAuthenticated, authorize(['admin']), upload.single('image'), 
 router.put('/:id', isAuthenticated, authorize(['admin']), upload.single('image'), updateSlider);
 router.delete('/:id', isAuthenticated, authorize(['admin']), deleteSlider);
 
-module.exports = router; 
+export default router; 

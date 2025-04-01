@@ -1,13 +1,23 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const session = require('express-session');
-const passport = require('passport');
-const { sequelize, testConnection, syncModels } = require('./config/db');
-require('./config/passport'); // Add passport configuration
+// index.js
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import session from 'express-session';
+import passport from 'passport';
+import { sequelize, testConnection, syncModels } from './config/db.js';
+import './config/passport.js'; // Changed to import
 
-// Import combined routes
-const routes = require('./routes');
+// Import routes - convert to ES module imports
+import routes from './routes/routesManager.js';
+
+// Import integration routes
+import googleAnalyticsRouter from './integration/googleAnalytics.js';
+import facebookPixelRouter from './integration/facebookPixel.js';
+import facebookCatalogRouter from './integration/facebookCatalog.js';
+import dashboardAnalyticsRouter from './integration/dashboardAnalytics.js';
+
+// Initialize dotenv
+dotenv.config();
 
 const app = express();
 
@@ -40,6 +50,12 @@ app.use('/uploads', express.static('uploads'));
 
 // Mount all routes under /api
 app.use('/api', routes);
+
+// Use the routes
+app.use('/api/google-analytics', googleAnalyticsRouter);
+app.use('/api/facebook-pixel', facebookPixelRouter);
+app.use('/api/facebook-catalog', facebookCatalogRouter);
+app.use('/api/dashboard', dashboardAnalyticsRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

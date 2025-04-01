@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const Category = sequelize.define('Category', {
     id: {
@@ -68,4 +68,4 @@ const Category = sequelize.define('Category', {
 
 // Note: Self-referential relationships are defined in associations.js
 
-module.exports = Category;
+export default Category;

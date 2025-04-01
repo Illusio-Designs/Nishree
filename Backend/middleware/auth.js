@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const User = require('../model/userModel'); // Adjust path as needed
+import jwt from 'jsonwebtoken';
+import User from '../model/userModel.js'; // Adjust path as needed
 
 /**
  * Authentication Middleware
@@ -65,7 +65,7 @@ const authorize = (roles = []) => {
 // For backward compatibility
 const auth = isAuthenticated;
 
-module.exports = {
+export {
     isAuthenticated,
     isAdmin,
     authorize,

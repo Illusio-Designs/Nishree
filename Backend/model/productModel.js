@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const Product = sequelize.define('Product', {
     id: {
@@ -42,13 +42,11 @@ const Product = sequelize.define('Product', {
     featured_review_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        references: {
-            model: 'reviews',
-            key: 'id'
-        },
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
         constraints: false
+        // Note: The reference to reviews table is defined in associations.js
+        // to avoid circular dependencies
     }
 }, {
     tableName: 'products',
@@ -58,18 +56,12 @@ const Product = sequelize.define('Product', {
     indexes: [
         {
             unique: true,
-            fields: ['slug']
+            fields: ['slug'] 
         },
         {
             fields: ['status']
-        },
-        {
-            fields: ['avg_rating']
-        },
-        {
-            fields: ['review_count']
         }
     ]
 });
 
-module.exports = Product; 
+export default Product;

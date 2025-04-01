@@ -1,13 +1,15 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const passport = require('passport');
-const path = require('path');
-const fs = require('fs');
-const User = require('../model/userModel');
-const nodemailer = require('nodemailer');
-const ImageHandler = require('../utils/imageHandler');
-const createUploadMiddleware = require('../middleware/uploadMiddleware');
-require('dotenv').config();
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import passport from 'passport';
+import path from 'path';
+import fs from 'fs';
+import User from '../model/userModel.js';
+import nodemailer from 'nodemailer';
+import ImageHandler from '../utils/imageHandler.js';
+import createUploadMiddleware from '../middleware/uploadMiddleware.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/user'));
@@ -24,7 +26,7 @@ const addImageUrlToResponse = (userResponse) => {
 };
 
 // **User Registration**
-const register = async (req, res) => {
+export const register = async (req, res) => {
     try {
         const { username, email, password, role } = req.body;
 
@@ -56,7 +58,7 @@ const register = async (req, res) => {
 };
 
 // **User Login**
-const login = async (req, res) => {
+export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -88,12 +90,12 @@ const login = async (req, res) => {
 };
 
 // **Google Authentication**
-const googleAuth = passport.authenticate('google', {
+export const googleAuth = passport.authenticate('google', {
     scope: ['profile', 'email']
 });
 
 // **Google Auth Callback**
-const googleAuthCallback = (req, res) => {
+export const googleAuthCallback = (req, res) => {
     try {
         const token = jwt.sign(
             { id: req.user.id, email: req.user.email, role: req.user.role }, 
@@ -113,7 +115,7 @@ const googleAuthCallback = (req, res) => {
 };
 
 // **Forgot Password**
-const forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
         
@@ -186,7 +188,7 @@ const forgotPassword = async (req, res) => {
 };
 
 // **Reset Password**
-const resetPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
     try {
         const { resetToken, password, confirmPassword } = req.body;
 
@@ -217,7 +219,7 @@ const resetPassword = async (req, res) => {
 };
 
 // **Get Current User**
-const getCurrentUser = async (req, res) => {
+export const getCurrentUser = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id, {
             attributes: { exclude: ['password', 'resetToken', 'resetTokenExpiry'] }
@@ -238,7 +240,7 @@ const getCurrentUser = async (req, res) => {
 };
 
 // **Update User**
-const updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
     try {
         const updates = Object.keys(req.body);
         const allowedUpdates = ['username', 'email'];
@@ -301,7 +303,7 @@ const updateUser = async (req, res) => {
 };
 
 // **Update Password**
-const updatePassword = async (req, res) => {
+export const updatePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         
@@ -335,7 +337,7 @@ const updatePassword = async (req, res) => {
 };
 
 // **Delete User**
-const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id);
         if (!user) {
@@ -356,7 +358,7 @@ const deleteUser = async (req, res) => {
 };
 
 // **Get All Users**
-const getAllUsers = async (req, res) => {
+export const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll({
             attributes: { exclude: ['password', 'resetToken', 'resetTokenExpiry'] }
@@ -370,19 +372,4 @@ const getAllUsers = async (req, res) => {
         console.error('Get all users error:', error);
         res.status(500).json({ message: 'Failed to get users', error: error.message });
     }
-};
-
-module.exports = { 
-    register, 
-    login, 
-    googleAuth, 
-    googleAuthCallback, 
-    forgotPassword, 
-    resetPassword, 
-    getCurrentUser,
-    updateUser, 
-    updatePassword,
-    deleteUser,
-    upload,
-    getAllUsers
 };

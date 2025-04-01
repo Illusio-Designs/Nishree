@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const Slider = sequelize.define('Slider', {
     id: {
@@ -46,5 +46,5 @@ const Slider = sequelize.define('Slider', {
     collate: 'utf8mb4_general_ci'
 });
 
-module.exports = Slider;
+export default Slider; // Use export default
 

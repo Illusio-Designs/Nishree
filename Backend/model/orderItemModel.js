@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const OrderItem = sequelize.define('OrderItem', {
     id: {
@@ -67,4 +67,4 @@ const OrderItem = sequelize.define('OrderItem', {
     ]
 });
 
-module.exports = OrderItem; 
+export default OrderItem; // Use export default 

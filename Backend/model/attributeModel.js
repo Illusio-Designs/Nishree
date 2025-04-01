@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const Attribute = sequelize.define('Attribute', {
     id: {
@@ -16,7 +16,13 @@ const Attribute = sequelize.define('Attribute', {
     tableName: 'attributes',
     timestamps: true,
     charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci'
+    collate: 'utf8mb4_general_ci',
+    indexes: [
+        {
+            unique: true,
+            fields: ['name']
+        }
+    ]
 });
 
-module.exports = Attribute; 
+export default Attribute; // Use export default 

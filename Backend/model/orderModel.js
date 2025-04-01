@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const Order = sequelize.define('Order', {
     id: {
@@ -73,14 +73,15 @@ const Order = sequelize.define('Order', {
         },
         {
             fields: ['user_id']
-        },
-        {
-            fields: ['status']
-        },
-        {
-            fields: ['payment_status']
         }
+        // Consider removing unique constraints on status and payment_status
+        // {
+        //     fields: ['status']
+        // },
+        // {
+        //     fields: ['payment_status']
+        // }
     ]
 });
 
-module.exports = Order; 
+export default Order; 

@@ -1,17 +1,17 @@
-const Review = require('../model/reviewModel');
-const ReviewImage = require('../model/reviewImageModel');
-const ReviewLike = require('../model/reviewLikeModel');
-const ReviewComment = require('../model/reviewCommentModel');
-const ReviewReport = require('../model/reviewReportModel');
-const Product = require('../model/productModel');
-const Order = require('../model/orderModel');
-const OrderItem = require('../model/orderItemModel');
-const User = require('../model/userModel');
-const path = require('path');
-const fs = require('fs');
-const { Op } = require('sequelize');
-const sequelize = require('../config/db');
-const createUploadMiddleware = require('../middleware/uploadMiddleware');
+import Review from '../model/reviewModel.js';
+import ReviewImage from '../model/reviewImageModel.js';
+import ReviewLike from '../model/reviewLikeModel.js';
+import ReviewComment from '../model/reviewCommentModel.js';
+import ReviewReport from '../model/reviewReportModel.js';
+import Product from '../model/productModel.js';
+import Order from '../model/orderModel.js';
+import OrderItem from '../model/orderItemModel.js';
+import User from '../model/userModel.js';
+import path from 'path';
+import fs from 'fs';
+import { Op } from 'sequelize';
+import sequelize from '../config/db.js';
+import createUploadMiddleware from '../middleware/uploadMiddleware.js';
 
 // Initialize upload middleware for review images
 const upload = createUploadMiddleware(
@@ -83,7 +83,7 @@ const updateProductReviewStats = async (productId, transaction) => {
 };
 
 // Create a new review
-const createReview = async (req, res) => {
+export const createReview = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -235,7 +235,7 @@ const createReview = async (req, res) => {
 };
 
 // Get all reviews for a product
-const getProductReviews = async (req, res) => {
+export const getProductReviews = async (req, res) => {
     try {
         const { productId } = req.params;
         const { status, rating, verified, hasImages, hasVideos, featured, page = 1, limit = 10, sort = 'recent' } = req.query;
@@ -375,7 +375,7 @@ const getProductReviews = async (req, res) => {
 };
 
 // Get user's reviews
-const getUserReviews = async (req, res) => {
+export const getUserReviews = async (req, res) => {
     try {
         const userId = req.params.userId || req.user.id;
         const { page = 1, limit = 10, status } = req.query;
@@ -430,7 +430,7 @@ const getUserReviews = async (req, res) => {
 };
 
 // Get a single review
-const getReviewById = async (req, res) => {
+export const getReviewById = async (req, res) => {
     try {
         const { reviewId } = req.params;
         
@@ -478,7 +478,7 @@ const getReviewById = async (req, res) => {
 };
 
 // Update a review
-const updateReview = async (req, res) => {
+export const updateReview = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -608,7 +608,7 @@ const updateReview = async (req, res) => {
 };
 
 // Delete a review
-const deleteReview = async (req, res) => {
+export const deleteReview = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -672,7 +672,7 @@ const deleteReview = async (req, res) => {
 };
 
 // Moderate a review (admin only)
-const moderateReview = async (req, res) => {
+export const moderateReview = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -748,7 +748,7 @@ const moderateReview = async (req, res) => {
 };
 
 // Delete a review image
-const deleteReviewImage = async (req, res) => {
+export const deleteReviewImage = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -814,14 +814,12 @@ const deleteReviewImage = async (req, res) => {
     }
 };
 
-module.exports = {
+export {
     createReview,
     getProductReviews,
     getUserReviews,
     getReviewById,
-    updateReview,
     deleteReview,
     moderateReview,
-    deleteReviewImage,
     upload
 }; 

@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const { isAuthenticated, authorize } = require('../middleware/auth');
-const {
+import express from 'express';
+import { isAuthenticated, authorize } from '../middleware/auth.js';
+import {
     createProduct,
     getAllProducts,
     getProductById,
     updateProduct,
     deleteProduct,
     upload
-} = require('../controller/productController');
+} from '../controller/productController.js';
+
+const router = express.Router();
 
 // Public routes
 router.get('/', getAllProducts);
@@ -19,4 +20,4 @@ router.post('/', isAuthenticated, authorize(['admin']), upload.array('images', 5
 router.put('/:id', isAuthenticated, authorize(['admin']), upload.array('images', 5), updateProduct);
 router.delete('/:id', isAuthenticated, authorize(['admin']), deleteProduct);
 
-module.exports = router; 
+export default router; 

@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from 'express';
+import { 
     createOrder, 
     getAllOrders, 
     getUserOrders, 
     getOrderById, 
     updateOrderStatus, 
     cancelOrder 
-} = require('../controller/orderController');
-const { isAuthenticated, isAdmin } = require('../middleware/auth');
+} from '../controller/orderController.js';
+import { isAuthenticated, isAdmin } from '../middleware/auth.js';
+
+const router = express.Router();
 
 // Protected routes - require authentication
 router.post('/', isAuthenticated, createOrder);
@@ -20,4 +21,4 @@ router.put('/:id/cancel', isAuthenticated, cancelOrder);
 router.get('/admin', isAuthenticated, isAdmin, getAllOrders);
 router.put('/:id/status', isAuthenticated, isAdmin, updateOrderStatus);
 
-module.exports = router; 
+export default router; 

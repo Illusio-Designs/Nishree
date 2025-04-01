@@ -1,9 +1,9 @@
-const ShippingAddress = require('../model/shippingAddressModel');
-const { Op } = require('sequelize');
-const sequelize = require('../config/db');
+import ShippingAddress from '../model/shippingAddressModel.js';
+import { Op } from 'sequelize';
+import sequelize from '../config/db.js';
 
 // Create a new shipping address
-const createShippingAddress = async (req, res) => {
+export const createShippingAddress = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -65,7 +65,7 @@ const createShippingAddress = async (req, res) => {
 };
 
 // Get all shipping addresses for a user
-const getUserShippingAddresses = async (req, res) => {
+export const getUserShippingAddresses = async (req, res) => {
     try {
         const userId = req.user.id;
 
@@ -85,7 +85,7 @@ const getUserShippingAddresses = async (req, res) => {
 };
 
 // Get a shipping address by ID
-const getShippingAddressById = async (req, res) => {
+export const getShippingAddressById = async (req, res) => {
     try {
         const addressId = req.params.id;
         const userId = req.user.id;
@@ -109,7 +109,7 @@ const getShippingAddressById = async (req, res) => {
 };
 
 // Update a shipping address
-const updateShippingAddress = async (req, res) => {
+export const updateShippingAddress = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -174,7 +174,7 @@ const updateShippingAddress = async (req, res) => {
 };
 
 // Delete a shipping address
-const deleteShippingAddress = async (req, res) => {
+export const deleteShippingAddress = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -226,7 +226,7 @@ const deleteShippingAddress = async (req, res) => {
 };
 
 // Set a shipping address as default
-const setDefaultShippingAddress = async (req, res) => {
+export const setDefaultShippingAddress = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -274,13 +274,4 @@ const setDefaultShippingAddress = async (req, res) => {
         console.error('Error setting default shipping address:', error);
         res.status(500).json({ message: 'Failed to set default shipping address', error: error.message });
     }
-};
-
-module.exports = {
-    createShippingAddress,
-    getUserShippingAddresses,
-    getShippingAddressById,
-    updateShippingAddress,
-    deleteShippingAddress,
-    setDefaultShippingAddress
 }; 

@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { isAuthenticated, isAdmin } from '../middleware/auth.js';
+import couponController from '../controller/couponController.js';
+
 const router = express.Router();
-const { isAuthenticated, isAdmin } = require('../middleware/auth');
-const couponController = require('../controller/couponController');
 
 // Admin routes (protected)
 // Create a new coupon
@@ -26,4 +27,4 @@ router.post('/validate', isAuthenticated, couponController.validateCoupon);
 // Apply a coupon (increment used count)
 router.post('/apply', isAuthenticated, couponController.applyCoupon);
 
-module.exports = router; 
+export default router; 

@@ -1,11 +1,11 @@
-const Slider = require('../model/sliderModel');
-const Category = require('../model/categoryModel');
-const { v4: uuidv4 } = require('uuid');
-const path = require('path');
-const fs = require('fs').promises;
-const fsSync = require('fs');
-const ImageHandler = require('../utils/imageHandler');
-const createUploadMiddleware = require('../middleware/uploadMiddleware');
+import Slider from '../model/sliderModel.js';
+import Category from '../model/categoryModel.js';
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import fs from 'fs/promises';
+import fsSync from 'fs';
+import ImageHandler from '../utils/imageHandler.js';
+import createUploadMiddleware from '../middleware/uploadMiddleware.js';
 
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/slider'));
@@ -24,7 +24,7 @@ const formatSliderResponse = (slider) => {
 };
 
 // Create Slider
-const createSlider = async (req, res) => {
+export const createSlider = async (req, res) => {
     try {
         const { title, tagline, buttonText, categoryId, status, order } = req.body;
         
@@ -95,7 +95,7 @@ const createSlider = async (req, res) => {
 };
 
 // Get All Sliders
-const getAllSliders = async (req, res) => {
+export const getAllSliders = async (req, res) => {
     try {
         const sliders = await Slider.findAll({
             include: [{
@@ -117,7 +117,7 @@ const getAllSliders = async (req, res) => {
 };
 
 // Get Slider by ID
-const getSliderById = async (req, res) => {
+export const getSliderById = async (req, res) => {
     try {
         const slider = await Slider.findByPk(req.params.id, {
             include: [{
@@ -142,7 +142,7 @@ const getSliderById = async (req, res) => {
 };
 
 // Update Slider
-const updateSlider = async (req, res) => {
+export const updateSlider = async (req, res) => {
     try {
         const slider = await Slider.findByPk(req.params.id);
         if (!slider) {
@@ -224,7 +224,7 @@ const updateSlider = async (req, res) => {
 };
 
 // Delete Slider
-const deleteSlider = async (req, res) => {
+export const deleteSlider = async (req, res) => {
     try {
         const slider = await Slider.findByPk(req.params.id);
         if (!slider) {
@@ -244,11 +244,10 @@ const deleteSlider = async (req, res) => {
     }
 };
 
-module.exports = {
+export {
     createSlider,
     getAllSliders,
     getSliderById,
     updateSlider,
-    deleteSlider,
     upload
 }; 

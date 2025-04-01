@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from 'express';
+import { 
     createCategory, 
     getAllCategories, 
     getCategoryByName, 
     updateCategory, 
     deleteCategory,
     upload 
-} = require('../controller/categoryController');
-const { isAuthenticated, isAdmin } = require('../middleware/auth');
+} from '../controller/categoryController.js';
+import { isAuthenticated, isAdmin } from '../middleware/auth.js';
+
+const router = express.Router();
 
 // Public routes (no authentication required)
 router.get('/', getAllCategories);
@@ -19,4 +20,4 @@ router.post('/', isAuthenticated, isAdmin, upload.single('image'), createCategor
 router.put('/:id', isAuthenticated, isAdmin, upload.single('image'), updateCategory);
 router.delete('/:id', isAuthenticated, isAdmin, deleteCategory);
 
-module.exports = router;
+export default router;

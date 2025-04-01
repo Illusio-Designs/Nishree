@@ -1,6 +1,6 @@
-const multer = require('multer');
-const path = require('path');
-const fsSync = require('fs');
+import multer from 'multer';
+import path from 'path';
+import fsSync from 'fs';
 
 // Create upload middleware factory
 const createUploadMiddleware = (uploadDir, fieldName = 'image') => {
@@ -36,4 +36,4 @@ const createUploadMiddleware = (uploadDir, fieldName = 'image') => {
     });
 };
 
-module.exports = createUploadMiddleware; 
+export default createUploadMiddleware; 

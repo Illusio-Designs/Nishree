@@ -1,12 +1,12 @@
-const ReviewLike = require('../model/reviewLikeModel');
-const Review = require('../model/reviewModel');
-const User = require('../model/userModel');
-const ReviewImage = require('../model/reviewImageModel');
-const Product = require('../model/productModel');
-const { Op } = require('sequelize');
+import ReviewLike from '../model/reviewLikeModel.js';
+import Review from '../model/reviewModel.js';
+import User from '../model/userModel.js';
+import ReviewImage from '../model/reviewImageModel.js';
+import Product from '../model/productModel.js';
+import { Op } from 'sequelize';
 
 // Toggle like on a review (like if not liked, unlike if already liked)
-const toggleLike = async (req, res) => {
+export const toggleLike = async (req, res) => {
     try {
         const { reviewId } = req.params;
         const userId = req.user.id;
@@ -69,7 +69,7 @@ const toggleLike = async (req, res) => {
 };
 
 // Check if a user has liked a review
-const checkLikeStatus = async (req, res) => {
+export const checkLikeStatus = async (req, res) => {
     try {
         const { reviewId } = req.params;
         const userId = req.user.id;
@@ -104,7 +104,7 @@ const checkLikeStatus = async (req, res) => {
 };
 
 // Get all likes for a review
-const getReviewLikes = async (req, res) => {
+export const getReviewLikes = async (req, res) => {
     try {
         const { reviewId } = req.params;
         const { page = 1, limit = 20 } = req.query;
@@ -147,7 +147,7 @@ const getReviewLikes = async (req, res) => {
 };
 
 // Get reviews liked by a user
-const getUserLikedReviews = async (req, res) => {
+export const getUserLikedReviews = async (req, res) => {
     try {
         const userId = req.params.userId || req.user.id;
         const { page = 1, limit = 10 } = req.query;
@@ -198,11 +198,4 @@ const getUserLikedReviews = async (req, res) => {
         console.error('Error getting user liked reviews:', error);
         res.status(500).json({ message: 'Failed to get liked reviews', error: error.message });
     }
-};
-
-module.exports = {
-    toggleLike,
-    checkLikeStatus,
-    getReviewLikes,
-    getUserLikedReviews
 }; 

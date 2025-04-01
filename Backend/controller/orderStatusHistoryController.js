@@ -1,10 +1,10 @@
-const OrderStatusHistory = require('../model/orderStatusHistoryModel');
-const Order = require('../model/orderModel');
-const { Op } = require('sequelize');
-const sequelize = require('../config/db');
+import OrderStatusHistory from '../model/orderStatusHistoryModel.js';
+import Order from '../model/orderModel.js';
+import { Op } from 'sequelize';
+import sequelize from '../config/db.js';
 
 // Get status history for an order
-const getOrderStatusHistory = async (req, res) => {
+export const getOrderStatusHistory = async (req, res) => {
     try {
         const orderId = req.params.orderId;
         const userId = req.user.id;
@@ -33,7 +33,7 @@ const getOrderStatusHistory = async (req, res) => {
 };
 
 // Add a new status entry (admin only)
-const addOrderStatusEntry = async (req, res) => {
+export const addOrderStatusEntry = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -82,9 +82,4 @@ const addOrderStatusEntry = async (req, res) => {
         console.error('Error adding status entry:', error);
         res.status(500).json({ message: 'Failed to add status entry', error: error.message });
     }
-};
-
-module.exports = {
-    getOrderStatusHistory,
-    addOrderStatusEntry
 }; 

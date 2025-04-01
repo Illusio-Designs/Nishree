@@ -1,13 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from 'express';
+import { 
     getOrderStatusHistory,
     addOrderStatusEntry
-} = require('../controller/orderStatusHistoryController');
-const { isAuthenticated, isAdmin } = require('../middleware/auth');
+} from '../controller/orderStatusHistoryController.js';
+import { isAuthenticated, isAdmin } from '../middleware/auth.js';
+
+const router = express.Router();
 
 // Routes for specific order status history
 router.get('/order/:orderId', isAuthenticated, getOrderStatusHistory);
 router.post('/order/:orderId', isAuthenticated, isAdmin, addOrderStatusEntry);
 
-module.exports = router; 
+export default router; 

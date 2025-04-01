@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const Wishlist = sequelize.define('Wishlist', {
     id: {
@@ -41,4 +41,4 @@ const Wishlist = sequelize.define('Wishlist', {
     ]
 });
 
-module.exports = Wishlist; 
+export default Wishlist; 

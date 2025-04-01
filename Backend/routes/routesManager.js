@@ -1,20 +1,21 @@
-const express = require('express');
+// routes/routesManager.js
+import express from 'express';
 const router = express.Router();
 
 // Import all route modules
-const userRoutes = require('./userRoutes');
-const categoryRoutes = require('./categoryRoutes');
-const productRoutes = require('./productRoutes');
-const orderRoutes = require('./orderRoutes');
-const reviewRoutes = require('./reviewRoutes');
-const sliderRoutes = require('./sliderRoutes');
-const couponRoutes = require('./couponRoutes');
-const wishlistRoutes = require('./wishlistRoutes');
-const shippingAddressRoutes = require('./shippingAddressRoutes');
-const paymentRoutes = require('./paymentRoutes');
-const shippingFeeRoutes = require('./shippingFeeRoutes');
-const orderStatusHistoryRoutes = require('./orderStatusHistoryRoutes');
-const seoRoutes = require('./seoRoutes');
+import userRoutes from './userRoutes.js';
+import categoryRoutes from './categoryRoutes.js';
+import productRoutes from './productRoutes.js';
+import orderRoutes from './orderRoutes.js';
+import reviewRoutes from './reviewRoutes.js';
+import sliderRoutes from './sliderRoutes.js';
+import couponRoutes from './couponRoutes.js';
+import wishlistRoutes from './wishlistRoutes.js';
+import shippingAddressRoutes from './shippingAddressRoutes.js';
+import paymentRoutes from './paymentRoutes.js';
+import shippingFeeRoutes from './shippingFeeRoutes.js';
+import orderStatusHistoryRoutes from './orderStatusHistoryRoutes.js';
+import seoRoutes from './seoRoutes.js';
 
 // Core Routes
 router.use('/users', userRoutes);
@@ -43,4 +44,4 @@ router.get('/health', (req, res) => {
     });
 });
 
-module.exports = router; 
+export default router;

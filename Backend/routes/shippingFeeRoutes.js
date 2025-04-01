@@ -1,12 +1,13 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from 'express';
+import { 
     getAllShippingFees,
     createOrUpdateShippingFee,
     getShippingFeeByType,
     deleteShippingFee
-} = require('../controller/shippingFeeController');
-const { isAuthenticated, authorize } = require('../middleware/auth');
+} from '../controller/shippingFeeController.js';
+import { isAuthenticated, authorize } from '../middleware/auth.js';
+
+const router = express.Router();
 
 // Public routes
 router.get('/', getAllShippingFees);
@@ -16,4 +17,4 @@ router.get('/:type', getShippingFeeByType);
 router.post('/', isAuthenticated, authorize(['admin']), createOrUpdateShippingFee);
 router.delete('/:id', isAuthenticated, authorize(['admin']), deleteShippingFee);
 
-module.exports = router; 
+export default router; 

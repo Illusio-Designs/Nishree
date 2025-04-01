@@ -1,10 +1,11 @@
-const express = require('express');
+import express from 'express';
+import reviewController from '../controller/reviewController.js';
+import reviewLikeController from '../controller/reviewLikeController.js';
+import reviewCommentController from '../controller/reviewCommentController.js';
+import reviewReportController from '../controller/reviewReportController.js';
+import { isAuthenticated, authorize } from '../middleware/auth.js';
+
 const router = express.Router();
-const reviewController = require('../controller/reviewController');
-const reviewLikeController = require('../controller/reviewLikeController');
-const reviewCommentController = require('../controller/reviewCommentController');
-const reviewReportController = require('../controller/reviewReportController');
-const { isAuthenticated, authorize } = require('../middleware/auth');
 
 // ============= Review Core Routes =============
 // Public routes
@@ -53,4 +54,4 @@ router.get('/reports', authorize(['admin']), reviewReportController.getAllReport
 router.get('/:reviewId/reports', authorize(['admin']), reviewReportController.getReviewReports);
 router.put('/report/:reportId', authorize(['admin']), reviewReportController.updateReportStatus);
 
-module.exports = router; 
+export default router; 

@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const ProductSEO = sequelize.define('ProductSEO', {
     id: {
@@ -42,7 +42,13 @@ const ProductSEO = sequelize.define('ProductSEO', {
     }
 }, {
     tableName: 'product_seo',
-    timestamps: true
+    timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['productId']
+      }
+    ]
 });
 
-module.exports = ProductSEO; 
+export default ProductSEO; // Use export default 

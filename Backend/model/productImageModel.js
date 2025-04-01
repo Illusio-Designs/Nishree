@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const ProductImage = sequelize.define('ProductImage', {
     id: {
@@ -40,4 +40,4 @@ const ProductImage = sequelize.define('ProductImage', {
     timestamps: true
 });
 
-module.exports = ProductImage; 
+export default ProductImage; // Use export default 

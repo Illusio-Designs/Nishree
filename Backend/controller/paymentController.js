@@ -1,10 +1,10 @@
-const Payment = require('../model/paymentModel');
-const Order = require('../model/orderModel');
-const { Op } = require('sequelize');
-const sequelize = require('../config/db');
+import Payment from '../model/paymentModel.js';
+import Order from '../model/orderModel.js';
+import { Op } from 'sequelize';
+import sequelize from '../config/db.js';
 
 // Process a payment
-const processPayment = async (req, res) => {
+export const processPayment = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -153,7 +153,7 @@ const processPayment = async (req, res) => {
 };
 
 // Get payment status for an order
-const getPaymentStatus = async (req, res) => {
+export const getPaymentStatus = async (req, res) => {
     try {
         const orderId = req.params.orderId;
         const userId = req.user.id;
@@ -189,7 +189,7 @@ const getPaymentStatus = async (req, res) => {
 };
 
 // Process a refund
-const processRefund = async (req, res) => {
+export const processRefund = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -265,7 +265,7 @@ const processRefund = async (req, res) => {
 };
 
 // Get all payments (admin only)
-const getAllPayments = async (req, res) => {
+export const getAllPayments = async (req, res) => {
     try {
         const { status, payment_type, start_date, end_date, page = 1, limit = 10 } = req.query;
         
@@ -309,11 +309,4 @@ const getAllPayments = async (req, res) => {
         console.error('Error getting payments:', error);
         res.status(500).json({ message: 'Failed to get payments', error: error.message });
     }
-};
-
-module.exports = {
-    processPayment,
-    getPaymentStatus,
-    processRefund,
-    getAllPayments
 }; 

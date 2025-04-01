@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const ProductBadge = sequelize.define('ProductBadge', {
     id: {
@@ -26,7 +26,13 @@ const ProductBadge = sequelize.define('ProductBadge', {
     }
 }, {
     tableName: 'product_badges',
-    timestamps: true
+    timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['name']
+        }
+    ]
 });
 
-module.exports = ProductBadge; 
+export default ProductBadge; // Use export default 

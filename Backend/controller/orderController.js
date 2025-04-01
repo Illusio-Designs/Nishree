@@ -1,14 +1,14 @@
-const Order = require('../model/orderModel');
-const OrderItem = require('../model/orderItemModel');
-const OrderStatusHistory = require('../model/orderStatusHistoryModel');
-const Product = require('../model/productModel');
-const ProductVariation = require('../model/productVariationModel');
-const ShippingAddress = require('../model/shippingAddressModel');
-const ShippingFee = require('../model/shippingFeeModel');
-const Payment = require('../model/paymentModel');
-const User = require('../model/userModel');
-const { Op } = require('sequelize');
-const sequelize = require('../config/db');
+import Order from '../model/orderModel.js';
+import OrderItem from '../model/orderItemModel.js';
+import OrderStatusHistory from '../model/orderStatusHistoryModel.js';
+import Product from '../model/productModel.js';
+import ProductVariation from '../model/productVariationModel.js';
+import ShippingAddress from '../model/shippingAddressModel.js';
+import ShippingFee from '../model/shippingFeeModel.js';
+import Payment from '../model/paymentModel.js';
+import User from '../model/userModel.js';
+import { Op } from 'sequelize';
+import sequelize from '../config/db.js';
 
 // Generate unique order number
 const generateOrderNumber = () => {
@@ -35,7 +35,7 @@ const calculateShippingFee = async (paymentType) => {
 };
 
 // Create a new order
-const createOrder = async (req, res) => {
+export const createOrder = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -177,7 +177,7 @@ const createOrder = async (req, res) => {
 };
 
 // Get all orders (admin)
-const getAllOrders = async (req, res) => {
+export const getAllOrders = async (req, res) => {
     try {
         const { status, payment_status, start_date, end_date, page = 1, limit = 10 } = req.query;
         
@@ -225,7 +225,7 @@ const getAllOrders = async (req, res) => {
 };
 
 // Get user's orders
-const getUserOrders = async (req, res) => {
+export const getUserOrders = async (req, res) => {
     try {
         const userId = req.user.id;
         const { status, page = 1, limit = 10 } = req.query;
@@ -265,7 +265,7 @@ const getUserOrders = async (req, res) => {
 };
 
 // Get order by ID
-const getOrderById = async (req, res) => {
+export const getOrderById = async (req, res) => {
     try {
         const orderId = req.params.id;
         const userId = req.user.id;
@@ -296,7 +296,7 @@ const getOrderById = async (req, res) => {
 };
 
 // Update order status
-const updateOrderStatus = async (req, res) => {
+export const updateOrderStatus = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -377,7 +377,7 @@ const updateOrderStatus = async (req, res) => {
 };
 
 // Cancel order (by user)
-const cancelOrder = async (req, res) => {
+export const cancelOrder = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -446,13 +446,4 @@ const cancelOrder = async (req, res) => {
         console.error('Error cancelling order:', error);
         res.status(500).json({ message: 'Failed to cancel order', error: error.message });
     }
-};
-
-module.exports = {
-    createOrder,
-    getAllOrders,
-    getUserOrders,
-    getOrderById,
-    updateOrderStatus,
-    cancelOrder
 }; 

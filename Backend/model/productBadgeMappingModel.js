@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const ProductBadgeMapping = sequelize.define('ProductBadgeMapping', {
     id: {
@@ -28,4 +28,4 @@ const ProductBadgeMapping = sequelize.define('ProductBadgeMapping', {
     timestamps: true
 });
 
-module.exports = ProductBadgeMapping; 
+export default ProductBadgeMapping; 

@@ -1,10 +1,10 @@
-const ReviewReport = require('../model/reviewReportModel');
-const Review = require('../model/reviewModel');
-const User = require('../model/userModel');
-const Product = require('../model/productModel');
+import ReviewReport from '../model/reviewReportModel.js';
+import Review from '../model/reviewModel.js';
+import User from '../model/userModel.js';
+import Product from '../model/productModel.js';
 
 // Report a review
-const reportReview = async (req, res) => {
+export const reportReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
         const { reason, details } = req.body;
@@ -57,7 +57,7 @@ const reportReview = async (req, res) => {
 };
 
 // Get all reports (admin only)
-const getAllReports = async (req, res) => {
+export const getAllReports = async (req, res) => {
     try {
         const { page = 1, limit = 20, status } = req.query;
 
@@ -116,7 +116,7 @@ const getAllReports = async (req, res) => {
 };
 
 // Get reports for a specific review (admin only)
-const getReviewReports = async (req, res) => {
+export const getReviewReports = async (req, res) => {
     try {
         const { reviewId } = req.params;
         const { page = 1, limit = 20, status } = req.query;
@@ -167,7 +167,7 @@ const getReviewReports = async (req, res) => {
 };
 
 // Update report status (admin only)
-const updateReportStatus = async (req, res) => {
+export const updateReportStatus = async (req, res) => {
     try {
         const { reportId } = req.params;
         const { status, admin_notes } = req.body;
@@ -201,11 +201,4 @@ const updateReportStatus = async (req, res) => {
         console.error('Error updating report status:', error);
         res.status(500).json({ message: 'Failed to update report status', error: error.message });
     }
-};
-
-module.exports = {
-    reportReview,
-    getAllReports,
-    getReviewReports,
-    updateReportStatus
 }; 

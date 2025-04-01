@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const ProductVariation = sequelize.define('ProductVariation', {
     id: {
@@ -38,4 +38,4 @@ const ProductVariation = sequelize.define('ProductVariation', {
     timestamps: true
 });
 
-module.exports = ProductVariation; 
+export default ProductVariation; // Use export default 

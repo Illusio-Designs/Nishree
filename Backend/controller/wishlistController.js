@@ -1,7 +1,7 @@
-const { Wishlist, Product, ProductImage } = require('../model/associations');
+import { Wishlist, Product, ProductImage } from '../model/associations.js';
 
 // Add product to wishlist
-exports.addToWishlist = async (req, res) => {
+export const addToWishlist = async (req, res) => {
     try {
         const { productId } = req.body;
         const userId = req.user.id; // From auth middleware
@@ -47,7 +47,7 @@ exports.addToWishlist = async (req, res) => {
 };
 
 // Get user's wishlist
-exports.getWishlist = async (req, res) => {
+export const getWishlist = async (req, res) => {
     try {
         const userId = req.user.id; // From auth middleware
 
@@ -85,7 +85,7 @@ exports.getWishlist = async (req, res) => {
 };
 
 // Check if a product is in the user's wishlist
-exports.checkWishlist = async (req, res) => {
+export const checkWishlist = async (req, res) => {
     try {
         const { productId } = req.params;
         const userId = req.user.id; // From auth middleware
@@ -111,7 +111,7 @@ exports.checkWishlist = async (req, res) => {
 };
 
 // Remove product from wishlist
-exports.removeFromWishlist = async (req, res) => {
+export const removeFromWishlist = async (req, res) => {
     try {
         const { productId } = req.params;
         const userId = req.user.id; // From auth middleware
@@ -144,7 +144,7 @@ exports.removeFromWishlist = async (req, res) => {
 };
 
 // Clear entire wishlist
-exports.clearWishlist = async (req, res) => {
+export const clearWishlist = async (req, res) => {
     try {
         const userId = req.user.id; // From auth middleware
 

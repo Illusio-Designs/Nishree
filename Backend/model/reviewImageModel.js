@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const ReviewImage = sequelize.define('ReviewImage', {
     id: {
@@ -41,4 +41,4 @@ const ReviewImage = sequelize.define('ReviewImage', {
     ]
 });
 
-module.exports = ReviewImage; 
+export default ReviewImage; // Use export default 

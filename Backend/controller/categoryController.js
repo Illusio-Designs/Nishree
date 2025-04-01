@@ -1,12 +1,11 @@
-const Category = require('../model/categoryModel');
-const { v4: uuidv4 } = require('uuid');
-const path = require('path');
-const fs = require('fs').promises;
-const fsSync = require('fs');
-const { Op } = require('sequelize');
-const sequelize = require('sequelize');
-const ImageHandler = require('../utils/imageHandler');
-const createUploadMiddleware = require('../middleware/uploadMiddleware');
+import Category from '../model/categoryModel.js';
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import fs from 'fs/promises';
+import fsSync from 'fs';
+import { Op } from 'sequelize';
+import ImageHandler from '../utils/imageHandler.js';
+import createUploadMiddleware from '../middleware/uploadMiddleware.js';
 
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/category'));
@@ -122,7 +121,7 @@ const getCategoryByName = async (req, res) => {
         const category = await Category.findOne({
             where: {
                 name: {
-                    [sequelize.Op.iLike]: name // Case-insensitive search
+                    [Op.iLike]: name // Case-insensitive search
                 }
             },
             include: [{
@@ -261,7 +260,7 @@ const deleteCategory = async (req, res) => {
     }
 };
 
-module.exports = {
+export {
     createCategory,
     getAllCategories,
     getCategoryByName,

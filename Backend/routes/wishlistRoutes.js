@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { isAuthenticated } from '../middleware/auth.js';
+import wishlistController from '../controller/wishlistController.js';
+
 const router = express.Router();
-const { isAuthenticated } = require('../middleware/auth');
-const wishlistController = require('../controller/wishlistController');
 
 // All wishlist routes are protected and require authentication
 
@@ -20,4 +21,4 @@ router.delete('/:productId', isAuthenticated, wishlistController.removeFromWishl
 // Clear entire wishlist
 router.delete('/', isAuthenticated, wishlistController.clearWishlist);
 
-module.exports = router; 
+export default router; 

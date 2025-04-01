@@ -1,7 +1,7 @@
-const SEOMetadata = require('../model/seoMetadataModel');
+import SEOMetadata from '../model/seoMetadataModel.js';
 
 // Initialize default SEO data for pages
-const initializeSEOData = async () => {
+export const initializeSEOData = async () => {
     try {
         const defaultPages = [
             { 
@@ -54,7 +54,7 @@ const initializeSEOData = async () => {
 };
 
 // Get SEO data for a specific page
-const getSEOData = async (req, res) => {
+export const getSEOData = async (req, res) => {
     try {
         const { page_name } = req.query;
         
@@ -78,7 +78,7 @@ const getSEOData = async (req, res) => {
 };
 
 // Get all SEO data
-const getAllSEOData = async (req, res) => {
+export const getAllSEOData = async (req, res) => {
     try {
         const allSEOData = await SEOMetadata.findAll({
             order: [['page_name', 'ASC']]
@@ -92,7 +92,7 @@ const getAllSEOData = async (req, res) => {
 };
 
 // Update SEO data for a page
-const updateSEOData = async (req, res) => {
+export const updateSEOData = async (req, res) => {
     try {
         const { 
             page_name, 
@@ -138,7 +138,7 @@ const updateSEOData = async (req, res) => {
 };
 
 // Create new SEO entry for a page
-const createSEOData = async (req, res) => {
+export const createSEOData = async (req, res) => {
     try {
         const { 
             page_name, 
@@ -182,7 +182,7 @@ const createSEOData = async (req, res) => {
 };
 
 // Delete SEO data for a page
-const deleteSEOData = async (req, res) => {
+export const deleteSEOData = async (req, res) => {
     try {
         const { page_name } = req.params;
         
@@ -208,13 +208,4 @@ const deleteSEOData = async (req, res) => {
         console.error('Error deleting SEO data:', error);
         res.status(500).json({ message: 'Failed to delete SEO data', error: error.message });
     }
-};
-
-module.exports = {
-    initializeSEOData,
-    getSEOData,
-    getAllSEOData,
-    updateSEOData,
-    createSEOData,
-    deleteSEOData
 }; 

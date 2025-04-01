@@ -1,12 +1,13 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from 'express';
+import { 
     processPayment,
     getPaymentStatus,
     processRefund,
     getAllPayments
-} = require('../controller/paymentController');
-const { isAuthenticated, isAdmin } = require('../middleware/auth');
+} from '../controller/paymentController.js';
+import { isAuthenticated, isAdmin } from '../middleware/auth.js';
+
+const router = express.Router();
 
 // User routes - require authentication
 router.post('/', isAuthenticated, processPayment);
@@ -16,4 +17,4 @@ router.get('/order/:orderId', isAuthenticated, getPaymentStatus);
 router.post('/refund', isAuthenticated, isAdmin, processRefund);
 router.get('/admin', isAuthenticated, isAdmin, getAllPayments);
 
-module.exports = router; 
+export default router; 

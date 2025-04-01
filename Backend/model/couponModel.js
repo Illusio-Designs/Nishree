@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const Coupon = sequelize.define('Coupon', {
     id: {
@@ -63,4 +63,4 @@ const Coupon = sequelize.define('Coupon', {
     ]
 });
 
-module.exports = Coupon; 
+export default Coupon; // Use export default 

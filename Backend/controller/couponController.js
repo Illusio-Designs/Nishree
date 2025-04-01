@@ -1,8 +1,8 @@
-const { Coupon } = require('../model/associations');
-const { Op } = require('sequelize');
+import { Coupon } from '../model/associations.js';
+import { Op } from 'sequelize';
 
 // Create a new coupon
-exports.createCoupon = async (req, res) => {
+export const createCoupon = async (req, res) => {
     try {
         const {
             code,
@@ -90,7 +90,7 @@ exports.createCoupon = async (req, res) => {
 };
 
 // Get all coupons
-exports.getAllCoupons = async (req, res) => {
+export const getAllCoupons = async (req, res) => {
     try {
         const coupons = await Coupon.findAll();
 
@@ -108,7 +108,7 @@ exports.getAllCoupons = async (req, res) => {
 };
 
 // Get a single coupon by ID
-exports.getCouponById = async (req, res) => {
+export const getCouponById = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -128,7 +128,7 @@ exports.getCouponById = async (req, res) => {
 };
 
 // Validate a coupon
-exports.validateCoupon = async (req, res) => {
+export const validateCoupon = async (req, res) => {
     try {
         const { code, orderAmount } = req.body;
 
@@ -190,7 +190,7 @@ exports.validateCoupon = async (req, res) => {
 };
 
 // Apply a coupon (increment used count)
-exports.applyCoupon = async (req, res) => {
+export const applyCoupon = async (req, res) => {
     try {
         const { code } = req.body;
 
@@ -236,7 +236,7 @@ exports.applyCoupon = async (req, res) => {
 };
 
 // Update a coupon
-exports.updateCoupon = async (req, res) => {
+export const updateCoupon = async (req, res) => {
     try {
         const { id } = req.params;
         const {
@@ -337,7 +337,7 @@ exports.updateCoupon = async (req, res) => {
 };
 
 // Delete a coupon
-exports.deleteCoupon = async (req, res) => {
+export const deleteCoupon = async (req, res) => {
     try {
         const { id } = req.params;
 

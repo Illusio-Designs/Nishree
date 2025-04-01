@@ -1,8 +1,8 @@
-const ShippingFee = require('../model/shippingFeeModel');
-const sequelize = require('../config/db');
+import ShippingFee from '../model/shippingFeeModel.js';
+import sequelize from '../config/db.js';
 
 // Get all shipping fees
-const getAllShippingFees = async (req, res) => {
+export const getAllShippingFees = async (req, res) => {
     try {
         const shippingFees = await ShippingFee.findAll();
         res.json({ shippingFees });
@@ -13,7 +13,7 @@ const getAllShippingFees = async (req, res) => {
 };
 
 // Create or update shipping fee
-const createOrUpdateShippingFee = async (req, res) => {
+export const createOrUpdateShippingFee = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -62,7 +62,7 @@ const createOrUpdateShippingFee = async (req, res) => {
 };
 
 // Get shipping fee by order type
-const getShippingFeeByType = async (req, res) => {
+export const getShippingFeeByType = async (req, res) => {
     try {
         const orderType = req.params.type;
         
@@ -82,7 +82,7 @@ const getShippingFeeByType = async (req, res) => {
 };
 
 // Delete shipping fee
-const deleteShippingFee = async (req, res) => {
+export const deleteShippingFee = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -103,11 +103,4 @@ const deleteShippingFee = async (req, res) => {
         console.error('Error deleting shipping fee:', error);
         res.status(500).json({ message: 'Failed to delete shipping fee', error: error.message });
     }
-};
-
-module.exports = {
-    getAllShippingFees,
-    createOrUpdateShippingFee,
-    getShippingFeeByType,
-    deleteShippingFee
 }; 

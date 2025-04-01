@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
 const Review = sequelize.define('Review', {
     id: {
@@ -72,20 +72,8 @@ const Review = sequelize.define('Review', {
         },
         {
             fields: ['product_id']
-        },
-        {
-            fields: ['order_id']
-        },
-        {
-            fields: ['status']
-        },
-        {
-            fields: ['verified_purchase']
-        },
-        {
-            fields: ['is_featured']
         }
     ]
 });
 
-module.exports = Review; 
+export default Review; // Use export default 
