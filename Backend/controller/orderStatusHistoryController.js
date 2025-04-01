@@ -1,7 +1,7 @@
-import OrderStatusHistory from '../model/orderStatusHistoryModel.js';
-import Order from '../model/orderModel.js';
+import { OrderStatusHistory } from '../model/orderStatusHistoryModel.js';
+import { Order } from '../model/orderModel.js';
 import { Op } from 'sequelize';
-import sequelize from '../config/db.js';
+import { sequelize } from '../config/db.js';
 
 // Get status history for an order
 export const getOrderStatusHistory = async (req, res) => {

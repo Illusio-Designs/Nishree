@@ -1,13 +1,13 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ProductSEO = sequelize.define('ProductSEO', {
+export const ProductSEO = sequelize.define('ProductSEO', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    productId: {
+    product_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         unique: true,
@@ -16,37 +16,38 @@ const ProductSEO = sequelize.define('ProductSEO', {
             key: 'id'
         }
     },
-    metaTitle: {
+    meta_title: {
         type: DataTypes.STRING,
         allowNull: true
     },
-    metaDescription: {
+    meta_description: {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    metaKeywords: {
+    meta_keywords: {
         type: DataTypes.STRING,
         allowNull: true
     },
-    ogTitle: {
+    og_title: {
         type: DataTypes.STRING,
         allowNull: true
     },
-    ogDescription: {
+    og_description: {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    ogImage: {
+    og_image: {
         type: DataTypes.STRING,
         allowNull: true
     }
 }, {
     tableName: 'product_seo',
     timestamps: true,
+    underscored: true, // Use underscored naming convention
     indexes: [
       {
         unique: true,
-        fields: ['productId']
+        fields: ['product_id']
       }
     ]
 });

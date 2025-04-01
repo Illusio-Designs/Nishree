@@ -16,6 +16,7 @@ import paymentRoutes from './paymentRoutes.js';
 import shippingFeeRoutes from './shippingFeeRoutes.js';
 import orderStatusHistoryRoutes from './orderStatusHistoryRoutes.js';
 import seoRoutes from './seoRoutes.js';
+import settingsRoutes from './settingsRoutes.js';
 
 // Core Routes
 router.use('/users', userRoutes);
@@ -33,6 +34,7 @@ router.use('/payments', paymentRoutes);
 router.use('/shipping-fees', shippingFeeRoutes);
 router.use('/order-status', orderStatusHistoryRoutes);
 router.use('/seo', seoRoutes);
+router.use('/settings', settingsRoutes);
 
 // Health Check Route
 router.get('/health', (req, res) => {

@@ -1,16 +1,11 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const Order = sequelize.define('Order', {
+export const Order = sequelize.define('Order', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
-    },
-    order_number: {
-        type: DataTypes.STRING(20),
-        allowNull: false,
-        unique: true
     },
     user_id: {
         type: DataTypes.INTEGER,
@@ -20,10 +15,14 @@ const Order = sequelize.define('Order', {
             key: 'id'
         }
     },
+    order_number: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
     total_amount: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 0.00
+        allowNull: false
     },
     shipping_fee: {
         type: DataTypes.DECIMAL(10, 2),
@@ -32,8 +31,7 @@ const Order = sequelize.define('Order', {
     },
     final_amount: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 0.00
+        allowNull: false
     },
     payment_type: {
         type: DataTypes.ENUM('cod', 'credit_card', 'debit_card', 'upi', 'wallet'),
@@ -41,21 +39,11 @@ const Order = sequelize.define('Order', {
     },
     payment_status: {
         type: DataTypes.ENUM('pending', 'paid', 'failed', 'refunded'),
-        allowNull: false,
         defaultValue: 'pending'
     },
     status: {
         type: DataTypes.ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled'),
-        allowNull: false,
         defaultValue: 'pending'
-    },
-    tracking_number: {
-        type: DataTypes.STRING(50),
-        allowNull: true
-    },
-    courier_service: {
-        type: DataTypes.STRING(100),
-        allowNull: true
     },
     notes: {
         type: DataTypes.TEXT,
@@ -66,21 +54,21 @@ const Order = sequelize.define('Order', {
     timestamps: true, // This will add createdAt and updatedAt fields
     charset: 'utf8mb4',
     collate: 'utf8mb4_general_ci',
+    underscored: true,
     indexes: [
+        {
+            fields: ['user_id']
+        },
         {
             unique: true,
             fields: ['order_number']
         },
         {
-            fields: ['user_id']
+            fields: ['status']
+        },
+        {
+            fields: ['payment_status']
         }
-        // Consider removing unique constraints on status and payment_status
-        // {
-        //     fields: ['status']
-        // },
-        // {
-        //     fields: ['payment_status']
-        // }
     ]
 });
 

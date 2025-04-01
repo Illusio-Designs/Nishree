@@ -1,5 +1,5 @@
-import ShippingFee from '../model/shippingFeeModel.js';
-import sequelize from '../config/db.js';
+import { ShippingFee } from '../model/shippingFeeModel.js';
+import { sequelize } from '../config/db.js';
 
 // Get all shipping fees
 export const getAllShippingFees = async (req, res) => {

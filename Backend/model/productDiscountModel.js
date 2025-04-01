@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ProductDiscount = sequelize.define('ProductDiscount', {
+export const ProductDiscount = sequelize.define('ProductDiscount', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -15,11 +15,12 @@ const ProductDiscount = sequelize.define('ProductDiscount', {
             key: 'id'
         }
     },
-    discountType: {
+    type: {
         type: DataTypes.ENUM('percentage', 'fixed'),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 'percentage'
     },
-    discountValue: {
+    value: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },
@@ -31,15 +32,31 @@ const ProductDiscount = sequelize.define('ProductDiscount', {
         type: DataTypes.DATE,
         allowNull: false
     },
+    minPurchase: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
+    maxDiscount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
     status: {
-        type: DataTypes.ENUM('active', 'inactive'),
+        type: DataTypes.ENUM('active', 'inactive', 'expired'),
         defaultValue: 'active'
     }
 }, {
     tableName: 'product_discounts',
     timestamps: true,
     charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci'
+    collate: 'utf8mb4_general_ci',
+    indexes: [
+        {
+            fields: ['productId']
+        },
+        {
+            fields: ['startDate', 'endDate']
+        }
+    ]
 });
 
 export default ProductDiscount; // Use export default 

@@ -1,39 +1,70 @@
-// Import all models
-import User from './userModel.js';
-import Category from './categoryModel.js';
-import Slider from './sliderModel.js';
-import Product from './productModel.js';
-import ProductVariation from './productVariationModel.js';
-import Attribute from './attributeModel.js';
-import AttributeValue from './attributeValueModel.js';
-import ProductVariationAttribute from './productVariationAttributeModel.js';
-import ProductImage from './productImageModel.js';
-import ProductSEO from './productSEOModel.js';
-import ProductBadge from './productBadgeModel.js';
-import ProductBadgeMapping from './productBadgeMappingModel.js';
-import ProductDiscount from './productDiscountModel.js';
-import Coupon from './couponModel.js';
-import Wishlist from './wishlistModel.js';
+// Import models
+import { User } from './userModel.js';
+import { Category } from './categoryModel.js';
+import { Slider } from './sliderModel.js';
+import { Product } from './productModel.js';
+import { ProductVariation } from './productVariationModel.js';
+import { Attribute } from './attributeModel.js';
+import { AttributeValue } from './attributeValueModel.js';
+import { ProductVariationAttribute } from './productVariationAttributeModel.js';
+import { ProductImage } from './productImageModel.js';
+import { ProductSEO } from './productSEOModel.js';
+import { ProductBadge } from './productBadgeModel.js';
+import { ProductBadgeMapping } from './productBadgeMappingModel.js';
+import { ProductDiscount } from './productDiscountModel.js';
+import { Coupon } from './couponModel.js';
+import { Wishlist } from './wishlistModel.js';
+import { Cart } from './cartModel.js';
+import { CartItem } from './cartItemModel.js';
+import { Order } from './orderModel.js';
+import { OrderItem } from './orderItemModel.js';
+import { ShippingAddress } from './shippingAddressModel.js';
+import { ShippingFee } from './shippingFeeModel.js';
+import { OrderStatusHistory } from './orderStatusHistoryModel.js';
+import { Payment } from './paymentModel.js';
+import { Settings } from './settingsModel.js';
+import { Review } from './reviewModel.js';
+import { ReviewImage } from './reviewImageModel.js';
+import { ReviewLike } from './reviewLikeModel.js';
+import { ReviewComment } from './reviewCommentModel.js';
+import { ReviewReport } from './reviewReportModel.js';
 
-// Order management models
-import Order from './orderModel.js';
-import OrderItem from './orderItemModel.js';
-import ShippingAddress from './shippingAddressModel.js';
-import ShippingFee from './shippingFeeModel.js';
-import OrderStatusHistory from './orderStatusHistoryModel.js';
-import Payment from './paymentModel.js';
-
-// Review system models
-import Review from './reviewModel.js';
-import ReviewImage from './reviewImageModel.js';
-import ReviewLike from './reviewLikeModel.js';
-import ReviewComment from './reviewCommentModel.js';
-import ReviewReport from './reviewReportModel.js';
+// Export all models
+export {
+    User,
+    Category,
+    Slider,
+    Product,
+    ProductVariation,
+    Attribute,
+    AttributeValue,
+    ProductVariationAttribute,
+    ProductImage,
+    ProductSEO,
+    ProductBadge,
+    ProductBadgeMapping,
+    ProductDiscount,
+    Coupon,
+    Wishlist,
+    Cart,
+    CartItem,
+    Order,
+    OrderItem,
+    ShippingAddress,
+    ShippingFee,
+    OrderStatusHistory,
+    Payment,
+    Settings,
+    Review,
+    ReviewImage,
+    ReviewLike,
+    ReviewComment,
+    ReviewReport
+};
 
 // Add explicit constraint for featured_review_id to fix foreign key issue
 // Wrap in try-catch to prevent errors during initialization
 try {
-    const { sequelize } = require('../config/db.js');
     sequelize.query(`
         ALTER TABLE products 
         ADD CONSTRAINT fk_products_featured_review 
@@ -305,32 +336,3 @@ ReviewReport.belongsTo(User, {
     foreignKey: 'user_id',
     onDelete: 'SET NULL'
 });
-
-export {
-    User,
-    Category,
-    Slider,
-    Product,
-    ProductVariation,
-    Attribute,
-    AttributeValue,
-    ProductVariationAttribute,
-    ProductImage,
-    ProductSEO,
-    ProductBadge,
-    ProductBadgeMapping,
-    ProductDiscount,
-    Coupon,
-    Wishlist,
-    Order,
-    OrderItem,
-    ShippingAddress,
-    ShippingFee,
-    OrderStatusHistory,
-    Payment,
-    Review,
-    ReviewImage,
-    ReviewLike,
-    ReviewComment,
-    ReviewReport
-};

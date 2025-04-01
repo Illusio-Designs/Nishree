@@ -6,7 +6,7 @@ import {
     createSEOData, 
     deleteSEOData 
 } from '../controller/seoController.js';
-import { isAuthenticated, authorize } from '../middleware/auth.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

@@ -1,21 +1,31 @@
 import express from 'express';
-import { isAuthenticated, authorize } from '../middleware/auth.js';
-import {
+import { 
     createProduct,
     getAllProducts,
-    getProductById,
+    getProduct,
     updateProduct,
     deleteProduct,
-    upload
+    getProductsByCategory,
+    searchProducts,
+    getFeaturedProducts,
+    getNewArrivals,
+    getBestSellers
 } from '../controller/productController.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
+import { upload } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
 // Public routes
 router.get('/', getAllProducts);
-router.get('/:id', getProductById);
+router.get('/search', searchProducts);
+router.get('/featured', getFeaturedProducts);
+router.get('/new-arrivals', getNewArrivals);
+router.get('/best-sellers', getBestSellers);
+router.get('/category/:categoryId', getProductsByCategory);
+router.get('/:id', getProduct);
 
-// Protected routes (admin only)
+// Admin routes
 router.post('/', isAuthenticated, authorize(['admin']), upload.array('images', 5), createProduct);
 router.put('/:id', isAuthenticated, authorize(['admin']), upload.array('images', 5), updateProduct);
 router.delete('/:id', isAuthenticated, authorize(['admin']), deleteProduct);

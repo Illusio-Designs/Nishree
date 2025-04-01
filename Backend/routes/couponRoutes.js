@@ -1,30 +1,24 @@
 import express from 'express';
-import { isAuthenticated, isAdmin } from '../middleware/auth.js';
-import couponController from '../controller/couponController.js';
+import { 
+    createCoupon,
+    getAllCoupons,
+    getCoupon,
+    updateCoupon,
+    deleteCoupon,
+    validateCoupon
+} from '../controller/couponController.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Admin routes (protected)
-// Create a new coupon
-router.post('/', isAuthenticated, isAdmin, couponController.createCoupon);
+// Public routes
+router.post('/validate', validateCoupon);
 
-// Get all coupons
-router.get('/', isAuthenticated, isAdmin, couponController.getAllCoupons);
-
-// Get a single coupon by ID
-router.get('/:id', isAuthenticated, isAdmin, couponController.getCouponById);
-
-// Update a coupon
-router.put('/:id', isAuthenticated, isAdmin, couponController.updateCoupon);
-
-// Delete a coupon
-router.delete('/:id', isAuthenticated, isAdmin, couponController.deleteCoupon);
-
-// Public/User routes
-// Validate a coupon
-router.post('/validate', isAuthenticated, couponController.validateCoupon);
-
-// Apply a coupon (increment used count)
-router.post('/apply', isAuthenticated, couponController.applyCoupon);
+// Admin routes
+router.post('/', isAuthenticated, authorize(['admin']), createCoupon);
+router.get('/', isAuthenticated, authorize(['admin']), getAllCoupons);
+router.get('/:id', isAuthenticated, authorize(['admin']), getCoupon);
+router.put('/:id', isAuthenticated, authorize(['admin']), updateCoupon);
+router.delete('/:id', isAuthenticated, authorize(['admin']), deleteCoupon);
 
 export default router; 

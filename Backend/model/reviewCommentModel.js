@@ -1,13 +1,13 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ReviewComment = sequelize.define('ReviewComment', {
+export const ReviewComment = sequelize.define('ReviewComment', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    review_id: {
+    reviewId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -15,7 +15,7 @@ const ReviewComment = sequelize.define('ReviewComment', {
             key: 'id'
         }
     },
-    user_id: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -40,12 +40,10 @@ const ReviewComment = sequelize.define('ReviewComment', {
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            fields: ['review_id']
+            fields: ['reviewId']
         },
         {
-            fields: ['user_id']
+            fields: ['userId']
         }
     ]
-});
-
-export default ReviewComment; // Use export default 
+}); 

@@ -1,24 +1,30 @@
 import express from 'express';
-import { isAuthenticated } from '../middleware/auth.js';
-import wishlistController from '../controller/wishlistController.js';
+import { isAuthenticated } from '../middleware/authMiddleware.js';
+import { 
+    getWishlist,
+    addToWishlist,
+    removeFromWishlist,
+    clearWishlist,
+    moveToCart
+} from '../controller/wishlistController.js';
 
 const router = express.Router();
 
 // All wishlist routes are protected and require authentication
 
-// Add product to wishlist
-router.post('/', isAuthenticated, wishlistController.addToWishlist);
-
 // Get user's wishlist
-router.get('/', isAuthenticated, wishlistController.getWishlist);
+router.get('/', isAuthenticated, getWishlist);
 
-// Check if a product is in the user's wishlist
-router.get('/check/:productId', isAuthenticated, wishlistController.checkWishlist);
+// Add product to wishlist
+router.post('/add/:productId', isAuthenticated, addToWishlist);
 
 // Remove product from wishlist
-router.delete('/:productId', isAuthenticated, wishlistController.removeFromWishlist);
+router.delete('/remove/:productId', isAuthenticated, removeFromWishlist);
 
 // Clear entire wishlist
-router.delete('/', isAuthenticated, wishlistController.clearWishlist);
+router.delete('/clear', isAuthenticated, clearWishlist);
+
+// Move product to cart
+router.post('/move-to-cart/:productId', isAuthenticated, moveToCart);
 
 export default router; 

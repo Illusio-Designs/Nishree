@@ -1,16 +1,24 @@
 // index.js
-import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
+import { sequelize, connectDB, syncDatabase } from './config/db.js';
+import routesManager from './routes/routesManager.js';
+import passport from './config/passport.js';
 import session from 'express-session';
-import passport from 'passport';
-import { sequelize, testConnection, syncModels } from './config/db.js';
-import './config/passport.js'; // Changed to import
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import settingsRoutes from './routes/settingsRoutes.js';
+
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Import routes - convert to ES module imports
-import routes from './routes/routesManager.js';
-
-// Import integration routes
 import googleAnalyticsRouter from './integration/googleAnalytics.js';
 import facebookPixelRouter from './integration/facebookPixel.js';
 import facebookCatalogRouter from './integration/facebookCatalog.js';
@@ -23,67 +31,62 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(morgan('dev'));
 
 // Session configuration
-app.use(session({ 
-    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'your-fallback-secret',
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
+    saveUninitialized: false
 }));
 
 // Initialize Passport and restore authentication state from session
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static('uploads'));
+// Serve static files
+app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 // Mount all routes under /api
-app.use('/api', routes);
+app.use('/api', routesManager);
 
 // Use the routes
 app.use('/api/google-analytics', googleAnalyticsRouter);
 app.use('/api/facebook-pixel', facebookPixelRouter);
 app.use('/api/facebook-catalog', facebookCatalogRouter);
 app.use('/api/dashboard', dashboardAnalyticsRouter);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({
+        success: false,
         message: 'Something went wrong!',
-        error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
 });
 
-// Initialize database and start server
+// Start server
+const PORT = process.env.PORT || 5000;
+
 const startServer = async () => {
     try {
-        // Test database connection
-        const isConnected = await testConnection();
-        if (!isConnected) {
-            throw new Error('Failed to connect to database');
-        }
+        // Connect to database
+        await connectDB();
+        
+        // Sync database models with force option
+        await syncDatabase(true);
 
-        // Try to sync models
-        const isSynced = await syncModels();
-        if (!isSynced) {
-            console.warn('Warning: Database models could not be fully synchronized.');
-            console.warn('Some features may be limited. Please check your database configuration.');
-        }
-
-        // Start the server
-        const PORT = process.env.PORT || 5001;
+        // Start listening
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
         });
@@ -93,4 +96,9 @@ const startServer = async () => {
     }
 };
 
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+    startServer();
+}
+
+export { app };
+export default app;

@@ -2,14 +2,19 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import passport from 'passport';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
-import User from '../model/userModel.js';
+import { User } from '../model/userModel.js';
 import nodemailer from 'nodemailer';
 import ImageHandler from '../utils/imageHandler.js';
 import createUploadMiddleware from '../middleware/uploadMiddleware.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// Get directory name for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/user'));
@@ -361,15 +366,65 @@ export const deleteUser = async (req, res) => {
 export const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll({
-            attributes: { exclude: ['password', 'resetToken', 'resetTokenExpiry'] }
+            attributes: { exclude: ['password'] }
         });
-
-        // Add image URLs to all user responses
-        const usersWithImages = users.map(user => addImageUrlToResponse(user.toJSON()));
-        
-        res.json(usersWithImages);
+        res.json(users);
     } catch (error) {
         console.error('Get all users error:', error);
-        res.status(500).json({ message: 'Failed to get users', error: error.message });
+        res.status(500).json({ message: 'Error getting users' });
     }
 };
+
+// Get user profile
+export const getProfile = async (req, res) => {
+    try {
+        const user = await User.findByPk(req.user.id, {
+            attributes: { exclude: ['password'] }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({ message: 'Error getting profile' });
+    }
+};
+
+// Update user profile
+export const updateProfile = async (req, res) => {
+    try {
+        const { name, username, email } = req.body;
+        const user = await User.findByPk(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update fields
+        user.name = name || user.name;
+        user.username = username || user.username;
+        user.email = email || user.email;
+
+        await user.save();
+
+        res.json({
+            message: 'Profile updated successfully',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ message: 'Error updating profile' });
+    }
+};
+
+export {
+    upload
+}; 

@@ -1,13 +1,13 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const Review = sequelize.define('Review', {
+export const Review = sequelize.define('Review', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    user_id: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -15,7 +15,7 @@ const Review = sequelize.define('Review', {
             key: 'id'
         }
     },
-    product_id: {
+    productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -23,7 +23,7 @@ const Review = sequelize.define('Review', {
             key: 'id'
         }
     },
-    order_id: {
+    orderId: {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
@@ -47,15 +47,15 @@ const Review = sequelize.define('Review', {
         type: DataTypes.ENUM('pending', 'approved', 'rejected'),
         defaultValue: 'pending'
     },
-    verified_purchase: {
+    verifiedPurchase: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
-    is_featured: {
+    isFeatured: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
-    admin_notes: {
+    adminNotes: {
         type: DataTypes.TEXT,
         allowNull: true
     }
@@ -68,12 +68,10 @@ const Review = sequelize.define('Review', {
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            fields: ['user_id']
+            fields: ['userId']
         },
         {
-            fields: ['product_id']
+            fields: ['productId']
         }
     ]
-});
-
-export default Review; // Use export default 
+}); 

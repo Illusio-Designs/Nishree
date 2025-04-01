@@ -1,5 +1,5 @@
 import express from "express";
-import { sequelize } from "../config/db.js";  // Use named import
+import { sequelize } from '../config/db.js';  // Use default import
 
 const router = express.Router();
 

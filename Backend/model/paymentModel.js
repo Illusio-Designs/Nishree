@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
 
-const Payment = sequelize.define('Payment', {
+export const Payment = sequelize.define('Payment', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -28,7 +28,7 @@ const Payment = sequelize.define('Payment', {
         allowNull: false
     },
     transaction_id: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING,
         allowNull: true
     },
     amount_paid: {
@@ -37,26 +37,29 @@ const Payment = sequelize.define('Payment', {
     },
     status: {
         type: DataTypes.ENUM('pending', 'successful', 'failed', 'refunded'),
-        allowNull: false,
         defaultValue: 'pending'
     },
     payment_gateway: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    notes: {
+        type: DataTypes.TEXT,
         allowNull: true
     }
 }, {
     tableName: 'payments',
     timestamps: true,
-    charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci',
+    underscored: true,
     indexes: [
         {
             fields: ['order_id']
         },
         {
             fields: ['user_id']
+        },
+        {
+            fields: ['status']
         }
     ]
-});
-
-export default Payment; // Use export default 
+}); 

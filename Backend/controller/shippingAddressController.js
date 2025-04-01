@@ -1,6 +1,6 @@
-import ShippingAddress from '../model/shippingAddressModel.js';
+import { ShippingAddress } from '../model/shippingAddressModel.js';
 import { Op } from 'sequelize';
-import sequelize from '../config/db.js';
+import { sequelize } from '../config/db.js';
 
 // Create a new shipping address
 export const createShippingAddress = async (req, res) => {

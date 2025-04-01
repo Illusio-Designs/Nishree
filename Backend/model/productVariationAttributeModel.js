@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ProductVariationAttribute = sequelize.define('ProductVariationAttribute', {
+export const ProductVariationAttribute = sequelize.define('ProductVariationAttribute', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -34,6 +34,4 @@ const ProductVariationAttribute = sequelize.define('ProductVariationAttribute', 
 }, {
     tableName: 'product_variation_attributes',
     timestamps: true
-});
-
-export default ProductVariationAttribute; // Use export default 
+}); 

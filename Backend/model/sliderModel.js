@@ -1,50 +1,54 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
 
-const Slider = sequelize.define('Slider', {
+export const Slider = sequelize.define('Slider', {
     id: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        primaryKey: true
     },
     title: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    tagline: {
-        type: DataTypes.STRING,
+    description: {
+        type: DataTypes.TEXT,
         allowNull: true
-    },
-    buttonText: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    categoryId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'categories',
-            key: 'id'
-        }
     },
     image: {
         type: DataTypes.STRING,
+        allowNull: false
+    },
+    link: {
+        type: DataTypes.STRING,
         allowNull: true
+    },
+    position: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
     },
     status: {
         type: DataTypes.ENUM('active', 'inactive'),
         defaultValue: 'active'
     },
-    order: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0
+    startDate: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    endDate: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 }, {
-    tableName: 'sliders',
     timestamps: true,
-    charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci'
+    tableName: 'sliders',
+    indexes: [
+        {
+            fields: ['position']
+        },
+        {
+            fields: ['status']
+        }
+    ]
 });
-
-export default Slider; // Use export default
 

@@ -7,7 +7,7 @@ import {
     deleteShippingAddress,
     setDefaultShippingAddress
 } from '../controller/shippingAddressController.js';
-import { isAuthenticated } from '../middleware/auth.js';
+import { isAuthenticated } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

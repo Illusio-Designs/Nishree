@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const Attribute = sequelize.define('Attribute', {
+export const Attribute = sequelize.define('Attribute', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -11,6 +11,23 @@ const Attribute = sequelize.define('Attribute', {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
+    },
+    type: {
+        type: DataTypes.ENUM('text', 'number', 'select', 'color', 'size'),
+        allowNull: false,
+        defaultValue: 'text'
+    },
+    isRequired: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    displayOrder: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    status: {
+        type: DataTypes.ENUM('active', 'inactive'),
+        defaultValue: 'active'
     }
 }, {
     tableName: 'attributes',

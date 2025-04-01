@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ProductBadge = sequelize.define('ProductBadge', {
+export const ProductBadge = sequelize.define('ProductBadge', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -12,17 +12,25 @@ const ProductBadge = sequelize.define('ProductBadge', {
         allowNull: false,
         unique: true
     },
-    badgeType: {
-        type: DataTypes.STRING,
-        allowNull: false
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: true
     },
-    colorCode: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    iconName: {
+    color: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    icon: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    displayOrder: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    status: {
+        type: DataTypes.ENUM('active', 'inactive'),
+        defaultValue: 'active'
     }
 }, {
     tableName: 'product_badges',

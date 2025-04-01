@@ -1,50 +1,52 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
 
-const Coupon = sequelize.define('Coupon', {
+export const Coupon = sequelize.define('Coupon', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
     code: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING,
         allowNull: false,
         unique: true
     },
-    discount_type: {
-        type: DataTypes.ENUM('percentage', 'fixed_amount'),
-        allowNull: false
+    type: {
+        type: DataTypes.ENUM('percentage', 'fixed'),
+        allowNull: false,
+        defaultValue: 'percentage'
     },
-    discount_value: {
+    value: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },
-    minimum_order_value: {
+    minPurchase: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-        defaultValue: 0.00
+        allowNull: true
     },
-    max_uses: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 1
+    maxDiscount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
     },
-    uses_per_user: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 1
-    },
-    valid_from: {
+    startDate: {
         type: DataTypes.DATE,
         allowNull: false
     },
-    valid_to: {
+    endDate: {
         type: DataTypes.DATE,
         allowNull: false
+    },
+    usageLimit: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    usedCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
     },
     status: {
-        type: DataTypes.ENUM('active', 'expired'),
+        type: DataTypes.ENUM('active', 'inactive', 'expired'),
         defaultValue: 'active'
     }
 }, {
@@ -61,6 +63,4 @@ const Coupon = sequelize.define('Coupon', {
             fields: ['status']
         }
     ]
-});
-
-export default Coupon; // Use export default 
+}); 

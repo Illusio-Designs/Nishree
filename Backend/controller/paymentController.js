@@ -1,7 +1,7 @@
-import Payment from '../model/paymentModel.js';
-import Order from '../model/orderModel.js';
+import { Payment } from '../model/paymentModel.js';
+import { Order } from '../model/orderModel.js';
 import { Op } from 'sequelize';
-import sequelize from '../config/db.js';
+import { sequelize } from '../config/db.js';
 
 // Process a payment
 export const processPayment = async (req, res) => {

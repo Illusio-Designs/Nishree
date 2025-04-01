@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js'; // Use named import
 
-const User = sequelize.define('User', {
+export const User = sequelize.define('User', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -57,5 +57,3 @@ const User = sequelize.define('User', {
         }
     ]
 });
-
-export default User; // Use export default

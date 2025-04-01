@@ -1,9 +1,9 @@
-const ReviewComment = require('../model/reviewCommentModel');
-const Review = require('../model/reviewModel');
-const User = require('../model/userModel');
+import { ReviewComment } from '../model/reviewCommentModel.js';
+import { Review } from '../model/reviewModel.js';
+import { User } from '../model/userModel.js';
 
 // Create a new comment on a review
-const createComment = async (req, res) => {
+export const createComment = async (req, res) => {
     try {
         const { reviewId } = req.params;
         const { comment } = req.body;
@@ -51,7 +51,7 @@ const createComment = async (req, res) => {
 };
 
 // Get all comments for a review
-const getReviewComments = async (req, res) => {
+export const getReviewComments = async (req, res) => {
     try {
         const { reviewId } = req.params;
         const { page = 1, limit = 20, status } = req.query;
@@ -105,7 +105,7 @@ const getReviewComments = async (req, res) => {
 };
 
 // Update a comment
-const updateComment = async (req, res) => {
+export const updateComment = async (req, res) => {
     try {
         const { commentId } = req.params;
         const { comment, status } = req.body;
@@ -153,7 +153,7 @@ const updateComment = async (req, res) => {
 };
 
 // Delete a comment
-const deleteComment = async (req, res) => {
+export const deleteComment = async (req, res) => {
     try {
         const { commentId } = req.params;
         
@@ -180,7 +180,7 @@ const deleteComment = async (req, res) => {
 };
 
 // Moderate a comment (admin only)
-const moderateComment = async (req, res) => {
+export const moderateComment = async (req, res) => {
     try {
         const { commentId } = req.params;
         const { status } = req.body;
@@ -208,12 +208,4 @@ const moderateComment = async (req, res) => {
         console.error('Error moderating comment:', error);
         res.status(500).json({ message: 'Failed to moderate comment', error: error.message });
     }
-};
-
-module.exports = {
-    createComment,
-    getReviewComments,
-    updateComment,
-    deleteComment,
-    moderateComment
 }; 

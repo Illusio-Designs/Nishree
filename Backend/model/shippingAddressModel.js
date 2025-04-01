@@ -1,13 +1,13 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ShippingAddress = sequelize.define('ShippingAddress', {
+export const ShippingAddress = sequelize.define('ShippingAddress', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    user_id: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -27,7 +27,7 @@ const ShippingAddress = sequelize.define('ShippingAddress', {
         type: DataTypes.STRING(100),
         allowNull: false
     },
-    postal_code: {
+    postalCode: {
         type: DataTypes.STRING(20),
         allowNull: false
     },
@@ -35,11 +35,11 @@ const ShippingAddress = sequelize.define('ShippingAddress', {
         type: DataTypes.STRING(100),
         allowNull: false
     },
-    phone_number: {
+    phoneNumber: {
         type: DataTypes.STRING(20),
         allowNull: false
     },
-    is_default: {
+    isDefault: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     }
@@ -50,9 +50,7 @@ const ShippingAddress = sequelize.define('ShippingAddress', {
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            fields: ['user_id']
+            fields: ['userId']
         }
     ]
-});
-
-export default ShippingAddress; // Use export default 
+}); 

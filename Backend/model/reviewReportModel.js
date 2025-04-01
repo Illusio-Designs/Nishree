@@ -1,13 +1,13 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ReviewReport = sequelize.define('ReviewReport', {
+export const ReviewReport = sequelize.define('ReviewReport', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    review_id: {
+    reviewId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -15,7 +15,7 @@ const ReviewReport = sequelize.define('ReviewReport', {
             key: 'id'
         }
     },
-    user_id: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -35,7 +35,7 @@ const ReviewReport = sequelize.define('ReviewReport', {
         type: DataTypes.ENUM('pending', 'resolved', 'rejected'),
         defaultValue: 'pending'
     },
-    admin_notes: {
+    adminNotes: {
         type: DataTypes.TEXT,
         allowNull: true
     }
@@ -48,15 +48,13 @@ const ReviewReport = sequelize.define('ReviewReport', {
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            fields: ['review_id']
+            fields: ['reviewId']
         },
         {
-            fields: ['user_id']
+            fields: ['userId']
         },
         {
             fields: ['status']
         }
     ]
-});
-
-export default ReviewReport; // Use export default 
+}); 

@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
 
-const ProductBadgeMapping = sequelize.define('ProductBadgeMapping', {
+export const ProductBadgeMapping = sequelize.define('ProductBadgeMapping', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -22,10 +22,30 @@ const ProductBadgeMapping = sequelize.define('ProductBadgeMapping', {
             model: 'product_badges',
             key: 'id'
         }
+    },
+    displayOrder: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    startDate: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    endDate: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    status: {
+        type: DataTypes.ENUM('active', 'inactive'),
+        defaultValue: 'active'
     }
 }, {
     tableName: 'product_badge_mappings',
-    timestamps: true
-});
-
-export default ProductBadgeMapping; 
+    timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['productId', 'badgeId']
+        }
+    ]
+}); 

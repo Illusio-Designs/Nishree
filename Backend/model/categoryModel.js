@@ -1,11 +1,12 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
+import slugify from 'slugify';
 
-const Category = sequelize.define('Category', {
+export const Category = sequelize.define('Category', {
     id: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        primaryKey: true
     },
     name: {
         type: DataTypes.STRING,
@@ -13,7 +14,8 @@ const Category = sequelize.define('Category', {
     },
     slug: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     description: {
         type: DataTypes.TEXT,
@@ -35,37 +37,34 @@ const Category = sequelize.define('Category', {
         type: DataTypes.ENUM('active', 'inactive'),
         defaultValue: 'active'
     },
-    seoTitle: {
+    metaTitle: {
         type: DataTypes.STRING,
         allowNull: true
     },
-    seoDescription: {
+    metaDescription: {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    seoKeywords: {
+    metaKeywords: {
         type: DataTypes.STRING,
-        allowNull: true
-    },
-    metaTags: {
-        type: DataTypes.JSON,
         allowNull: true
     }
 }, {
-    tableName: 'categories',
     timestamps: true,
+    tableName: 'categories',
     indexes: [
         {
-            fields: ['parentId']
-        },
-        {
-            fields: ['status']
+            unique: true,
+            fields: ['slug']
         }
     ],
-    charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci'
+    hooks: {
+        beforeValidate: (category) => {
+            if (category.name && !category.slug) {
+                category.slug = slugify(category.name, { lower: true });
+            }
+        }
+    }
 });
 
 // Note: Self-referential relationships are defined in associations.js
-
-export default Category;

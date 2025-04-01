@@ -1,13 +1,13 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ReviewImage = sequelize.define('ReviewImage', {
+export const ReviewImage = sequelize.define('ReviewImage', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    review_id: {
+    reviewId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -15,11 +15,11 @@ const ReviewImage = sequelize.define('ReviewImage', {
             key: 'id'
         }
     },
-    file_name: {
+    fileName: {
         type: DataTypes.STRING(255),
         allowNull: false
     },
-    file_type: {
+    fileType: {
         type: DataTypes.ENUM('image', 'video'),
         allowNull: false,
         defaultValue: 'image'
@@ -33,12 +33,10 @@ const ReviewImage = sequelize.define('ReviewImage', {
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            fields: ['review_id']
+            fields: ['reviewId']
         },
         {
-            fields: ['file_type']
+            fields: ['fileType']
         }
     ]
-});
-
-export default ReviewImage; // Use export default 
+}); 

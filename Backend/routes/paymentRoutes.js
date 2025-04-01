@@ -1,20 +1,24 @@
 import express from 'express';
 import { 
-    processPayment,
+    createPaymentIntent,
+    confirmPayment,
     getPaymentStatus,
-    processRefund,
-    getAllPayments
+    refundPayment,
+    getAllPayments,
+    getUserPayments
 } from '../controller/paymentController.js';
-import { isAuthenticated, isAdmin } from '../middleware/auth.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// User routes - require authentication
-router.post('/', isAuthenticated, processPayment);
-router.get('/order/:orderId', isAuthenticated, getPaymentStatus);
+// Protected routes
+router.post('/create-payment-intent', isAuthenticated, createPaymentIntent);
+router.post('/confirm/:paymentIntentId', isAuthenticated, confirmPayment);
+router.get('/status/:paymentIntentId', isAuthenticated, getPaymentStatus);
+router.get('/my-payments', isAuthenticated, getUserPayments);
 
-// Admin only routes
-router.post('/refund', isAuthenticated, isAdmin, processRefund);
-router.get('/admin', isAuthenticated, isAdmin, getAllPayments);
+// Admin routes
+router.get('/', isAuthenticated, authorize(['admin']), getAllPayments);
+router.post('/refund/:paymentId', isAuthenticated, authorize(['admin']), refundPayment);
 
 export default router; 

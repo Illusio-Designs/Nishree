@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
 
-const OrderStatusHistory = sequelize.define('OrderStatusHistory', {
+export const OrderStatusHistory = sequelize.define('OrderStatusHistory', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -27,27 +27,20 @@ const OrderStatusHistory = sequelize.define('OrderStatusHistory', {
             key: 'id'
         }
     },
-    updated_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
+    notes: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     tableName: 'order_status_history',
-    timestamps: false, // Using updated_at instead
-    charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci',
+    timestamps: true,
+    underscored: true,
     indexes: [
         {
             fields: ['order_id']
         },
         {
-            fields: ['status']
-        },
-        {
             fields: ['updated_by']
         }
     ]
-});
-
-export default OrderStatusHistory; 
+}); 

@@ -1,8 +1,8 @@
-import ReviewLike from '../model/reviewLikeModel.js';
-import Review from '../model/reviewModel.js';
-import User from '../model/userModel.js';
-import ReviewImage from '../model/reviewImageModel.js';
-import Product from '../model/productModel.js';
+import { ReviewLike } from '../model/reviewLikeModel.js';
+import { Review } from '../model/reviewModel.js';
+import { User } from '../model/userModel.js';
+import { ReviewImage } from '../model/reviewImageModel.js';
+import { Product } from '../model/productModel.js';
 import { Op } from 'sequelize';
 
 // Toggle like on a review (like if not liked, unlike if already liked)

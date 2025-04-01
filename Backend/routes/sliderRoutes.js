@@ -1,5 +1,5 @@
 import express from 'express';
-import { isAuthenticated, authorize } from '../middleware/auth.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 import { 
     createSlider, 
     getAllSliders, 

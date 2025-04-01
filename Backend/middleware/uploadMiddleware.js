@@ -1,39 +1,36 @@
 import multer from 'multer';
 import path from 'path';
-import fsSync from 'fs';
+import { fileURLToPath } from 'url';
 
-// Create upload middleware factory
-const createUploadMiddleware = (uploadDir, fieldName = 'image') => {
-    // Configure storage
-    const storage = multer.diskStorage({
-        destination: (req, file, cb) => {
-            if (!fsSync.existsSync(uploadDir)) {
-                fsSync.mkdirSync(uploadDir, { recursive: true });
-            }
-            cb(null, uploadDir);
-        },
-        filename: (req, file, cb) => {
-            cb(null, `temp-${Date.now()}-${file.originalname}`);
-        }
-    });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-    // Configure file filter
-    const fileFilter = (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed!'), false);
-        }
-    };
+// Configure storage
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../uploads/'));
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
 
-    // Create and return the multer instance
-    return multer({ 
-        storage, 
-        fileFilter,
-        limits: {
-            fileSize: 5 * 1024 * 1024 // 5MB limit
-        }
-    });
+// File filter
+const fileFilter = (req, file, cb) => {
+    // Accept images only
+    if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+    } else {
+        cb(new Error('Not an image! Please upload only images.'), false);
+    }
 };
 
-export default createUploadMiddleware; 
+// Create multer upload instance
+export const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    }
+}); 

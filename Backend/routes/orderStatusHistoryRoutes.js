@@ -3,7 +3,7 @@ import {
     getOrderStatusHistory,
     addOrderStatusEntry
 } from '../controller/orderStatusHistoryController.js';
-import { isAuthenticated, isAdmin } from '../middleware/auth.js';
+import { isAuthenticated, isAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

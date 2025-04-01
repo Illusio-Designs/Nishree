@@ -2,14 +2,17 @@
   "name": "nishree-backend",
   "version": "1.0.0",
   "type": "module",
+  "description": "Backend for Nishree e-commerce platform",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch --config jest.config.js",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --config jest.config.js",
     "db:setup": "node scripts/setupDatabase.js",
     "build": "echo \"Building the project...\"",
-    "lint": "eslint .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint ."
   },
   "keywords": [
     "e-commerce",
@@ -23,28 +26,31 @@
   ],
   "author": "Riya Lunagariya",
   "license": "ISC",
-  "description": "An e-commerce platform for seamless online shopping experience.",
   "email": "info@illusiodesigns.agency",
   "website": "https://www.illusiodesigns.agency",
   "dependencies": {
     "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "express-session": "^1.18.1",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.2",
-    "mysql2": "^3.14.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "jsonwebtoken": "^9.0.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.2.0",
     "nodemailer": "^6.10.0",
-    "passport": "^0.7.0",
+    "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
-    "sequelize": "^6.37.7",
+    "sequelize": "^6.31.0",
     "sharp": "^0.33.5",
     "slugify": "^1.6.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
   }
 }

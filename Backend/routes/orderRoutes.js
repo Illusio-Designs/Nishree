@@ -1,24 +1,26 @@
 import express from 'express';
 import { 
-    createOrder, 
-    getAllOrders, 
-    getUserOrders, 
-    getOrderById, 
-    updateOrderStatus, 
-    cancelOrder 
+    createOrder,
+    getAllOrders,
+    getOrder,
+    updateOrderStatus,
+    cancelOrder,
+    getUserOrders,
+    getOrderStats
 } from '../controller/orderController.js';
-import { isAuthenticated, isAdmin } from '../middleware/auth.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Protected routes - require authentication
+// Protected routes
 router.post('/', isAuthenticated, createOrder);
-router.get('/', isAuthenticated, getUserOrders);
-router.get('/:id', isAuthenticated, getOrderById);
+router.get('/my-orders', isAuthenticated, getUserOrders);
+router.get('/:id', isAuthenticated, getOrder);
 router.put('/:id/cancel', isAuthenticated, cancelOrder);
 
-// Admin only routes
-router.get('/admin', isAuthenticated, isAdmin, getAllOrders);
-router.put('/:id/status', isAuthenticated, isAdmin, updateOrderStatus);
+// Admin routes
+router.get('/', isAuthenticated, authorize(['admin']), getAllOrders);
+router.put('/:id/status', isAuthenticated, authorize(['admin']), updateOrderStatus);
+router.get('/stats/overview', isAuthenticated, authorize(['admin']), getOrderStats);
 
 export default router; 

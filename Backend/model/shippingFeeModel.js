@@ -1,13 +1,13 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ShippingFee = sequelize.define('ShippingFee', {
+export const ShippingFee = sequelize.define('ShippingFee', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    order_type: {
+    orderType: {
         type: DataTypes.ENUM('cod', 'prepaid'),
         allowNull: false
     },
@@ -16,12 +16,12 @@ const ShippingFee = sequelize.define('ShippingFee', {
         allowNull: false,
         defaultValue: 0.00
     },
-    weight_based_fee: {
+    weightBasedFee: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0.00
     },
-    location_based_fee: {
+    locationBasedFee: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0.00
@@ -33,9 +33,7 @@ const ShippingFee = sequelize.define('ShippingFee', {
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            fields: ['order_type']
+            fields: ['orderType']
         }
     ]
-});
-
-export default ShippingFee; 
+}); 

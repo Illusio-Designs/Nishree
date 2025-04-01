@@ -5,7 +5,7 @@ import {
     getShippingFeeByType,
     deleteShippingFee
 } from '../controller/shippingFeeController.js';
-import { isAuthenticated, authorize } from '../middleware/auth.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const AttributeValue = sequelize.define('AttributeValue', {
+export const AttributeValue = sequelize.define('AttributeValue', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -18,12 +18,26 @@ const AttributeValue = sequelize.define('AttributeValue', {
     value: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    displayOrder: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    status: {
+        type: DataTypes.ENUM('active', 'inactive'),
+        defaultValue: 'active'
     }
 }, {
     tableName: 'attribute_values',
     timestamps: true,
     charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci'
+    collate: 'utf8mb4_general_ci',
+    indexes: [
+        {
+            unique: true,
+            fields: ['attributeId', 'value']
+        }
+    ]
 });
 
 export default AttributeValue; // Use export default 

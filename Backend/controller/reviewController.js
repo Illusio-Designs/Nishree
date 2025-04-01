@@ -1,20 +1,25 @@
-import Review from '../model/reviewModel.js';
-import ReviewImage from '../model/reviewImageModel.js';
-import ReviewLike from '../model/reviewLikeModel.js';
-import ReviewComment from '../model/reviewCommentModel.js';
-import ReviewReport from '../model/reviewReportModel.js';
-import Product from '../model/productModel.js';
-import Order from '../model/orderModel.js';
-import OrderItem from '../model/orderItemModel.js';
-import User from '../model/userModel.js';
+import { Review } from '../model/reviewModel.js';
+import { ReviewImage } from '../model/reviewImageModel.js';
+import { ReviewLike } from '../model/reviewLikeModel.js';
+import { ReviewComment } from '../model/reviewCommentModel.js';
+import { ReviewReport } from '../model/reviewReportModel.js';
+import { Product } from '../model/productModel.js';
+import { Order } from '../model/orderModel.js';
+import { OrderItem } from '../model/orderItemModel.js';
+import { User } from '../model/userModel.js';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { Op } from 'sequelize';
-import sequelize from '../config/db.js';
+import { sequelize } from '../config/db.js';
 import createUploadMiddleware from '../middleware/uploadMiddleware.js';
 
+// Get directory name for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Initialize upload middleware for review images
-const upload = createUploadMiddleware(
+export const upload = createUploadMiddleware(
     path.join(__dirname, '../uploads/reviews'),
     'reviewMedia',
     { 
@@ -814,12 +819,3 @@ export const deleteReviewImage = async (req, res) => {
     }
 };
 
-export {
-    createReview,
-    getProductReviews,
-    getUserReviews,
-    getReviewById,
-    deleteReview,
-    moderateReview,
-    upload
-}; 

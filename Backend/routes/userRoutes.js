@@ -10,10 +10,12 @@ import {
     updateUser, 
     updatePassword,
     deleteUser,
-    upload,
-    getAllUsers
+    getAllUsers,
+    getProfile,
+    updateProfile
 } from '../controller/userController.js';
-import { isAuthenticated, authorize } from '../middleware/auth.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
+import { upload } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
@@ -52,8 +54,10 @@ router.get('/me', isAuthenticated, getCurrentUser);
 router.put('/update', isAuthenticated, upload.single('profilePic'), updateUser);
 router.put('/update-password', isAuthenticated, updatePassword);
 router.delete('/delete', isAuthenticated, deleteUser);
+router.get('/profile', isAuthenticated, getProfile);
+router.put('/profile', isAuthenticated, updateProfile);
 
 // Admin routes
-router.get('/admin/users', isAuthenticated, authorize(['admin']), getAllUsers);
+router.get('/', isAuthenticated, authorize(['admin']), getAllUsers);
 
 export default router;

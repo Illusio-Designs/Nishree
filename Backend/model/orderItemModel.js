@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
 
-const OrderItem = sequelize.define('OrderItem', {
+export const OrderItem = sequelize.define('OrderItem', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -48,12 +48,17 @@ const OrderItem = sequelize.define('OrderItem', {
     subtotal: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
+    },
+    status: {
+        type: DataTypes.ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'),
+        defaultValue: 'pending'
     }
 }, {
     tableName: 'order_items',
     timestamps: true,
     charset: 'utf8mb4',
     collate: 'utf8mb4_general_ci',
+    underscored: true,
     indexes: [
         {
             fields: ['order_id']
@@ -65,6 +70,4 @@ const OrderItem = sequelize.define('OrderItem', {
             fields: ['variation_id']
         }
     ]
-});
-
-export default OrderItem; // Use export default 
+}); 

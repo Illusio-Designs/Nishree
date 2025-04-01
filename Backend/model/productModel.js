@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
 
-const Product = sequelize.define('Product', {
+export const Product = sequelize.define('Product', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -63,5 +63,3 @@ const Product = sequelize.define('Product', {
         }
     ]
 });
-
-export default Product;

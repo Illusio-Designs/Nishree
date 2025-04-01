@@ -1,7 +1,7 @@
-import ReviewReport from '../model/reviewReportModel.js';
-import Review from '../model/reviewModel.js';
-import User from '../model/userModel.js';
-import Product from '../model/productModel.js';
+import { ReviewReport } from '../model/reviewReportModel.js';
+import { Review } from '../model/reviewModel.js';
+import { User } from '../model/userModel.js';
+import { Product } from '../model/productModel.js';
 
 // Report a review
 export const reportReview = async (req, res) => {

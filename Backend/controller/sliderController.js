@@ -1,11 +1,16 @@
-import Slider from '../model/sliderModel.js';
-import Category from '../model/categoryModel.js';
+import { Slider } from '../model/sliderModel.js';
+import { Category } from '../model/categoryModel.js';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import ImageHandler from '../utils/imageHandler.js';
 import createUploadMiddleware from '../middleware/uploadMiddleware.js';
+
+// Get directory name for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/slider'));
@@ -245,9 +250,5 @@ export const deleteSlider = async (req, res) => {
 };
 
 export {
-    createSlider,
-    getAllSliders,
-    getSliderById,
-    updateSlider,
     upload
 }; 

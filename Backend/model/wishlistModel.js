@@ -1,13 +1,13 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
 
-const Wishlist = sequelize.define('Wishlist', {
+export const Wishlist = sequelize.define('Wishlist', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    user_id: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -15,7 +15,7 @@ const Wishlist = sequelize.define('Wishlist', {
             key: 'id'
         }
     },
-    product_id: {
+    productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -23,22 +23,20 @@ const Wishlist = sequelize.define('Wishlist', {
             key: 'id'
         }
     },
-    created_at: {
+    createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW
     }
 }, {
     tableName: 'wishlists',
-    timestamps: false, // using created_at instead
+    timestamps: false, // using createdAt instead
     charset: 'utf8mb4',
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
             unique: true,
-            fields: ['user_id', 'product_id']
+            fields: ['userId', 'productId']
         }
     ]
 });
-
-export default Wishlist; 

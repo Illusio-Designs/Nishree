@@ -1,14 +1,14 @@
-import Order from '../model/orderModel.js';
-import OrderItem from '../model/orderItemModel.js';
-import OrderStatusHistory from '../model/orderStatusHistoryModel.js';
-import Product from '../model/productModel.js';
-import ProductVariation from '../model/productVariationModel.js';
-import ShippingAddress from '../model/shippingAddressModel.js';
-import ShippingFee from '../model/shippingFeeModel.js';
-import Payment from '../model/paymentModel.js';
-import User from '../model/userModel.js';
+import { Order } from '../model/orderModel.js';
+import { OrderItem } from '../model/orderItemModel.js';
+import { OrderStatusHistory } from '../model/orderStatusHistoryModel.js';
+import { Product } from '../model/productModel.js';
+import { ProductVariation } from '../model/productVariationModel.js';
+import { ShippingAddress } from '../model/shippingAddressModel.js';
+import { ShippingFee } from '../model/shippingFeeModel.js';
+import { Payment } from '../model/paymentModel.js';
+import { User } from '../model/userModel.js';
 import { Op } from 'sequelize';
-import sequelize from '../config/db.js';
+import { sequelize } from '../config/db.js';
 
 // Generate unique order number
 const generateOrderNumber = () => {
