@@ -6,7 +6,7 @@ import fs from 'fs/promises';
 import fsSync from 'fs';
 import { Op } from 'sequelize';
 import ImageHandler from '../utils/imageHandler.js';
-import createUploadMiddleware from '../middleware/uploadMiddleware.js';
+import { upload } from '../middleware/uploadMiddleware.js';
 
 // Get directory name for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -14,9 +14,6 @@ const __dirname = path.dirname(__filename);
 
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/category'));
-
-// Create upload middleware for category images
-const upload = createUploadMiddleware(path.join(__dirname, '../uploads/category'), 'image');
 
 // Helper function to format category response
 const formatCategoryResponse = (category) => {
@@ -118,17 +115,12 @@ const getAllCategories = async (req, res) => {
     }
 };
 
-// Get Category by Name
-const getCategoryByName = async (req, res) => {
+// Get Category by ID
+const getCategory = async (req, res) => {
     try {
-        const { name } = req.params;
+        const { id } = req.params;
         
-        const category = await Category.findOne({
-            where: {
-                name: {
-                    [Op.iLike]: name // Case-insensitive search
-                }
-            },
+        const category = await Category.findByPk(id, {
             include: [{
                 model: Category,
                 as: 'parent',
@@ -145,7 +137,7 @@ const getCategoryByName = async (req, res) => {
 
         res.status(200).json(categoryResponse);
     } catch (error) {
-        console.error('Get category by name error:', error);
+        console.error('Get category error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -268,7 +260,7 @@ const deleteCategory = async (req, res) => {
 export {
     createCategory,
     getAllCategories,
-    getCategoryByName,
+    getCategory,
     updateCategory,
     deleteCategory,
     upload

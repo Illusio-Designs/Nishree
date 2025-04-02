@@ -2,6 +2,7 @@ import { Payment } from '../model/paymentModel.js';
 import { Order } from '../model/orderModel.js';
 import { Op } from 'sequelize';
 import { sequelize } from '../config/db.js';
+import { PaymentService } from '../services/paymentService.js';
 
 // Process a payment
 export const processPayment = async (req, res) => {
@@ -308,5 +309,143 @@ export const getAllPayments = async (req, res) => {
     } catch (error) {
         console.error('Error getting payments:', error);
         res.status(500).json({ message: 'Failed to get payments', error: error.message });
+    }
+};
+
+// Confirm Payment
+export const confirmPayment = async (req, res) => {
+    try {
+        const { paymentIntentId } = req.params; // Assuming the payment intent ID is passed as a URL parameter
+
+        // Here you would typically call your payment service to confirm the payment
+        const paymentIntent = await PaymentService.confirmPayment(paymentIntentId);
+
+        if (!paymentIntent) {
+            return res.status(404).json({ message: 'Payment intent not found' });
+        }
+
+        res.status(200).json({
+            message: 'Payment confirmed successfully',
+            paymentIntent
+        });
+    } catch (error) {
+        console.error('Error confirming payment:', error);
+        res.status(500).json({ message: 'Failed to confirm payment', error: error.message });
+    }
+};
+
+// Create Payment Intent
+export const createPaymentIntent = async (req, res) => {
+    try {
+        const { amount, currency } = req.body; // Assuming amount and currency are passed in the request body
+
+        // Here you would typically call your payment gateway to create a payment intent
+        const paymentIntent = await PaymentService.createPaymentIntent(amount, currency);
+
+        if (!paymentIntent) {
+            return res.status(400).json({ message: 'Failed to create payment intent' });
+        }
+
+        res.status(201).json({
+            message: 'Payment intent created successfully',
+            paymentIntent
+        });
+    } catch (error) {
+        console.error('Error creating payment intent:', error);
+        res.status(500).json({ message: 'Failed to create payment intent', error: error.message });
+    }
+};
+
+// Get all payments for the authenticated user
+export const getUserPayments = async (req, res) => {
+    try {
+        const userId = req.user.id; // Assuming user ID is available in the request
+
+        const payments = await Payment.findAll({
+            where: { user_id: userId },
+            order: [['createdAt', 'DESC']]
+        });
+
+        if (!payments.length) {
+            return res.status(404).json({ message: 'No payments found for this user' });
+        }
+
+        res.json(payments);
+    } catch (error) {
+        console.error('Error fetching user payments:', error);
+        res.status(500).json({ message: 'Failed to fetch user payments', error: error.message });
+    }
+};
+
+// Process a refund
+export const refundPayment = async (req, res) => {
+    const transaction = await sequelize.transaction();
+    
+    try {
+        const { payment_id, reason } = req.body; // Assuming payment ID and reason for refund are passed in the request body
+        const userId = req.user.id;
+
+        if (!payment_id) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'Payment ID is required' });
+        }
+
+        // Only admin can process refunds
+        if (req.user.role !== 'admin') {
+            await transaction.rollback();
+            return res.status(403).json({ message: 'Only admin can process refunds' });
+        }
+
+        const payment = await Payment.findByPk(payment_id, { transaction });
+        if (!payment) {
+            await transaction.rollback();
+            return res.status(404).json({ message: 'Payment not found' });
+        }
+
+        // Can only refund successful payments
+        if (payment.status !== 'successful') {
+            await transaction.rollback();
+            return res.status(400).json({ message: `Cannot refund ${payment.status} payments` });
+        }
+
+        // Update payment status
+        payment.status = 'refunded';
+        await payment.save({ transaction });
+
+        // Also update the order's payment status
+        const order = await Order.findByPk(payment.order_id, { transaction });
+        if (order) {
+            order.payment_status = 'refunded';
+            await order.save({ transaction });
+        }
+
+        // Create a refund record
+        // In a real app, you might have a separate Refund model
+        // For simplicity, we're just creating a new payment record with negative amount
+        await Payment.create({
+            order_id: payment.order_id,
+            user_id: userId, // Admin who processed the refund
+            payment_type: payment.payment_type,
+            transaction_id: `REFUND-${payment.transaction_id || payment.id}`,
+            amount_paid: -payment.amount_paid, // Negative amount to indicate refund
+            status: 'successful',
+            payment_gateway: payment.payment_gateway,
+            notes: reason || 'Refund processed'
+        }, { transaction });
+
+        await transaction.commit();
+
+        res.json({
+            message: 'Refund processed successfully',
+            payment: {
+                id: payment.id,
+                status: payment.status,
+                reason: reason || 'Refund processed'
+            }
+        });
+    } catch (error) {
+        await transaction.rollback();
+        console.error('Error processing refund:', error);
+        res.status(500).json({ message: 'Failed to process refund', error: error.message });
     }
 }; 

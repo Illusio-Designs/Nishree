@@ -196,4 +196,62 @@ export const changePassword = async (req, res) => {
         console.error('Change password error:', error);
         res.status(500).json({ message: 'Error changing password' });
     }
-}; 
+};
+
+// Logout user
+export const logout = (req, res) => {
+    req.logout((err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Logout failed', error: err.message });
+        }
+        res.json({ message: 'Logged out successfully' });
+    });
+};
+
+// Reset password
+export const resetPassword = async (req, res) => {
+    try {
+        const { resetToken, newPassword } = req.body;
+
+        // Verify the reset token and find the user
+        const user = await User.findOne({ where: { resetToken } });
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired reset token' });
+        }
+
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        user.resetToken = null; // Clear the reset token
+        await user.save();
+
+        res.json({ message: 'Password has been reset successfully' });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ message: 'Error resetting password' });
+    }
+};
+
+// Verify Email
+export const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params; // Assuming the token is passed as a URL parameter
+
+        // Find the user associated with the token
+        const user = await User.findOne({ where: { verificationToken: token } });
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid or expired verification token' });
+        }
+
+        // Mark the user as verified
+        user.isVerified = true;
+        user.verificationToken = null; // Clear the verification token
+        await user.save();
+
+        res.json({ message: 'Email verified successfully' });
+    } catch (error) {
+        console.error('Email verification error:', error);
+        res.status(500).json({ message: 'Error verifying email' });
+    }
+};
+

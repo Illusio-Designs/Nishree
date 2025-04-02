@@ -7,7 +7,7 @@ import fs from 'fs';
 import { User } from '../model/userModel.js';
 import nodemailer from 'nodemailer';
 import ImageHandler from '../utils/imageHandler.js';
-import createUploadMiddleware from '../middleware/uploadMiddleware.js';
+import { upload } from '../middleware/uploadMiddleware.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -18,9 +18,6 @@ const __dirname = path.dirname(__filename);
 
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/user'));
-
-// Create upload middleware for profile pictures
-const upload = createUploadMiddleware(path.join(__dirname, '../uploads/user'), 'profilePic');
 
 // Helper function to add image URL to user response
 const addImageUrlToResponse = (userResponse) => {
@@ -396,35 +393,22 @@ export const getProfile = async (req, res) => {
 // Update user profile
 export const updateProfile = async (req, res) => {
     try {
-        const { name, username, email } = req.body;
-        const user = await User.findByPk(req.user.id);
+        const { id } = req.user; // Assuming you have user ID in the request
+        const updates = req.body;
 
+        const user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Update fields
-        user.name = name || user.name;
-        user.username = username || user.username;
-        user.email = email || user.email;
-
-        await user.save();
-
-        res.json({
-            message: 'Profile updated successfully',
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
-        });
+        await user.update(updates);
+        res.json({ message: 'Profile updated successfully', user });
     } catch (error) {
-        console.error('Update profile error:', error);
-        res.status(500).json({ message: 'Error updating profile' });
+        console.error('Error updating profile:', error);
+        res.status(500).json({ message: 'Failed to update profile', error: error.message });
     }
 };
 
 export {
-    upload
+    upload,
 }; 

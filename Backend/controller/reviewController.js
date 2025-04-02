@@ -12,22 +12,11 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { Op } from 'sequelize';
 import { sequelize } from '../config/db.js';
-import createUploadMiddleware from '../middleware/uploadMiddleware.js';
+import { upload } from '../middleware/uploadMiddleware.js';
 
 // Get directory name for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Initialize upload middleware for review images
-export const upload = createUploadMiddleware(
-    path.join(__dirname, '../uploads/reviews'),
-    'reviewMedia',
-    { 
-        fileTypes: ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'],
-        maxSize: 15 * 1024 * 1024 // 15MB max size for videos
-    },
-    true // Allow multiple files
-);
 
 // Helper to update product review statistics
 const updateProductReviewStats = async (productId, transaction) => {
@@ -435,50 +424,25 @@ export const getUserReviews = async (req, res) => {
 };
 
 // Get a single review
-export const getReviewById = async (req, res) => {
+export const getReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
-        
+
         const review = await Review.findByPk(reviewId, {
             include: [
-                { 
-                    model: User,
-                    attributes: ['id', 'username', 'profileImage']
-                },
-                { model: ReviewImage },
-                { 
-                    model: Product,
-                    attributes: ['id', 'name', 'slug']
-                },
-                { 
-                    model: ReviewLike,
-                    attributes: ['id', 'user_id']
-                },
-                { 
-                    model: ReviewComment,
-                    include: [{ 
-                        model: User,
-                        attributes: ['id', 'username', 'profileImage']
-                    }],
-                    order: [['created_at', 'ASC']]
-                }
+                { model: User, attributes: ['id', 'username', 'profileImage'] },
+                { model: ReviewImage }
             ]
         });
-        
+
         if (!review) {
             return res.status(404).json({ message: 'Review not found' });
         }
-        
-        // If review is not approved, only admin or review owner can see it
-        if (review.status !== 'approved' && 
-            (!req.user || (req.user.id !== review.user_id && req.user.role !== 'admin'))) {
-            return res.status(403).json({ message: 'Access denied' });
-        }
-        
-        res.json({ review });
+
+        res.json(review);
     } catch (error) {
-        console.error('Error getting review:', error);
-        res.status(500).json({ message: 'Failed to get review', error: error.message });
+        console.error('Error fetching review:', error);
+        res.status(500).json({ message: 'Failed to fetch review', error: error.message });
     }
 };
 
@@ -816,6 +780,23 @@ export const deleteReviewImage = async (req, res) => {
         await transaction.rollback();
         console.error('Error deleting review image:', error);
         res.status(500).json({ message: 'Failed to delete review image', error: error.message });
+    }
+};
+
+// Get all reviews
+export const getAllReviews = async (req, res) => {
+    try {
+        const reviews = await Review.findAll({
+            include: [
+                { model: User, attributes: ['id', 'username'] },
+                { model: Product, attributes: ['id', 'name'] }
+            ]
+        });
+
+        res.json(reviews);
+    } catch (error) {
+        console.error('Error fetching reviews:', error);
+        res.status(500).json({ message: 'Failed to fetch reviews', error: error.message });
     }
 };
 

@@ -1,4 +1,4 @@
-import { Wishlist, Product, ProductImage } from '../model/associations.js';
+import { Wishlist, Product, ProductImage, Cart } from '../model/associations.js';
 
 // Add product to wishlist
 export const addToWishlist = async (req, res) => {
@@ -161,5 +161,43 @@ export const clearWishlist = async (req, res) => {
             message: 'Failed to clear wishlist',
             error: error.message
         });
+    }
+};
+
+// Move product from wishlist to cart
+export const moveToCart = async (req, res) => {
+    try {
+        const { productId } = req.params; // Assuming the product ID is passed as a URL parameter
+        const userId = req.user.id; // Assuming user ID is available in the request
+
+        // Find the product in the wishlist
+        const wishlistItem = await Wishlist.findOne({
+            where: {
+                userId,
+                productId
+            }
+        });
+
+        if (!wishlistItem) {
+            return res.status(404).json({ message: 'Product not found in wishlist' });
+        }
+
+        // Add the product to the cart
+        const cartItem = await Cart.create({
+            userId,
+            productId,
+            quantity: 1 // Assuming default quantity is 1
+        });
+
+        // Remove the product from the wishlist
+        await wishlistItem.destroy();
+
+        res.status(200).json({
+            message: 'Product moved to cart successfully',
+            cartItem
+        });
+    } catch (error) {
+        console.error('Error moving product to cart:', error);
+        res.status(500).json({ message: 'Failed to move product to cart', error: error.message });
     }
 }; 

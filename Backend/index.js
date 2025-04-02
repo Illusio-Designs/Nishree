@@ -37,7 +37,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(morgan('dev'));
+app.use(morgan('combined')); // Logs all requests to the console
 
 // Session configuration
 app.use(session({

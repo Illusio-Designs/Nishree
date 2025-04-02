@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import ImageHandler from '../utils/imageHandler.js';
-import createUploadMiddleware from '../middleware/uploadMiddleware.js';
+import { upload } from '../middleware/uploadMiddleware.js';
 import slugify from 'slugify';
 import { sequelize } from '../config/db.js';
 import { Op } from 'sequelize';
@@ -13,9 +13,6 @@ const __dirname = path.dirname(__filename);
 
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/products'));
-
-// Create upload middleware for product images
-const upload = createUploadMiddleware(path.join(__dirname, '../uploads/products'), 'image');
 
 // Helper function to format product response
 const formatProductResponse = (product) => {
@@ -87,9 +84,9 @@ export const createProduct = async (req, res) => {
         } = req.body;
 
         // Create product with basic info
-        const product = await Product.create({
-            name,
-            description,
+            const product = await Product.create({
+                name,
+                description,
             categoryId,
             price,
             stock,
@@ -98,17 +95,17 @@ export const createProduct = async (req, res) => {
         }, { transaction });
 
         // Handle variations if provided
-        if (variations && variations.length > 0) {
-            for (const variation of variations) {
-                const productVariation = await ProductVariation.create({
-                    productId: product.id,
-                    price: variation.price,
-                    stock: variation.stock,
+            if (variations && variations.length > 0) {
+                for (const variation of variations) {
+                    const productVariation = await ProductVariation.create({
+                        productId: product.id,
+                        price: variation.price,
+                        stock: variation.stock,
                     sku: variation.sku || uuidv4()
                 }, { transaction });
 
-                // Handle variation attributes
-                if (variation.attributes) {
+                    // Handle variation attributes
+                    if (variation.attributes) {
                     for (const attr of variation.attributes) {
                         const [attribute] = await Attribute.findOrCreate({
                             where: { name: attr.name },
@@ -247,7 +244,7 @@ export const getAllProducts = async (req, res) => {
 };
 
 // Get product by ID
-export const getProductById = async (req, res) => {
+export const getProduct = async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -316,25 +313,25 @@ export const updateProduct = async (req, res) => {
             slug: name ? slugify(name, { lower: true }) : product.slug
         }, { transaction });
 
-        // Handle variations
+            // Handle variations
         if (variations) {
             // Delete existing variations
-            await ProductVariation.destroy({
+                await ProductVariation.destroy({
                 where: { productId: id },
                 transaction
-            });
+                });
 
-            // Create new variations
-            for (const variation of variations) {
-                const productVariation = await ProductVariation.create({
+                // Create new variations
+                for (const variation of variations) {
+                    const productVariation = await ProductVariation.create({
                     productId: id,
-                    price: variation.price,
-                    stock: variation.stock,
+                        price: variation.price,
+                        stock: variation.stock,
                     sku: variation.sku || uuidv4()
                 }, { transaction });
 
-                // Handle variation attributes
-                if (variation.attributes) {
+                    // Handle variation attributes
+                    if (variation.attributes) {
                     for (const attr of variation.attributes) {
                         const [attribute] = await Attribute.findOrCreate({
                             where: { name: attr.name },
@@ -356,12 +353,12 @@ export const updateProduct = async (req, res) => {
                     }
                 }
             }
-        }
+            }
 
-        // Handle badges
-        if (badges) {
+            // Handle badges
+            if (badges) {
             // Delete existing badge mappings
-            await ProductBadgeMapping.destroy({
+                await ProductBadgeMapping.destroy({
                 where: { productId: id },
                 transaction
             });
@@ -393,7 +390,7 @@ export const updateProduct = async (req, res) => {
                     description: seo.description,
                     keywords: seo.keywords
                 }, { transaction });
-            } else {
+                } else {
                 await ProductSEO.create({
                     productId: id,
                     title: seo.title,
@@ -480,4 +477,107 @@ export const deleteProduct = async (req, res) => {
     }
 };
 
-export { upload }; 
+// Example function to get best-selling products
+export const getBestSellers = async (req, res) => {
+    try {
+        const bestSellers = await Product.findAll({
+            where: { soldCount: { [Op.gt]: 0 } }, // Assuming you have a soldCount field
+            order: [['soldCount', 'DESC']],
+            limit: 10 // Limit to top 10 best sellers
+        });
+
+        res.json(bestSellers);
+    } catch (error) {
+        console.error('Error fetching best sellers:', error);
+        res.status(500).json({ message: 'Failed to fetch best sellers', error: error.message });
+    }
+};
+
+// Example function to get featured products
+export const getFeaturedProducts = async (req, res) => {
+    try {
+        const featuredProducts = await Product.findAll({
+            where: { isFeatured: true }, // Assuming you have an isFeatured field
+            limit: 10 // Limit to top 10 featured products
+        });
+
+        res.json(featuredProducts);
+    } catch (error) {
+        console.error('Error fetching featured products:', error);
+        res.status(500).json({ message: 'Failed to fetch featured products', error: error.message });
+    }
+};
+
+// Example function to get new arrivals
+export const getNewArrivals = async (req, res) => {
+    try {
+        const newArrivals = await Product.findAll({
+            order: [['createdAt', 'DESC']], // Assuming you want the latest products
+            limit: 10 // Limit to top 10 new arrivals
+        });
+
+        res.json(newArrivals);
+    } catch (error) {
+        console.error('Error fetching new arrivals:', error);
+        res.status(500).json({ message: 'Failed to fetch new arrivals', error: error.message });
+    }
+};
+
+// Get products by category
+export const getProductsByCategory = async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+
+        const products = await Product.findAll({
+            where: { categoryId },
+            include: [
+                { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
+                { model: ProductImage },
+                { model: ProductBadge, through: ProductBadgeMapping },
+                { model: ProductSEO },
+                { model: ProductDiscount }
+            ]
+        });
+
+        if (!products.length) {
+            return res.status(404).json({ message: 'No products found for this category' });
+        }
+
+        res.json(products.map(formatProductResponse));
+    } catch (error) {
+        console.error('Error fetching products by category:', error);
+        res.status(500).json({ message: 'Failed to fetch products by category', error: error.message });
+    }
+};
+
+// Search products
+export const searchProducts = async (req, res) => {
+    try {
+        const { query } = req.query;
+
+        const products = await Product.findAll({
+            where: {
+                name: {
+                    [Op.iLike]: `%${query}%`
+                }
+            },
+            include: [
+                { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
+                { model: ProductImage },
+                { model: ProductBadge, through: ProductBadgeMapping },
+                { model: ProductSEO },
+                { model: ProductDiscount }
+            ]
+        });
+
+        if (!products.length) {
+            return res.status(404).json({ message: 'No products found matching your search' });
+        }
+
+        res.json(products.map(formatProductResponse));
+    } catch (error) {
+        console.error('Error searching products:', error);
+        res.status(500).json({ message: 'Failed to search products', error: error.message });
+    }
+};
+

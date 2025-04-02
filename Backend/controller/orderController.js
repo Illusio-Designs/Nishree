@@ -264,34 +264,26 @@ export const getUserOrders = async (req, res) => {
     }
 };
 
-// Get order by ID
-export const getOrderById = async (req, res) => {
+// Get Order by ID
+export const getOrder = async (req, res) => {
     try {
-        const orderId = req.params.id;
-        const userId = req.user.id;
-        
-        const order = await Order.findByPk(orderId, {
+        const { id } = req.params; // Assuming the order ID is passed as a URL parameter
+
+        const order = await Order.findByPk(id, {
             include: [
-                { model: OrderItem, include: [Product, ProductVariation] },
-                { model: User, attributes: ['id', 'username', 'email'] },
-                { model: OrderStatusHistory, order: [['updated_at', 'DESC']] },
-                { model: Payment }
+                { model: OrderItem },
+                { model: User }
             ]
         });
-        
+
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
-        
-        // If not admin and not order owner, deny access
-        if (req.user.role !== 'admin' && order.user_id !== userId) {
-            return res.status(403).json({ message: 'Access denied' });
-        }
-        
-        res.json({ order });
+
+        res.json(order);
     } catch (error) {
-        console.error('Error getting order:', error);
-        res.status(500).json({ message: 'Failed to get order', error: error.message });
+        console.error('Error fetching order:', error);
+        res.status(500).json({ message: 'Failed to fetch order', error: error.message });
     }
 };
 
@@ -446,4 +438,27 @@ export const cancelOrder = async (req, res) => {
         console.error('Error cancelling order:', error);
         res.status(500).json({ message: 'Failed to cancel order', error: error.message });
     }
-}; 
+};
+
+// Get order statistics
+export const getOrderStats = async (req, res) => {
+    try {
+        const totalOrders = await Order.count();
+        const totalRevenue = await Order.sum('final_amount');
+        const totalPendingOrders = await Order.count({ where: { status: 'pending' } });
+        const totalDeliveredOrders = await Order.count({ where: { status: 'delivered' } });
+        const totalCancelledOrders = await Order.count({ where: { status: 'cancelled' } });
+
+        res.json({
+            totalOrders,
+            totalRevenue,
+            totalPendingOrders,
+            totalDeliveredOrders,
+            totalCancelledOrders
+        });
+    } catch (error) {
+        console.error('Error fetching order statistics:', error);
+        res.status(500).json({ message: 'Failed to fetch order statistics', error: error.message });
+    }
+};
+

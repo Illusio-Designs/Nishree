@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import ImageHandler from '../utils/imageHandler.js';
-import createUploadMiddleware from '../middleware/uploadMiddleware.js';
+import multer from 'multer';
 
 // Get directory name for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -15,8 +15,18 @@ const __dirname = path.dirname(__filename);
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/slider'));
 
-// Create upload middleware for slider images
-const upload = createUploadMiddleware(path.join(__dirname, '../uploads/slider'), 'image');
+// Configure storage for uploaded files
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '../uploads/sliders'));
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`);
+    }
+});
+
+// Create the upload middleware
+export const upload = multer({ storage });
 
 // Helper function to format slider response
 const formatSliderResponse = (slider) => {
@@ -249,6 +259,3 @@ export const deleteSlider = async (req, res) => {
     }
 };
 
-export {
-    upload
-}; 

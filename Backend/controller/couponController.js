@@ -358,4 +358,22 @@ export const deleteCoupon = async (req, res) => {
             error: error.message
         });
     }
+};
+
+// Get Coupon by ID
+export const getCoupon = async (req, res) => {
+    try {
+        const { id } = req.params; // Assuming the coupon ID is passed as a URL parameter
+
+        const coupon = await Coupon.findByPk(id);
+        
+        if (!coupon) {
+            return res.status(404).json({ message: 'Coupon not found' });
+        }
+
+        res.json(coupon);
+    } catch (error) {
+        console.error('Error fetching coupon:', error);
+        res.status(500).json({ message: 'Failed to fetch coupon', error: error.message });
+    }
 }; 
