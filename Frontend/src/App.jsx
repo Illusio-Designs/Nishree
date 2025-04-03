@@ -1,15 +1,16 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import React from 'react';
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from './context/AuthContext';
+import AppRoutes from './routes/AppRoutes';
 import "./App.css";
-import Home from "./pages/Home";
-import DashboardLogin from "./pages/Dashboard/Login";
+import './styles/index.css'; // This will now work correctly
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<DashboardLogin />} />
-      </Routes>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

@@ -10,8 +10,6 @@ import passport from './config/passport.js';
 import session from 'express-session';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 
 // Get the directory name of the current module
@@ -32,7 +30,11 @@ const app = express();
 // Middleware
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    maxAge: 86400 // 24 hours
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -61,9 +63,6 @@ app.use('/api/google-analytics', googleAnalyticsRouter);
 app.use('/api/facebook-pixel', facebookPixelRouter);
 app.use('/api/facebook-catalog', facebookCatalogRouter);
 app.use('/api/dashboard', dashboardAnalyticsRouter);
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/settings', settingsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

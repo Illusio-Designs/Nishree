@@ -1,10 +1,3 @@
-playfair-display-<uniquifier> {
-    font-family: "Playfair Display", serif;
-    font-optical-sizing: auto;
-    font-weight: <weight>;
-    font-style: normal;
-  }
-
 .img-fluid{
     width: 100%;
     height: auto;

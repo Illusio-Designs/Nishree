@@ -409,6 +409,84 @@ export const updateProfile = async (req, res) => {
     }
 };
 
+// Add the missing logout function
+export const logout = (req, res) => {
+    try {
+        // Clear the token from client storage
+        res.clearCookie('token');
+        
+        // If using passport session
+        if (req.logout) {
+            req.logout((err) => {
+                if (err) {
+                    return res.status(500).json({ 
+                        message: 'Logout failed', 
+                        error: err.message 
+                    });
+                }
+            });
+        }
+
+        res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ 
+            message: 'Logout failed', 
+            error: error.message 
+        });
+    }
+};
+
+// Add missing verifyEmail function
+export const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const user = await User.findOne({ where: { verificationToken: token } });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid verification token' });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = null;
+        await user.save();
+
+        res.json({ message: 'Email verified successfully' });
+    } catch (error) {
+        console.error('Email verification error:', error);
+        res.status(500).json({ message: 'Failed to verify email', error: error.message });
+    }
+};
+
+// Add missing changePassword function
+export const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findByPk(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Current password is incorrect' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ message: 'Failed to change password', error: error.message });
+    }
+};
+
+// Export all functions individually
 export {
-    upload,
-}; 
+    upload
+};
+
+// Remove the userController object export

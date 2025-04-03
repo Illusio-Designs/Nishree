@@ -19,7 +19,7 @@ import seoRoutes from './seoRoutes.js';
 import settingsRoutes from './settingsRoutes.js';
 
 // Core Routes
-router.use('/users', userRoutes);
+router.use('/users', userRoutes); // This now includes both auth and user routes
 router.use('/categories', categoryRoutes);
 router.use('/products', productRoutes);
 router.use('/orders', orderRoutes);
