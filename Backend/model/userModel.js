@@ -27,10 +27,6 @@ export const User = sequelize.define('User', {
         defaultValue: 'consumer',
         allowNull: false
     },
-    status: {
-        type: DataTypes.ENUM('active', 'inactive'),
-        defaultValue: 'active'
-    },
     profileImage: {
         type: DataTypes.STRING,
         allowNull: true

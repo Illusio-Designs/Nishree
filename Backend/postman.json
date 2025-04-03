@@ -1,0 +1,175 @@
+{
+    "info": {
+        "name": "User Management API",
+        "description": "API for managing users including registration, login, profile management, and password management.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "User Registration",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"username\": \"string\", \"email\": \"string\", \"password\": \"string\", \"role\": \"string\"}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/users/register",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "users", "register"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "User Login",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"email\": \"string\", \"password\": \"string\"}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/users/login",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "users", "login"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get Current User",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/users/me",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "users", "me"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Update User Profile",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"username\": \"string\", \"email\": \"string\"}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/users/update",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "users", "update"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Update Password",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"currentPassword\": \"string\", \"newPassword\": \"string\", \"confirmPassword\": \"string\"}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/users/update-password",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "users", "update-password"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Delete User",
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/users/delete",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "users", "delete"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Forgot Password",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"email\": \"string\"}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/users/forgot-password",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "users", "forgot-password"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Reset Password",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"resetToken\": \"string\", \"password\": \"string\", \"confirmPassword\": \"string\"}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/api/users/reset-password",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "users", "reset-password"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get All Users (Admin Only)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/api/users",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "users"]
+                }
+            },
+            "response": []
+        }
+    ]
+}
