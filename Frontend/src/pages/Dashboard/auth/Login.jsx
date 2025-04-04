@@ -1,21 +1,17 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useAuth } from "../../../context/AuthContext";
 import "../../../styles/auth/AdminLogin.css";
-import { login, googleAuth } from "../../../services/authService";
-import { useAuth } from '../../../context/AuthContext';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login: authLogin } = useAuth(); // Get login function from AuthContext
+  const { login, googleLogin } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,17 +19,27 @@ const Login = () => {
 
     try {
       const response = await login(formData);
-      if (response.token && response.user) {
-        // Update auth context with user data
-        await authLogin(response.user, response.token);
-        
-        toast.success('Login successful!');
-        
-        // Navigate to dashboard after successful login
+      toast.success("Login successful!");
+      setTimeout(() => {
         navigate("/dashboard", { replace: true });
-      }
+      }, 1000);
     } catch (err) {
       toast.error(err.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      const response = await googleLogin();
+      toast.success("Google login successful!");
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 2000);
+    } catch (err) {
+      toast.error(err.message || "Google login failed");
     } finally {
       setIsLoading(false);
     }
@@ -43,27 +49,15 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      await googleAuth();
-      toast.success('Google login successful!');
-    } catch (err) {
-      toast.error(err.message || "Google login failed");
-    }
-  };
-
   return (
     <div className="auth-container">
       <ToastContainer position="top-center" className="toast" />
       <div className="auth-card">
-        <div>
-          <h2 className="auth-title">Admin Login</h2>
-        </div>
+        <h2 className="auth-title">Admin Login</h2>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <input
-              id="email"
               name="email"
               type="email"
               required
@@ -76,7 +70,6 @@ const Login = () => {
           </div>
           <div className="form-group password-input-wrapper-login">
             <input
-              id="password"
               name="password"
               type={showPassword ? "text" : "password"}
               required
@@ -96,11 +89,9 @@ const Login = () => {
           </div>
 
           <div className="flex-between">
-            <div>
-              <Link to="/admin/forgot-password" className="auth-link">
-                Forgot your password?
-              </Link>
-            </div>
+            <Link to="/admin/forgot-password" className="auth-link">
+              Forgot your password?
+            </Link>
           </div>
 
           <div className="form-group">

@@ -13,11 +13,14 @@ export const register = async (formData) => {
 export const login = async (formData) => {
     try {
         const response = await api.post('/api/users/login', formData);
-        if (response.data.token) {
-            localStorage.setItem('token', response.data.token);
+        console.log("Login response:", response.data);
+        if (!response.data.token || !response.data.user) {
+            throw new Error("Invalid response structure");
         }
+        localStorage.setItem('token', response.data.token);
         return response.data;
     } catch (error) {
+        console.error("Login error:", error);
         throw handleApiError(error);
     }
 };
