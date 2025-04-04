@@ -1,19 +1,70 @@
-.products-card{
-    display: flex;
-    justify-content: space-around;
-    padding: 30px;
+.products-card {
+  display: flex;
+  justify-content: space-around;
+  padding: 30px;
 }
-.card{
-    background-color: #FFEADA;
-    border-radius: 20px;
+.card {
+  position: relative;
+  background-color: #ffeada;
+  border-radius: 20px;
+  height: 100%;
 }
-.heart{
-    background-color: white;
-    padding: 20px;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    margin-left: 20%;
-    margin-top: 2%;
-    position: absolute;
+.card .product-img img {
+  height: 400px;
+  width: 354px;
+  margin-left: 10%;
+}
+.heart {
+  background-color: white;
+  padding: 20px;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  margin-left: 80%;
+  margin-top: 2%;
+  position: absolute;
+}
+.product-name {
+  position: absolute;
+  margin-top: -26%;
+  color: white;
+  font-size: 22px;
+  padding: 0 10px;
+}
+.rating {
+  position: absolute;
+  margin-left: 72%;
+  margin-top: -28%;
+  background-color: white;
+  font-size: 22px;
+  padding: 5px 20px;
+  border-radius: 50px;
+}
+.prices {
+  display: flex;
+  gap: 15px;
+}
+.product-price {
+  position: absolute;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  padding: 12px 20px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  margin-top: -17%;
+  align-items: center;
+}
+.discount-price {
+  color: #dc2626;
+}
+.current-price {
+  color: #adaebc;
+  text-decoration: line-through;
+}
+.product-cart {
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0px 0px 4.96px 0px #00000040;
 }
