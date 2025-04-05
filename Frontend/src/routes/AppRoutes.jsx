@@ -6,10 +6,7 @@ import AdminLogin from "../pages/Dashboard/auth/Login";
 import AdminRegister from "../pages/Dashboard/auth/Register";
 import AdminForgotPassword from "../pages/Dashboard/auth/ForgotPassword";
 import AdminResetPassword from "../pages/Dashboard/auth/ResetPassword";
-import Dashboard from "../pages/Dashboard/Dashboard";
-import Leads from "../pages/dashboard/Leads";
-import Customers from "../pages/dashboard/Customers";
-import Reports from "../pages/dashboard/Reports";
+import Dashboard from "../pages/Dashboard/Layout/Dashboard";
 import { useAuth } from "../context/AuthContext";
 
 const AdminRoute = ({ children }) => {

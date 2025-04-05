@@ -7,12 +7,20 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
   const checkUser = async () => {
     const storedToken = localStorage.getItem("token");
-    if (!storedToken) {
+    const expirationTime = localStorage.getItem("tokenExpiration");
+
+    // Check if the token is expired
+    if (
+      !storedToken ||
+      (expirationTime && new Date().getTime() > expirationTime)
+    ) {
       setLoading(false);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       return;
     }
 
@@ -22,7 +30,7 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
         setToken(storedToken);
       } else {
-        throw new Error('No user data received');
+        throw new Error("No user data received");
       }
     } catch (error) {
       console.error("Auth check failed:", error);
@@ -35,11 +43,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Remove the duplicate useEffect
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
+    const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
@@ -52,6 +59,9 @@ export const AuthProvider = ({ children }) => {
       const response = await login(credentials);
       if (response.token && response.user) {
         localStorage.setItem("token", response.token);
+        // Set token expiration to 24 hours from now
+        const expirationTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
+        localStorage.setItem("tokenExpiration", expirationTime);
         setUser(response.user);
         return response;
       }
