@@ -6,7 +6,7 @@ import AdminLogin from "../pages/Dashboard/auth/Login";
 import AdminRegister from "../pages/Dashboard/auth/Register";
 import AdminForgotPassword from "../pages/Dashboard/auth/ForgotPassword";
 import AdminResetPassword from "../pages/Dashboard/auth/ResetPassword";
-import Dashboard from "../pages/dashboard/Dashboard";
+import Dashboard from "../pages/Dashboard/Dashboard";
 import Leads from "../pages/dashboard/Leads";
 import Customers from "../pages/dashboard/Customers";
 import Reports from "../pages/dashboard/Reports";
@@ -32,19 +32,15 @@ const AppRoutes = () => {
       <Route path="/admin/reset-password" element={<AdminResetPassword />} />
 
       {/* Protected Dashboard Routes */}
+
       <Route
-        path="/dashboard"
+        path="/dashboard/*"
         element={
           <AdminRoute>
-            <MainLayout />
+            <Dashboard />
           </AdminRoute>
         }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="leads" element={<Leads />} />
-        <Route path="customers" element={<Customers />} />
-        <Route path="reports" element={<Reports />} />
-      </Route>
+      />
     </Routes>
   );
 };

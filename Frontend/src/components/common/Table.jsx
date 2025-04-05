@@ -1,0 +1,53 @@
+import React from 'react';
+import '../../styles/components/Table.css';
+
+const Table = ({ columns, data, onRowClick, actions }) => {
+  return (
+    <div className="table-container">
+      <table className="common-table">
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th key={column.key}>{column.header}</th>
+            ))}
+            {actions && <th>Actions</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row, index) => (
+            <tr
+              key={row.id || index}
+              onClick={() => onRowClick && onRowClick(row)}
+              className={onRowClick ? 'clickable' : ''}
+            >
+              {columns.map((column) => (
+                <td key={column.key}>
+                  {column.render ? column.render(row) : row[column.key]}
+                </td>
+              ))}
+              {actions && (
+                <td className="action-column">
+                  {actions.map((action, actionIndex) => (
+                    <button
+                      key={actionIndex}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        action.onClick(row);
+                      }}
+                      className={`action-btn ${action.className || ''}`}
+                    >
+                      {action.icon && <span className="action-icon">{action.icon}</span>}
+                      {action.label}
+                    </button>
+                  ))}
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default Table;

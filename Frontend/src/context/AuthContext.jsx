@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { getCurrentUser } from "../services/userService";
+import { getCurrentUser } from "../services/userService"; // Uncomment this line
 import { login, logout, register, googleAuth } from "../services/authService";
 
 const AuthContext = createContext(null);
@@ -7,28 +7,45 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkUser();
-  }, []);
+  const [token, setToken] = useState(localStorage.getItem('token'));
 
   const checkUser = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) {
       setLoading(false);
       return;
     }
 
     try {
-      const userData = await getCurrentUser(token);
-      setUser(userData);
+      const userData = await getCurrentUser(storedToken);
+      if (userData) {
+        setUser(userData);
+        setToken(storedToken);
+      } else {
+        throw new Error('No user data received');
+      }
     } catch (error) {
       console.error("Auth check failed:", error);
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setToken(null);
+      setUser(null);
     } finally {
       setLoading(false);
     }
   };
+
+  // Remove the duplicate useEffect
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    if (storedToken && storedUser) {
+      setToken(storedToken);
+      setUser(JSON.parse(storedUser));
+    }
+    checkUser();
+  }, []);
 
   const loginUser = async (credentials) => {
     try {
@@ -87,6 +104,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         loading,
+        token, // Add token to the context value
         login: loginUser,
         logout: logoutUser,
         register: registerUser,

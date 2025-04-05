@@ -1,12 +1,24 @@
 import api, { handleApiError } from './api';
 
 // User related API calls
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (token) => {
+    if (!token) {
+        throw new Error('No token provided');
+    }
+    
     try {
-        const response = await api.get('/api/users/me');
+        const response = await api.get('/api/users/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         return response.data;
     } catch (error) {
-        throw handleApiError(error);
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+        }
+        throw error;
     }
 };
 
