@@ -25,6 +25,15 @@ span {
     font-size: 20px;
 }
 
+.background {
+    background-image: url("../assets/—Pngtree—texture of recycled cardboard with_15735637 1.png");
+    background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  padding: 0 0 50px 0;
+  }
+  
+
 
 /* Add Playfair Display font */
 @font-face {

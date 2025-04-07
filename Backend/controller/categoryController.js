@@ -26,7 +26,7 @@ const formatCategoryResponse = (category) => {
 // Create Category
 const createCategory = async (req, res) => {
     try {
-        const { name, description, status, parentId, seoTitle, seoDescription, seoKeywords, slug, metaTags } = req.body;
+        const { name, description, status, parentId, metaTitle, metaDescription, metaKeywords, slug, metaTags } = req.body;
         
         // Check for duplicate category name
         const existingCategory = await Category.findOne({
@@ -66,15 +66,16 @@ const createCategory = async (req, res) => {
             }
         }
 
+        // Create category with correct field names
         const category = await Category.create({
             name,
             description,
             status,
             parentId,
             image,
-            seoTitle,
-            seoDescription,
-            seoKeywords,
+            metaTitle,
+            metaDescription,
+            metaKeywords,
             slug,
             metaTags
         });
@@ -105,12 +106,87 @@ const createCategory = async (req, res) => {
 const getAllCategories = async (req, res) => {
     try {
         const categories = await Category.findAll({
-            where: { status: 'active' },
+            include: [{
+                model: Category,
+                as: 'parent',
+                attributes: ['id', 'name']
+            }],
             order: [['createdAt', 'DESC']]
         });
-        res.status(200).json(categories);
+
+        // Format the response
+        const formattedCategories = categories.map(category => ({
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            status: category.status,
+            parentId: category.parentId,
+            parentName: category.parent ? category.parent.name : null,
+            image: category.image,
+            seoTitle: category.seoTitle,
+            seoDescription: category.seoDescription,
+            seoKeywords: category.seoKeywords,
+            slug: category.slug,
+            metaTags: category.metaTags,
+            createdAt: category.createdAt,
+            updatedAt: category.updatedAt
+        }));
+
+        res.status(200).json(formattedCategories);
     } catch (error) {
         console.error('Get all categories error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Delete Category
+const deleteCategory = async (req, res) => {
+    try {
+        const categoryId = req.params.id;
+        
+        // Check if category exists
+        const category = await Category.findByPk(categoryId);
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        // Check if category is being used as a parent
+        const hasChildren = await Category.findOne({
+            where: { parentId: categoryId }
+        });
+
+        if (hasChildren) {
+            return res.status(400).json({ 
+                message: 'Cannot delete category: it has child categories',
+                error: 'HAS_CHILD_CATEGORIES'
+            });
+        }
+
+        // Check if category is being used in products (if you have products)
+        // const hasProducts = await Product.findOne({
+        //     where: { categoryId: categoryId }
+        // });
+        // if (hasProducts) {
+        //     return res.status(400).json({ 
+        //         message: 'Cannot delete category: it is being used in products',
+        //         error: 'CATEGORY_IN_USE'
+        //     });
+        // }
+
+        // Delete image if exists
+        if (category.image) {
+            try {
+                await imageHandler.deleteFile(imageHandler.getImagePath(category.image));
+            } catch (imageError) {
+                console.error('Error deleting image:', imageError);
+                // Continue with category deletion even if image deletion fails
+            }
+        }
+        
+        await category.destroy();
+        res.status(200).json({ message: 'Category deleted successfully' });
+    } catch (error) {
+        console.error('Delete category error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -232,27 +308,6 @@ const updateCategory = async (req, res) => {
         });
     } catch (error) {
         console.error('Update category error:', error);
-        res.status(500).json({ message: error.message });
-    }
-};
-
-// Delete Category
-const deleteCategory = async (req, res) => {
-    try {
-        const category = await Category.findByPk(req.params.id);
-        if (!category) {
-            return res.status(404).json({ message: 'Category not found' });
-        }
-
-        // Delete image if exists
-        if (category.image) {
-            await imageHandler.deleteFile(imageHandler.getImagePath(category.image));
-        }
-        
-        await category.destroy();
-        res.status(200).json({ message: 'Category deleted successfully' });
-    } catch (error) {
-        console.error('Delete category error:', error);
         res.status(500).json({ message: error.message });
     }
 };

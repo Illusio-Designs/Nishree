@@ -1,14 +1,87 @@
-import React from "react";
+import React, { useState } from "react";
+import "../../Styles/common/InputField.css";
 
-const InputField = ({ label, value, onChange, placeholder }) => {
+const InputField = ({ 
+  label, 
+  value, 
+  onChange, 
+  placeholder, 
+  type = "text", 
+  multiline = false,
+  required = false,
+  accept,
+  className = ""
+}) => {
+  const [preview, setPreview] = useState(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
+    }
+    onChange(e);
+  };
+
+  if (type === "file") {
+    return (
+      <div className={`input-field ${className}`}>
+        <label>{label}</label>
+        <div className="file-input-container">
+          <div className="file-input-wrapper">
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept={accept}
+              required={required}
+              className="file-input"
+            />
+            <div className="file-input-placeholder">
+              {value ? value.name : placeholder || "Choose a file"}
+            </div>
+            <button className="file-input-button">Browse</button>
+          </div>
+          {preview && (
+            <div className="file-preview">
+              <img src={preview} alt="Preview" className="file-preview-image" />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (multiline) {
+    return (
+      <div className={`input-field ${className}`}>
+        <label>{label}</label>
+        <textarea
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          className="textarea-input"
+          rows={4}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="input-field">
+    <div className={`input-field ${className}`}>
       <label>{label}</label>
       <input
-        type="text"
+        type={type}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        required={required}
+        className="text-input"
       />
     </div>
   );

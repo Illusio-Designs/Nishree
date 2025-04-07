@@ -3,7 +3,8 @@ import Table from './Table';
 import Pagination from './Pagination';
 import SearchBar from './SearchBar';
 import Filter from './Filter';
-import "../../Styles/components/TableControls.css"
+import ActionButton from './ActionButton';
+import "../../Styles/common/TableControls.css";
 
 const TableWithControls = ({
   columns,
@@ -11,7 +12,7 @@ const TableWithControls = ({
   itemsPerPage = 10,
   searchFields = [],
   filters = [],
-  actions,
+  actions = [],
   onRowClick
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,6 +55,32 @@ const TableWithControls = ({
     }));
   };
 
+  const renderActions = (row) => {
+    return (
+      <div className="table-actions">
+        {actions.map((action, index) => (
+          <ActionButton
+            key={index}
+            variant={action.variant}
+            icon={action.icon}
+            onClick={() => action.onClick(row)}
+            tooltip={action.tooltip}
+            disabled={action.disabled?.(row)}
+            size={action.size || "small"}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  const enhancedColumns = actions?.length > 0 
+    ? [...columns, { 
+        key: 'actions', 
+        header: 'Actions',
+        render: (row) => renderActions(row)
+      }] 
+    : columns;
+
   return (
     <div className="table-with-controls">
       <div className="table-controls">
@@ -74,9 +101,8 @@ const TableWithControls = ({
       </div>
 
       <Table
-        columns={columns}
+        columns={enhancedColumns}
         data={paginatedData}
-        actions={actions}
         onRowClick={onRowClick}
       />
 

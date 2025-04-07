@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../../../styles/auth/Register.css";
-import { register } from "../../../services/authService";
+import { useAuth } from "../../../context/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
@@ -12,18 +12,18 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "admin", // Added role field with default value 'admin'
+    role: "admin",
   });
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,19 +32,16 @@ const Register = () => {
       return;
     }
     setIsLoading(true);
-    setError("");
 
     try {
-      const response = await register({
+      await register({
         username: formData.username,
         email: formData.email,
         password: formData.password,
         role: "admin",
       });
-      if (response.token) {
-        toast.success("Registration successful!");
-        navigate("/dashboard");
-      }
+      toast.success("Registration successful!");
+      navigate("/dashboard");
     } catch (err) {
       toast.error(err.message || "Registration failed");
     } finally {
@@ -59,8 +56,6 @@ const Register = () => {
         <div>
           <h2 className="register-title">Create Admin Account</h2>
         </div>
-
-        {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">

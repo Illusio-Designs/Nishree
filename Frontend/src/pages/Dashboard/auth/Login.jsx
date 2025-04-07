@@ -11,35 +11,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login, googleLogin } = useAuth();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await login(formData);
+      await login(formData);
       toast.success("Login successful!");
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 1000);
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       toast.error(err.message || "Login failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      setIsLoading(true);
-      const response = await googleLogin();
-      toast.success("Google login successful!");
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 2000);
-    } catch (err) {
-      toast.error(err.message || "Google login failed");
     } finally {
       setIsLoading(false);
     }
@@ -97,22 +80,6 @@ const Login = () => {
           <div className="form-group">
             <button type="submit" disabled={isLoading} className="auth-button">
               {isLoading ? "Signing in..." : "Sign in as Admin"}
-            </button>
-          </div>
-
-          <div className="form-group">
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="google-button"
-              disabled={isLoading}
-            >
-              <img
-                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                alt="Google"
-                className="google-icon"
-              />
-              Sign in with Google
             </button>
           </div>
         </form>

@@ -1,41 +1,57 @@
-.header {
-    background-color: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+*{
+    margin: 0;
+    padding: 0;
 }
-
-.header-container {
-    max-width: 80rem;
-    margin: 0 auto;
-    padding: 1rem 1rem;
+.header{
+    position: absolute;
+    z-index: 1;
+}
+.back{
+    padding: 37px 5px;
+    height: auto;
+    width: 85%;
+    margin: 20px 7.5%; 
+    position: absolute;
+    border: 1px solid #F2F2F226;
+    background: #F2F2F226;
+    backdrop-filter: blur(25.200000762939453px);
+    border-radius: 22px;
+}
+.header .container{
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
+    padding: 10px 60px 10px 20px;
+    width: 80%;
+    margin: 10px auto; 
+    background-color: #ffffff;
+    position: relative;
+    border-radius: 20px;
 }
-
-.header-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #111827;
+.logo img{
+    width: 50%;
 }
-
-.header-user-section {
+.logo{
+    width:15%;
+}
+.icon{
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    align-items:center ;
+    gap: 20px;
+}
+.nav{
+    display: flex;
+    gap: 50px;
+}
+.nav a{
+    color:#000000;
+    font-size: 20px;
+    text-decoration: none;
+    font-weight: bold;
+}
+.nav a:hover{
+    color: #B72D24;
+    text-decoration: underline;
+    text-underline-offset: 5px;
 }
 
-.user-email {
-    color: #374151;
-}
-
-.logout-button {
-    background-color: #ef4444;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    transition: background-color 0.2s;
-}
-
-.logout-button:hover {
-    background-color: #dc2626;
-}

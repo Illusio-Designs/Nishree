@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast, ToastContainer } from "react-toastify";
+import { authService } from '../../../services';
 import '../../../styles/auth/ResetPassword.css';
-import { resetPassword } from '../../../services/authService';
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
@@ -11,24 +12,25 @@ const ResetPassword = () => {
         password: '',
         confirmPassword: ''
     });
-    const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            toast.error('Passwords do not match');
             return;
         }
 
         setIsLoading(true);
-        setError('');
 
         try {
-            await resetPassword({ token, password: formData.password });
-            navigate('/login', { state: { message: 'Password reset successful. Please login with your new password.' } });
+            await authService.resetPassword({ token, password: formData.password });
+            toast.success('Password reset successful');
+            setTimeout(() => {
+                navigate('/admin/login');
+            }, 2000);
         } catch (err) {
-            setError(err.message || 'Failed to reset password');
+            toast.error(err.message || 'Failed to reset password');
         } finally {
             setIsLoading(false);
         }
@@ -40,24 +42,13 @@ const ResetPassword = () => {
 
     return (
         <div className="reset-container">
+            <ToastContainer position="top-center" />
             <div className="reset-card">
-                <div>
-                    <h2 className="reset-title">
-                        Reset Your Password
-                    </h2>
-                </div>
-
-                {error && (
-                    <div className="error-message">
-                        {error}
-                    </div>
-                )}
+                <h2 className="reset-title">Reset Your Password</h2>
 
                 <form onSubmit={handleSubmit}>
-                    <div>
-                        <label htmlFor="password" className="sr-only">New Password</label>
+                    <div className="form-group">
                         <input
-                            id="password"
                             name="password"
                             type="password"
                             required
@@ -67,10 +58,8 @@ const ResetPassword = () => {
                             onChange={handleChange}
                         />
                     </div>
-                    <div>
-                        <label htmlFor="confirmPassword" className="sr-only">Confirm New Password</label>
+                    <div className="form-group">
                         <input
-                            id="confirmPassword"
                             name="confirmPassword"
                             type="password"
                             required
@@ -81,7 +70,7 @@ const ResetPassword = () => {
                         />
                     </div>
 
-                    <div>
+                    <div className="form-group">
                         <button
                             type="submit"
                             disabled={isLoading}

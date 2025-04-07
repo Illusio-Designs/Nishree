@@ -1,9 +1,10 @@
 import React from "react";
-import Header from "../Componets/Header";
+import Header from "../components/Header";
 import "../Styles/Home.css";
 import hero from "../assets/aromatic-spice-collection-adds-flavor-cooking-generated-by-ai 1.png";
 import about from "../assets/img.png";
-import ProductCard from "../Componets/Productcard";
+import ProductCard from "../components/Productcard";
+import vector1 from "../assets/Vector (17).png"
 
 const Home = () => {
   return (
@@ -21,6 +22,7 @@ const Home = () => {
           <button className="btn">Shop Now</button>
         </div>
       </div>
+      <div className="background">
       <div className="about">
         <div className="about-img">
           <img src={about} className="img-fluid" alt="about" />
@@ -47,6 +49,27 @@ const Home = () => {
           </h1>
         </div>
         <ProductCard />
+      </div>
+      </div>
+      <div className="whychooseus">
+      <div className="products-heading">
+          <h1>
+            <span>Why</span> Chhose Us
+          </h1>
+        </div>
+        <div className="features">
+          <div className="feature">
+            <div className="feature-icon">
+              <img src={vector1} alt="icon" />
+            </div>
+            <div className="feature-text">
+              <h4>Quality Ingredients</h4>
+              <p>
+              Sourced from the finest farms across India
+              </p>
+            </div>
+            </div>
+      </div>
       </div>
     </>
   );
