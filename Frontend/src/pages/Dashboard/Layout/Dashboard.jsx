@@ -18,14 +18,10 @@ import {
 // Import dashboard components
 import DashboardOverview from "../Pages/DashboardOverview";
 import Customers from "../Pages/Customers";
-<<<<<<< HEAD
-// import Leads from "./Leads";
-// import Reports from "./Reports";
-// import Settings from "../../../components/common/Settings";
-=======
+
 import Category from "../Pages/Category";
 import Settings from "../../../components/common/Settings";
->>>>>>> 13ebd4d4074ee654cbf4bb75ade32d2b3ed5da9c
+
 
 // Import additional icon
 import { FaChevronLeft } from "react-icons/fa";

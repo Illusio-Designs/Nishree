@@ -1,13 +1,9 @@
-<<<<<<< HEAD
-import React from 'react';
-import TableWithControls from '../../../components/common/TableWithControls';  // Add this import
-import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
-=======
+
 import React from "react";
 import TableWithControls from "../../../components/common/TableWithControls"; // Add this import
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import "../../../styles/Dashboard.css";
->>>>>>> 13ebd4d4074ee654cbf4bb75ade32d2b3ed5da9c
+
 
 const Customers = () => {
   const columns = [
