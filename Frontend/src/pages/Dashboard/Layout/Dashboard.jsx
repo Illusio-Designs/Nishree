@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link, Routes, Route, Outlet } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import img from "../../assets/RTHSRT 1.png";
-import "../../styles/Dashboard.css";
+import img from "../../../assets/RTHSRT 1.png";
+import "../../../styles/Dashboard.css";
 import {
   FaHome,
   FaUsers,
@@ -17,10 +17,10 @@ import {
 
 // Import dashboard components
 import DashboardOverview from "../Pages/DashboardOverview";
-import Customers from "../Customers";
-import Leads from "./Leads";
-import Reports from "./Reports";
-import Settings from "../../../components/common/Settings";
+import Customers from "../Pages/Customers";
+// import Leads from "./Leads";
+// import Reports from "./Reports";
+// import Settings from "../../../components/common/Settings";
 
 // Import additional icon
 import { FaChevronLeft } from "react-icons/fa";

@@ -1,5 +1,5 @@
 import React from 'react';
-import TableWithControls from '../../components/common/TableWithControls';  // Add this import
+import TableWithControls from '../../../components/common/TableWithControls';  // Add this import
 import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 
 const Customers = () => {
