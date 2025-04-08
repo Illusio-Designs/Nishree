@@ -12,10 +12,10 @@ const Header = () => {
             <img src={logo} alt="logo" />
           </div>
           <div className="nav">
-            <a href="#">Home</a>
+            <a href="/">Home</a>
             <a href="#">About us</a>
             <a href="#">Collection</a>
-            <a href="#">Product</a>
+            <a href="/product">Product</a>
             <a href="#">Contact</a>
           </div>
           <div className="icon">
