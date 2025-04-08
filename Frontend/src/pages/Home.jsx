@@ -12,6 +12,7 @@ import vector5 from "../assets/Vector (21).png";
 import Testimonials from "../components/Teastimonials";
 import BlogCard from "../components/BlogCard";
 import Newsletter from "../components/Newsletter";
+import Footer from "../components/Footer";
 
 const Home = () => {
   return (
@@ -136,8 +137,10 @@ const Home = () => {
       <div className="background">
         <BlogCard />
       </div>
+
       <Newsletter />
-      
+
+      <Footer />
     </>
   );
 };
