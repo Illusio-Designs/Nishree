@@ -26,13 +26,15 @@
 }
 .product-name {
   position: absolute;
-  margin-top: -26%;
+  margin-top: -27%;
   color: white;
-  font-size: 21px;
+  font-size: 23px;
   padding: 0 10px;
-  margin-left: -4px;
+  margin-left: -3px;
   font-weight: 600;
 }
+
+
 .rating {
   position: absolute;
   margin-left: 75%;
@@ -43,11 +45,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
+  font-size: 15px;
+  font-weight: 500;
 }
 .prices {
   display: flex;
   gap: 15px;
+  align-items: center;
 }
 .product-price {
   position: absolute;
@@ -63,10 +67,14 @@
 }
 .discount-price {
   color: #dc2626;
+  font-size: 20px;
+  font-weight: 700;
 }
 .current-price {
   color: #adaebc;
   text-decoration: line-through;
+  font-size: 18px;
+  font-weight: 500;
 }
 .product-cart {
   border-radius: 50%;

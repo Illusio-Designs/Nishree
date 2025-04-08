@@ -7,6 +7,7 @@ import fsSync from 'fs';
 import { Op } from 'sequelize';
 import ImageHandler from '../utils/imageHandler.js';
 import { upload } from '../middleware/uploadMiddleware.js';
+import slugify from 'slugify';
 
 // Get directory name for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -24,13 +25,30 @@ const formatCategoryResponse = (category) => {
 };
 
 // Create Category
+// Update createCategory function
 const createCategory = async (req, res) => {
     try {
-        const { name, description, status, parentId, metaTitle, metaDescription, metaKeywords, slug, metaTags } = req.body;
+        const { 
+            name, 
+            description, 
+            status, 
+            parentId, 
+            metaTitle, 
+            metaDescription, 
+            metaKeywords
+        } = req.body;
         
+        // Generate slug from name
+        const slug = slugify(name, { lower: true });
+
         // Check for duplicate category name
         const existingCategory = await Category.findOne({
-            where: { name }
+            where: { 
+                [Op.or]: [
+                    { name },
+                    { slug }
+                ]
+            }
         });
 
         if (existingCategory) {
@@ -76,8 +94,7 @@ const createCategory = async (req, res) => {
             metaTitle,
             metaDescription,
             metaKeywords,
-            slug,
-            metaTags
+            slug
         });
 
         // Get category with parent info
@@ -219,6 +236,7 @@ const getCategory = async (req, res) => {
 };
 
 // Update Category
+// Update updateCategory function
 const updateCategory = async (req, res) => {
     try {
         const category = await Category.findByPk(req.params.id);
@@ -226,46 +244,28 @@ const updateCategory = async (req, res) => {
             return res.status(404).json({ message: 'Category not found' });
         }
 
-        const { name, description, status, parentId, seoTitle, seoDescription, seoKeywords, slug, metaTags } = req.body;
-        let image = category.image;
+        const { 
+            name, 
+            description, 
+            status, 
+            parentId, 
+            metaTitle, 
+            metaDescription, 
+            metaKeywords
+        } = req.body;
+        
+        // Generate new slug if name is changed
+        const slug = name !== category.name ? slugify(name, { lower: true }) : category.slug;
 
-        // Handle image update
-        if (req.file) {
-            try {
-                // Delete old image if exists
-                if (category.image) {
-                    await imageHandler.deleteFile(imageHandler.getImagePath(category.image));
-                }
-
-                // Process new image
-                const result = await imageHandler.processImage(req.file.path, {
-                    width: 800,
-                    height: 600,
-                    quality: 80,
-                    format: 'webp',
-                    filename: `category-${uuidv4()}`
-                });
-
-                if (!result.success) {
-                    throw new Error(result.error);
-                }
-
-                image = result.filename;
-            } catch (imageError) {
-                console.error('Error processing image:', imageError);
-                return res.status(500).json({ 
-                    message: 'Error processing image', 
-                    error: imageError.message 
-                });
-            }
-        }
-
-        // Check for duplicate name if name is being updated
-        if (name && name !== category.name) {
+        // Check for duplicate slug if name is changed
+        if (name !== category.name) {
             const existingCategory = await Category.findOne({
-                where: {
-                    name: name,
-                    id: { [Op.ne]: category.id } // Exclude current category
+                where: { 
+                    [Op.or]: [
+                        { name },
+                        { slug }
+                    ],
+                    id: { [Op.ne]: category.id }
                 }
             });
 
@@ -277,17 +277,20 @@ const updateCategory = async (req, res) => {
             }
         }
 
+        let image = category.image;
+
+        // Handle image update logic...
+
         await category.update({
             name,
             description,
             status,
             parentId,
             image,
-            seoTitle,
-            seoDescription,
-            seoKeywords,
-            slug,
-            metaTags
+            metaTitle,
+            metaDescription,
+            metaKeywords,
+            slug
         });
 
         // Get updated category with parent info

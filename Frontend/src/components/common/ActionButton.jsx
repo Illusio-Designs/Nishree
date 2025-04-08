@@ -1,5 +1,7 @@
 import React from "react";
-import { FaEye, FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaCheck, FaTimes } from "react-icons/fa";
+import { HiOutlineEye, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck } from "react-icons/hi2";
+import { IoToggle, IoToggleOutline, IoClose } from "react-icons/io5";
+
 import "../../Styles/common/ActionButton.css";
 
 const ActionButton = ({ 
@@ -28,13 +30,13 @@ const ActionButton = ({
     if (icon) return icon;
     
     const icons = {
-      view: <FaEye />,
-      edit: <FaEdit />,
-      delete: <FaTrash />,
-      active: <FaToggleOn />,
-      inactive: <FaToggleOff />,
-      approve: <FaCheck />,
-      reject: <FaTimes />
+      view: <HiOutlineEye size={20} />,
+      edit: <HiOutlinePencil size={20} />,
+      delete: <HiOutlineTrash size={20} />,
+      active: <IoToggle size={20} />,
+      inactive: <IoToggleOutline size={20} />,
+      approve: <HiOutlineCheck size={20} />,
+      reject: <IoClose size={20} />
     };
     return icons[variant] || null;
   };

@@ -1,8 +1,8 @@
 
 import React from "react";
 import TableWithControls from "../../../components/common/TableWithControls"; // Add this import
-import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
-import "../../../styles/Dashboard.css";
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from "react-icons/hi2";
+import "../../../styles/dashboard/Dashboard.css";
 
 
 const Customers = () => {
@@ -23,19 +23,19 @@ const Customers = () => {
 
   const actions = [
     {
-      icon: <FaEye />,
+      icon: <HiOutlineEye size={20} />,
       label: "View",
       onClick: (row) => console.log("View", row),
       className: "view-btn",
     },
     {
-      icon: <FaEdit />,
+      icon: <HiOutlinePencil size={20} />,
       label: "Edit",
       onClick: (row) => console.log("Edit", row),
       className: "edit-btn",
     },
     {
-      icon: <FaTrash />,
+      icon: <HiOutlineTrash size={20} />,
       label: "Delete",
       onClick: (row) => console.log("Delete", row),
       className: "delete-btn",

@@ -229,4 +229,52 @@ export const categoryService = {
     }
 };
 
+// Slider Services
+export const sliderService = {
+    createSlider: async (sliderData) => {
+        try {
+            const response = await api.post('/api/sliders', sliderData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getAllSliders: async () => {
+        try {
+            const response = await api.get('/api/sliders');
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getSliderById: async (id) => {
+        try {
+            const response = await api.get(`/api/sliders/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    updateSlider: async (id, sliderData) => {
+        try {
+            const response = await api.put(`/api/sliders/${id}`, sliderData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    deleteSlider: async (id) => {
+        try {
+            const response = await api.delete(`/api/sliders/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    }
+};
+
 export default api;

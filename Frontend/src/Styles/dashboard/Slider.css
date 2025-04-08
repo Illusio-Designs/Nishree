@@ -1,0 +1,143 @@
+.pslider-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.slider {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    height: 100%;
+}
+
+.slide {
+    min-width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slide-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #fff;
+    z-index: 2;
+    width: 80%;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+}
+
+.slide-title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.slide-description {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.slider-nav {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 3;
+}
+
+.slider-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.slider-dot.active {
+    background-color: #fff;
+}
+
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+    transition: background-color 0.3s ease;
+}
+
+.slider-arrow:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.slider-arrow.prev {
+    left: 20px;
+}
+
+.slider-arrow.next {
+    right: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .slider-container {
+        height: 300px;
+    }
+
+    .slide-title {
+        font-size: 1.8rem;
+    }
+
+    .slide-description {
+        font-size: 1rem;
+    }
+
+    .slider-arrow {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .slider-container {
+        height: 200px;
+    }
+
+    .slide-title {
+        font-size: 1.4rem;
+    }
+
+    .slide-description {
+        font-size: 0.9rem;
+    }
+
+    .slider-arrow {
+        width: 25px;
+        height: 25px;
+    }
+}

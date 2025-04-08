@@ -29,7 +29,17 @@
   min-height: 100vh;
   overflow: hidden;
   background-color: var(--primary-bg);
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, sans-serif !important;
+}
+
+.dashboard-layout h1, .dashboard-layout h2{
+  font-family: "Inter", system-ui, -apple-system, sans-serif !important;
+}
+
+.dashboard-title {
+  margin-bottom: 1.5rem;
+  font-size: 30px;
+  font-weight: 700;
 }
 
 /* Modern Sidebar */
@@ -186,14 +196,6 @@
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.dashboard-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  padding-bottom: 1rem;
-  letter-spacing: -0.025em;
 }
 
 /* Stats Grid */

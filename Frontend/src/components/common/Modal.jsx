@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from './Button';
+import { IoClose } from 'react-icons/io5';
 import '../../Styles/common/Modal.css';
 
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -14,7 +15,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             onClick={onClose}
             className="modal-close-button"
           >
-            ×
+            <IoClose size={24} />
           </Button>
         </div>
         <div className="modal-body">

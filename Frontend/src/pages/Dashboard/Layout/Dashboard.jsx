@@ -1,30 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link, Routes, Route, Outlet } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import img from "../../../assets/RTHSRT 1.png";
-import "../../../styles/Dashboard.css";
-import {
-  FaHome,
-  FaUsers,
-  FaTasks,
-  FaChartLine,
-  FaCog,
-  FaBars,
-  FaTimes,
-  FaLock,
-  FaSignOutAlt,
-} from "react-icons/fa";
+import img from "../../../assets/RTHSRT.png";
+import "../../../Styles/dashboard/Dashboard.css";
+import { HiOutlineHome, HiOutlineUsers, HiOutlineCog, HiOutlineLockClosed, HiOutlineChevronLeft, HiOutlineArrowRightOnRectangle, HiOutlineBell } from "react-icons/hi2";
+import { IoGridOutline } from "react-icons/io5";
+import Slider from "../Pages/Slider";
 
 // Import dashboard components
 import DashboardOverview from "../Pages/DashboardOverview";
 import Customers from "../Pages/Customers";
-
 import Category from "../Pages/Category";
 import Settings from "../../../components/common/Settings";
-
-
-// Import additional icon
-import { FaChevronLeft } from "react-icons/fa";
 
 const Dashboard = () => {
   const { user, loading, logout } = useAuth(); // Add logout to destructuring
@@ -68,7 +55,7 @@ const Dashboard = () => {
         {/* <div className="sidebar-header">
                     <h2>{isSidebarOpen ? 'Admin Panel' : 'AP'}</h2>
                     <button className="toggle-btn" onClick={toggleSidebar}>
-                        <FaChevronLeft />
+                        <HiOutlineChevronLeft size={20} />
                     </button>
                 </div> */}
         <div className="sidebar-header">
@@ -84,7 +71,7 @@ const Dashboard = () => {
               <img src={img} width={70} alt="AP" className="logo-small" />
             )}
             <button className="toggle-btn" onClick={toggleSidebar}>
-              <FaChevronLeft />
+              <HiOutlineChevronLeft size={20} />
             </button>
           </div>
         </div>
@@ -95,7 +82,7 @@ const Dashboard = () => {
               location.pathname === "/dashboard" ? "active" : ""
             }`}
           >
-            <FaHome className="nav-icon" />
+            <HiOutlineHome className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Dashboard</span>
           </Link>
           <Link
@@ -104,7 +91,7 @@ const Dashboard = () => {
               location.pathname === "/dashboard/customers" ? "active" : ""
             }`}
           >
-            <FaUsers className="nav-icon" />
+            <HiOutlineUsers className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Customers</span>
           </Link>
           <Link
@@ -113,8 +100,17 @@ const Dashboard = () => {
               location.pathname === "/dashboard/category" ? "active" : ""
             }`}
           >
-            <FaTasks className="nav-icon" />
+            <IoGridOutline className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Category</span>
+          </Link>
+          <Link
+            to="/dashboard/slider"
+            className={`nav-item ${
+              location.pathname === "/dashboard/slider" ? "active" : ""
+            }`}
+          >
+            <IoGridOutline className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Slider</span>
           </Link>
         </nav>
       </div>
@@ -124,7 +120,7 @@ const Dashboard = () => {
           <div className="header-actions">
             <button className="notification-btn">
               <span className="notification-count">3</span>
-              🔔
+              <HiOutlineBell size={20} />
             </button>
             <div className="user-profile-dropdown">
               <div className="profile-trigger" onClick={toggleDropdown}>
@@ -145,19 +141,19 @@ const Dashboard = () => {
                     to="/dashboard/settings/profile"
                     className="dropdown-item"
                   >
-                    <FaCog className="item-icon" />
+                    <HiOutlineCog className="item-icon" size={20} />
                     Profile Settings
                   </Link>
                   <Link
                     to="/dashboard/settings/security"
                     className="dropdown-item"
                   >
-                    <FaLock className="item-icon" />
+                    <HiOutlineLockClosed className="item-icon" size={20} />
                     Security
                   </Link>
                   <div className="dropdown-divider" />
                   <button onClick={handleLogout} className="dropdown-item">
-                    <FaSignOutAlt className="item-icon" />
+                    <HiOutlineArrowRightOnRectangle className="item-icon" size={20} />
                     Logout
                   </button>
                 </div>
@@ -171,6 +167,7 @@ const Dashboard = () => {
               <Route index element={<DashboardOverview />} />
               <Route path="customers" element={<Customers />} />
               <Route path="category" element={<Category />} />
+              <Route path="slider" element={<Slider />} />
             </Routes>
           </div>
         </div>
