@@ -93,7 +93,7 @@ const Customers = () => {
 
   return (
     <div className="customers">
-      <h2 className="dashboard-title">Customers</h2>
+     <h2 className="dashboard-title">Customers</h2>
       <TableWithControls
         columns={columns}
         data={sampleData}
