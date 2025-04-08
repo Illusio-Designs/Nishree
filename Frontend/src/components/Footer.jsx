@@ -3,7 +3,7 @@ import logo from "../assets/RTHSRT.png";
 import "../Styles/components/Footer.css";
 
 const Footer = () => {
-  return;
+  return (
   <>
     <div className="footer">
       <div className="col-3">
@@ -119,7 +119,8 @@ const Footer = () => {
         </div>
       </div>
     </div>
-  </>;
+  </>
+  );
 };
 
 export default Footer;
