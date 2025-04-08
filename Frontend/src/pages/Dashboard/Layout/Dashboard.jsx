@@ -4,8 +4,9 @@ import { useAuth } from "../../../context/AuthContext";
 import img from "../../../assets/RTHSRT.png";
 import "../../../Styles/dashboard/Dashboard.css";
 import { HiOutlineHome, HiOutlineUsers, HiOutlineCog, HiOutlineLockClosed, HiOutlineChevronLeft, HiOutlineArrowRightOnRectangle, HiOutlineBell } from "react-icons/hi2";
-import { IoGridOutline } from "react-icons/io5";
+import { IoGridOutline, IoCartOutline } from "react-icons/io5";
 import Slider from "../Pages/Slider";
+import Products from "../Pages/Products";
 
 // Import dashboard components
 import DashboardOverview from "../Pages/DashboardOverview";
@@ -112,6 +113,15 @@ const Dashboard = () => {
             <IoGridOutline className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Slider</span>
           </Link>
+          <Link
+            to="/dashboard/products"
+            className={`nav-item ${
+              location.pathname === "/dashboard/products" ? "active" : ""
+            }`}
+          >
+            <IoCartOutline className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Products</span>
+          </Link>
         </nav>
       </div>
       <div className="main-content">
@@ -168,6 +178,7 @@ const Dashboard = () => {
               <Route path="customers" element={<Customers />} />
               <Route path="category" element={<Category />} />
               <Route path="slider" element={<Slider />} />
+              <Route path="products" element={<Products />} />
             </Routes>
           </div>
         </div>
