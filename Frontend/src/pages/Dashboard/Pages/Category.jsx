@@ -199,9 +199,8 @@ const Category = () => {
         <Button 
           onClick={() => handleOpenModal('add')}
           className="add-button"
-          icon={<FaPlus />}
         >
-          Add Category
+         <FaPlus /> Add Category
         </Button>
       </div>
 

@@ -181,9 +181,8 @@ const Slider = () => {
         <Button 
           onClick={() => handleOpenModal('add')}
           className="add-button"
-          icon={<FaPlus />}
-        >
-          Add Slider
+          >
+          <FaPlus /> Add Slider
         </Button>
       </div>
 

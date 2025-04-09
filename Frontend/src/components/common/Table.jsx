@@ -7,8 +7,8 @@ const Table = ({ columns, data, onRowClick, actions }) => {
       <table className="common-table">
         <thead>
           <tr>
-            {columns.map((column) => (
-              <th key={column.key}>{column.header}</th>
+            {columns.map((column, index) => (
+              <th key={column.accessor || column.key || index}>{column.header}</th>
             ))}
             {actions && <th>Actions</th>}
           </tr>
@@ -20,9 +20,9 @@ const Table = ({ columns, data, onRowClick, actions }) => {
               onClick={() => onRowClick && onRowClick(row)}
               className={onRowClick ? 'clickable' : ''}
             >
-              {columns.map((column) => (
-                <td key={column.key}>
-                  {column.render ? column.render(row) : row[column.key]}
+              {columns.map((column, colIndex) => (
+                <td key={column.accessor || column.key || colIndex}>
+                  {column.render ? column.render(row) : row[column.accessor || column.key]}
                 </td>
               ))}
               {actions && (

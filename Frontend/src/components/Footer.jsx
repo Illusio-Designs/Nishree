@@ -33,7 +33,7 @@ const Footer = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
                   height="20"
-                  fill="currentColor"
+                  fill="#9CA3AF"
                   class="bi bi-geo-alt-fill"
                   viewBox="0 0 16 16"
                 >
@@ -46,7 +46,7 @@ const Footer = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
                   height="20"
-                  fill="currentColor"
+                  fill="#9CA3AF"
                   class="bi bi-telephone-fill"
                   viewBox="0 0 16 16"
                 >
@@ -62,7 +62,7 @@ const Footer = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
                   height="20"
-                  fill="currentColor"
+                  fill="#9CA3AF"
                   class="bi bi-envelope-fill"
                   viewBox="0 0 16 16"
                 >
@@ -80,7 +80,7 @@ const Footer = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="25"
                 height="25"
-                fill="currentColor"
+                fill="#9CA3AF"
                 class="bi bi-facebook"
                 viewBox="0 0 16 16"
               >
@@ -90,7 +90,7 @@ const Footer = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="25"
                 height="25"
-                fill="currentColor"
+                fill="#9CA3AF"
                 class="bi bi-instagram"
                 viewBox="0 0 16 16"
               >
@@ -100,7 +100,7 @@ const Footer = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="25"
                 height="25"
-                fill="currentColor"
+                fill="#9CA3AF"
                 class="bi bi-twitter"
                 viewBox="0 0 16 16"
               >
@@ -110,7 +110,7 @@ const Footer = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="25"
                 height="25"
-                fill="currentColor"
+                fill="#9CA3AF"
                 class="bi bi-youtube"
                 viewBox="0 0 16 16"
               >

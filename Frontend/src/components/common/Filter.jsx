@@ -1,17 +1,16 @@
 import React from 'react';
 
-const Filter = ({ filters, selectedFilters, onChange }) => {
+const Filter = ({ filters = [], selectedFilters = {}, onChange }) => {
   return (
     <div className="filter-container">
       {filters.map(filter => (
-        <div key={filter.key} className="filter-group">
-          <label>{filter.label}</label>
+        <div key={filter.key} className="filter-item">
           <select
             value={selectedFilters[filter.key] || ''}
             onChange={(e) => onChange(filter.key, e.target.value)}
             className="filter-select"
           >
-            <option value="">All</option>
+            <option value="">All {filter.label}</option>
             {filter.options.map(option => (
               <option key={option.value} value={option.value}>
                 {option.label}

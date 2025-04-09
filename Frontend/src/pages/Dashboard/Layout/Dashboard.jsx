@@ -3,16 +3,19 @@ import { useNavigate, Link, Routes, Route, Outlet } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import img from "../../../assets/RTHSRT.png";
 import "../../../Styles/dashboard/Dashboard.css";
-import { HiOutlineHome, HiOutlineUsers, HiOutlineCog, HiOutlineLockClosed, HiOutlineChevronLeft, HiOutlineArrowRightOnRectangle, HiOutlineBell } from "react-icons/hi2";
+import { HiOutlineHome, HiOutlineUsers, HiOutlineCog, HiOutlineLockClosed, HiOutlineChevronLeft, HiOutlineArrowRightOnRectangle, HiOutlineBell, HiOutlinePhoto } from "react-icons/hi2";
 import { IoGridOutline, IoCartOutline } from "react-icons/io5";
 import Slider from "../Pages/Slider";
 import Products from "../Pages/Products";
+import Coupons from "../Pages/Coupons";
+import Orders from "../Pages/Orders";
+import Reviews from "../Pages/Reviews";
+import Wishlist from "../Pages/Wishlist";
 
 // Import dashboard components
 import DashboardOverview from "../Pages/DashboardOverview";
 import Customers from "../Pages/Customers";
 import Category from "../Pages/Category";
-import Settings from "../../../components/common/Settings";
 
 const Dashboard = () => {
   const { user, loading, logout } = useAuth(); // Add logout to destructuring
@@ -110,7 +113,7 @@ const Dashboard = () => {
               location.pathname === "/dashboard/slider" ? "active" : ""
             }`}
           >
-            <IoGridOutline className="nav-icon" size={24} />
+            <HiOutlinePhoto className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Slider</span>
           </Link>
           <Link
@@ -121,6 +124,42 @@ const Dashboard = () => {
           >
             <IoCartOutline className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Products</span>
+          </Link>
+          <Link
+            to="/dashboard/orders"
+            className={`nav-item ${
+              location.pathname === "/dashboard/orders" ? "active" : ""
+            }`}
+          >
+            <HiOutlineBell className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Orders</span>
+          </Link>
+          <Link
+            to="/dashboard/coupons"
+            className={`nav-item ${
+              location.pathname === "/dashboard/coupons" ? "active" : ""
+            }`}
+          >
+            <HiOutlinePhoto className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Coupons</span>
+          </Link>
+          <Link
+            to="/dashboard/reviews"
+            className={`nav-item ${
+              location.pathname === "/dashboard/reviews" ? "active" : ""
+            }`}
+          >
+            <HiOutlineUsers className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Reviews</span>
+          </Link>
+          <Link
+            to="/dashboard/wishlist"
+            className={`nav-item ${
+              location.pathname === "/dashboard/wishlist" ? "active" : ""
+            }`}
+          >
+            <IoGridOutline className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Wishlist</span>
           </Link>
         </nav>
       </div>
@@ -179,6 +218,10 @@ const Dashboard = () => {
               <Route path="category" element={<Category />} />
               <Route path="slider" element={<Slider />} />
               <Route path="products" element={<Products />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="coupons" element={<Coupons />} />
+              <Route path="reviews" element={<Reviews />} />
+              <Route path="wishlist" element={<Wishlist />} />
             </Routes>
           </div>
         </div>

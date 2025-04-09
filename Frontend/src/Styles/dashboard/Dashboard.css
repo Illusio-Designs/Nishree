@@ -58,6 +58,10 @@
   padding: 20px 10px;
 }
 
+.customers{
+  padding: 20px;
+}
+
 .toggle-btn {
   position: absolute;
   right: -12px;

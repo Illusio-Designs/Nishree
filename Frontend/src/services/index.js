@@ -343,4 +343,160 @@ export const sliderService = {
     }
 };
 
+// Order Services
+export const orderService = {
+    getAllOrders: async () => {
+        try {
+            const response = await api.get('/api/orders');
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getOrderById: async (id) => {
+        try {
+            const response = await api.get(`/api/orders/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    updateOrderStatus: async (id, statusData) => {
+        try {
+            const response = await api.put(`/api/orders/${id}/status`, statusData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    deleteOrder: async (id) => {
+        try {
+            const response = await api.delete(`/api/orders/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    }
+};
+
+// Coupon Services
+export const couponService = {
+    createCoupon: async (couponData) => {
+        try {
+            const response = await api.post('/api/coupons', couponData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getAllCoupons: async () => {
+        try {
+            const response = await api.get('/api/coupons');
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getCouponById: async (id) => {
+        try {
+            const response = await api.get(`/api/coupons/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    updateCoupon: async (id, couponData) => {
+        try {
+            const response = await api.put(`/api/coupons/${id}`, couponData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    deleteCoupon: async (id) => {
+        try {
+            const response = await api.delete(`/api/coupons/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    }
+};
+
+// Wishlist Services
+export const wishlistService = {
+    getAllWishlists: async () => {
+        try {
+            const response = await api.get('/api/wishlists');
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getWishlistById: async (id) => {
+        try {
+            const response = await api.get(`/api/wishlists/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    deleteWishlist: async (id) => {
+        try {
+            const response = await api.delete(`/api/wishlists/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    }
+};
+
+// Review Services
+export const reviewService = {
+    getAllReviews: async (status = 'all') => {
+        try {
+            const response = await api.get(`/api/reviews?status=${status}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getReviewById: async (id) => {
+        try {
+            const response = await api.get(`/api/reviews/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    updateReviewStatus: async (id, statusData) => {
+        try {
+            const response = await api.put(`/api/reviews/${id}/status`, statusData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    deleteReview: async (id) => {
+        try {
+            const response = await api.delete(`/api/reviews/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    }
+};
+
 export default api;

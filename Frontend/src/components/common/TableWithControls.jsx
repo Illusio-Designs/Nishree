@@ -18,10 +18,10 @@ const TableWithControls = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilters, setSelectedFilters] = useState({});
-  const [filteredData, setFilteredData] = useState(data);
+  const [filteredData, setFilteredData] = useState(Array.isArray(data) ? data : []);
 
   useEffect(() => {
-    let result = [...data];
+    let result = Array.isArray(data) ? [...data] : [];
 
     // Apply search
     if (searchTerm) {

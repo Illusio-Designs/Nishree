@@ -136,27 +136,32 @@ const Products = () => {
           {row.status}
         </span>
       )
-    }
-  ];
-
-  const actions = [
-    {
-      icon: <HiOutlineEye />,
-      onClick: (row) => console.log('View product', row),
-      variant: "view",
-      tooltip: "View Product"
     },
     {
-      icon: <HiOutlinePencil />,
-      onClick: (row) => handleOpenModal('edit', row),
-      variant: "edit",
-      tooltip: "Edit Product"
-    },
-    {
-      icon: <HiOutlineTrash />,
-      onClick: (row) => handleDelete(row.id),
-      variant: "delete",
-      tooltip: "Delete Product"
+      key: "actions",
+      header: "Actions",
+      render: (row) => (
+        <div className="action-buttons">
+          <ActionButton
+            icon={<HiOutlineEye />}
+            onClick={() => console.log('View product', row)}
+            variant="view"
+            tooltip="View Product"
+          />
+          <ActionButton
+            icon={<HiOutlinePencil />}
+            onClick={() => handleOpenModal('edit', row)}
+            variant="edit"
+            tooltip="Edit Product"
+          />
+          <ActionButton
+            icon={<HiOutlineTrash />}
+            onClick={() => handleDelete(row.id)}
+            variant="delete"
+            tooltip="Delete Product"
+          />
+        </div>
+      )
     }
   ];
 
@@ -175,7 +180,6 @@ const Products = () => {
       <TableWithControls
         columns={columns}
         data={products}
-        actions={actions}
         searchFields={["name", "description"]}
         filters={[
           {
@@ -244,14 +248,15 @@ const Products = () => {
           <div className="modal-actions">
             <Button
               type="submit"
-              className="submit-button"
+              className="modal-submit-button"
+              disabled={!formData.name}
             >
               {modalMode === 'add' ? 'Create Product' : 'Update Product'}
             </Button>
             <Button
               type="button"
               onClick={() => setShowModal(false)}
-              className="cancel-button"
+              className="modal-cancel-button"
               variant="secondary"
             >
               Cancel

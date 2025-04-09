@@ -29,9 +29,11 @@
 
 .footer h2{
   padding-bottom: 20px;
+  font-family: Inter;
 }
 
 .footer-links a {
+  font-family: Nunito Sans;
   display: block;
   color: #9CA3AF;
   text-decoration: none;
@@ -49,8 +51,8 @@
 .footer-contact .footer-item {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding-bottom: 10px;
+  gap: 10px;
+  padding-bottom: 15px;
 }
 .footer-social{
   display: flex;
@@ -63,6 +65,10 @@ hr{
   display: flex;
   justify-content: space-between;
   padding-top: 20px;
+}
+.copyright p{
+  color: #ffffff;
+  font-family: DM Sans;
 }
 .copyright a{
   color: inherit;
