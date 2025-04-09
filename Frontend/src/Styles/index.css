@@ -24,7 +24,8 @@ h5 {
   font-family: playfair display;
 }
 
-p, a {
+p,
+a {
   font-family: Nunito Sans;
 }
 
@@ -53,6 +54,10 @@ span {
   background-size: cover;
   background-position: center;
   padding: 0 0 50px 0;
+}
+
+.nishree {
+  background: #ffffff;
 }
 
 .whychooseus {

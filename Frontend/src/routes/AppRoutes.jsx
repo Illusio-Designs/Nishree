@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
 import Product from "../pages/Product";
+import Collection from "../pages/Collection";
 import AdminLogin from "../pages/Dashboard/auth/Login";
 import AdminRegister from "../pages/Dashboard/auth/Register";
 import AdminForgotPassword from "../pages/Dashboard/auth/ForgotPassword";
@@ -22,6 +23,7 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<Home />} />
       <Route path="/product" element={<Product />} />
+      <Route path="/collection" element={<Collection />} />
 
       {/* Admin Authentication Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />
