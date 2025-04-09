@@ -193,17 +193,21 @@ const Coupons = () => {
             />
             <label htmlFor="isActive">Active</label>
           </div>
-          <div className="flex justify-end gap-2">
-            <ActionButton
+          <div className="modal-actions">
+          <Button 
+              type="submit" 
+              className="modal-submit-button"
+            >
+              {selectedCoupon ? 'Update' : 'Create'}
+            </Button>
+            <Button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              variant="secondary"
+              className="modal-cancel-button"
             >
               Cancel
-            </ActionButton>
-            <ActionButton type="submit" variant="primary">
-              {selectedCoupon ? 'Update' : 'Create'}
-            </ActionButton>
+            </Button>
+           
           </div>
         </form>
       </Modal>
