@@ -16,6 +16,7 @@ import Wishlist from "../Pages/Wishlist";
 import DashboardOverview from "../Pages/DashboardOverview";
 import Customers from "../Pages/Customers";
 import Category from "../Pages/Category";
+import Settings from "../../../components/common/Settings";
 
 const Dashboard = () => {
   const { user, loading, logout } = useAuth(); // Add logout to destructuring
@@ -222,6 +223,8 @@ const Dashboard = () => {
               <Route path="coupons" element={<Coupons />} />
               <Route path="reviews" element={<Reviews />} />
               <Route path="wishlist" element={<Wishlist />} />
+              <Route path="settings/profile" element={<Settings type="profile" />} />
+              <Route path="settings/security" element={<Settings type="security" />} />
             </Routes>
           </div>
         </div>

@@ -14,20 +14,45 @@ const Coupons = () => {
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [formData, setFormData] = useState({
     code: '',
-    discount: '',
+    discountType: 'percentage',
+    discountValue: '',
+    minOrderAmount: 0,
+    maxDiscount: '',
     validFrom: '',
-    validUntil: '',
-    maxUses: '',
-    isActive: true
+    validTo: '',
+    maxUsage: 1,
+    status: 'active'
   });
+  const [error, setError] = useState('');
 
   const columns = [
     { header: 'Code', accessor: 'code' },
-    { header: 'Discount', accessor: 'discount' },
-    { header: 'Valid From', accessor: 'validFrom' },
-    { header: 'Valid Until', accessor: 'validUntil' },
-    { header: 'Max Uses', accessor: 'maxUses' },
-    { header: 'Status', accessor: 'isActive' },
+    { 
+      header: 'Discount',
+      accessor: 'discountValue',
+      cell: (row) => `${row.discountValue}${row.discountType === 'percentage' ? '%' : ' Fixed'}`
+    },
+    { 
+      header: 'Valid From', 
+      accessor: 'validFrom',
+      cell: (row) => new Date(row.validFrom).toLocaleDateString()
+    },
+    { 
+      header: 'Valid To', 
+      accessor: 'validTo',
+      cell: (row) => new Date(row.validTo).toLocaleDateString()
+    },
+    { header: 'Min Order', accessor: 'minOrderAmount' },
+    { header: 'Usage', cell: (row) => `${row.usedCount}/${row.maxUsage}` },
+    { 
+      header: 'Status', 
+      accessor: 'status',
+      cell: (row) => (
+        <span className={`status-${row.status.toLowerCase()}`}>
+          {row.status}
+        </span>
+      )
+    },
     {
       header: 'Actions',
       accessor: 'actions',
@@ -67,11 +92,14 @@ const Coupons = () => {
     setSelectedCoupon(coupon);
     setFormData({
       code: coupon.code,
-      discount: coupon.discount,
-      validFrom: coupon.validFrom,
-      validUntil: coupon.validUntil,
-      maxUses: coupon.maxUses,
-      isActive: coupon.isActive
+      discountType: coupon.discountType,
+      discountValue: coupon.discountValue,
+      minOrderAmount: coupon.minOrderAmount,
+      maxDiscount: coupon.maxDiscount,
+      validFrom: new Date(coupon.validFrom).toISOString().split('T')[0],
+      validTo: new Date(coupon.validTo).toISOString().split('T')[0],
+      maxUsage: coupon.maxUsage,
+      status: coupon.status
     });
     setIsModalOpen(true);
   };
@@ -89,6 +117,32 @@ const Coupons = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    // Validate form data
+    if (!formData.code) {
+      setError('Coupon code is required');
+      return;
+    }
+
+    if (formData.discountValue <= 0) {
+      setError('Discount value must be greater than 0');
+      return;
+    }
+
+    if (formData.discountType === 'percentage' && formData.discountValue > 100) {
+      setError('Percentage discount cannot exceed 100%');
+      return;
+    }
+
+    const startDate = new Date(formData.validFrom);
+    const endDate = new Date(formData.validTo);
+
+    if (endDate <= startDate) {
+      setError('End date must be after start date');
+      return;
+    }
+
     try {
       if (selectedCoupon) {
         await couponService.updateCoupon(selectedCoupon.id, formData);
@@ -100,11 +154,14 @@ const Coupons = () => {
       setSelectedCoupon(null);
       setFormData({
         code: '',
-        discount: '',
+        discountType: 'percentage',
+        discountValue: '',
+        minOrderAmount: 0,
+        maxDiscount: '',
         validFrom: '',
-        validUntil: '',
-        maxUses: '',
-        isActive: true
+        validTo: '',
+        maxUsage: 1,
+        status: 'active'
       });
       fetchCoupons();
     } catch (error) {
@@ -150,48 +207,87 @@ const Coupons = () => {
         title={selectedCoupon ? 'Edit Coupon' : 'Create Coupon'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <div className="text-red-500 mb-4">{error}</div>}
           <InputField
             label="Coupon Code"
             value={formData.code}
-            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
             required
           />
-          <InputField
-            label="Discount"
-            type="number"
-            value={formData.discount}
-            onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
-            required
-          />
-          <InputField
-            label="Valid From"
-            type="date"
-            value={formData.validFrom}
-            onChange={(e) => setFormData({ ...formData, validFrom: e.target.value })}
-            required
-          />
-          <InputField
-            label="Valid Until"
-            type="date"
-            value={formData.validUntil}
-            onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-            required
-          />
-          <InputField
-            label="Max Uses"
-            type="number"
-            value={formData.maxUses}
-            onChange={(e) => setFormData({ ...formData, maxUses: e.target.value })}
-            required
-          />
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="isActive"
-              checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-2">Discount Type</label>
+              <select
+                className="w-full p-2 border rounded"
+                value={formData.discountType}
+                onChange={(e) => setFormData({ ...formData, discountType: e.target.value })}
+              >
+                <option value="percentage">Percentage</option>
+                <option value="fixed">Fixed Amount</option>
+              </select>
+            </div>
+            <InputField
+              label="Discount Value"
+              type="number"
+              min="0"
+              max={formData.discountType === 'percentage' ? '100' : undefined}
+              value={formData.discountValue}
+              onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })}
+              required
             />
-            <label htmlFor="isActive">Active</label>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <InputField
+              label="Minimum Order Amount"
+              type="number"
+              min="0"
+              value={formData.minOrderAmount}
+              onChange={(e) => setFormData({ ...formData, minOrderAmount: e.target.value })}
+            />
+            <InputField
+              label="Maximum Discount"
+              type="number"
+              min="0"
+              value={formData.maxDiscount}
+              onChange={(e) => setFormData({ ...formData, maxDiscount: e.target.value })}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <InputField
+              label="Valid From"
+              type="date"
+              value={formData.validFrom}
+              onChange={(e) => setFormData({ ...formData, validFrom: e.target.value })}
+              required
+            />
+            <InputField
+              label="Valid To"
+              type="date"
+              value={formData.validTo}
+              onChange={(e) => setFormData({ ...formData, validTo: e.target.value })}
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <InputField
+              label="Maximum Usage"
+              type="number"
+              min="1"
+              value={formData.maxUsage}
+              onChange={(e) => setFormData({ ...formData, maxUsage: e.target.value })}
+              required
+            />
+            <div>
+              <label className="block mb-2">Status</label>
+              <select
+                className="w-full p-2 border rounded"
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
           </div>
           <div className="modal-actions">
           <Button 
