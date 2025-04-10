@@ -50,7 +50,7 @@
   text-decoration: none;
   font-weight: bold;
 }
-.nav a:hover {
+.nav a:hover, .nav a.active {
   color: #b72d24;
   text-decoration: underline;
   text-underline-offset: 5px;

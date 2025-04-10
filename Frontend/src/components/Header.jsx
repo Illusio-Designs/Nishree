@@ -1,6 +1,7 @@
 import React from "react";
 import logo from "../assets/RTHSRT.png";
 import "../Styles/components/Header.css";
+import { NavLink } from 'react-router-dom';
 
 const Header = () => {
   return (
@@ -11,13 +12,16 @@ const Header = () => {
           <div className="logo">
             <img src={logo} alt="logo" />
           </div>
-          <div className="nav">
-            <a href="/">Home</a>
-            <a href="#">About us</a>
-            <a href="/collection">Collection</a>
-            <a href="/product">Product</a>
-            <a href="#">Contact</a>
-          </div>
+         
+
+<div className="nav">
+  <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')}>Home</NavLink>
+  <NavLink to="/about" className={({ isActive }) => (isActive ? 'active' : '')}>About us</NavLink>
+  <NavLink to="/collection" className={({ isActive }) => (isActive ? 'active' : '')}>Collection</NavLink>
+  <NavLink to="/product" className={({ isActive }) => (isActive ? 'active' : '')}>Product</NavLink>
+  <NavLink to="/contact" className={({ isActive }) => (isActive ? 'active' : '')}>Contact</NavLink>
+</div>
+
           <div className="icon">
             <div className="user">
               <svg

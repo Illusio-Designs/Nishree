@@ -3,14 +3,18 @@ import { useNavigate, Link, Routes, Route, Outlet } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import img from "../../../assets/RTHSRT.png";
 import "../../../Styles/dashboard/Dashboard.css";
-import { HiOutlineHome, HiOutlineUsers, HiOutlineCog, HiOutlineLockClosed, HiOutlineChevronLeft, HiOutlineArrowRightOnRectangle, HiOutlineBell, HiOutlinePhoto } from "react-icons/hi2";
-import { IoGridOutline, IoCartOutline } from "react-icons/io5";
+import { HiOutlineHome, HiOutlineUsers, HiOutlineCog, HiOutlineLockClosed, HiOutlineChevronLeft, HiOutlineArrowRightOnRectangle, HiOutlineBell, HiOutlinePhoto, HiOutlineClipboardDocumentList, HiOutlineTicket, HiOutlineStar, HiOutlineTruck } from "react-icons/hi2";
+import { IoGridOutline, IoCartOutline, IoHeartOutline, IoLayersOutline, IoPricetagOutline } from "react-icons/io5";
 import Slider from "../Pages/Slider";
 import Products from "../Pages/Products";
 import Coupons from "../Pages/Coupons";
 import Orders from "../Pages/Orders";
 import Reviews from "../Pages/Reviews";
 import Wishlist from "../Pages/Wishlist";
+import OrderStatusHistory from "../Pages/OrderStatusHistory";
+import ShippingFees from "../Pages/ShippingFees";
+import ShippingAddresses from "../Pages/ShippingAddresses";
+import Payments from "../Pages/Payments";
 
 // Import dashboard components
 import DashboardOverview from "../Pages/DashboardOverview";
@@ -136,12 +140,21 @@ const Dashboard = () => {
             <span className={!isSidebarOpen ? "hidden" : ""}>Orders</span>
           </Link>
           <Link
+            to="/dashboard/order-status-history"
+            className={`nav-item ${
+              location.pathname === "/dashboard/order-status-history" ? "active" : ""
+            }`}
+          >
+            <HiOutlineClipboardDocumentList className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Order Status</span>
+          </Link>
+          <Link
             to="/dashboard/coupons"
             className={`nav-item ${
               location.pathname === "/dashboard/coupons" ? "active" : ""
             }`}
           >
-            <HiOutlinePhoto className="nav-icon" size={24} />
+            <HiOutlineTicket className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Coupons</span>
           </Link>
           <Link
@@ -150,7 +163,7 @@ const Dashboard = () => {
               location.pathname === "/dashboard/reviews" ? "active" : ""
             }`}
           >
-            <HiOutlineUsers className="nav-icon" size={24} />
+            <HiOutlineStar className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Reviews</span>
           </Link>
           <Link
@@ -159,8 +172,35 @@ const Dashboard = () => {
               location.pathname === "/dashboard/wishlist" ? "active" : ""
             }`}
           >
-            <IoGridOutline className="nav-icon" size={24} />
+            <IoHeartOutline className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Wishlist</span>
+          </Link>
+          <Link
+            to="/dashboard/shipping-fees"
+            className={`nav-item ${
+              location.pathname === "/dashboard/shipping-fees" ? "active" : ""
+            }`}
+          >
+            <IoPricetagOutline className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Shipping Fees</span>
+          </Link>
+          <Link
+            to="/dashboard/shipping-addresses"
+            className={`nav-item ${
+              location.pathname === "/dashboard/shipping-addresses" ? "active" : ""
+            }`}
+          >
+            <HiOutlineTruck className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Shipping Addresses</span>
+          </Link>
+          <Link
+            to="/dashboard/payments"
+            className={`nav-item ${
+              location.pathname === "/dashboard/payments" ? "active" : ""
+            }`}
+          >
+            <IoLayersOutline className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Payments</span>
           </Link>
         </nav>
       </div>
@@ -220,9 +260,13 @@ const Dashboard = () => {
               <Route path="slider" element={<Slider />} />
               <Route path="products" element={<Products />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="order-status-history" element={<OrderStatusHistory />} />
               <Route path="coupons" element={<Coupons />} />
               <Route path="reviews" element={<Reviews />} />
               <Route path="wishlist" element={<Wishlist />} />
+              <Route path="shipping-fees" element={<ShippingFees />} />
+              <Route path="shipping-addresses" element={<ShippingAddresses />} />
+              <Route path="payments" element={<Payments />} />
               <Route path="settings/profile" element={<Settings type="profile" />} />
               <Route path="settings/security" element={<Settings type="security" />} />
             </Routes>

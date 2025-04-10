@@ -18,10 +18,22 @@ const TableWithControls = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilters, setSelectedFilters] = useState({});
-  const [filteredData, setFilteredData] = useState(Array.isArray(data) ? data : []);
+  const [filteredData, setFilteredData] = useState([]);
 
+  // Initialize filteredData when data changes
   useEffect(() => {
-    let result = Array.isArray(data) ? [...data] : [];
+    if (Array.isArray(data)) {
+      setFilteredData(data);
+    } else {
+      setFilteredData([]);
+    }
+  }, [data]);
+
+  // Apply filters and search separately from data changes
+  useEffect(() => {
+    if (!Array.isArray(data) || data.length === 0) return;
+    
+    let result = [...data];
 
     // Apply search
     if (searchTerm) {
@@ -41,7 +53,7 @@ const TableWithControls = ({
 
     setFilteredData(result);
     setCurrentPage(1);
-  }, [searchTerm, selectedFilters, data, searchFields]);
+  }, [searchTerm, selectedFilters, searchFields]); // Removed data dependency
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);

@@ -42,6 +42,15 @@ const handleApiError = (error) => {
     }
 };
 
+// Import services
+import { shippingFeeService } from './shippingFeeService';
+import { shippingAddressService } from './shippingAddressService';
+import { paymentService } from './paymentService';
+import { settingsService } from './settingsService';
+
+// Export all services
+export { shippingFeeService, shippingAddressService, paymentService, settingsService };
+
 // Auth Services
 export const authService = {
     register: async (formData) => {
