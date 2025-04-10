@@ -1,10 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, Link, Routes, Route, Outlet } from "react-router-dom";
+import {
+  useNavigate,
+  useLocation,
+  Link,
+  Routes,
+  Route,
+  Outlet,
+} from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import img from "../../../assets/RTHSRT.png";
 import "../../../Styles/dashboard/Dashboard.css";
-import { HiOutlineHome, HiOutlineUsers, HiOutlineCog, HiOutlineLockClosed, HiOutlineChevronLeft, HiOutlineArrowRightOnRectangle, HiOutlineBell, HiOutlinePhoto, HiOutlineClipboardDocumentList, HiOutlineTicket, HiOutlineStar, HiOutlineTruck } from "react-icons/hi2";
-import { IoGridOutline, IoCartOutline, IoHeartOutline, IoLayersOutline, IoPricetagOutline } from "react-icons/io5";
+import {
+  HiOutlineHome,
+  HiOutlineUsers,
+  HiOutlineCog,
+  HiOutlineLockClosed,
+  HiOutlineChevronLeft,
+  HiOutlineArrowRightOnRectangle,
+  HiOutlineBell,
+  HiOutlinePhoto,
+  HiOutlineClipboardDocumentList,
+  HiOutlineTicket,
+  HiOutlineStar,
+  HiOutlineTruck,
+} from "react-icons/hi2";
+import {
+  IoGridOutline,
+  IoCartOutline,
+  IoHeartOutline,
+  IoLayersOutline,
+  IoPricetagOutline,
+} from "react-icons/io5";
 import Slider from "../Pages/Slider";
 import Products from "../Pages/Products";
 import Coupons from "../Pages/Coupons";
@@ -27,6 +53,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Make sure this line is present
+
+  const location = useLocation();
 
   // Add handleLogout function
   const handleLogout = async () => {
@@ -80,7 +108,10 @@ const Dashboard = () => {
               <img src={img} width={70} alt="AP" className="logo-small" />
             )}
             <button className="toggle-btn" onClick={toggleSidebar}>
-              <HiOutlineChevronLeft size={20} />
+              <HiOutlineChevronLeft
+                size={20}
+                className={`${!isSidebarOpen ? "rotate-180" : ""}`}
+              />
             </button>
           </div>
         </div>
@@ -142,7 +173,9 @@ const Dashboard = () => {
           <Link
             to="/dashboard/order-status-history"
             className={`nav-item ${
-              location.pathname === "/dashboard/order-status-history" ? "active" : ""
+              location.pathname === "/dashboard/order-status-history"
+                ? "active"
+                : ""
             }`}
           >
             <HiOutlineClipboardDocumentList className="nav-icon" size={24} />
@@ -182,16 +215,22 @@ const Dashboard = () => {
             }`}
           >
             <IoPricetagOutline className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>Shipping Fees</span>
+            <span className={!isSidebarOpen ? "hidden" : ""}>
+              Shipping Fees
+            </span>
           </Link>
           <Link
             to="/dashboard/shipping-addresses"
             className={`nav-item ${
-              location.pathname === "/dashboard/shipping-addresses" ? "active" : ""
+              location.pathname === "/dashboard/shipping-addresses"
+                ? "active"
+                : ""
             }`}
           >
             <HiOutlineTruck className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>Shipping Addresses</span>
+            <span className={!isSidebarOpen ? "hidden" : ""}>
+              Shipping Addresses
+            </span>
           </Link>
           <Link
             to="/dashboard/payments"
@@ -243,7 +282,10 @@ const Dashboard = () => {
                   </Link>
                   <div className="dropdown-divider" />
                   <button onClick={handleLogout} className="dropdown-item">
-                    <HiOutlineArrowRightOnRectangle className="item-icon" size={20} />
+                    <HiOutlineArrowRightOnRectangle
+                      className="item-icon"
+                      size={20}
+                    />
                     Logout
                   </button>
                 </div>
@@ -260,15 +302,27 @@ const Dashboard = () => {
               <Route path="slider" element={<Slider />} />
               <Route path="products" element={<Products />} />
               <Route path="orders" element={<Orders />} />
-              <Route path="order-status-history" element={<OrderStatusHistory />} />
+              <Route
+                path="order-status-history"
+                element={<OrderStatusHistory />}
+              />
               <Route path="coupons" element={<Coupons />} />
               <Route path="reviews" element={<Reviews />} />
               <Route path="wishlist" element={<Wishlist />} />
               <Route path="shipping-fees" element={<ShippingFees />} />
-              <Route path="shipping-addresses" element={<ShippingAddresses />} />
+              <Route
+                path="shipping-addresses"
+                element={<ShippingAddresses />}
+              />
               <Route path="payments" element={<Payments />} />
-              <Route path="settings/profile" element={<Settings type="profile" />} />
-              <Route path="settings/security" element={<Settings type="security" />} />
+              <Route
+                path="settings/profile"
+                element={<Settings type="profile" />}
+              />
+              <Route
+                path="settings/security"
+                element={<Settings type="security" />}
+              />
             </Routes>
           </div>
         </div>

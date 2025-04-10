@@ -58,6 +58,12 @@
   padding: 20px 10px;
 }
 
+.sidebar-nav {
+  overflow-y: auto;
+  max-height: calc(100vh - 150px);
+  scrollbar-width: none;
+}
+
 .customers{
   padding: 20px;
 }
