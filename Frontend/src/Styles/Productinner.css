@@ -16,3 +16,7 @@
   justify-content: space-between;
   gap: 20px;
 }
+.product-inner .feature img{
+  width: 100px;
+  height: 100px;
+}

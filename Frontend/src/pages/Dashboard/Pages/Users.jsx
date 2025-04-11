@@ -264,8 +264,7 @@ const Users = () => {
                 <p><strong>Email:</strong> {selectedUser.email}</p>
                 <p><strong>Role:</strong> {selectedUser.role}</p>
                 <p><strong>Status:</strong> {selectedUser.status}</p>
-              </div>
-              
+              </div>          
               <div className="info-section">
                 <h3>Account Information</h3>
                 <p><strong>Created At:</strong> {formatDate(selectedUser.createdAt)}</p>

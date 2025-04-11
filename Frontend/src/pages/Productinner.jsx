@@ -57,7 +57,7 @@ const Productinner = () => {
   return (
     <>
       <Header />
-      <div className="background">
+      <div className="background product-inner">
         <div className="productinner">
           <h1 className="text-center">
             <span>About </span>This product
@@ -196,32 +196,7 @@ const Productinner = () => {
               ))}
             </div>
           </section>
-        </div>
-
-        <div className="blog-section">
-          <h2
-            style={{
-              fontFamily: "inter",
-              textAlign: "center",
-              fontSize: "30px",
-              paddingBottom: "20px",
-            }}
-          >
-            Try It With These Recipes
-          </h2>
-          <div className="blog-cards">
-            {blogPosts.map((post, index) => (
-              <div className="blog-card" key={index}>
-                <div className="blog-image">
-                  <img src={post.image} alt={post.title} />
-                </div>
-                <h3>{post.title}</h3>
-                <p>{post.description}</p>
-                <button className="read-more">Read More →</button>
-              </div>
-            ))}
-          </div>
-        </div>
+        </div>   
 
         <div className="Facts">
           <h1>
@@ -249,6 +224,33 @@ const Productinner = () => {
         </div>
       </div>
       <Testimonials />
+
+      <div className="background">
+      <div className="blog-section">
+          <h2
+            style={{
+              fontFamily: "inter",
+              textAlign: "center",
+              fontSize: "30px",
+              paddingBottom: "20px",
+            }}
+          >
+            Try It With These Recipes
+          </h2>
+          <div className="blog-cards">
+            {blogPosts.map((post, index) => (
+              <div className="blog-card" key={index}>
+                <div className="blog-image">
+                  <img src={post.image} alt={post.title} />
+                </div>
+                <h3>{post.title}</h3>
+                <p>{post.description}</p>
+                <button className="read-more">Read More →</button>
+              </div>
+            ))}
+          </div>
+        </div>
+        </div>
       <Newsletter />
       <Footer />
     </>
