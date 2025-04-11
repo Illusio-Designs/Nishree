@@ -41,17 +41,22 @@
   object-fit: cover;
 }
 
-.user-info h3 {
+.testimonials-container h3,  .testimonials-container span{
   font-family: playfair display;
   font-size: 20px;
   margin: 0;
   font-weight: 700;
 }
 
+.testimonials-container span h2{
+  padding-bottom: 20px;
+}
+
 p.testimonial-text {
   color: #9ca3af;
   font-size: 18px;
   font-weight: 400;
+  font-family: Nunito Sans;
 }
 
 @media (max-width: 768px) {

@@ -20,26 +20,20 @@ const TableWithControls = ({
   const [selectedFilters, setSelectedFilters] = useState({});
   const [filteredData, setFilteredData] = useState([]);
 
-  // Initialize filteredData when data changes
+  // Combined effect to handle data changes, filtering, and searching
   useEffect(() => {
-    if (Array.isArray(data)) {
-      setFilteredData(data);
-    } else {
+    if (!Array.isArray(data)) {
       setFilteredData([]);
+      return;
     }
-  }, [data]);
-
-  // Apply filters and search separately from data changes
-  useEffect(() => {
-    if (!Array.isArray(data) || data.length === 0) return;
     
     let result = [...data];
 
     // Apply search
-    if (searchTerm) {
+    if (searchTerm && Array.isArray(searchFields) && searchFields.length > 0) {
       result = result.filter(item =>
         searchFields.some(field =>
-          String(item[field]).toLowerCase().includes(searchTerm.toLowerCase())
+          field && item && item[field] && String(item[field]).toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     }
@@ -47,13 +41,12 @@ const TableWithControls = ({
     // Apply filters
     Object.entries(selectedFilters).forEach(([key, value]) => {
       if (value) {
-        result = result.filter(item => String(item[key]) === String(value));
+        result = result.filter(item => String(item[key] || '') === String(value));
       }
     });
 
     setFilteredData(result);
-    setCurrentPage(1);
-  }, [searchTerm, selectedFilters, searchFields]); // Removed data dependency
+  }, [data, searchTerm, selectedFilters]); // Removed searchFields from dependency array
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from "react-toastify";
 import { authService } from '../../../services';
-import '../../../styles/auth/ForgotPassword.css';
+import '../../../Styles/auth/ForgotPassword.css';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');

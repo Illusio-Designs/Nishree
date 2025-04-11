@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "../../../styles/auth/Register.css";
+import "../../../Styles/auth/Register.css";
 import { useAuth } from "../../../context/AuthContext";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 

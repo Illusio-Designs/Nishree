@@ -98,6 +98,7 @@ const Wishlist = () => {
         data={wishlists}
         columns={columns}
         searchPlaceholder="Search wishlists..."
+        searchFields={['productName', 'userName', 'createdAt']}
       />
 
       <Modal

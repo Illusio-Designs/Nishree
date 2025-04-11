@@ -23,6 +23,9 @@ import {
   HiOutlineTicket,
   HiOutlineStar,
   HiOutlineTruck,
+  HiOutlineChatBubbleLeftRight,
+  HiOutlineHeart,
+  HiOutlineGlobeAlt,
 } from "react-icons/hi2";
 import {
   IoGridOutline,
@@ -36,11 +39,16 @@ import Products from "../Pages/Products";
 import Coupons from "../Pages/Coupons";
 import Orders from "../Pages/Orders";
 import Reviews from "../Pages/Reviews";
+import ReviewComments from "../Pages/ReviewComments";
+import ReviewLikes from "../Pages/ReviewLikes";
 import Wishlist from "../Pages/Wishlist";
 import OrderStatusHistory from "../Pages/OrderStatusHistory";
 import ShippingFees from "../Pages/ShippingFees";
 import ShippingAddresses from "../Pages/ShippingAddresses";
 import Payments from "../Pages/Payments";
+
+import Users from "../Pages/Users";
+import SEO from "../Pages/SEO";
 
 // Import dashboard components
 import DashboardOverview from "../Pages/DashboardOverview";
@@ -200,6 +208,24 @@ const Dashboard = () => {
             <span className={!isSidebarOpen ? "hidden" : ""}>Reviews</span>
           </Link>
           <Link
+            to="/dashboard/review-comments"
+            className={`nav-item ${
+              location.pathname === "/dashboard/review-comments" ? "active" : ""
+            }`}
+          >
+            <HiOutlineChatBubbleLeftRight className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Review Comments</span>
+          </Link>
+          <Link
+            to="/dashboard/review-likes"
+            className={`nav-item ${
+              location.pathname === "/dashboard/review-likes" ? "active" : ""
+            }`}
+          >
+            <HiOutlineHeart className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Review Likes</span>
+          </Link>
+          <Link
             to="/dashboard/wishlist"
             className={`nav-item ${
               location.pathname === "/dashboard/wishlist" ? "active" : ""
@@ -240,6 +266,24 @@ const Dashboard = () => {
           >
             <IoLayersOutline className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Payments</span>
+          </Link>
+          <Link
+            to="/dashboard/users"
+            className={`nav-item ${
+              location.pathname === "/dashboard/users" ? "active" : ""
+            }`}
+          >
+            <HiOutlineUsers className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Users</span>
+          </Link>
+          <Link
+            to="/dashboard/seo"
+            className={`nav-item ${
+              location.pathname === "/dashboard/seo" ? "active" : ""
+            }`}
+          >
+            <HiOutlineGlobeAlt className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>SEO</span>
           </Link>
         </nav>
       </div>
@@ -308,6 +352,8 @@ const Dashboard = () => {
               />
               <Route path="coupons" element={<Coupons />} />
               <Route path="reviews" element={<Reviews />} />
+              <Route path="review-comments" element={<ReviewComments />} />
+              <Route path="review-likes" element={<ReviewLikes />} />
               <Route path="wishlist" element={<Wishlist />} />
               <Route path="shipping-fees" element={<ShippingFees />} />
               <Route
@@ -315,6 +361,8 @@ const Dashboard = () => {
                 element={<ShippingAddresses />}
               />
               <Route path="payments" element={<Payments />} />
+              <Route path="users" element={<Users />} />
+              <Route path="seo" element={<SEO />} />
               <Route
                 path="settings/profile"
                 element={<Settings type="profile" />}

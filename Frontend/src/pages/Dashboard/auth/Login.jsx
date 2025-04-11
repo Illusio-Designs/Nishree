@@ -4,7 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
-import "../../../styles/auth/AdminLogin.css";
+import "../../../Styles/auth/AdminLogin.css";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });

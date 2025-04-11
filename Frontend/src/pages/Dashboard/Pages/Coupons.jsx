@@ -196,6 +196,7 @@ const Coupons = () => {
         data={coupons}
         columns={columns}
         searchPlaceholder="Search coupons..."
+        searchFields={['code', 'discountType', 'status']}
       />
 
       <Modal

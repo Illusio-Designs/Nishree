@@ -10,7 +10,6 @@ import vector4 from "../assets/Vector (23).png";
 import vector5 from "../assets/Vector (24).png";
 import img1 from "../assets/p-01.jpg.png";
 import img2 from "../assets/Link.png";
-import border from "../assets/Border.png";
 import "../Styles/Collection.css";
 
 // New product data

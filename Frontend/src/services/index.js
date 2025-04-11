@@ -42,14 +42,170 @@ const handleApiError = (error) => {
     }
 };
 
-// Import services
-import { shippingFeeService } from './shippingFeeService';
-import { shippingAddressService } from './shippingAddressService';
-import { paymentService } from './paymentService';
-import { settingsService } from './settingsService';
+// Shipping Fee Services
+export const shippingFeeService = {
+    getAllShippingFees: async () => {
+        try {
+            const response = await api.get('/api/shipping-fees');
+            return response.data.shippingFees;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
 
-// Export all services
-export { shippingFeeService, shippingAddressService, paymentService, settingsService };
+    getShippingFeeByType: async (type) => {
+        try {
+            const response = await api.get(`/api/shipping-fees/${type}`);
+            return response.data.shippingFee;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    createOrUpdateShippingFee: async (feeData) => {
+        try {
+            const response = await api.post('/api/shipping-fees', feeData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    deleteShippingFee: async (id) => {
+        try {
+            const response = await api.delete(`/api/shipping-fees/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+};
+
+// Shipping Address Services
+export const shippingAddressService = {
+    getUserShippingAddresses: async () => {
+        try {
+            const response = await api.get('/api/shipping-addresses');
+            return response.data.shippingAddresses;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    getShippingAddressById: async (id) => {
+        try {
+            const response = await api.get(`/api/shipping-addresses/${id}`);
+            return response.data.shippingAddress;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    createShippingAddress: async (addressData) => {
+        try {
+            const response = await api.post('/api/shipping-addresses', addressData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    updateShippingAddress: async (id, addressData) => {
+        try {
+            const response = await api.put(`/api/shipping-addresses/${id}`, addressData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    deleteShippingAddress: async (id) => {
+        try {
+            const response = await api.delete(`/api/shipping-addresses/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+};
+
+// Payment Services
+export const paymentService = {
+    getAllPayments: async () => {
+        try {
+            const response = await api.get('/api/payments');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    getPaymentById: async (id) => {
+        try {
+            const response = await api.get(`/api/payments/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    updatePaymentStatus: async (id, statusData) => {
+        try {
+            const response = await api.put(`/api/payments/${id}/status`, statusData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    deletePayment: async (id) => {
+        try {
+            const response = await api.delete(`/api/payments/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+};
+
+// Settings Services
+export const settingsService = {
+    getAllSettings: async () => {
+        try {
+            const response = await api.get('/api/settings');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    getSettingByKey: async (key) => {
+        try {
+            const response = await api.get(`/api/settings/${key}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    upsertSetting: async (settingData) => {
+        try {
+            const response = await api.post('/api/settings', settingData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    deleteSetting: async (key) => {
+        try {
+            const response = await api.delete(`/api/settings/${key}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+};
 
 // Auth Services
 export const authService = {

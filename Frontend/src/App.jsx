@@ -3,7 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import AppRoutes from "./routes/AppRoutes";
 import "./App.css";
-import "./styles/index.css"; // This will now work correctly
+import "./Styles/index.css"; // This will now work correctly
 
 function App() {
   return (

@@ -114,6 +114,7 @@ const Reviews = () => {
         data={reviews}
         columns={columns}
         searchPlaceholder="Search reviews..."
+        searchFields={['productName', 'customerName', 'status']}
       />
 
       <Modal

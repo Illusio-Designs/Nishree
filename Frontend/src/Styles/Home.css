@@ -23,7 +23,7 @@
 }
 .about{
     display: flex;
-    padding: 25px 50px 0px 30px;
+    padding: 25px 50px 0px;
     align-items: center;
 }
 .about-img, .about-text{

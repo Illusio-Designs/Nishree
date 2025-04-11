@@ -2,7 +2,7 @@
 import React from "react";
 import TableWithControls from "../../../components/common/TableWithControls"; // Add this import
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from "react-icons/hi2";
-import "../../../styles/dashboard/Dashboard.css";
+import "../../../Styles/dashboard/Dashboard.css";
 
 
 const Customers = () => {
