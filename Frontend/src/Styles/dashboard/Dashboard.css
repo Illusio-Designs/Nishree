@@ -109,6 +109,7 @@
 .nav-item span {
   color: var(--text-primary);
   transition: color 0.3s ease;
+  font-size: 20px;
 }
 
 .sidebar.collapsed .nav-item span {
@@ -332,8 +333,8 @@
 
 .profile-trigger img {
   object-fit: cover;
-  border: 2px solid var(--secondary-bg);
   transition: border-color 0.2s ease;
+  height: 30px;
 }
 
 .profile-trigger:hover img {
@@ -357,13 +358,17 @@
   padding: 16px;
   background: var(--primary-bg);
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .dropdown-header span {
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.dropdown-header img{
+  height: 50px;
+  width: 50px;
 }
 
 .dropdown-header small {
@@ -397,6 +402,13 @@
   font-size: 1.1rem;
   color: var(--text-secondary);
   transition: color 0.2s ease;
+}
+
+.dropdown-header .user-info{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: baseline;
 }
 
 .dropdown-item:hover .item-icon {

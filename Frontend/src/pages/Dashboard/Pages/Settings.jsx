@@ -3,7 +3,7 @@ import Modal from '../../../components/common/Modal';
 import InputField from '../../../components/common/InputField';
 import ActionButton from '../../../components/common/ActionButton';
 import Button from '../../../components/common/Button';
-import { settingsService } from '../../../services/settingsService';
+import { settingsService } from '../../../services';
 import { toast } from 'react-toastify';
 import '../../../Styles/dashboard/Settings.css';
 import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus } from 'react-icons/hi2';

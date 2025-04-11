@@ -2,11 +2,15 @@ import React from "react";
 import product from "../assets/4 (1) 2.png";
 import bg from "../assets/Vector 1.png";
 import "../Styles/components/Productcard.css";
+import { useNavigate } from 'react-router-dom';
+
 
 const ProductCard = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="products-card">
-      <div className="card">
+      <div className="card" onClick={() => navigate(`/productinner`)}>
         <div className="heart">
           <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import img from "../../../assets/RTHSRT.png";
+import profile from "../../../assets/img (1).png";
 import "../../../Styles/dashboard/Dashboard.css";
 import {
   HiOutlineHome,
@@ -54,7 +55,8 @@ import SEO from "../Pages/SEO";
 import DashboardOverview from "../Pages/DashboardOverview";
 import Customers from "../Pages/Customers";
 import Category from "../Pages/Category";
-import Settings from "../../../components/common/Settings";
+import ProfileSettings from "../../../components/common/Settings";
+import SystemSettings from "../Pages/Settings";
 
 const Dashboard = () => {
   const { user, loading, logout } = useAuth(); // Add logout to destructuring
@@ -298,21 +300,29 @@ const Dashboard = () => {
             <div className="user-profile-dropdown">
               <div className="profile-trigger" onClick={toggleDropdown}>
                 <img
-                  src={user?.photoURL || "default-avatar.png"}
+                  src={user?.photoURL || profile}
                   alt="Profile"
-                  className="img-fluid"
+                  className="profile-avatar"
                 />
               </div>
               {isDropdownOpen && (
                 <div className="dropdown-menu">
                   <div className="dropdown-header">
-                    <span>{user?.displayName || "Admin"}</span>
-                    <small>{user?.email}</small>
+                    <img
+                      src={user?.photoURL || profile}
+                      alt="Profile"
+                      className="dropdown-avatar"
+                    />
+                    <div className="user-info">
+                      <span className="user-name">{user?.displayName || "Admin"}</span>
+                      <small className="user-email">{user?.email}</small>
+                    </div>
                   </div>
                   <div className="dropdown-divider" />
                   <Link
                     to="/dashboard/settings/profile"
                     className="dropdown-item"
+                    onClick={() => setIsDropdownOpen(false)}
                   >
                     <HiOutlineCog className="item-icon" size={20} />
                     Profile Settings
@@ -320,12 +330,21 @@ const Dashboard = () => {
                   <Link
                     to="/dashboard/settings/security"
                     className="dropdown-item"
+                    onClick={() => setIsDropdownOpen(false)}
                   >
                     <HiOutlineLockClosed className="item-icon" size={20} />
                     Security
                   </Link>
+                  <Link
+                    to="/dashboard/settings"
+                    className="dropdown-item"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    <HiOutlineCog className="item-icon" size={20} />
+                    System Settings
+                  </Link>
                   <div className="dropdown-divider" />
-                  <button onClick={handleLogout} className="dropdown-item">
+                  <button onClick={handleLogout} className="dropdown-item modal-submit-button">
                     <HiOutlineArrowRightOnRectangle
                       className="item-icon"
                       size={20}
@@ -363,13 +382,14 @@ const Dashboard = () => {
               <Route path="payments" element={<Payments />} />
               <Route path="users" element={<Users />} />
               <Route path="seo" element={<SEO />} />
+              <Route path="settings" element={<SystemSettings />} />
               <Route
                 path="settings/profile"
-                element={<Settings type="profile" />}
+                element={<ProfileSettings type="profile" />}
               />
               <Route
                 path="settings/security"
-                element={<Settings type="security" />}
+                element={<ProfileSettings type="security" />}
               />
             </Routes>
           </div>
