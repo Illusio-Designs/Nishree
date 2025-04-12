@@ -1,9 +1,12 @@
 import React from "react";
 import logo from "../assets/RTHSRT.png";
 import "../Styles/components/Header.css";
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 const Header = () => {
+  const location = useLocation();
+  const isActive = location.pathname.startsWith('/product');
+
   return (
     <>
       <div className="header">
@@ -18,7 +21,9 @@ const Header = () => {
   <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')}>Home</NavLink>
   <NavLink to="/about" className={({ isActive }) => (isActive ? 'active' : '')}>About us</NavLink>
   <NavLink to="/collection" className={({ isActive }) => (isActive ? 'active' : '')}>Collection</NavLink>
-  <NavLink to="/product" className={({ isActive }) => (isActive ? 'active' : '')}>Product</NavLink>
+  <NavLink to="/product" className={isActive ? 'active' : ''}>
+      Product
+    </NavLink>
   <NavLink to="/contact" className={({ isActive }) => (isActive ? 'active' : '')}>Contact</NavLink>
 </div>
 
