@@ -64,7 +64,7 @@ const ProductCard = () => {
           </div>
         </div>
       </div>
-      <div className="card">
+      <div className="card" onClick={() => navigate(`/productinner`)}>
         <div className="heart">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +118,7 @@ const ProductCard = () => {
           </div>
         </div>
       </div>
-      <div className="card">
+      <div className="card" onClick={() => navigate(`/productinner`)}>
         <div className="heart">
           <svg
             xmlns="http://www.w3.org/2000/svg"
