@@ -1,7 +1,7 @@
 import React from "react";
 import "../Styles/About.css";
 import Header from "../components/Header";
-import Testimonials from "../components/Teastimonials";
+import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 import hero from "../assets/aboutbg.png";

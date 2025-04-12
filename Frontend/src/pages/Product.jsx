@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from "../components/Header";
-import Testimonials from "../components/Teastimonials";
+import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from '../components/Footer';
 import ProductCard from "../components/Productcard";

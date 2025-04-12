@@ -1,0 +1,33 @@
+.cart-popup {
+    position: fixed;
+    right: 0;
+    top: 0;
+    background: white;
+    z-index: 1001;
+    padding: 20px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+    overflow-y: auto;
+    transition: all 0.3s ease;
+  }
+  
+  /* Overlay for dimmed background */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Add your own styles for item, quantity, button etc. */
+  

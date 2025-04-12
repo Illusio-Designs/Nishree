@@ -9,7 +9,7 @@ import vector2 from "../assets/Vector (18).png";
 import vector3 from "../assets/Vector (19).png";
 import vector4 from "../assets/Vector (20).png";
 import vector5 from "../assets/Vector (21).png";
-import Testimonials from "../components/Teastimonials";
+import Testimonials from "../components/Testimonials";
 import BlogCard from "../components/BlogCard";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";

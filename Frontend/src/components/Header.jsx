@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../assets/RTHSRT.png";
 import "../Styles/components/Header.css";
 import { NavLink, useLocation } from 'react-router-dom';
+import CartPopup from "./CartPopup";
 
 const Header = () => {
   const location = useLocation();
   const isActive = location.pathname.startsWith('/product');
 
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const toggleCart = () => {
+    setIsCartOpen(!isCartOpen);
+  };
+
   return (
     <>
+    <div className={`overlay ${isCartOpen ? 'active' : ''}`} onClick={() => setIsCartOpen(false)}></div>
       <div className="header">
         <div className="back"></div>
         <div className="container">
@@ -44,7 +52,7 @@ const Header = () => {
                 />
               </svg>
             </div>
-            <div className="cart">
+            <div className="cart" onClick={toggleCart}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -59,6 +67,8 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {isCartOpen && <CartPopup onClose={() => setIsCartOpen(false)} />}
     </>
   );
 };

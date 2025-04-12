@@ -1,9 +1,14 @@
 import React from "react";
 import Header from "../components/Header";
 import "../Styles/Productinner.css";
-import Testimonials from "../components/Teastimonials";
+import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
+import productImage from "../assets/4 (1) 2.png";
+import offer from "../assets/offer.png";
+import truck from "../assets/truck.png";
+import returnimg from "../assets/return.png";
+import secure from "../assets/secure.png";
 import about from "../assets/img (4).png";
 import div1 from "../assets/div (4).png";
 import div2 from "../assets/div (5).png";
@@ -58,6 +63,70 @@ const Productinner = () => {
     <>
       <Header />
       <div className="background product-inner">
+        <div className="products-info">
+          <div className="product-left">
+            <img src={productImage} alt="Chole Masala" className="main-image" />
+            <div className="thumbnail-list">
+              {[...Array(4)].map((_, i) => (
+                <img key={i} src={productImage} alt="thumb" className="thumb" />
+              ))}
+            </div>
+          </div>
+
+          <div className="product-right">
+            <div className="badge">Best Seller</div>
+            <h1>Signature Garam Masala</h1>
+            <p className="desc">
+              A perfect blend of bold spices for authentic Indian curries.
+            </p>
+            <p className="desc">
+              A perfect blend of bold spices for authentic Indian curries.
+            </p>
+
+            <select className="weight-select">
+              <option>100gm</option>
+            </select>
+
+            <p className="price">₹250</p>
+
+            <div className="actions">
+              <button className="btn-red">Add to Cart</button>
+              <button className="buy-btn">Buy Now</button>
+            </div>
+
+            <div className="offers-section">
+              <h3> <img src={offer} alt="offer" height="20px"/> Offers</h3>
+              <div className="offer-list">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="offer-box">
+                    <h4>Cashback</h4>
+                    <p>
+                      Upto ₹12.09 cashback as Amazon Pay Balance when you pay
+                      with…
+                    </p>
+                    <span>1 offer ▸</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="icons-section">
+              <div className="icon-box">
+                <img src={truck} alt="truck" className="icon" />
+                <p>Free Delivery</p>
+              </div>
+              <div className="icon-box">
+              <img src={returnimg} alt="return" className="icon" />
+                <p>Non-Returnable</p>
+              </div>
+              <div className="icon-box">
+              <img src={secure} alt="secure" className="icon" />
+                <p>Secure transaction</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="productinner">
           <h1 className="text-center">
             <span>About </span>This product
@@ -196,14 +265,14 @@ const Productinner = () => {
               ))}
             </div>
           </section>
-        </div>   
+        </div>
 
         <div className="Facts">
           <h1>
             <span>Nutritional</span> Facts
           </h1>
           <div className="fact-content">
-            <p>Per 10g Serving</p>
+            <p className="serving-title">Per 10g Serving</p>
             <div className="weight">
               <p>Calories</p>
               <p>40</p>
@@ -226,7 +295,7 @@ const Productinner = () => {
       <Testimonials />
 
       <div className="background">
-      <div className="blog-section">
+        <div className="blog-section">
           <h2
             style={{
               fontFamily: "inter",
@@ -250,7 +319,7 @@ const Productinner = () => {
             ))}
           </div>
         </div>
-        </div>
+      </div>
       <Newsletter />
       <Footer />
     </>
