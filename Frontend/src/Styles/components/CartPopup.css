@@ -32,24 +32,26 @@
 
 .item-details {
   flex-grow: 1;
+  margin-right: 30px;
 }
 
 .item-title {
-  font-size: 0.85rem;
   font-weight: bold;
+  color: #282828;
   margin: 0;
 }
 
 .item-weight {
   font-size: 0.75rem;
-  color: #333;
+  color: #282828;
   margin-bottom: 5px;
+  font-weight: 700;
 }
 
 .remove-btn {
   background: none;
   border: none;
-  color: #333;
+  color: #282828;
   font-size: 0.75rem;
   cursor: pointer;
   padding: 0;
@@ -139,4 +141,3 @@
     visibility: visible;
 }
 
-/* Add your own styles for item, quantity, button etc. */
