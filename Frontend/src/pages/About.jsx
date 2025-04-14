@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "../Styles/About.css";
 import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
@@ -17,6 +17,24 @@ import img2 from "../assets/img (3).png";
 import img3 from "../assets/men.png";
 
 const About = () => {
+  useEffect(() => {
+    const sections = document.querySelectorAll(".section");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
+
   const legacy = [
     {
       id: 1,
@@ -41,7 +59,7 @@ const About = () => {
   return (
     <>
       <Header />
-      <div className="hero-section">
+      <div className="hero-section section">
         <div className="hero-img">
           <img src={hero} className="img-fluid" alt="hero-img" />
         </div>
@@ -59,7 +77,7 @@ const About = () => {
         </div>
       </div>
 
-      <div className="about">
+      <div className="about section">
         <div className="about-text">
           <h1>
             <span>Who </span>We Are
@@ -116,7 +134,7 @@ const About = () => {
         </div>
       </div>
 
-      <div className="legacy">
+      <div className="legacy section">
       <section className="testimonials">
       <h1 className="text-center">
         <span>Our Legacy</span> of Taste
@@ -135,7 +153,7 @@ const About = () => {
     </section>
       </div>
 
-      <div className="whychooseus">
+      <div className="whychooseus section">
         <div className="products-heading">
           <h1>
             <span>Why Choose</span> Nishree?
@@ -178,7 +196,7 @@ const About = () => {
         </div>
       </div>
 
-      <div className="legacy">
+      <div className="legacy section">
       <div className="whychooseus">
         <div className="products-heading">
           <h1>
@@ -221,7 +239,7 @@ const About = () => {
       </div>
       </div>
 
-      <div className="whychooseus">
+      <div className="whychooseus section">
         <div className="products-heading">
           <h2 style={{ fontFamily: "inter" }}>From Farm to Kitchen</h2>
         </div>
@@ -256,7 +274,7 @@ const About = () => {
         </div>
       </div>
 
-      <div className="legacy">
+      <div className="legacy section">
       <Testimonials />
       </div>
       

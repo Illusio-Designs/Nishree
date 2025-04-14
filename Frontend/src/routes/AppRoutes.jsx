@@ -5,6 +5,7 @@ import Product from "../pages/Product";
 import Collection from "../pages/Collection";
 import About from "../pages/About";
 import Productinner from "../pages/Productinner";
+import CheckoutPage from "../pages/CheckoutPage";
 import AdminLogin from "../pages/Dashboard/auth/Login";
 import AdminRegister from "../pages/Dashboard/auth/Register";
 import AdminForgotPassword from "../pages/Dashboard/auth/ForgotPassword";
@@ -28,6 +29,7 @@ const AppRoutes = () => {
       <Route path="/collection" element={<Collection />} />
       <Route path="/about" element={<About />} />
       <Route path="/productinner" element={<Productinner />} />
+      <Route path="/checkout" element={<CheckoutPage />} />
 
       {/* Admin Authentication Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />

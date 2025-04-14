@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "../components/Header";
 import "../Styles/Home.css";
 import hero from "../assets/aromatic-spice-collection-adds-flavor-cooking-generated-by-ai 1.png";
@@ -15,10 +15,28 @@ import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 
 const Home = () => {
+  useEffect(() => {
+    const sections = document.querySelectorAll(".section");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <Header />
-      <div className="hero-section">
+      <div className="hero-section section">
         <div className="hero-img">
           <img src={hero} className="img-fluid" alt="hero-img" />
         </div>
@@ -30,7 +48,7 @@ const Home = () => {
           <button className="btn">Shop Now</button>
         </div>
       </div>
-      <div className="background">
+      <div className="background section">
         <div className="about">
           <div className="about-img">
             <img src={about} className="img-fluid" alt="about" />
@@ -59,7 +77,7 @@ const Home = () => {
           <ProductCard />
         </div>
       </div>
-      <div className="whychooseus">
+      <div className="whychooseus section">
         <div className="products-heading">
           <h1>
             <span>Why</span> Chhose Us
@@ -95,10 +113,10 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <div className="background">
+      <div className="background section">
         <Testimonials />
       </div>
-      <div className="whychooseus">
+      <div className="whychooseus section">
         <div className="products-heading">
           <h1>
             <span>Good Taste,</span> Great Health
@@ -134,7 +152,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <div className="background">
+      <div className="background section">
         <BlogCard />
       </div>
 

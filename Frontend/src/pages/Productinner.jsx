@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "../components/Header";
 import "../Styles/Productinner.css";
 import Testimonials from "../components/Testimonials";
@@ -23,6 +23,24 @@ import card2 from "../assets/img (6).png";
 import card3 from "../assets/img (7).png";
 
 const Productinner = () => {
+  useEffect(() => {
+    const sections = document.querySelectorAll(".section");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
+
   const legacy = [
     {
       id: 1,
@@ -62,7 +80,7 @@ const Productinner = () => {
   return (
     <>
       <Header />
-      <div className="background product-inner">
+      <div className="background product-inner section">
         <div className="products-info">
           <div className="product-left">
             <img src={productImage} alt="Chole Masala" className="main-image" />
@@ -127,7 +145,7 @@ const Productinner = () => {
           </div>
         </div>
 
-        <div className="productinner">
+        <div className="productinner section">
           <h1 className="text-center">
             <span>About </span>This product
           </h1>
@@ -191,7 +209,7 @@ const Productinner = () => {
           </div>
         </div>
 
-        <div className="whychooseus">
+        <div className="whychooseus section">
           <div className="products-heading">
             <h1>
               <span>Why Choose</span> Nishree?
@@ -241,7 +259,7 @@ const Productinner = () => {
           </div>
         </div>
 
-        <div className="legacy">
+        <div className="legacy section">
           <section className="testimonials">
             <h1 className="text-center">
               <span>How</span> to Use
@@ -267,7 +285,7 @@ const Productinner = () => {
           </section>
         </div>
 
-        <div className="Facts">
+        <div className="Facts section">
           <h1>
             <span>Nutritional</span> Facts
           </h1>
@@ -294,7 +312,7 @@ const Productinner = () => {
       </div>
       <Testimonials />
 
-      <div className="background">
+      <div className="background section">
         <div className="blog-section">
           <h2
             style={{

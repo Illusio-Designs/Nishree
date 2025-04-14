@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
@@ -21,10 +21,28 @@ const products = [
 ];
 
 const Collection = () => {
+  useEffect(() => {
+    const sections = document.querySelectorAll(".section");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <Header />
-      <div className="background">
+      <div className="background section">
         <div className="hero-section">
           <div className="hero-img">
             <img src={hero} className="img-fluid" alt="hero-img" />
@@ -41,7 +59,7 @@ const Collection = () => {
           </div>
         </div>
 
-        <div className="category">
+        <div className="category section">
           <h1 className="text-center">
             <span>Shop by</span> Category
           </h1>
@@ -75,7 +93,7 @@ const Collection = () => {
           </div>
         </div>
 
-        <div className="whychooseus">
+        <div className="whychooseus section">
           <div className="products-heading">
             <h1>
               <span>Why Choose</span> Nishree Products?
@@ -120,7 +138,7 @@ const Collection = () => {
             </div>
           </div>
         </div>
-        <div className="nishree">
+        <div className="nishree section">
           <Testimonials />
         </div>
       </div>

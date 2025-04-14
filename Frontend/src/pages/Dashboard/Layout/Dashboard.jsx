@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   useNavigate,
   useLocation,
@@ -63,6 +63,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Make sure this line is present
+  const dropdownRef = useRef(null); // Ref for dropdown
 
   const location = useLocation();
 
@@ -81,6 +82,19 @@ const Dashboard = () => {
       navigate("/admin/login", { replace: true });
     }
   }, [user, loading, navigate]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -297,8 +311,13 @@ const Dashboard = () => {
               <span className="notification-count">3</span>
               <HiOutlineBell size={20} />
             </button>
-            <div className="user-profile-dropdown">
-              <div className="profile-trigger" onClick={toggleDropdown}>
+            <div className="user-profile-dropdown" ref={dropdownRef}>
+              <div
+                className="profile-trigger"
+                onClick={toggleDropdown}
+                aria-expanded={isDropdownOpen}
+                aria-haspopup="true"
+              >
                 <img
                   src={user?.photoURL || profile}
                   alt="Profile"

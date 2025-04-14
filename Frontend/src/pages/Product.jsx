@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
@@ -12,10 +12,28 @@ import vector5 from "../assets/Vector (24).png";
 import "../Styles/Product.css"
 
 const Product = () => {
+  useEffect(() => {
+    const sections = document.querySelectorAll(".section");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <Header />
-      <div className="hero-section">
+      <div className="hero-section section">
         <div className="hero-img">
           <img src={hero} className="img-fluid" alt="hero-img" />
         </div>
@@ -28,7 +46,7 @@ const Product = () => {
         </div>
       </div>
       
-      <div className="background">
+      <div className="background section">
       <div className="products">
           <div className="products-heading">
             <h1>
@@ -49,7 +67,7 @@ const Product = () => {
         </div>
         </div>
 
-        <div className="whychooseus">
+        <div className="whychooseus section">
         <div className="products-heading">
           <h2 style={{fontFamily: 'inter'}}>
           Why Choose Nishree Products?
@@ -95,7 +113,7 @@ const Product = () => {
         </div>
       </div>
 
-        <div className="background">
+        <div className="background section">
       <Testimonials />
       </div>
       <Newsletter />
