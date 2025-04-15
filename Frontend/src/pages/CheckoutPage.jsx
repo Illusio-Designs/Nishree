@@ -99,14 +99,13 @@ const CheckoutPage = () => {
                 </div>
                 <div className="summary-row total">
                   <p>Total</p>
-                  <p>₹{total}</p>
+                  <p><strong>₹{total}</strong></p>
                 </div>
                 <div className="shipping-info">
-                  Estimated shipping time: 2 days
+                  <p>Estimated shipping time: 2 days</p>
                 </div>
                 <button className="checkout-btn">CHECK OUT</button>
               </div>
-
               <div className="payment-types">
                 <div className="payment-title">Payment type</div>
                 <div className="payment-icons">

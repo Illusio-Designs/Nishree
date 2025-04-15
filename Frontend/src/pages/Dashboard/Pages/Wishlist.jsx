@@ -86,7 +86,7 @@ const Wishlist = () => {
     <div className="wishlist-container">
       <div className="header-section">
         <h2 className="dashboard-title">Wishlist Management</h2>
-        <Button 
+  <Button 
           className="add-button"
           onClick={fetchWishlists}
         >
@@ -110,7 +110,7 @@ const Wishlist = () => {
         title="Wishlist Details"
       >
         {selectedWishlist && (
-          <div className="modal-content">
+   <div className="modal-content">
             <div className="customer-info">
               <h3 className="section-title">Customer Information</h3>
               <p>Name: {selectedWishlist.customerName}</p>

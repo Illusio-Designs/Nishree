@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { sliderService } from "../../../services";
+import { sliderService, categoryService } from "../../../services";
 import { toast } from "react-toastify";
 import TableWithControls from "../../../components/common/TableWithControls";
 import InputField from "../../../components/common/InputField";
@@ -12,18 +12,16 @@ import { FaPlus } from "react-icons/fa";
 
 const Slider = () => {
   const [sliders, setSliders] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedSlider, setSelectedSlider] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState('add');
+  const [modalMode, setModalMode] = useState("add");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     image: null,
-    link: "",
-    position: 0,
-    status: "active",
-    startDate: "",
-    endDate: ""
+    categoryId: "",
+    buttonText: "",
   });
 
   const fetchSliders = async () => {
@@ -31,29 +29,28 @@ const Slider = () => {
       const data = await sliderService.getAllSliders();
       setSliders(data);
     } catch (error) {
-      toast.error('Failed to fetch sliders');
+      toast.error("Failed to fetch sliders");
       console.error("Failed to fetch sliders:", error);
     }
   };
 
-  const fetchSliderById = async (id) => {
+  const fetchCategories = async () => {
     try {
-      const slider = await sliderService.getSliderById(id);
-      return slider;
+      const data = await categoryService.getAllCategories();
+      setCategories(data);
     } catch (error) {
-      toast.error('Failed to fetch slider details');
-      console.error("Failed to fetch slider details:", error);
-      return null;
+      toast.error("Failed to fetch categories");
+      console.error("Failed to fetch categories:", error);
     }
   };
 
   const handleDelete = async (id) => {
     try {
       await sliderService.deleteSlider(id);
-      toast.success('Slider deleted successfully');
+      toast.success("Slider deleted successfully");
       fetchSliders();
     } catch (error) {
-      toast.error(error.message || 'Failed to delete slider');
+      toast.error(error.message || "Failed to delete slider");
       console.error("Failed to delete slider:", error);
     }
   };
@@ -62,23 +59,23 @@ const Slider = () => {
     e.preventDefault();
     try {
       const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
+      Object.keys(formData).forEach((key) => {
         if (formData[key] !== null) {
-          if (key === 'image' && typeof formData[key] === 'string') {
+          if (key === "image" && typeof formData[key] === "string") {
             return;
           }
           formDataToSend.append(key, formData[key]);
         }
       });
 
-      if (modalMode === 'add') {
+      if (modalMode === "add") {
         await sliderService.createSlider(formDataToSend);
-        toast.success('Slider created successfully');
+        toast.success("Slider created successfully");
       } else {
         await sliderService.updateSlider(selectedSlider.id, formDataToSend);
-        toast.success('Slider updated successfully');
+        toast.success("Slider updated successfully");
       }
-      
+
       setShowModal(false);
       fetchSliders();
     } catch (error) {
@@ -89,32 +86,23 @@ const Slider = () => {
 
   const handleOpenModal = async (mode, slider = null) => {
     setModalMode(mode);
-    if (slider && mode === 'edit') {
-      const sliderDetails = await fetchSliderById(slider.id);
-      if (sliderDetails) {
-        setSelectedSlider(sliderDetails);
-        setFormData({
-          title: sliderDetails.title || "",
-          description: sliderDetails.description || "",
-          image: sliderDetails.image || null,
-          link: sliderDetails.link || "",
-          position: sliderDetails.position || 0,
-          status: sliderDetails.status || "active",
-          startDate: sliderDetails.startDate || "",
-          endDate: sliderDetails.endDate || ""
-        });
-      }
+    if (slider && mode === "edit") {
+      setSelectedSlider(slider);
+      setFormData({
+        title: slider.title || "",
+        description: slider.description || "",
+        image: slider.image || null,
+        categoryId: slider.categoryId || "",
+        buttonText: slider.buttonText || "",
+      });
     } else {
       setSelectedSlider(null);
       setFormData({
         title: "",
         description: "",
         image: null,
-        link: "",
-        position: 0,
-        status: "active",
-        startDate: "",
-        endDate: ""
+        categoryId: "",
+        buttonText: "",
       });
     }
     setShowModal(true);
@@ -122,36 +110,34 @@ const Slider = () => {
 
   useEffect(() => {
     fetchSliders();
+    fetchCategories();
   }, []);
 
   const columns = [
     { key: "title", header: "Title" },
     { key: "description", header: "Description" },
     {
-      key: "status",
-      header: "Status",
-      render: (row) => (
-        <span className={`status-badge ${row.status}`}>
-          {row.status}
-        </span>
-      )
+      key: "categoryName",
+      header: "Category",
+    },
+    {
+      key: "buttonText",
+      header: "Button Text",
     },
     {
       key: "image",
       header: "Image",
-      render: (row) => (
+      render: (row) =>
         row.image ? (
-          <img 
+          <img
             src={`${import.meta.env.VITE_API_URL}/uploads/slider/${row.image}`}
             alt={row.title}
             className="slider-thumbnail"
           />
         ) : (
           <span className="no-image">No image</span>
-        )
-      )
+        ),
     },
-    { key: "position", header: "Position" },
     {
       key: "actions",
       header: "Actions",
@@ -159,7 +145,7 @@ const Slider = () => {
         <div className="action-buttons">
           <ActionButton
             icon={<HiOutlinePencil size={20} />}
-            onClick={() => handleOpenModal('edit', row)}
+            onClick={() => handleOpenModal("edit", row)}
             variant="edit"
             tooltip="Edit Slider"
           />
@@ -170,18 +156,15 @@ const Slider = () => {
             tooltip="Delete Slider"
           />
         </div>
-      )
-    }
+      ),
+    },
   ];
 
   return (
     <div className="slider-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Slider Manager</h2>
-        <Button 
-          onClick={() => handleOpenModal('add')}
-          className="add-button"
-          >
+        <Button onClick={() => handleOpenModal("add")} className="add-button">
           <FaPlus /> Add Slider
         </Button>
       </div>
@@ -195,63 +178,52 @@ const Slider = () => {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={modalMode === 'add' ? 'Add New Slider' : 'Edit Slider'}
+        title={modalMode === "add" ? "Add New Slider" : "Edit Slider"}
       >
         <form onSubmit={handleSubmit} className="slider-form">
           <InputField
             label="Title"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
             placeholder="Enter slider title"
             required
           />
           <InputField
             label="Description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
             placeholder="Enter description"
             multiline
           />
           <InputField
-            label="Link"
-            value={formData.link}
-            onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-            placeholder="Enter slider link"
-          />
-          <InputField
-            label="Position"
-            type="number"
-            value={formData.position}
-            onChange={(e) => setFormData({ ...formData, position: parseInt(e.target.value) })}
-            placeholder="Enter position number"
-          />
-          <InputField
-            label="Status"
+            label="Category"
             type="select"
-            value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            options={[
-              { value: "active", label: "Active" },
-              { value: "inactive", label: "Inactive" }
-            ]}
+            value={formData.categoryId}
+            onChange={(e) =>
+              setFormData({ ...formData, categoryId: e.target.value })
+            }
+            options={categories.map((category) => ({
+              value: category.id,
+              label: category.name,
+            }))}
+            placeholder="Select a category"
           />
           <InputField
-            label="Start Date"
-            type="date"
-            value={formData.startDate}
-            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+            label="Button Text"
+            value={formData.buttonText}
+            onChange={(e) =>
+              setFormData({ ...formData, buttonText: e.target.value })
+            }
+            placeholder="Enter button text"
           />
-          <InputField
-            label="End Date"
-            type="date"
-            value={formData.endDate}
-            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-          />
-          
           <div className="image-upload-section">
-            {modalMode === 'edit' && formData.image && (
+            {modalMode === "edit" && formData.image && (
               <div className="current-image">
-                <img 
+                <img
                   src={`${import.meta.env.VITE_API_URL}/uploads/slider/${formData.image}`}
                   alt="Current slider"
                   className="preview-image"
@@ -261,18 +233,20 @@ const Slider = () => {
             <InputField
               type="file"
               label="Slider Image"
-              onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+              onChange={(e) =>
+                setFormData({ ...formData, image: e.target.files[0] })
+              }
               accept="image/*"
             />
           </div>
-          
+
           <div className="modal-actions">
             <Button
               type="submit"
               className="modal-submit-button"
               disabled={!formData.title}
             >
-              {modalMode === 'add' ? 'Create' : 'Update'}
+              {modalMode === "add" ? "Create" : "Update"}
             </Button>
             <Button
               type="button"

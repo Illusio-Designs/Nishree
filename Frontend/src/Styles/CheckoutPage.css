@@ -117,31 +117,30 @@
 }
 
 .summary-box {
-  padding: 15px;
+  padding: 40px 25px;
   background-color: #f9f9f9;
 }
 
-.summary-title {
-  font-size: 16px;
+.order-summary .summary-title {
+  font-size: 20px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
+.order-summary .summary-row {
+ color: #282828;
+ font-size: 20px;
+ margin-bottom: 25px;
 }
 
 .summary-row.total {
-  font-weight: bold;
   border-top: 1px solid #ddd;
-  padding-top: 10px;
+  padding-top: 20px;
 }
 
 .shipping-info {
-  font-size: 12px;
-  margin-top: 10px;
+  font-size: 18px;
+  color: #282828B2;
 }
 
 .checkout-btn {

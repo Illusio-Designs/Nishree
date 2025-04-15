@@ -89,11 +89,13 @@ export const createSlider = async (req, res) => {
 
         // Get slider with category info
         const sliderWithCategory = await Slider.findByPk(slider.id, {
-            include: [{
-                model: Category,
-                as: 'category',
-                attributes: ['id', 'name']
-            }]
+            include: [
+                {
+                    model: Category,
+                    as: 'category', // Ensure this alias matches the one in your Sequelize association
+                    attributes: ['id', 'name'],
+                },
+            ],
         });
 
         // Format response

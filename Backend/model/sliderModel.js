@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js';
+import { Category } from './categoryModel.js'; // Import the Category model
 
 export const Slider = sequelize.define('Slider', {
     id: {
@@ -51,4 +52,7 @@ export const Slider = sequelize.define('Slider', {
         }
     ]
 });
+
+// Define the association with the Category model
+Slider.belongsTo(Category, { as: 'category', foreignKey: 'categoryId' });
 

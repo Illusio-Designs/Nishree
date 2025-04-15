@@ -1,4 +1,3 @@
-// index.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -39,7 +38,14 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(morgan('combined')); // Logs all requests to the console
+
+// Configure morgan to skip repetitive API calls to reduce console log spam
+app.use(morgan('combined', {
+    skip: function (req, res) {
+        // Skip logging for /api/users/me requests that return 304 (not modified)
+        return req.path === '/api/users/me' && res.statusCode === 304;
+    }
+}));
 
 // Session configuration
 app.use(session({
@@ -54,6 +60,20 @@ app.use(passport.session());
 
 // Serve static files
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
+
+// Health check API endpoint
+app.get('/api/health', (req, res) => {
+    const healthData = {
+        uptime: process.uptime(),
+        timestamp: Date.now(),
+        status: 'ok',
+        database: {
+            status: sequelize.authenticate().then(() => 'connected').catch(() => 'disconnected')
+        }
+    };
+    
+    res.status(200).json(healthData);
+});
 
 // Mount all routes under /api
 app.use('/api', routesManager);
