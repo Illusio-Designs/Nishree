@@ -49,7 +49,7 @@ const CheckoutPage = () => {
             <p className="line"></p>
             <p className="section-title">2. DELIVERY</p>
             <p className="line"></p>
-            <p className="section-title">2. Review & Payment</p>
+            <p className="section-title">3. REVIEW & PAYMENT</p>
           </div>
           <div className="checkout">
             {/* Left - Cart Items */}
@@ -99,7 +99,9 @@ const CheckoutPage = () => {
                 </div>
                 <div className="summary-row total">
                   <p>Total</p>
-                  <p><strong>₹{total}</strong></p>
+                  <p>
+                    <strong>₹{total}</strong>
+                  </p>
                 </div>
                 <div className="shipping-info">
                   <p>Estimated shipping time: 2 days</p>
@@ -131,12 +133,81 @@ const CheckoutPage = () => {
               <div className="delivery-info">
                 <div className="delivery-title">Delivery and retour</div>
                 <ul className="delivery-list">
-                  <li>Order before 12:00 and we will ship the same day.</li>
                   <li>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="#282828"
+                      stroke="#282828"
+                      stroke-width="2"
+                      class="bi bi-chevron-right"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
+                      />
+                    </svg>{" "}
+                    Order before 12:00 and we will ship the same day.
+                  </li>
+                  <li>
+                    {" "}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="#282828"
+                      stroke="#282828"
+                      stroke-width="2"
+                      class="bi bi-chevron-right"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
+                      />
+                    </svg>
                     Orders made after Friday 12:00 are processed on Monday.
                   </li>
-                  <li>To return your articles, please contact us first.</li>
-                  <li>Postal charges for return are not reimbursed.</li>
+                  <li>
+                    {" "}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="#282828"
+                      stroke="#282828"
+                      stroke-width="2"
+                      class="bi bi-chevron-right"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
+                      />
+                    </svg>
+                    To return your articles, please contact us first.
+                  </li>
+                  <li>
+                    {" "}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="#282828"
+                      stroke="#282828"
+                      stroke-width="2"
+                      class="bi bi-chevron-right"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708"
+                      />
+                    </svg>{" "}
+                    Postal charges for return are not reimbursed.
+                  </li>
                 </ul>
               </div>
             </div>

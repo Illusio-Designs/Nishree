@@ -1,5 +1,5 @@
 .checkout-page {
-  padding: 10% 8% 20px;
+  padding: 10% 8% 5%;
 }
 
 .checkout {
@@ -114,6 +114,8 @@
 
 .order-summary {
   grid-column: span 1;
+  display: grid;
+  gap: 70px;
 }
 
 .summary-box {
@@ -155,33 +157,35 @@
   margin-top: 15px;
 }
 
-.payment-types {
-  margin-top: 20px;
-}
-
 .payment-title {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 10px;
+  color: #282828;
+  font-size: 22px;
+  font-weight: 400;
+  margin-bottom: 20px;
 }
 
-.payment-icons img {
-  width: 40px;
-  margin-right: 10px;
-}
-
-.delivery-info {
-  margin-top: 20px;
+.payment-icons {
+  display: flex;
+  gap: 20px;
 }
 
 .delivery-title {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 10px;
+  color: #282828;
+  font-size: 22px;
+  font-weight: 400;
+  margin-bottom: 30px;
 }
 
 .delivery-list {
-  list-style: disc;
-  margin-left: 20px;
-  font-size: 12px;
+  list-style: none;
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.delivery-list li {
+  display: flex;
+  align-items: center;
+  color: #282828;
+  gap: 10px;
 }
