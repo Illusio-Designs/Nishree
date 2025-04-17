@@ -7,6 +7,8 @@ import About from "../pages/About";
 import Productinner from "../pages/Productinner";
 import CheckoutPage from "../pages/CheckoutPage";
 import Contact from "../pages/Contact";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
 import AdminLogin from "../pages/Dashboard/auth/Login";
 import AdminRegister from "../pages/Dashboard/auth/Register";
 import AdminForgotPassword from "../pages/Dashboard/auth/ForgotPassword";
@@ -32,6 +34,8 @@ const AppRoutes = () => {
       <Route path="/productinner" element={<Productinner />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       {/* Admin Authentication Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />

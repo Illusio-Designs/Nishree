@@ -1,20 +1,20 @@
 .hero-product-text {
-    position: relative;
-    padding: 13% 0% 8% 35%;
-    text-align: center;
-    align-items: center;
-    color: #ffffff;
+  position: relative;
+  padding: 13% 0% 8% 35%;
+  text-align: center;
+  align-items: center;
+  color: #ffffff;
 }
-.hero-product-text h1{
-    color: #ffffff;
-    font-size: 80px;
-    font-weight: 700;
+.hero-product-text h1 {
+  color: #ffffff;
+  font-size: 80px;
+  font-weight: 700;
 }
-.hero-product-text p{
-    font-size: 28px;
-    font-weight: 600;
-    line-height: 46px;
+.hero-product-text p {
+  font-size: 28px;
+  line-height: 46px;
+  font-family: "Inter", sans-serif;
 }
-.products-heading h2{
-    font-size: 35px;
+.products-heading h2 {
+  font-size: 35px;
 }

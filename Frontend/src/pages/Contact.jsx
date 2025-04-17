@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "../Styles/Contact.css";
@@ -7,47 +7,30 @@ const Contact = () => {
   return (
     <>
       <Header />
-      <section className="contact">
-  <div class="contact-box">
-    <div class="contact-links">
-      <h2>CONTACT</h2>
-      <div class="links">
-        <div class="link">
-          <a><img src="https://i.postimg.cc/m2mg2Hjm/linkedin.png" alt="linkedin" /></a>
+      <>
+        <div className="contact">
+          <div className="contact-container">
+            <h1 className="text-center">
+              <span>Contact</span> Us
+            </h1>
+            <form className="contact-form">
+              <label htmlFor="name">Name:</label>
+              <input type="text" id="name" name="name" required />
+
+              <label htmlFor="email">Email:</label>
+              <input type="email" id="email" name="email" required />
+
+              <label htmlFor="message">Message:</label>
+              <textarea id="message" name="message" required></textarea>
+
+              <button type="submit">Send Message</button>
+            </form>
+          </div>
         </div>
-        <div class="link">
-          <a><img src="https://i.postimg.cc/YCV2QBJg/github.png" alt="github" /></a>
-        </div>
-        <div class="link">
-          <a><img src="https://i.postimg.cc/W4Znvrry/codepen.png" alt="codepen" /></a>
-        </div>
-        <div class="link">
-          <a><img src="https://i.postimg.cc/NjLfyjPB/email.png" alt="email" /></a>
-        </div>
-      </div>
-    </div>
-    <div class="contact-form-wrapper">
-      <form>
-        <div class="form-item">
-          <input type="text" name="sender" required />
-          <label>Name:</label>
-        </div>
-        <div class="form-item">
-          <input type="text" name="email" required />
-          <label>Email:</label>
-        </div>
-        <div class="form-item">
-          <textarea class="" name="message" required></textarea>
-          <label>Message:</label>
-        </div>
-        <button class="submit-btn">Send</button>  
-      </form>
-    </div>
-  </div>
-</section>
+      </>
       <Footer />
     </>
   );
-}
+};
 
 export default Contact;

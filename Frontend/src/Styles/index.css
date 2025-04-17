@@ -28,12 +28,12 @@
   transform: translateY(0);
 }
 
-
 h1,
 h2,
 h3,
 h4,
-h5, span {
+h5,
+span {
   font-family: playfair display;
 }
 
@@ -53,12 +53,16 @@ span {
 }
 
 .btn-red {
-  background-color: #dc2626;
+  background: linear-gradient(135deg, #dc2626, #991b1b);
   color: #ffffff;
   padding: 10px 30px;
   border: none;
   border-radius: 50px;
   font-size: 20px;
+}
+
+.btn-red:hover {
+  box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
 }
 
 .background {
