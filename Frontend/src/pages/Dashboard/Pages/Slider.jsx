@@ -26,11 +26,15 @@ const Slider = () => {
 
   const fetchSliders = async () => {
     try {
-      const data = await sliderService.getAllSliders();
-      setSliders(data);
+      const response = await sliderService.getAllSliders();
+      if (response.data && response.data.sliders) {
+        setSliders(response.data.sliders);
+      } else {
+        throw new Error('Invalid response structure');
+      }
     } catch (error) {
-      toast.error("Failed to fetch sliders");
-      console.error("Failed to fetch sliders:", error);
+      toast.error('Failed to fetch sliders');
+      console.error('Failed to fetch sliders:', error);
     }
   };
 
@@ -61,25 +65,25 @@ const Slider = () => {
       const formDataToSend = new FormData();
       Object.keys(formData).forEach((key) => {
         if (formData[key] !== null) {
-          if (key === "image" && typeof formData[key] === "string") {
+          if (key === 'image' && typeof formData[key] === 'string') {
             return;
           }
           formDataToSend.append(key, formData[key]);
         }
       });
 
-      if (modalMode === "add") {
+      if (modalMode === 'add') {
         await sliderService.createSlider(formDataToSend);
-        toast.success("Slider created successfully");
+        toast.success('Slider created successfully');
       } else {
         await sliderService.updateSlider(selectedSlider.id, formDataToSend);
-        toast.success("Slider updated successfully");
+        toast.success('Slider updated successfully');
       }
 
       setShowModal(false);
       fetchSliders();
     } catch (error) {
-      toast.error(error.message || `Failed to ${modalMode} slider`);
+      toast.error(error.response?.data?.message || `Failed to ${modalMode} slider`);
       console.error(`Failed to ${modalMode} slider:`, error);
     }
   };
