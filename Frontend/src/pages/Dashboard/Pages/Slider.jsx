@@ -68,9 +68,20 @@ const Slider = () => {
           if (key === 'image' && typeof formData[key] === 'string') {
             return;
           }
-          formDataToSend.append(key, formData[key]);
+      
+          if (key === 'categoryId') {
+            formDataToSend.append(key, Number(formData[key])); // ensure it's a number
+          } else {
+            formDataToSend.append(key, formData[key]);
+          }
         }
       });
+      
+      // Debug log
+      for (var pair of formDataToSend.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+      
 
       if (modalMode === 'add') {
         await sliderService.createSlider(formDataToSend);
