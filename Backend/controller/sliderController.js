@@ -39,12 +39,35 @@ const formatSliderResponse = (slider) => {
 };
 
 // Create Slider
+// In createSlider function
 export const createSlider = async (req, res) => {
     try {
-        const { title, tagline, buttonText, categoryId, status, order } = req.body;
+        console.log("Request body received:", req.body);
+        console.log("Request file received:", req.file);
         
-        // Check if category exists if categoryId is provided
+        let { title, description, buttonText, categoryId, status, position } = req.body;
+
+        // Check for required fields
+        if (!title) {
+            return res.status(400).json({ message: 'Title is required' });
+        }
+        
+        // Check for image
+        if (!req.file) {
+            return res.status(400).json({ message: 'Image is required for new sliders' });
+        }
+
+        // Handle categoryId properly
         if (categoryId) {
+            categoryId = Number(categoryId);
+            if (isNaN(categoryId)) {
+                categoryId = null;
+            }
+        } else {
+            categoryId = null;
+        }
+
+        if (categoryId !== null) {
             const category = await Category.findByPk(categoryId);
             if (!category) {
                 return res.status(400).json({ message: 'Category not found' });
@@ -54,56 +77,47 @@ export const createSlider = async (req, res) => {
         let image = null;
 
         if (req.file) {
-            try {
-                const result = await imageHandler.processImage(req.file.path, {
-                    width: 1920,
-                    height: 1080,
-                    quality: 80,
-                    format: 'webp',
-                    filename: `slider-${uuidv4()}`
-                });
+            const result = await imageHandler.processImage(req.file.path, {
+                width: 1920,
+                height: 1080,
+                quality: 80,
+                format: 'webp',
+                filename: `slider-${uuidv4()}`
+            });
 
-                if (!result.success) {
-                    throw new Error(result.error);
-                }
-
-                image = result.filename;
-            } catch (imageError) {
-                console.error('Error processing image:', imageError);
-                return res.status(500).json({ 
-                    message: 'Error processing image', 
-                    error: imageError.message 
-                });
+            if (!result.success) {
+                throw new Error(result.error);
             }
+
+            image = result.filename;
         }
 
         const slider = await Slider.create({
             title,
-            tagline,
+            description, // Changed from tagline
             buttonText,
             categoryId,
             image,
-            status,
-            order
+            status: status || 'active',
+            position: position ? Number(position) : 0
         });
 
-        // Get slider with category info
+        // Rest of the function remains the same
         const sliderWithCategory = await Slider.findByPk(slider.id, {
             include: [
                 {
                     model: Category,
-                    as: 'category', // Ensure this alias matches the one in your Sequelize association
+                    as: 'category',
                     attributes: ['id', 'name'],
                 },
             ],
         });
 
-        // Format response
         const sliderResponse = formatSliderResponse(sliderWithCategory);
 
-        res.status(201).json({ 
-            message: 'Slider created successfully', 
-            slider: sliderResponse 
+        res.status(201).json({
+            message: 'Slider created successfully',
+            slider: sliderResponse
         });
     } catch (error) {
         console.error('Create slider error:', error);
@@ -111,7 +125,9 @@ export const createSlider = async (req, res) => {
     }
 };
 
+
 // Get All Sliders
+// In sliderController.js, modify the getAllSliders function:
 export const getAllSliders = async (req, res) => {
     try {
         const sliders = await Slider.findAll({
@@ -120,18 +136,19 @@ export const getAllSliders = async (req, res) => {
                 as: 'category',
                 attributes: ['id', 'name']
             }],
-            order: [['order', 'ASC']]
+            order: [['position', 'ASC']]
         });
 
-        // Format response
         const slidersResponse = sliders.map(formatSliderResponse);
 
-        res.status(200).json(slidersResponse);
+        res.status(200).json({ sliders: slidersResponse });
     } catch (error) {
         console.error('Get all sliders error:', error);
         res.status(500).json({ message: error.message });
     }
 };
+
+
 
 // Get Slider by ID
 export const getSliderById = async (req, res) => {
@@ -160,17 +177,23 @@ export const getSliderById = async (req, res) => {
 
 // Update Slider
 export const updateSlider = async (req, res) => {
+    
     try {
         const slider = await Slider.findByPk(req.params.id);
         if (!slider) {
             return res.status(404).json({ message: 'Slider not found' });
         }
 
-        const { title, tagline, buttonText, categoryId, status, order } = req.body;
+        const { title, description, buttonText, categoryId, status, position } = req.body;
 
-        // Check if category exists if categoryId is provided
-        if (categoryId) {
-            const category = await Category.findByPk(categoryId);
+        // Add this code here
+        let categoryIdToUse = Number(categoryId);
+        if (categoryIdToUse === "" || isNaN(categoryIdToUse)) {
+          categoryIdToUse = null;
+        }
+        
+        if (categoryIdToUse) {
+            const category = await Category.findByPk(categoryIdToUse);
             if (!category) {
                 return res.status(400).json({ message: 'Category not found' });
             }
@@ -179,46 +202,35 @@ export const updateSlider = async (req, res) => {
         let image = slider.image;
 
         if (req.file) {
-            try {
-                // Delete old image if exists
-                if (slider.image) {
-                    await imageHandler.deleteFile(imageHandler.getImagePath(slider.image));
-                }
-
-                // Process new image
-                const result = await imageHandler.processImage(req.file.path, {
-                    width: 1920,
-                    height: 1080,
-                    quality: 80,
-                    format: 'webp',
-                    filename: `slider-${uuidv4()}`
-                });
-
-                if (!result.success) {
-                    throw new Error(result.error);
-                }
-
-                image = result.filename;
-            } catch (imageError) {
-                console.error('Error processing image:', imageError);
-                return res.status(500).json({ 
-                    message: 'Error processing image', 
-                    error: imageError.message 
-                });
+            if (slider.image) {
+                await imageHandler.deleteFile(imageHandler.getImagePath(slider.image));
             }
+
+            const result = await imageHandler.processImage(req.file.path, {
+                width: 1920,
+                height: 1080,
+                quality: 80,
+                format: 'webp',
+                filename: `slider-${uuidv4()}`
+            });
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            image = result.filename;
         }
 
         await slider.update({
             title,
-            tagline,
+            description,  // Changed from tagline
             buttonText,
             categoryId,
             image,
-            status,
-            order
+            status: status || 'active',
+            position: position || 0
         });
 
-        // Get updated slider with category info
         const updatedSlider = await Slider.findByPk(slider.id, {
             include: [{
                 model: Category,
@@ -227,18 +239,18 @@ export const updateSlider = async (req, res) => {
             }]
         });
 
-        // Format response
         const sliderResponse = formatSliderResponse(updatedSlider);
 
-        res.status(200).json({ 
-            message: 'Slider updated successfully', 
-            slider: sliderResponse 
+        res.status(200).json({
+            message: 'Slider updated successfully',
+            slider: sliderResponse
         });
     } catch (error) {
         console.error('Update slider error:', error);
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // Delete Slider
 export const deleteSlider = async (req, res) => {

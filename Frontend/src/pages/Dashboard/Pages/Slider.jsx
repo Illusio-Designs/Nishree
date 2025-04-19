@@ -24,15 +24,18 @@ const Slider = () => {
     buttonText: "",
   });
 
-  const fetchSliders = async () => {
-    try {
-      const data = await sliderService.getAllSliders();
-      setSliders(data);
-    } catch (error) {
-      toast.error("Failed to fetch sliders");
-      console.error("Failed to fetch sliders:", error);
-    }
-  };
+// In Slider.jsx, modify the fetchSliders function:
+const fetchSliders = async () => {
+  try {
+    const response = await sliderService.getAllSliders();
+    
+    // ✅ Set directly if response.data is an array
+    setSliders(response.data); // No `.sliders` here
+  } catch (error) {
+    toast.error('Failed to fetch sliders');
+    console.error('Failed to fetch sliders:', error);
+  }
+};
 
   const fetchCategories = async () => {
     try {
@@ -58,28 +61,57 @@ const Slider = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Validate required fields
+      if (!formData.title) {
+        toast.error("Title is required");
+        return;
+      }
+      
+      if (modalMode === 'add' && !formData.image) {
+        toast.error("Image is required");
+        return;
+      }
+      
       const formDataToSend = new FormData();
-      Object.keys(formData).forEach((key) => {
-        if (formData[key] !== null) {
-          if (key === "image" && typeof formData[key] === "string") {
-            return;
-          }
-          formDataToSend.append(key, formData[key]);
-        }
-      });
-
-      if (modalMode === "add") {
+      
+      // Always append these fields
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('buttonText', formData.buttonText || '');
+      
+      // Handle categoryId properly - only append if it's a valid number
+      if (formData.categoryId && formData.categoryId !== "" && !isNaN(Number(formData.categoryId))) {
+        formDataToSend.append('categoryId', Number(formData.categoryId));
+      }
+      
+      // Image handling
+      if (formData.image instanceof File) {
+        formDataToSend.append('image', formData.image);
+      }
+      
+      // Add these default values if in add mode
+      if (modalMode === 'add') {
+        formDataToSend.append('status', 'active');
+        formDataToSend.append('position', 0);
+      }
+      
+      console.log("Form data entries:");
+      for (var pair of formDataToSend.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+      
+      if (modalMode === 'add') {
         await sliderService.createSlider(formDataToSend);
-        toast.success("Slider created successfully");
+        toast.success('Slider created successfully');
       } else {
         await sliderService.updateSlider(selectedSlider.id, formDataToSend);
-        toast.success("Slider updated successfully");
+        toast.success('Slider updated successfully');
       }
-
+      
       setShowModal(false);
       fetchSliders();
     } catch (error) {
-      toast.error(error.message || `Failed to ${modalMode} slider`);
+      toast.error(error.response?.data?.message || `Failed to ${modalMode} slider`);
       console.error(`Failed to ${modalMode} slider:`, error);
     }
   };
