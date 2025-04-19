@@ -1,151 +1,361 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import { FaEye, FaEyeSlash, FaLock, FaEnvelope, FaUser } from "react-icons/fa";
+import { createUseStyles } from "react-jss";
+
+// React-JSS styles
+const useStyles = createUseStyles({
+  "@keyframes slideLeft": {
+    from: {
+      opacity: 0,
+      transform: "translateX(30px) scale(0.98)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translateX(0px) scale(1)",
+    },
+  },
+  "@keyframes spin": {
+    to: {
+      transform: "rotate(360deg)",
+    },
+  },
+  loginContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f5f7fa",
+    padding: "5rem 1rem 2rem",
+  },
+  loginCard: {
+    animation: "$slideLeft ease-in 0.3s",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    borderRadius: "12px",
+    width: "100%",
+    padding: "2.5rem",
+    background: "#fff",
+    transition: "transform 0.3s ease",
+    "&:hover": {
+      transform: "translateY(-5px)",
+    },
+  },
+  loginSubtitle: {
+    color: "#64748b",
+    marginTop: "0.5rem",
+    fontSize: "0.95rem",
+  },
+  inputIconWrapper: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+  },
+  inputIcon: {
+    position: "absolute",
+    left: "12px",
+    color: "#94a3b8",
+    fontSize: "1rem",
+  },
+  authInput: {
+    width: "100%",
+    padding: "0.75rem 1.75rem",
+    marginBottom: "0rem",
+    paddingLeft: "2rem",
+  },
+  inputError: {
+    borderColor: "#ef4444",
+  },
+  errorMessage: {
+    color: "#ef4444",
+    fontSize: "0.875rem",
+    marginTop: "0.5rem",
+    marginBottom: "0",
+  },
+  passwordInputWrapper: {
+    position: "relative",
+  },
+  passwordToggle: {
+    position: "absolute",
+    right: "10px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
+    color: "#94a3b8",
+    cursor: "pointer",
+    padding: "5px",
+    fontSize: "1rem",
+    transition: "color 0.2s",
+    "&:hover": {
+      color: "#3b82f6",
+    },
+  },
+  loginOptions: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    margin: "1.25rem 0",
+    "@media (max-width: 640px)": {
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: "1rem",
+    },
+  },
+  rememberMe: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  rememberCheckbox: {
+    width: "18px",
+    height: "18px",
+    accentColor: "#3b82f6",
+    cursor: "pointer",
+  },
+});
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "admin",
-  });
+  const classes = useStyles();
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // Check for saved credentials on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setFormData((prev) => ({ ...prev, email: savedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Email validation
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email address is invalid";
+    }
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
+
+    if (!validateForm()) return;
+
     setIsLoading(true);
 
     try {
-      await register({
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        role: "admin",
-      });
-      toast.success("Registration successful!");
-      navigate("/dashboard");
+      // Handle remember me
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", formData.email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
+
+      await login(formData);
+      toast.success("Login successful!");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      toast.error(err.message || "Registration failed");
+      toast.error(
+        err.message || "Login failed. Please check your credentials."
+      );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: null,
+      });
     }
   };
 
   return (
     <>
       <Header />
-      <div className="register-container">
+      <div className={`auth-container ${classes.loginContainer}`}>
         <ToastContainer position="top-center" className="toast" />
-        <div className="register-card">
-          <div>
-            <h2 className="register-title">Register Yourself Here</h2>
+        <div className={`auth-card ${classes.loginCard}`}>
+          <div className={classes.loginHeader}>
+            <h1 className={`auth-title ${classes.loginTitle}`}> Register</h1>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="register-input"
-                placeholder="Admin Username"
-                value={formData.username}
-                onChange={handleChange}
-                autoComplete="username"
-              />
-            </div>
-            <div className="input-group">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="register-input"
-                placeholder="Admin Email address"
-                value={formData.email}
-                onChange={handleChange}
-                autoComplete="email"
-              />
-            </div>
-            <div className="input-group">
-              <div className="password-input-wrapper">
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className={`form-group ${classes.formGroup}`}>
+              <div className={classes.inputIconWrapper}>
+                <FaUser className={classes.inputIcon} />
                 <input
-                  id="password"
+                  name="name"
+                  type="name"
+                  required
+                  className={`auth-input ${classes.authInput} ${
+                    errors.email ? classes.inputError : ""
+                  }`}
+                  placeholder="Username"
+                  value={formData.name}
+                  onChange={handleChange}
+                  autoComplete="name"
+                />
+              </div>
+              {errors.name && (
+                <p className={classes.errorMessage}>{errors.name}</p>
+              )}
+            </div>
+
+            <div className={`form-group ${classes.formGroup}`}>
+              <div className={classes.inputIconWrapper}>
+                <FaEnvelope className={classes.inputIcon} />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  className={`auth-input ${classes.authInput} ${
+                    errors.email ? classes.inputError : ""
+                  }`}
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  autoComplete="email"
+                />
+              </div>
+              {errors.email && (
+                <p className={classes.errorMessage}>{errors.email}</p>
+              )}
+            </div>
+
+            <div className={`form-group ${classes.formGroup}`}>
+              <div
+                className={`${classes.inputIconWrapper} ${classes.passwordInputWrapper}`}
+              >
+                <FaLock className={classes.inputIcon} />
+                <input
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  className="register-input"
+                  className={`auth-input ${classes.authInput} ${
+                    errors.password ? classes.inputError : ""
+                  }`}
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
-                  className="password-toggle"
+                  className={classes.passwordToggle}
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
+              {errors.password && (
+                <p className={classes.errorMessage}>{errors.password}</p>
+              )}
             </div>
 
-            <div className="input-group">
-              <div className="password-input-wrapper">
+            <div className={`form-group ${classes.formGroup}`}>
+              <div
+                className={`${classes.inputIconWrapper} ${classes.passwordInputWrapper}`}
+              >
+                <FaLock className={classes.inputIcon} />
                 <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
+                  name="password"
+                  type={showPassword ? "text" : "password"}
                   required
-                  className="register-input"
+                  className={`auth-input ${classes.authInput} ${
+                    errors.password ? classes.inputError : ""
+                  }`}
                   placeholder="Confirm Password"
-                  value={formData.confirmPassword}
+                  value={formData.password}
                   onChange={handleChange}
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
-                  className="password-toggle"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className={classes.passwordToggle}
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
+              {errors.password && (
+                <p className={classes.errorMessage}>{errors.password}</p>
+              )}
             </div>
 
-            <div>
+            <div className={classes.loginOptions}>
+              <div className={classes.rememberMe}>
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={() => setRememberMe(!rememberMe)}
+                  className={classes.rememberCheckbox}
+                />
+                <label htmlFor="rememberMe">Remember me</label>
+              </div>
+              <Link
+                to="/forgot-password"
+                className={`auth-link ${classes.forgotLink}`}
+              >
+                Forgot your password?
+              </Link>
+            </div>
+
+            <div className={`form-group ${classes.formGroup}`}>
               <button
                 type="submit"
-                className="register-button"
                 disabled={isLoading}
+                className={`auth-button ${classes.loginButton}`}
               >
-                {isLoading ? "Registering Admin..." : "Register as Admin"}
+                {isLoading ? (
+                  <>
+                    <span className={classes.spinner}></span>
+                    <span>Signing in...</span>
+                  </>
+                ) : (
+                  "Sign Up"
+                )}
               </button>
             </div>
           </form>
 
-          <div className="text-center">
-            <Link to="/login" className="login-link">
-              Already have an admin account? Login
-            </Link>
+          <div className={`text-center ${classes.signupPrompt}`}>
+            <p>
+              have an account?{" "}
+              <Link to="/login" className={`auth-link ${classes.signupLink}`}>
+                Sign in
+              </Link>
+            </p>
           </div>
         </div>
       </div>
