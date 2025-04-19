@@ -22,6 +22,7 @@ const Slider = () => {
     image: null,
     categoryId: "",
     buttonText: "",
+    position: 0,
   });
 
 // In Slider.jsx, modify the fetchSliders function:
@@ -30,7 +31,7 @@ const fetchSliders = async () => {
     const response = await sliderService.getAllSliders();
     
     // ✅ Set directly if response.data is an array
-    setSliders(response.data); // No `.sliders` here
+    setSliders(response.sliders); // ✅ Correct
   } catch (error) {
     toast.error('Failed to fetch sliders');
     console.error('Failed to fetch sliders:', error);
@@ -78,6 +79,7 @@ const fetchSliders = async () => {
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description || '');
       formDataToSend.append('buttonText', formData.buttonText || '');
+      formDataToSend.append('position', formData.position || 0);
       
       // Handle categoryId properly - only append if it's a valid number
       if (formData.categoryId && formData.categoryId !== "" && !isNaN(Number(formData.categoryId))) {
@@ -126,6 +128,7 @@ const fetchSliders = async () => {
         image: slider.image || null,
         categoryId: slider.categoryId || "",
         buttonText: slider.buttonText || "",
+        position: slider.position || 0,
       });
     } else {
       setSelectedSlider(null);
@@ -149,12 +152,14 @@ const fetchSliders = async () => {
     { key: "title", header: "Title" },
     { key: "description", header: "Description" },
     {
-      key: "categoryName",
+      key: "categoryId",
       header: "Category",
+      render: (row) => row.categoryId || "N/A"
     },
     {
       key: "buttonText",
       header: "Button Text",
+      render: (row) => row.buttonText || "N/A"
     },
     {
       key: "image",
@@ -162,9 +167,9 @@ const fetchSliders = async () => {
       render: (row) =>
         row.image ? (
           <img
-            src={`${import.meta.env.VITE_API_URL}/uploads/slider/${row.image}`}
+            src={`${import.meta.env.VITE_API_URL}/uploads/sliders/${row.image}`}
             alt={row.title}
-            className="slider-thumbnail"
+            style={{ width: "100px", height: "auto", objectFit: "cover" }}
           />
         ) : (
           <span className="no-image">No image</span>
@@ -191,6 +196,7 @@ const fetchSliders = async () => {
       ),
     },
   ];
+  
 
   return (
     <div className="slider-manager">
@@ -251,6 +257,15 @@ const fetchSliders = async () => {
               setFormData({ ...formData, buttonText: e.target.value })
             }
             placeholder="Enter button text"
+          />
+          <InputField
+            label="Position"
+            type="number"
+            value={formData.position}
+            onChange={(e) =>
+              setFormData({ ...formData, position: parseInt(e.target.value) || 0 })
+            }
+            placeholder="Enter display position (0 = default)"
           />
           <div className="image-upload-section">
             {modalMode === "edit" && formData.image && (
