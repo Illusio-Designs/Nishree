@@ -136,18 +136,18 @@ export const getAllSliders = async (req, res) => {
                 as: 'category',
                 attributes: ['id', 'name']
             }],
-            position: [['position', 'ASC']]
+            order: [['position', 'ASC']]
         });
 
         const slidersResponse = sliders.map(formatSliderResponse);
 
-        // Change this line to wrap the response in an object
         res.status(200).json({ sliders: slidersResponse });
     } catch (error) {
         console.error('Get all sliders error:', error);
         res.status(500).json({ message: error.message });
     }
 };
+
 
 
 // Get Slider by ID

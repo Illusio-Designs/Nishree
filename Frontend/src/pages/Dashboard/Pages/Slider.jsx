@@ -29,8 +29,8 @@ const fetchSliders = async () => {
   try {
     const response = await sliderService.getAllSliders();
     
-    // Set sliders directly from the response data (which is the array)
-    setSliders(response.data);
+    // ✅ Set directly if response.data is an array
+    setSliders(response.data); // No `.sliders` here
   } catch (error) {
     toast.error('Failed to fetch sliders');
     console.error('Failed to fetch sliders:', error);
