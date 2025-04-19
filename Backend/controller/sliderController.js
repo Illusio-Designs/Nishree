@@ -39,16 +39,35 @@ const formatSliderResponse = (slider) => {
 };
 
 // Create Slider
+// In createSlider function
 export const createSlider = async (req, res) => {
     try {
-        let { title, tagline, buttonText, categoryId, status, position } = req.body;
+        console.log("Request body received:", req.body);
+        console.log("Request file received:", req.file);
+        
+        let { title, description, buttonText, categoryId, status, position } = req.body;
 
-        console.log("Received categoryId:", categoryId);
+        // Check for required fields
+        if (!title) {
+            return res.status(400).json({ message: 'Title is required' });
+        }
+        
+        // Check for image
+        if (!req.file) {
+            return res.status(400).json({ message: 'Image is required for new sliders' });
+        }
 
-// Ensure categoryId is a number
-categoryId = Number(categoryId);
-
+        // Handle categoryId properly
         if (categoryId) {
+            categoryId = Number(categoryId);
+            if (isNaN(categoryId)) {
+                categoryId = null;
+            }
+        } else {
+            categoryId = null;
+        }
+
+        if (categoryId !== null) {
             const category = await Category.findByPk(categoryId);
             if (!category) {
                 return res.status(400).json({ message: 'Category not found' });
@@ -75,14 +94,15 @@ categoryId = Number(categoryId);
 
         const slider = await Slider.create({
             title,
-            tagline,
+            description, // Changed from tagline
             buttonText,
             categoryId,
             image,
-            status,
-            position
+            status: status || 'active',
+            position: position ? Number(position) : 0
         });
 
+        // Rest of the function remains the same
         const sliderWithCategory = await Slider.findByPk(slider.id, {
             include: [
                 {
@@ -107,6 +127,7 @@ categoryId = Number(categoryId);
 
 
 // Get All Sliders
+// In sliderController.js, modify the getAllSliders function:
 export const getAllSliders = async (req, res) => {
     try {
         const sliders = await Slider.findAll({
@@ -115,12 +136,13 @@ export const getAllSliders = async (req, res) => {
                 as: 'category',
                 attributes: ['id', 'name']
             }],
-            order: [['position', 'ASC']] // <-- Fixed line
+            position: [['position', 'ASC']]
         });
 
         const slidersResponse = sliders.map(formatSliderResponse);
 
-        res.status(200).json(slidersResponse);
+        // Change this line to wrap the response in an object
+        res.status(200).json({ sliders: slidersResponse });
     } catch (error) {
         console.error('Get all sliders error:', error);
         res.status(500).json({ message: error.message });
@@ -162,10 +184,16 @@ export const updateSlider = async (req, res) => {
             return res.status(404).json({ message: 'Slider not found' });
         }
 
-        const { title, tagline, buttonText, categoryId, status, position } = req.body;
+        const { title, description, buttonText, categoryId, status, position } = req.body;
 
-        if (categoryId) {
-            const category = await Category.findByPk(categoryId);
+        // Add this code here
+        let categoryIdToUse = Number(categoryId);
+        if (categoryIdToUse === "" || isNaN(categoryIdToUse)) {
+          categoryIdToUse = null;
+        }
+        
+        if (categoryIdToUse) {
+            const category = await Category.findByPk(categoryIdToUse);
             if (!category) {
                 return res.status(400).json({ message: 'Category not found' });
             }
@@ -195,12 +223,12 @@ export const updateSlider = async (req, res) => {
 
         await slider.update({
             title,
-            tagline,
+            description,  // Changed from tagline
             buttonText,
             categoryId,
             image,
-            status,
-            position
+            status: status || 'active',
+            position: position || 0
         });
 
         const updatedSlider = await Slider.findByPk(slider.id, {
