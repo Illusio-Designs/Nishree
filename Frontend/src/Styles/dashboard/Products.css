@@ -1,5 +1,5 @@
 .products-manager {
-  padding: 2rem;
+  padding: 20px;
 }
 
 .header-section {
@@ -14,25 +14,29 @@
   height: 60px;
   object-fit: cover;
   border-radius: 4px;
+  border: 1px solid #ddd;
 }
 
 .no-image {
-  display: inline-block;
   width: 60px;
   height: 60px;
-  line-height: 60px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: #f5f5f5;
+  border: 1px dashed #ddd;
   border-radius: 4px;
   color: #999;
-  font-size: 0.8rem;
+  font-size: 12px;
+  text-align: center;
 }
 
 .status-badge {
-  padding: 0.25rem 0.75rem;
+  padding: 4px 8px;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 12px;
   font-weight: 500;
+  text-transform: capitalize;
 }
 
 .status-badge.active {
@@ -50,160 +54,171 @@
   color: #1565c0;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
 .badge-list {
   display: flex;
-  gap: 0.5rem;
+  gap: 4px;
   flex-wrap: wrap;
 }
 
 .badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
   color: white;
 }
 
-/* Form Styling */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Form Styles */
 .product-form {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  max-height: 80vh;
+  gap: 24px;
+  max-height: calc(100vh - 200px);
   overflow-y: auto;
-  padding: 1rem;
-  scrollbar-width: none;
+  padding: 20px;
 }
 
 .form-section {
   background-color: #f8f9fa;
-  padding: 1.5rem;
+  padding: 20px;
   border-radius: 8px;
   border: 1px solid #e9ecef;
 }
 
 .form-section h3 {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 16px 0;
+  font-size: 18px;
   color: #333;
-  font-size: 1.2rem;
 }
 
-.variation-item {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
+.variation-item,
+.badge-item,
+.discount-item {
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  border: 1px solid #e9ecef;
 }
 
 .variation-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .variation-header h4 {
   margin: 0;
+  font-size: 16px;
   color: #333;
-  font-size: 1.1rem;
 }
 
-.attributes-section {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
+.existing-images {
+  margin-top: 16px;
 }
 
-.attributes-section h5 {
-  margin: 0 0 1rem 0;
-  color: #555;
-  font-size: 1rem;
+.existing-images h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #333;
 }
 
-.attribute-item {
+.image-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 1rem;
-  align-items: start;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
 }
 
-.attribute-item select {
+.image-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.image-item img {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  background-color: white;
+  height: 100%;
+  object-fit: cover;
 }
 
-.attribute-item select:focus {
-  border-color: #80bdff;
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
 }
 
-.attribute-item select:disabled {
-  background-color: #e9ecef;
-  cursor: not-allowed;
-}
-
-.attribute-item button {
-  align-self: flex-end;
-}
-
-/* Danger button style */
-button[variant="danger"] {
-  background-color: #dc3545;
+.modal-submit-button {
+  background-color: #4CAF50;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 10px 24px;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
-button[variant="danger"]:hover {
-  background-color: #c82333;
+.modal-submit-button:hover {
+  background-color: #45a049;
 }
 
-/* Responsive styles */
-@media (max-width: 768px) {
-  .products-manager {
-    padding: 1rem;
-  }
+.modal-submit-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
 
+.modal-cancel-button {
+  background-color: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 10px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.modal-cancel-button:hover {
+  background-color: #e9ecef;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .header-section {
     flex-direction: column;
-    gap: 1rem;
+    gap: 16px;
     align-items: flex-start;
   }
 
-  .variation-item,
-  .badge-item,
-  .discount-item {
-    grid-template-columns: 1fr;
+  .product-form {
+    padding: 16px;
   }
 
-  .action-buttons {
+  .form-section {
+    padding: 16px;
+  }
+
+  .variation-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .modal-actions {
     flex-direction: column;
   }
 
-  .attribute-item {
-    grid-template-columns: 1fr;
-  }
-  
-  .attribute-item select {
-    margin-bottom: 0.5rem;
+  .modal-submit-button,
+  .modal-cancel-button {
+    width: 100%;
   }
 }

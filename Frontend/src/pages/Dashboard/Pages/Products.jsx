@@ -9,24 +9,20 @@ import Modal from "../../../components/common/Modal";
 import "../../../Styles/dashboard/Products.css";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from "react-icons/hi2";
 import { FaPlus } from "react-icons/fa";
-import "../../../Styles/dashboard/Products.css";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add');
-  const [availableAttributes, setAvailableAttributes] = useState([]);
-  const [attributeValues, setAttributeValues] = useState({});
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     status: "draft",
     categoryId: "",
-    // Basic product info
     price: "",
     stock: "",
-    // SEO fields
+    sku: "",
     seo: {
       meta_title: "",
       meta_description: "",
@@ -35,26 +31,18 @@ const Products = () => {
       og_description: "",
       og_image: ""
     },
-    // Variations
     variations: [{
       price: "",
       stock: "",
       sku: "",
-      attributes: [{
-        attributeId: "",
-        attributeName: "",
-        valueId: "",
-        value: ""
-      }]
+      attributes: []
     }],
-    // Badges
     badges: [{
       name: "",
       type: "",
-      color: "",
+      color: "#000000",
       icon: ""
     }],
-    // Discounts
     discounts: [{
       type: "percentage",
       value: "",
@@ -63,7 +51,6 @@ const Products = () => {
       minPurchase: "",
       maxDiscount: ""
     }],
-    // Images
     images: []
   });
 
@@ -77,76 +64,141 @@ const Products = () => {
     }
   };
 
-  const fetchAttributes = async () => {
-    try {
-      const response = await productService.getAttributes();
-      setAvailableAttributes(response.attributes || []);
-      
-      // Create a map of attribute values
-      const valuesMap = {};
-      response.attributes.forEach(attr => {
-        valuesMap[attr.id] = attr.values || [];
-      });
-      setAttributeValues(valuesMap);
-    } catch (error) {
-      toast.error('Failed to fetch attributes');
-      console.error("Failed to fetch attributes:", error);
-    }
-  };
-
   const handleDelete = async (id) => {
-    try {
-      await productService.deleteProduct(id);
-      toast.success('Product deleted successfully');
-      fetchProducts();
-    } catch (error) {
-      toast.error(error.message || 'Failed to delete product');
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        await productService.deleteProduct(id);
+        toast.success('Product deleted successfully');
+        fetchProducts();
+      } catch (error) {
+        toast.error(error.message || 'Failed to delete product');
+      }
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // First validate required fields
+      if (!formData.name || !formData.price || !formData.stock) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+
+      // Create base variation from main product data
+      const baseVariation = {
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock),
+        sku: formData.sku || `SKU-${Date.now()}`
+      };
+
+      // Prepare form data
       const formDataToSend = new FormData();
-      
+
       // Add basic product info
       formDataToSend.append('name', formData.name);
-      formDataToSend.append('description', formData.description);
+      formDataToSend.append('description', formData.description || '');
       formDataToSend.append('status', formData.status);
-      formDataToSend.append('categoryId', formData.categoryId);
+      formDataToSend.append('categoryId', formData.categoryId || '');
       formDataToSend.append('price', formData.price);
       formDataToSend.append('stock', formData.stock);
 
-      // Add SEO data
-      formDataToSend.append('seo', JSON.stringify(formData.seo));
+      // Handle variations
+      let variations = [];
+      
+      // Add additional variations if they exist and are valid
+      const additionalVariations = formData.variations
+        .filter(variation => {
+          const price = parseFloat(variation.price);
+          const stock = parseInt(variation.stock);
+          return (
+            variation.price && 
+            variation.stock && 
+            !isNaN(price) && 
+            !isNaN(stock) && 
+            price > 0 && 
+            stock >= 0 &&
+            variation.sku
+          );
+        })
+        .map(variation => ({
+          price: parseFloat(variation.price),
+          stock: parseInt(variation.stock),
+          sku: variation.sku
+        }));
 
-      // Add variations
-      formDataToSend.append('variations', JSON.stringify(formData.variations));
+      // If we have valid additional variations, use them; otherwise use the base variation
+      variations = additionalVariations.length > 0 ? additionalVariations : [baseVariation];
 
-      // Add badges
-      formDataToSend.append('badges', JSON.stringify(formData.badges));
+      // Add variations to form data
+      formDataToSend.append('variations', JSON.stringify(variations));
 
-      // Add discounts
-      formDataToSend.append('discounts', JSON.stringify(formData.discounts));
+      // Add SEO data if exists
+      const seoData = {
+        meta_title: formData.seo?.meta_title || '',
+        meta_description: formData.seo?.meta_description || '',
+        meta_keywords: formData.seo?.meta_keywords || '',
+        og_title: formData.seo?.og_title || '',
+        og_description: formData.seo?.og_description || '',
+        og_image: formData.seo?.og_image || ''
+      };
+      formDataToSend.append('seo', JSON.stringify(seoData));
 
-      // Add images
-      if (formData.images) {
+      // Add badges if they exist and are valid
+      const validBadges = formData.badges
+        .filter(badge => badge.name && badge.type)
+        .map(badge => ({
+          name: badge.name,
+          type: badge.type,
+          color: badge.color || '#000000',
+          icon: badge.icon || ''
+        }));
+      formDataToSend.append('badges', JSON.stringify(validBadges));
+
+      // Add discounts if they exist and are valid
+      const validDiscounts = formData.discounts
+        .filter(discount => {
+          const value = parseFloat(discount.value);
+          return (
+            discount.type &&
+            !isNaN(value) &&
+            value > 0 &&
+            discount.startDate &&
+            discount.endDate
+          );
+        })
+        .map(discount => ({
+          type: discount.type,
+          value: parseFloat(discount.value),
+          startDate: discount.startDate,
+          endDate: discount.endDate,
+          minPurchase: parseFloat(discount.minPurchase) || null,
+          maxDiscount: parseFloat(discount.maxDiscount) || null
+        }));
+      formDataToSend.append('discounts', JSON.stringify(validDiscounts));
+
+      // Add images if they exist
+      if (formData.images && formData.images.length > 0) {
         Array.from(formData.images).forEach(image => {
           formDataToSend.append('images', image);
         });
       }
 
+      // Submit the form
       if (modalMode === 'add') {
-        await productService.createProduct(formDataToSend);
+        const response = await productService.createProduct(formDataToSend);
+        console.log('Create response:', response);
         toast.success('Product created successfully');
       } else {
-        await productService.updateProduct(selectedProduct.id, formDataToSend);
+        const response = await productService.updateProduct(selectedProduct.id, formDataToSend);
+        console.log('Update response:', response);
         toast.success('Product updated successfully');
       }
       
       setShowModal(false);
       fetchProducts();
     } catch (error) {
+      console.error('Error submitting product:', error);
       toast.error(error.message || `Failed to ${modalMode} product`);
     }
   };
@@ -162,6 +214,7 @@ const Products = () => {
         categoryId: product.categoryId || "",
         price: product.price || "",
         stock: product.stock || "",
+        sku: product.sku || "",
         seo: product.ProductSEO || {
           meta_title: "",
           meta_description: "",
@@ -170,24 +223,19 @@ const Products = () => {
           og_description: "",
           og_image: ""
         },
-        variations: product.ProductVariations || [{
+        variations: product.ProductVariations?.length ? product.ProductVariations : [{
           price: "",
           stock: "",
           sku: "",
-          attributes: [{
-            attributeId: "",
-            attributeName: "",
-            valueId: "",
-            value: ""
-          }]
+          attributes: []
         }],
-        badges: product.ProductBadges || [{
+        badges: product.ProductBadges?.length ? product.ProductBadges : [{
           name: "",
           type: "",
-          color: "",
+          color: "#000000",
           icon: ""
         }],
-        discounts: product.ProductDiscounts || [{
+        discounts: product.ProductDiscounts?.length ? product.ProductDiscounts : [{
           type: "percentage",
           value: "",
           startDate: "",
@@ -206,6 +254,7 @@ const Products = () => {
         categoryId: "",
         price: "",
         stock: "",
+        sku: "",
         seo: {
           meta_title: "",
           meta_description: "",
@@ -218,17 +267,12 @@ const Products = () => {
           price: "",
           stock: "",
           sku: "",
-          attributes: [{
-            attributeId: "",
-            attributeName: "",
-            valueId: "",
-            value: ""
-          }]
+          attributes: []
         }],
         badges: [{
           name: "",
           type: "",
-          color: "",
+          color: "#000000",
           icon: ""
         }],
         discounts: [{
@@ -254,12 +298,7 @@ const Products = () => {
           price: "",
           stock: "",
           sku: "",
-          attributes: [{
-            attributeId: "",
-            attributeName: "",
-            valueId: "",
-            value: ""
-          }]
+          attributes: []
         }
       ]
     });
@@ -273,7 +312,7 @@ const Products = () => {
         {
           name: "",
           type: "",
-          color: "",
+          color: "#000000",
           icon: ""
         }
       ]
@@ -297,72 +336,37 @@ const Products = () => {
     });
   };
 
-  const handleAddVariationAttribute = (variationIndex) => {
-    const newFormData = { ...formData };
-    newFormData.variations[variationIndex].attributes.push({
-      attributeId: "",
-      attributeName: "",
-      valueId: "",
-      value: ""
-    });
-    setFormData(newFormData);
-  };
-
-  const handleRemoveVariationAttribute = (variationIndex, attributeIndex) => {
-    const newFormData = { ...formData };
-    newFormData.variations[variationIndex].attributes.splice(attributeIndex, 1);
-    setFormData(newFormData);
-  };
-
-  const handleVariationAttributeChange = (variationIndex, attributeIndex, field, value) => {
-    const newFormData = { ...formData };
-    const attribute = newFormData.variations[variationIndex].attributes[attributeIndex];
-    
-    if (field === 'attributeName') {
-      // Find the selected attribute
-      const selectedAttr = availableAttributes.find(attr => attr.name === value);
-      if (selectedAttr) {
-        attribute.attributeId = selectedAttr.id;
-        attribute.attributeName = value;
-        attribute.valueId = ""; // Reset value when attribute changes
-        attribute.value = ""; // Reset value when attribute changes
-      }
-    } else if (field === 'value') {
-      // Find the selected value
-      const attrValues = attributeValues[attribute.attributeId] || [];
-      const selectedValue = attrValues.find(val => val.value === value);
-      if (selectedValue) {
-        attribute.valueId = selectedValue.id;
-        attribute.value = value;
-      }
-    }
-    
-    setFormData(newFormData);
-  };
-
   useEffect(() => {
     fetchProducts();
-    fetchAttributes();
   }, []);
 
   const columns = [
-    { key: "name", header: "Name" },
     { 
       key: "images", 
       header: "Image",
-      render: (row) => (
-        row.ProductImages && row.ProductImages[0] ? (
-          <img 
-            src={row.ProductImages[0].image_url}
-            alt={row.name}
-            className="product-thumbnail"
-          />
-        ) : (
-          <span className="no-image">No image</span>
-        )
-      )
+      render: (row) => {
+        const imageUrl = row.ProductImages && row.ProductImages[0]?.image_url;
+        return (
+          <div className="product-image-cell">
+            {imageUrl ? (
+              <img 
+                src={`${import.meta.env.VITE_API_URL}${imageUrl}`}
+                alt={row.name}
+                className="product-thumbnail"
+              />
+            ) : (
+              <div className="no-image">No image</div>
+            )}
+          </div>
+        );
+      }
     },
-    { key: "price", header: "Price" },
+    { key: "name", header: "Name" },
+    { 
+      key: "price", 
+      header: "Price",
+      render: (row) => `$${parseFloat(row.price).toFixed(2)}`
+    },
     { key: "stock", header: "Stock" },
     {
       key: "status",
@@ -481,6 +485,8 @@ const Products = () => {
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
               required
+              min="0"
+              step="0.01"
             />
             <InputField
               label="Stock"
@@ -488,6 +494,13 @@ const Products = () => {
               value={formData.stock}
               onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
               required
+              min="0"
+            />
+            <InputField
+              label="SKU"
+              value={formData.sku}
+              onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+              placeholder="Enter product SKU"
             />
             <InputField
               label="Status"
@@ -529,6 +542,7 @@ const Products = () => {
                 ...formData,
                 seo: { ...formData.seo, meta_keywords: e.target.value }
               })}
+              placeholder="Separate keywords with commas"
             />
           </div>
 
@@ -562,6 +576,8 @@ const Products = () => {
                     newVariations[variationIndex].price = e.target.value;
                     setFormData({ ...formData, variations: newVariations });
                   }}
+                  min="0"
+                  step="0.01"
                 />
                 <InputField
                   label="Stock"
@@ -572,6 +588,7 @@ const Products = () => {
                     newVariations[variationIndex].stock = e.target.value;
                     setFormData({ ...formData, variations: newVariations });
                   }}
+                  min="0"
                 />
                 <InputField
                   label="SKU"
@@ -582,68 +599,6 @@ const Products = () => {
                     setFormData({ ...formData, variations: newVariations });
                   }}
                 />
-
-                {/* Attributes Section */}
-                <div className="attributes-section">
-                  <h5>Attributes</h5>
-                  {variation.attributes.map((attribute, attributeIndex) => (
-                    <div key={attributeIndex} className="attribute-item">
-                      <InputField
-                        label="Attribute"
-                        type="select"
-                        value={attribute.attributeName}
-                        onChange={(e) => handleVariationAttributeChange(
-                          variationIndex,
-                          attributeIndex,
-                          'attributeName',
-                          e.target.value
-                        )}
-                        options={[
-                          { value: "", label: "Select Attribute" },
-                          ...availableAttributes.map(attr => ({
-                            value: attr.name,
-                            label: attr.name
-                          }))
-                        ]}
-                      />
-                      {attribute.attributeId && (
-                        <InputField
-                          label="Value"
-                          type="select"
-                          value={attribute.value}
-                          onChange={(e) => handleVariationAttributeChange(
-                            variationIndex,
-                            attributeIndex,
-                            'value',
-                            e.target.value
-                          )}
-                          options={[
-                            { value: "", label: "Select Value" },
-                            ...(attributeValues[attribute.attributeId] || []).map(val => ({
-                              value: val.value,
-                              label: val.value
-                            }))
-                          ]}
-                        />
-                      )}
-                      {attributeIndex > 0 && (
-                        <Button
-                          type="button"
-                          variant="danger"
-                          onClick={() => handleRemoveVariationAttribute(variationIndex, attributeIndex)}
-                        >
-                          Remove Attribute
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    onClick={() => handleAddVariationAttribute(variationIndex)}
-                  >
-                    Add Attribute
-                  </Button>
-                </div>
               </div>
             ))}
             <Button type="button" onClick={handleAddVariation}>
@@ -667,12 +622,19 @@ const Products = () => {
                 />
                 <InputField
                   label="Type"
+                  type="select"
                   value={badge.type}
                   onChange={(e) => {
                     const newBadges = [...formData.badges];
                     newBadges[index].type = e.target.value;
                     setFormData({ ...formData, badges: newBadges });
                   }}
+                  options={[
+                    { value: "new", label: "New" },
+                    { value: "sale", label: "Sale" },
+                    { value: "featured", label: "Featured" },
+                    { value: "custom", label: "Custom" }
+                  ]}
                 />
                 <InputField
                   label="Color"
@@ -692,7 +654,21 @@ const Products = () => {
                     newBadges[index].icon = e.target.value;
                     setFormData({ ...formData, badges: newBadges });
                   }}
+                  placeholder="Icon class name or URL"
                 />
+                {index > 0 && (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    onClick={() => {
+                      const newBadges = [...formData.badges];
+                      newBadges.splice(index, 1);
+                      setFormData({ ...formData, badges: newBadges });
+                    }}
+                  >
+                    Remove Badge
+                  </Button>
+                )}
               </div>
             ))}
             <Button type="button" onClick={handleAddBadge}>
@@ -728,6 +704,9 @@ const Products = () => {
                     newDiscounts[index].value = e.target.value;
                     setFormData({ ...formData, discounts: newDiscounts });
                   }}
+                  min="0"
+                  step={discount.type === "percentage" ? "1" : "0.01"}
+                  max={discount.type === "percentage" ? "100" : undefined}
                 />
                 <InputField
                   label="Start Date"
@@ -749,6 +728,43 @@ const Products = () => {
                     setFormData({ ...formData, discounts: newDiscounts });
                   }}
                 />
+                <InputField
+                  label="Minimum Purchase"
+                  type="number"
+                  value={discount.minPurchase}
+                  onChange={(e) => {
+                    const newDiscounts = [...formData.discounts];
+                    newDiscounts[index].minPurchase = e.target.value;
+                    setFormData({ ...formData, discounts: newDiscounts });
+                  }}
+                  min="0"
+                  step="0.01"
+                />
+                <InputField
+                  label="Maximum Discount"
+                  type="number"
+                  value={discount.maxDiscount}
+                  onChange={(e) => {
+                    const newDiscounts = [...formData.discounts];
+                    newDiscounts[index].maxDiscount = e.target.value;
+                    setFormData({ ...formData, discounts: newDiscounts });
+                  }}
+                  min="0"
+                  step="0.01"
+                />
+                {index > 0 && (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    onClick={() => {
+                      const newDiscounts = [...formData.discounts];
+                      newDiscounts.splice(index, 1);
+                      setFormData({ ...formData, discounts: newDiscounts });
+                    }}
+                  >
+                    Remove Discount
+                  </Button>
+                )}
               </div>
             ))}
             <Button type="button" onClick={handleAddDiscount}>
@@ -772,7 +788,10 @@ const Products = () => {
                 <div className="image-grid">
                   {selectedProduct.ProductImages.map((image, index) => (
                     <div key={index} className="image-item">
-                      <img src={image.image_url} alt={`Product ${index + 1}`} />
+                      <img 
+                        src={`${import.meta.env.VITE_API_URL}${image.image_url}`}
+                        alt={`Product ${index + 1}`}
+                      />
                     </div>
                   ))}
                 </div>
@@ -784,7 +803,7 @@ const Products = () => {
             <Button
               type="submit"
               className="modal-submit-button"
-              disabled={!formData.name}
+              disabled={!formData.name || !formData.price || !formData.stock}
             >
               {modalMode === 'add' ? 'Create Product' : 'Update Product'}
             </Button>
