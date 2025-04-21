@@ -10,7 +10,8 @@ const InputField = ({
   multiline = false,
   required = false,
   accept,
-  className = ""
+  className = "",
+  options = []
 }) => {
   const [preview, setPreview] = useState(null);
 
@@ -52,6 +53,26 @@ const InputField = ({
             </div>
           )}
         </div>
+      </div>
+    );
+  }
+
+  if (type === "select") {
+    return (
+      <div className={`input-field ${className}`}>
+        <label>{label}</label>
+        <select
+          value={value}
+          onChange={onChange}
+          required={required}
+          className="select-input"
+        >
+          {options?.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
     );
   }

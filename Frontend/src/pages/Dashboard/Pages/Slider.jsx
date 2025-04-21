@@ -19,29 +19,27 @@ const Slider = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    buttonText: "",
     image: null,
     categoryId: "",
-    buttonText: "",
-    position: 0,
+    status: "active"
   });
 
-// In Slider.jsx, modify the fetchSliders function:
-const fetchSliders = async () => {
-  try {
-    const response = await sliderService.getAllSliders();
-    
-    // ✅ Set directly if response.data is an array
-    setSliders(response.sliders); // ✅ Correct
-  } catch (error) {
-    toast.error('Failed to fetch sliders');
-    console.error('Failed to fetch sliders:', error);
-  }
-};
+  const fetchSliders = async () => {
+    try {
+      const response = await sliderService.getAllSliders();
+      setSliders(response.sliders);
+    } catch (error) {
+      toast.error('Failed to fetch sliders');
+      console.error('Failed to fetch sliders:', error);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
       const data = await categoryService.getAllCategories();
-      setCategories(data);
+      const activeCategories = data.filter(category => category.status === 'active');
+      setCategories(activeCategories);
     } catch (error) {
       toast.error("Failed to fetch categories");
       console.error("Failed to fetch categories:", error);
@@ -75,31 +73,20 @@ const fetchSliders = async () => {
       
       const formDataToSend = new FormData();
       
-      // Always append these fields
+      // Append all form fields
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description || '');
       formDataToSend.append('buttonText', formData.buttonText || '');
-      formDataToSend.append('position', formData.position || 0);
+      formDataToSend.append('status', formData.status);
       
-      // Handle categoryId properly - only append if it's a valid number
-      if (formData.categoryId && formData.categoryId !== "" && !isNaN(Number(formData.categoryId))) {
-        formDataToSend.append('categoryId', Number(formData.categoryId));
+      // Handle categoryId
+      if (formData.categoryId) {
+        formDataToSend.append('categoryId', formData.categoryId);
       }
       
-      // Image handling
+      // Handle image
       if (formData.image instanceof File) {
         formDataToSend.append('image', formData.image);
-      }
-      
-      // Add these default values if in add mode
-      if (modalMode === 'add') {
-        formDataToSend.append('status', 'active');
-        formDataToSend.append('position', 0);
-      }
-      
-      console.log("Form data entries:");
-      for (var pair of formDataToSend.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
       }
       
       if (modalMode === 'add') {
@@ -112,32 +99,43 @@ const fetchSliders = async () => {
       
       setShowModal(false);
       fetchSliders();
+      
+      // Reset form
+      setFormData({
+        title: "",
+        description: "",
+        buttonText: "",
+        image: null,
+        categoryId: "",
+        status: "active"
+      });
     } catch (error) {
       toast.error(error.response?.data?.message || `Failed to ${modalMode} slider`);
       console.error(`Failed to ${modalMode} slider:`, error);
     }
   };
 
-  const handleOpenModal = async (mode, slider = null) => {
+  const handleOpenModal = (mode, slider = null) => {
     setModalMode(mode);
     if (slider && mode === "edit") {
       setSelectedSlider(slider);
       setFormData({
         title: slider.title || "",
         description: slider.description || "",
+        buttonText: slider.buttonText || "",
         image: slider.image || null,
         categoryId: slider.categoryId || "",
-        buttonText: slider.buttonText || "",
-        position: slider.position || 0,
+        status: slider.status || "active"
       });
     } else {
       setSelectedSlider(null);
       setFormData({
         title: "",
         description: "",
+        buttonText: "",
         image: null,
         categoryId: "",
-        buttonText: "",
+        status: "active"
       });
     }
     setShowModal(true);
@@ -151,15 +149,20 @@ const fetchSliders = async () => {
   const columns = [
     { key: "title", header: "Title" },
     { key: "description", header: "Description" },
+    { key: "buttonText", header: "Button Text" },
     {
-      key: "categoryId",
+      key: "categoryName",
       header: "Category",
-      render: (row) => row.categoryId || "N/A"
+      render: (row) => row.categoryName || "N/A"
     },
     {
-      key: "buttonText",
-      header: "Button Text",
-      render: (row) => row.buttonText || "N/A"
+      key: "status",
+      header: "Status",
+      render: (row) => (
+        <span className={`status-badge ${row.status}`}>
+          {row.status}
+        </span>
+      )
     },
     {
       key: "image",
@@ -167,7 +170,7 @@ const fetchSliders = async () => {
       render: (row) =>
         row.image ? (
           <img
-            src={`${import.meta.env.VITE_API_URL}/uploads/sliders/${row.image}`}
+            src={`${import.meta.env.VITE_API_URL}/uploads/slider/${row.image}`}
             alt={row.title}
             style={{ width: "100px", height: "auto", objectFit: "cover" }}
           />
@@ -196,7 +199,6 @@ const fetchSliders = async () => {
       ),
     },
   ];
-  
 
   return (
     <div className="slider-manager">
@@ -210,7 +212,7 @@ const fetchSliders = async () => {
       <TableWithControls
         columns={columns}
         data={sliders}
-        searchFields={["title", "description"]}
+        searchFields={["title", "description", "buttonText"]}
       />
 
       <Modal
@@ -238,19 +240,6 @@ const fetchSliders = async () => {
             multiline
           />
           <InputField
-            label="Category"
-            type="select"
-            value={formData.categoryId}
-            onChange={(e) =>
-              setFormData({ ...formData, categoryId: e.target.value })
-            }
-            options={categories.map((category) => ({
-              value: category.id,
-              label: category.name,
-            }))}
-            placeholder="Select a category"
-          />
-          <InputField
             label="Button Text"
             value={formData.buttonText}
             onChange={(e) =>
@@ -259,13 +248,31 @@ const fetchSliders = async () => {
             placeholder="Enter button text"
           />
           <InputField
-            label="Position"
-            type="number"
-            value={formData.position}
+            label="Category"
+            type="select"
+            value={formData.categoryId}
             onChange={(e) =>
-              setFormData({ ...formData, position: parseInt(e.target.value) || 0 })
+              setFormData({ ...formData, categoryId: e.target.value })
             }
-            placeholder="Enter display position (0 = default)"
+            options={[
+              { value: "", label: "Select a category" },
+              ...categories.map((category) => ({
+                value: category.id,
+                label: category.name,
+              }))
+            ]}
+          />
+          <InputField
+            label="Status"
+            type="select"
+            value={formData.status}
+            onChange={(e) =>
+              setFormData({ ...formData, status: e.target.value })
+            }
+            options={[
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" }
+            ]}
           />
           <div className="image-upload-section">
             {modalMode === "edit" && formData.image && (
@@ -284,6 +291,7 @@ const fetchSliders = async () => {
                 setFormData({ ...formData, image: e.target.files[0] })
               }
               accept="image/*"
+              required={modalMode === "add"}
             />
           </div>
 

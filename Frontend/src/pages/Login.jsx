@@ -61,7 +61,7 @@ const useStyles = createUseStyles({
   },
   authInput: {
     width: "100%",
-    padding: "0.75rem 2.75rem",
+    padding: "0.75rem 2.05rem !important",
     marginBottom: "0rem",
   },
   inputError: {
@@ -170,9 +170,15 @@ const Login = () => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      await login(formData);
-      toast.success("Login successful!");
-      navigate("/dashboard", { replace: true });
+      // Mock login without API call
+      // In a real app, you would call the login function from AuthContext
+      // await login(formData);
+      
+      // Simulate successful login
+      setTimeout(() => {
+        toast.success("Login successful!");
+        navigate("/profile", { replace: true });
+      }, 1500);
     } catch (err) {
       toast.error(
         err.message || "Login failed. Please check your credentials."
@@ -297,7 +303,7 @@ const Login = () => {
 
           <div className={`text-center ${classes.signupPrompt}`}>
             <p>
-              Don't have an admin account?{" "}
+              Don't have an account?{" "}
               <Link
                 to="/register"
                 className={`auth-link ${classes.signupLink}`}

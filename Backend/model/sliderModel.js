@@ -16,6 +16,10 @@ export const Slider = sequelize.define('Slider', {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    buttonText: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     image: {
         type: DataTypes.STRING,
         allowNull: false
@@ -23,6 +27,14 @@ export const Slider = sequelize.define('Slider', {
     link: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    categoryId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: Category,
+            key: 'id'
+        }
     },
     position: {
         type: DataTypes.INTEGER,

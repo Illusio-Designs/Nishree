@@ -29,7 +29,7 @@ const useStyles = createUseStyles({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f5f7fa",
-    padding: "5rem 1rem 2rem",
+    padding: "3rem 1rem 1rem",
   },
   loginCard: {
     animation: "$slideLeft ease-in 0.3s",
@@ -62,9 +62,8 @@ const useStyles = createUseStyles({
   },
   authInput: {
     width: "100%",
-    padding: "0.75rem 1.75rem",
+    padding: "0.75rem 2.05rem !important",
     marginBottom: "0rem",
-    paddingLeft: "2rem",
   },
   inputError: {
     borderColor: "#ef4444",
@@ -120,7 +119,7 @@ const useStyles = createUseStyles({
 
 const Register = () => {
   const classes = useStyles();
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -139,6 +138,13 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    // Name validation
+    if (!formData.name) {
+      newErrors.name = "Username is required";
+    } else if (formData.name.length < 3) {
+      newErrors.name = "Username must be at least 3 characters";
+    }
+
     // Email validation
     if (!formData.email) {
       newErrors.email = "Email is required";
@@ -153,6 +159,13 @@ const Register = () => {
       newErrors.password = "Password must be at least 6 characters";
     }
 
+    // Confirm Password validation
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (formData.confirmPassword !== formData.password) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -165,19 +178,25 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      // Handle remember me
-      if (rememberMe) {
-        localStorage.setItem("rememberedEmail", formData.email);
-      } else {
-        localStorage.removeItem("rememberedEmail");
-      }
+      // Create registration data object
+      const registrationData = {
+        username: formData.name,
+        email: formData.email,
+        password: formData.password
+      };
 
-      await login(formData);
-      toast.success("Login successful!");
-      navigate("/dashboard", { replace: true });
+      // Mock registration without API call
+      // In a real app, you would call the register function from AuthContext
+      // await register(registrationData);
+      
+      // Simulate successful registration
+      setTimeout(() => {
+        toast.success("Registration successful!");
+        navigate("/login", { replace: true });
+      }, 1500);
     } catch (err) {
       toast.error(
-        err.message || "Login failed. Please check your credentials."
+        err.message || "Registration failed. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -265,7 +284,7 @@ const Register = () => {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"
@@ -287,16 +306,16 @@ const Register = () => {
               >
                 <FaLock className={classes.inputIcon} />
                 <input
-                  name="password"
+                  name="confirmPassword"
                   type={showPassword ? "text" : "password"}
                   required
                   className={`auth-input ${classes.authInput} ${
-                    errors.password ? classes.inputError : ""
+                    errors.confirmPassword ? classes.inputError : ""
                   }`}
                   placeholder="Confirm Password"
-                  value={formData.password}
+                  value={formData.confirmPassword}
                   onChange={handleChange}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"
@@ -307,29 +326,12 @@ const Register = () => {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-              {errors.password && (
-                <p className={classes.errorMessage}>{errors.password}</p>
+              {errors.confirmPassword && (
+                <p className={classes.errorMessage}>{errors.confirmPassword}</p>
               )}
             </div>
 
-            <div className={classes.loginOptions}>
-              <div className={classes.rememberMe}>
-                <input
-                  type="checkbox"
-                  id="rememberMe"
-                  checked={rememberMe}
-                  onChange={() => setRememberMe(!rememberMe)}
-                  className={classes.rememberCheckbox}
-                />
-                <label htmlFor="rememberMe">Remember me</label>
-              </div>
-              <Link
-                to="/forgot-password"
-                className={`auth-link ${classes.forgotLink}`}
-              >
-                Forgot your password?
-              </Link>
-            </div>
+
 
             <div className={`form-group ${classes.formGroup}`}>
               <button
@@ -340,7 +342,7 @@ const Register = () => {
                 {isLoading ? (
                   <>
                     <span className={classes.spinner}></span>
-                    <span>Signing in...</span>
+                    <span>Registering...</span>
                   </>
                 ) : (
                   "Sign Up"
@@ -351,7 +353,7 @@ const Register = () => {
 
           <div className={`text-center ${classes.signupPrompt}`}>
             <p>
-              have an account?{" "}
+              Already have an account?{" "}
               <Link to="/login" className={`auth-link ${classes.signupLink}`}>
                 Sign in
               </Link>

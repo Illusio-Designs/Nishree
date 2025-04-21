@@ -45,7 +45,7 @@ export const createSlider = async (req, res) => {
         console.log("Request body received:", req.body);
         console.log("Request file received:", req.file);
         
-        let { title, description, buttonText, categoryId, status, position } = req.body;
+        let { title, description, buttonText, buttonType, buttonStyle, categoryId, status, position } = req.body;
 
         // Check for required fields
         if (!title) {
@@ -94,8 +94,10 @@ export const createSlider = async (req, res) => {
 
         const slider = await Slider.create({
             title,
-            description, // Changed from tagline
+            description,
             buttonText,
+            buttonType,
+            buttonStyle,
             categoryId,
             image,
             status: status || 'active',
@@ -184,7 +186,7 @@ export const updateSlider = async (req, res) => {
             return res.status(404).json({ message: 'Slider not found' });
         }
 
-        const { title, description, buttonText, categoryId, status, position } = req.body;
+        const { title, description, buttonText, buttonType, buttonStyle, categoryId, status, position } = req.body;
 
         // Add this code here
         let categoryIdToUse = Number(categoryId);
@@ -223,8 +225,10 @@ export const updateSlider = async (req, res) => {
 
         await slider.update({
             title,
-            description,  // Changed from tagline
+            description,
             buttonText,
+            buttonType,
+            buttonStyle,
             categoryId,
             image,
             status: status || 'active',

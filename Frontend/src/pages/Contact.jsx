@@ -14,14 +14,11 @@ const Contact = () => {
               <span>Contact</span> Us
             </h1>
             <form className="contact-form">
-              <label htmlFor="name">Name:</label>
-              <input type="text" id="name" name="name" required />
+              <input type="text" id="name" name="name" placeholder="Name" required />
 
-              <label htmlFor="email">Email:</label>
-              <input type="email" id="email" name="email" required />
+              <input type="email" id="email" name="email" placeholder="Email" required />
 
-              <label htmlFor="message">Message:</label>
-              <textarea id="message" name="message" required></textarea>
+              <textarea id="message" name="message" placeholder="Enter your message Here.." required></textarea>
 
               <button type="submit">Send Message</button>
             </form>
