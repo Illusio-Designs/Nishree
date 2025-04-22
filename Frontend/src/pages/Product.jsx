@@ -34,7 +34,7 @@ const Product = () => {
     <>
       <Header />
       <div className="hero-section section">
-        <div className="hero-img">
+        <div className="hero-img-section">
           <img src={hero} className="img-fluid" alt="hero-img" />
         </div>
         <div className="hero-product-text">

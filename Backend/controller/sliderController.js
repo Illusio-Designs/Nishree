@@ -255,6 +255,36 @@ export const updateSlider = async (req, res) => {
     }
 };
 
+// Get Public Sliders
+export const getPublicSliders = async (req, res) => {
+    try {
+        const sliders = await Slider.findAll({
+            where: {
+                status: 'active'
+            },
+            include: [{
+                model: Category,
+                as: 'category',
+                attributes: ['id', 'name', 'slug']
+            }],
+            order: [['position', 'ASC']],
+            attributes: ['id', 'title', 'description', 'buttonText', 'buttonType', 'buttonStyle', 'image', 'categoryId']
+        });
+
+        const slidersResponse = sliders.map(slider => {
+            const sliderData = slider.toJSON();
+            sliderData.categoryName = slider.category ? slider.category.name : null;
+            sliderData.categorySlug = slider.category ? slider.category.slug : null;
+            delete sliderData.category;
+            return sliderData;
+        });
+
+        res.status(200).json({ sliders: slidersResponse });
+    } catch (error) {
+        console.error('Get public sliders error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
 
 // Delete Slider
 export const deleteSlider = async (req, res) => {

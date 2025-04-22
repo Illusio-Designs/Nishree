@@ -44,7 +44,7 @@ const Collection = () => {
       <Header />
       <div className="background section">
         <div className="hero-section">
-          <div className="hero-img">
+          <div className="hero-img-section">
             <img src={hero} className="img-fluid" alt="hero-img" />
           </div>
           <div className="hero-product-text">

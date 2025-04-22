@@ -359,7 +359,7 @@ export const categoryService = {
 
     getAllCategories: async () => {
         try {
-            const response = await api.get('/api/categories');
+            const response = await api.get('/api/categories/admin/all');
             return response.data;
         } catch (error) {
             throw handleApiError(error);
@@ -383,7 +383,7 @@ export const categoryService = {
             throw handleApiError(error);
         }
     },
-
+    
     deleteCategory: async (id) => {
         try {
             const response = await api.delete(`/api/categories/${id}`);
@@ -394,6 +394,52 @@ export const categoryService = {
     }
 };
 
+export const sliderService = {
+    createSlider: async (sliderData) => {
+        try {
+            const response = await api.post('/api/sliders', sliderData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getAllSliders: async () => {
+        try {
+            const response = await api.get('/api/sliders/admin/all');
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getSliderById: async (id) => {
+        try {
+            const response = await api.get(`/api/sliders/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    updateSlider: async (id, sliderData) => {
+        try {
+            const response = await api.put(`/api/sliders/${id}`, sliderData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    deleteSlider: async (id) => {
+        try {
+            const response = await api.delete(`/api/sliders/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    }
+};
 // Product Services
 export const productService = {
     createProduct: async (productData) => {
@@ -461,52 +507,6 @@ export const productService = {
 };
 
 // Slider Services
-export const sliderService = {
-    createSlider: async (sliderData) => {
-        try {
-            const response = await api.post('/api/sliders', sliderData);
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    },
-
-    getAllSliders: async () => {
-        try {
-            const response = await api.get('/api/sliders');
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    },
-
-    getSliderById: async (id) => {
-        try {
-            const response = await api.get(`/api/sliders/${id}`);
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    },
-
-    updateSlider: async (id, sliderData) => {
-        try {
-            const response = await api.put(`/api/sliders/${id}`, sliderData);
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    },
-
-    deleteSlider: async (id) => {
-        try {
-            const response = await api.delete(`/api/sliders/${id}`);
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    }
-};
 
 // Order Services
 export const orderService = {

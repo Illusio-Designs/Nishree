@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import "../Styles/Home.css";
 import hero from "../assets/aromatic-spice-collection-adds-flavor-cooking-generated-by-ai 1.png";
@@ -14,7 +14,46 @@ import BlogCard from "../components/BlogCard";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 
+// Temporary test slider data
+const testSliders = [
+  {
+    id: 1,
+    title: "Flavors That Inspire, Traditions That Unite",
+    image: hero,
+  },
+  {
+    id: 2,
+    title: "Discover Authentic Indian Spices",
+    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=2070&auto=format&fit=crop",
+  },
+  {
+    id: 3,
+    title: "Premium Quality Products for Your Kitchen",
+    image: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?q=80&w=1974&auto=format&fit=crop",
+  }
+];
+
 const Home = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [sliders] = useState(testSliders);
+
+  const getSlideClass = (index) => {
+    if (index === currentSlide) return 'active';
+    if (index === (currentSlide - 1 + sliders.length) % sliders.length) return 'prev';
+    if (index === (currentSlide + 1) % sliders.length) return 'next';
+    return '';
+  };
+
+  useEffect(() => {
+    if (sliders.length > 0) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % sliders.length);
+      }, 5000);
+
+      return () => clearInterval(timer);
+    }
+  }, [sliders]);
+
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
     const observer = new IntersectionObserver(
@@ -37,15 +76,25 @@ const Home = () => {
     <>
       <Header />
       <div className="hero-section section">
-        <div className="hero-img">
-          <img src={hero} className="img-fluid" alt="hero-img" />
-        </div>
-        <div className="hero-text">
-          <h1>
-            Flavors That Inspire, <br />
-            Traditions That Unite.
-          </h1>
-          <button className="btn">Shop Now</button>
+        {sliders.map((slider, index) => (
+          <div key={slider.id} className={`hero-img ${getSlideClass(index)}`}>
+            <img src={slider.image} className="img-fluid" alt={slider.title} />
+            {index === currentSlide && (
+              <div className="hero-text">
+                <h1>{slider.title}</h1>
+                <button className="btn">Shop Now</button>
+              </div>
+            )}
+          </div>
+        ))}
+        <div className="slider-dots">
+          {sliders.map((_, index) => (
+            <span
+              key={index}
+              className={`dot ${index === currentSlide ? "active" : ""}`}
+              onClick={() => setCurrentSlide(index)}
+            />
+          ))}
         </div>
       </div>
       <div className="background section">

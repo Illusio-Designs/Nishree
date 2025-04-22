@@ -315,11 +315,46 @@ const updateCategory = async (req, res) => {
     }
 };
 
+// Get Public Categories
+const getPublicCategories = async (req, res) => {
+    try {
+        const categories = await Category.findAll({
+            where: {
+                status: 'active'
+            },
+            include: [{
+                model: Category,
+                as: 'parent',
+                attributes: ['id', 'name']
+            }],
+            order: [['createdAt', 'DESC']],
+            attributes: ['id', 'name', 'description', 'image', 'slug', 'parentId']
+        });
+
+        // Format the response
+        const formattedCategories = categories.map(category => ({
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            parentId: category.parentId,
+            parentName: category.parent ? category.parent.name : null,
+            image: category.image,
+            slug: category.slug
+        }));
+
+        res.status(200).json(formattedCategories);
+    } catch (error) {
+        console.error('Get public categories error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 export {
     createCategory,
     getAllCategories,
     getCategory,
     updateCategory,
     deleteCategory,
+    getPublicCategories,
     upload
 };
