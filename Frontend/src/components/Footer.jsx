@@ -22,7 +22,7 @@ const Footer = () => {
               <a href="/product">Products</a>
               <a href="#">Recipes</a>
               <a href="#">Blog</a>
-              <a href="#">Contact Us</a>
+              <a href="/contact">Contact Us</a>
             </div>
           </div>
           <div className="col-3">

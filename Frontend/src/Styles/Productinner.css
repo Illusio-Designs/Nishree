@@ -34,8 +34,9 @@
   border-radius: 8px;
 }
 
-.badge {
+.products-info .badge {
   background: #dc2626;
+  font-family: "Playfair Display";
   color: white;
   padding: 10px 30px;
   border-radius: 50px;
@@ -118,7 +119,7 @@
 }
 
 .offer-box span {
-  color: #f57c00;
+  color: #FAA215;
   font-weight: 500;
 }
 

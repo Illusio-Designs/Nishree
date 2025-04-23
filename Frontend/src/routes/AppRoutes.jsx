@@ -9,6 +9,7 @@ import CheckoutPage from "../pages/CheckoutPage";
 import Contact from "../pages/Contact";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import Profile from "../pages/Profile";
 import AdminLogin from "../pages/Dashboard/auth/Login";
 import AdminRegister from "../pages/Dashboard/auth/Register";
 import AdminForgotPassword from "../pages/Dashboard/auth/ForgotPassword";
@@ -21,6 +22,13 @@ const AdminRoute = ({ children }) => {
 
   if (loading) return <div>Loading...</div>;
   return user ? children : <Navigate to="/admin/login" />;
+};
+
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div>Loading...</div>;
+  return user ? children : <Navigate to="/login" />;
 };
 
 const AppRoutes = () => {
@@ -37,6 +45,16 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
+      {/* Protected User Routes */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Admin Authentication Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/register" element={<AdminRegister />} />
@@ -44,7 +62,6 @@ const AppRoutes = () => {
       <Route path="/admin/reset-password" element={<AdminResetPassword />} />
 
       {/* Protected Dashboard Routes */}
-
       <Route
         path="/dashboard/*"
         element={
