@@ -6,12 +6,13 @@ export const createCoupon = async (req, res) => {
     try {
         const {
             code,
-            discountType,
-            discountValue,
-            minOrderAmount,
-            maxUsage,
-            validFrom,
-            validTo,
+            type,
+            value,
+            minPurchase,
+            maxDiscount,
+            startDate,
+            endDate,
+            usageLimit,
             status
         } = req.body;
 
@@ -27,37 +28,44 @@ export const createCoupon = async (req, res) => {
         }
 
         // Validate discount value based on type
-        if (discountType === 'percentage' && (discountValue <= 0 || discountValue > 100)) {
+        if (type === 'percentage' && (value <= 0 || value > 100)) {
             return res.status(400).json({
                 message: 'Percentage discount must be between 0 and 100'
             });
         }
 
-        if (discountType === 'fixed' && discountValue <= 0) {
+        if (type === 'fixed' && value <= 0) {
             return res.status(400).json({
                 message: 'Fixed discount value must be greater than 0'
             });
         }
 
-        // Validate min order amount
-        if (minOrderAmount < 0) {
+        // Validate min purchase amount
+        if (minPurchase && minPurchase < 0) {
             return res.status(400).json({
-                message: 'Minimum order amount cannot be negative'
+                message: 'Minimum purchase amount cannot be negative'
             });
         }
 
-        // Validate max usage
-        if (maxUsage < 1) {
+        // Validate max discount
+        if (maxDiscount && maxDiscount < 0) {
             return res.status(400).json({
-                message: 'Maximum usage must be at least 1'
+                message: 'Maximum discount cannot be negative'
+            });
+        }
+
+        // Validate usage limit
+        if (usageLimit && usageLimit < 1) {
+            return res.status(400).json({
+                message: 'Usage limit must be at least 1'
             });
         }
 
         // Validate dates
-        const startDate = new Date(validFrom);
-        const endDate = new Date(validTo);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
 
-        if (endDate <= startDate) {
+        if (end <= start) {
             return res.status(400).json({
                 message: 'End date must be after start date'
             });
@@ -65,14 +73,14 @@ export const createCoupon = async (req, res) => {
 
         // Create the coupon
         const newCoupon = await Coupon.create({
-            code: code.toUpperCase(), // Store coupon codes in uppercase
-            discountType,
-            discountValue,
-            minOrderAmount: minOrderAmount || 0,
-            maxUsage: maxUsage || 1,
-            usedCount: 0,
-            validFrom: startDate,
-            validTo: endDate,
+            code: code.toUpperCase(),
+            type,
+            value: Number(value),
+            minPurchase: minPurchase ? Number(minPurchase) : null,
+            maxDiscount: maxDiscount ? Number(maxDiscount) : null,
+            startDate: start,
+            endDate: end,
+            usageLimit: usageLimit || null,
             status: status || 'active'
         });
 
@@ -141,8 +149,8 @@ export const validateCoupon = async (req, res) => {
             where: { 
                 code: code.toUpperCase(),
                 status: 'active',
-                validFrom: { [Op.lte]: new Date() },
-                validTo: { [Op.gte]: new Date() }
+                startDate: { [Op.lte]: new Date() },
+                endDate: { [Op.gte]: new Date() }
             }
         });
 
@@ -151,23 +159,23 @@ export const validateCoupon = async (req, res) => {
         }
 
         // Check if coupon is already used to its maximum
-        if (coupon.usedCount >= coupon.maxUsage) {
+        if (coupon.usageLimit && coupon.usageLimit <= coupon.usageCount) {
             return res.status(400).json({ message: 'Coupon has reached maximum usage limit' });
         }
 
         // Check if order meets minimum amount
-        if (orderAmount < coupon.minOrderAmount) {
+        if (orderAmount < coupon.minPurchase) {
             return res.status(400).json({ 
-                message: `Order must be at least ${coupon.minOrderAmount} to use this coupon` 
+                message: `Order must be at least ${coupon.minPurchase} to use this coupon` 
             });
         }
 
         // Calculate discount amount
         let discountAmount = 0;
-        if (coupon.discountType === 'percentage') {
-            discountAmount = (orderAmount * coupon.discountValue) / 100;
+        if (coupon.type === 'percentage') {
+            discountAmount = (orderAmount * coupon.value) / 100;
         } else {
-            discountAmount = coupon.discountValue;
+            discountAmount = coupon.value;
             // Ensure discount doesn't exceed order amount
             if (discountAmount > orderAmount) {
                 discountAmount = orderAmount;
@@ -203,8 +211,8 @@ export const applyCoupon = async (req, res) => {
             where: { 
                 code: code.toUpperCase(),
                 status: 'active',
-                validFrom: { [Op.lte]: new Date() },
-                validTo: { [Op.gte]: new Date() }
+                startDate: { [Op.lte]: new Date() },
+                endDate: { [Op.gte]: new Date() }
             }
         });
 
@@ -213,13 +221,13 @@ export const applyCoupon = async (req, res) => {
         }
 
         // Check if coupon is already used to its maximum
-        if (coupon.usedCount >= coupon.maxUsage) {
+        if (coupon.usageLimit && coupon.usageLimit <= coupon.usageCount) {
             return res.status(400).json({ message: 'Coupon has reached maximum usage limit' });
         }
 
         // Increment used count
         await coupon.update({
-            usedCount: coupon.usedCount + 1
+            usageCount: coupon.usageCount + 1
         });
 
         res.status(200).json({
@@ -241,12 +249,13 @@ export const updateCoupon = async (req, res) => {
         const { id } = req.params;
         const {
             code,
-            discountType,
-            discountValue,
-            minOrderAmount,
-            maxUsage,
-            validFrom,
-            validTo,
+            type,
+            value,
+            minPurchase,
+            maxDiscount,
+            startDate,
+            endDate,
+            usageLimit,
             status
         } = req.body;
 
@@ -272,40 +281,47 @@ export const updateCoupon = async (req, res) => {
         }
 
         // Validate discount value based on type
-        if (discountType === 'percentage' && (discountValue <= 0 || discountValue > 100)) {
+        if (type === 'percentage' && (value <= 0 || value > 100)) {
             return res.status(400).json({
                 message: 'Percentage discount must be between 0 and 100'
             });
         }
 
-        if (discountType === 'fixed' && discountValue <= 0) {
+        if (type === 'fixed' && value <= 0) {
             return res.status(400).json({
                 message: 'Fixed discount value must be greater than 0'
             });
         }
 
-        // Validate min order amount
-        if (minOrderAmount && minOrderAmount < 0) {
+        // Validate min purchase amount
+        if (minPurchase && minPurchase < 0) {
             return res.status(400).json({
-                message: 'Minimum order amount cannot be negative'
+                message: 'Minimum purchase amount cannot be negative'
             });
         }
 
-        // Validate max usage
-        if (maxUsage && maxUsage < 1) {
+        // Validate max discount
+        if (maxDiscount && maxDiscount < 0) {
             return res.status(400).json({
-                message: 'Maximum usage must be at least 1'
+                message: 'Maximum discount cannot be negative'
+            });
+        }
+
+        // Validate usage limit
+        if (usageLimit && usageLimit < 1) {
+            return res.status(400).json({
+                message: 'Usage limit must be at least 1'
             });
         }
 
         // Validate dates
-        let startDate = coupon.validFrom;
-        let endDate = coupon.validTo;
+        let start = coupon.startDate;
+        let end = coupon.endDate;
 
-        if (validFrom) startDate = new Date(validFrom);
-        if (validTo) endDate = new Date(validTo);
+        if (startDate) start = new Date(startDate);
+        if (endDate) end = new Date(endDate);
 
-        if (endDate <= startDate) {
+        if (end <= start) {
             return res.status(400).json({
                 message: 'End date must be after start date'
             });
@@ -314,12 +330,13 @@ export const updateCoupon = async (req, res) => {
         // Update the coupon
         await coupon.update({
             code: code ? code.toUpperCase() : coupon.code,
-            discountType: discountType || coupon.discountType,
-            discountValue: discountValue || coupon.discountValue,
-            minOrderAmount: minOrderAmount !== undefined ? minOrderAmount : coupon.minOrderAmount,
-            maxUsage: maxUsage || coupon.maxUsage,
-            validFrom: startDate,
-            validTo: endDate,
+            type: type || coupon.type,
+            value: value || coupon.value,
+            minPurchase: minPurchase !== undefined ? minPurchase : coupon.minPurchase,
+            maxDiscount: maxDiscount !== undefined ? maxDiscount : coupon.maxDiscount,
+            startDate: start,
+            endDate: end,
+            usageLimit: usageLimit || coupon.usageLimit,
             status: status || coupon.status
         });
 

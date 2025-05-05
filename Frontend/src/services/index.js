@@ -561,8 +561,10 @@ export const couponService = {
     getAllCoupons: async () => {
         try {
             const response = await api.get('/api/coupons');
+            console.log('API Response:', response.data);
             return response.data;
         } catch (error) {
+            console.error('Error in getAllCoupons:', error);
             throw handleApiError(error);
         }
     },
