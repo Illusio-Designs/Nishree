@@ -24,10 +24,36 @@ export const ProductVariation = sequelize.define('ProductVariation', {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },
+    comparePrice: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
     stock: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0
+    },
+    weight: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
+    weightUnit: {
+        type: DataTypes.ENUM('g', 'kg', 'lb', 'oz'),
+        allowNull: true
+    },
+    dimensions: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        comment: 'JSON object containing length, width, height'
+    },
+    dimensionUnit: {
+        type: DataTypes.ENUM('cm', 'm', 'in', 'ft'),
+        allowNull: true
+    },
+    attributes: {
+        type: DataTypes.JSON,
+        allowNull: false,
+        comment: 'JSON object containing all variation attributes (size, color, etc.)'
     },
     status: {
         type: DataTypes.ENUM('active', 'inactive'),
@@ -35,5 +61,14 @@ export const ProductVariation = sequelize.define('ProductVariation', {
     }
 }, {
     tableName: 'product_variations',
-    timestamps: true
+    timestamps: true,
+    indexes: [
+        {
+            unique: true,
+            fields: ['sku']
+        },
+        {
+            fields: ['productId']
+        }
+    ]
 }); 

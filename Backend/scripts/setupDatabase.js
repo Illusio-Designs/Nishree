@@ -1,7 +1,11 @@
-require('dotenv').config();
-const { Sequelize } = require('sequelize');
-const path = require('path');
-const fs = require('fs');
+import 'dotenv/config';
+import { Sequelize } from 'sequelize';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create Sequelize instance
 const sequelize = new Sequelize(
@@ -53,9 +57,19 @@ const setupDatabase = async () => {
         // Load all models
         const models = {};
         for (const file of modelFiles) {
-            const modelPath = path.join(modelDir, file);
-            const model = require(modelPath);
-            models[model.name] = model;
+            const modelPath = `file://${path.join(modelDir, file)}`;
+            const modelModule = await import(modelPath);
+            // Get the model name from the file name (e.g., 'productModel.js' -> 'Product')
+            const modelName = file.charAt(0).toUpperCase() + file.slice(1).replace('Model.js', '');
+            // Get the exported model using the model name
+            const model = modelModule[modelName];
+            if (model) {
+                console.log(`Loaded model: ${modelName}`);
+                models[modelName] = model;
+            } else {
+                console.log(`Failed to load model: ${modelName}`);
+                console.log('Available exports:', Object.keys(modelModule));
+            }
         }
         
         // Create tables without foreign keys
@@ -70,20 +84,22 @@ const setupDatabase = async () => {
         console.log('Step 1a: Creating base tables structure...');
         try {
             // Create tables in a specific order
-            await models.User.sync(options);
-            await models.Category.sync(options);
-            await models.Order.sync(options);
-            await models.Review.sync(options);
+            if (models.User) await models.User.sync(options);
+            if (models.Category) await models.Category.sync(options);
+            if (models.Order) await models.Order.sync(options);
+            if (models.Review) await models.Review.sync(options);
             
             // Create Product table but modify it first to remove the featured_review_id temporarily
-            console.log('Creating Product table without featured_review_id...');
-            const productAttributes = models.Product.getAttributes();
-            const originalFeaturedReviewId = productAttributes.featured_review_id;
-            delete productAttributes.featured_review_id;
-            await models.Product.sync(options);
-            
-            // Add back the attribute for later use
-            models.Product.rawAttributes.featured_review_id = originalFeaturedReviewId;
+            if (models.Product) {
+                console.log('Creating Product table without featured_review_id...');
+                const productAttributes = models.Product.getAttributes();
+                const originalFeaturedReviewId = productAttributes.featured_review_id;
+                delete productAttributes.featured_review_id;
+                await models.Product.sync(options);
+                
+                // Add back the attribute for later use
+                models.Product.rawAttributes.featured_review_id = originalFeaturedReviewId;
+            }
             
             // Then create other tables
             for (const modelName in models) {
@@ -91,6 +107,16 @@ const setupDatabase = async () => {
                     await models[modelName].sync(options);
                 }
             }
+            
+            // Add comparePrice column to product_variations table if it doesn't exist
+            console.log('Adding comparePrice column to product_variations table...');
+            await sequelize.query(`
+                ALTER TABLE product_variations 
+                ADD COLUMN IF NOT EXISTS comparePrice DECIMAL(10,2) NULL,
+                ADD COLUMN IF NOT EXISTS attributes JSON NOT NULL DEFAULT ('{}')
+            `).catch(err => {
+                console.log('Note: Some columns might already exist, continuing...');
+            });
             
             // Step 1b: Now manually add the featured_review_id column to products table
             console.log('Step 1b: Adding featured_review_id column to products table...');
@@ -106,7 +132,7 @@ const setupDatabase = async () => {
             
             // Step 2: Apply associations
             console.log('Step 2: Applying associations...');
-            require('../model/associations');
+            await import(`file://${path.join(__dirname, '..', 'model', 'associations.js')}`);
             
             // Step 3: Update tables with foreign keys and indexes
             console.log('Step 3: Updating tables with foreign keys and indexes...');

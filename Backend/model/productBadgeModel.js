@@ -16,13 +16,18 @@ export const ProductBadge = sequelize.define('ProductBadge', {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    color: {
-        type: DataTypes.STRING,
+    type: {
+        type: DataTypes.ENUM('manual', 'auto'),
+        defaultValue: 'manual'
+    },
+    autoType: {
+        type: DataTypes.ENUM('new', 'best_seller', 'featured', 'sale', 'out_of_stock'),
         allowNull: true
     },
-    icon: {
-        type: DataTypes.STRING,
-        allowNull: true
+    conditions: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        comment: 'JSON conditions for automatic badge assignment'
     },
     displayOrder: {
         type: DataTypes.INTEGER,

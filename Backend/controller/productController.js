@@ -71,126 +71,88 @@ export const createProduct = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
-        const {
+        // Parse form data
+        const name = req.body.name;
+        const description = req.body.description;
+        const categoryId = req.body.categoryId;
+        const status = req.body.status || 'active';
+        const variations = JSON.parse(req.body.variations);
+        const seo = JSON.parse(req.body.seo);
+        const images = req.files;
+
+        // Create product with basic info
+        const product = await Product.create({
             name,
             description,
             categoryId,
-            price,
-            stock,
-            variations,
-            badges,
-            seo,
-            images
-        } = req.body;
-
-        // Create product with basic info
-            const product = await Product.create({
-                name,
-                description,
-            categoryId,
-            price,
-            stock,
-            slug: slugify(name, { lower: true }),
-            status: 'active'
+            status,
+            slug: slugify(name, { lower: true })
         }, { transaction });
 
-        // Handle variations if provided
-            if (variations && variations.length > 0) {
-                for (const variation of variations) {
-                    const productVariation = await ProductVariation.create({
-                        productId: product.id,
-                        price: variation.price,
-                        stock: variation.stock,
-                    sku: variation.sku || uuidv4()
-                }, { transaction });
-
-                    // Handle variation attributes
-                    if (variation.attributes) {
-                    for (const attr of variation.attributes) {
-                        const [attribute] = await Attribute.findOrCreate({
-                            where: { name: attr.name },
-                            transaction
-                        });
-
-                        const [attributeValue] = await AttributeValue.findOrCreate({
-                            where: {
-                                attributeId: attribute.id,
-                                value: attr.value
-                            },
-                            transaction
-                        });
-
-                        await ProductVariationAttribute.create({
-                            variationId: productVariation.id,
-                            attributeValueId: attributeValue.id
-                        }, { transaction });
-                    }
-                }
-            }
-        }
-
-        // Handle badges if provided
-        if (badges && badges.length > 0) {
-            for (const badge of badges) {
-                const [productBadge] = await ProductBadge.findOrCreate({
-                    where: { name: badge.name },
-                    defaults: {
-                        badgeType: badge.type,
-                        colorCode: badge.color,
-                        iconName: badge.icon
-                    },
-                    transaction
-                });
-
-                await ProductBadgeMapping.create({
-                    productId: product.id,
-                    badgeId: productBadge.id
-                }, { transaction });
-            }
-        }
-
-        // Handle SEO if provided
+        // Create SEO record
         if (seo) {
             await ProductSEO.create({
-                productId: product.id,
-                title: seo.title,
-                description: seo.description,
-                keywords: seo.keywords
+                product_id: product.id,
+                meta_title: seo.metaTitle || name,
+                meta_description: seo.metaDescription || description,
+                meta_keywords: seo.metaKeywords,
+                og_title: seo.ogTitle || name,
+                og_description: seo.ogDescription || description,
+                og_image: seo.ogImage
             }, { transaction });
+        }
+
+        // Handle variations if provided
+        if (variations && variations.length > 0) {
+            for (const variation of variations) {
+                // Ensure required fields are present
+                if (!variation.price || !variation.attributes) {
+                    throw new Error('Price and attributes are required for each variation');
+                }
+
+                await ProductVariation.create({
+                    productId: product.id,
+                    sku: variation.sku || `SKU-${product.id}-${variation.id}`,
+                    price: Number(variation.price),
+                    comparePrice: variation.comparePrice ? Number(variation.comparePrice) : null,
+                    stock: Number(variation.stock),
+                    weight: variation.weight ? Number(variation.weight) : null,
+                    weightUnit: variation.weightUnit || 'g',
+                    dimensions: variation.dimensions ? JSON.stringify(variation.dimensions) : null,
+                    dimensionUnit: variation.dimensionUnit || 'cm',
+                    attributes: variation.attributes || {}
+                }, { transaction });
+            }
         }
 
         // Handle images if provided
         if (images && images.length > 0) {
             for (const image of images) {
                 await ProductImage.create({
-                    productId: product.id,
-                    imageName: image.name,
-                    isPrimary: image.isPrimary || false
+                    product_id: product.id,
+                    image_url: `/uploads/products/${image.filename}`,
+                    alt_text: name,
+                    display_order: 0,
+                    is_primary: false,
+                    status: 'active'
                 }, { transaction });
             }
         }
 
         await transaction.commit();
-
-        // Fetch the created product with all associations
-        const createdProduct = await Product.findByPk(product.id, {
-            include: [
-                { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
-                { model: ProductImage },
-                { model: ProductBadge, through: ProductBadgeMapping },
-                { model: ProductSEO },
-                { model: ProductDiscount }
-            ]
-        });
-
         res.status(201).json({
+            success: true,
             message: 'Product created successfully',
-            product: formatProductResponse(createdProduct)
+            data: formatProductResponse(product)
         });
     } catch (error) {
         await transaction.rollback();
         console.error('Error creating product:', error);
-        res.status(500).json({ message: 'Failed to create product', error: error.message });
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create product',
+            error: error.message
+        });
     }
 };
 
@@ -411,9 +373,12 @@ export const updateProduct = async (req, res) => {
             // Create new images
             for (const image of images) {
                 await ProductImage.create({
-                    productId: id,
-                    imageName: image.name,
-                    isPrimary: image.isPrimary || false
+                    product_id: id,
+                    image_url: `/uploads/products/${image.name}`,
+                    alt_text: name,
+                    display_order: 0,
+                    is_primary: image.isPrimary || false,
+                    status: 'active'
                 }, { transaction });
             }
         }
