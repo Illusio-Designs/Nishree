@@ -597,42 +597,12 @@ export const couponService = {
     }
 };
 
-// Wishlist Services
-export const wishlistService = {
-    getAllWishlists: async () => {
-        try {
-            const response = await api.get('/api/wishlists');
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    },
-
-    getWishlistById: async (id) => {
-        try {
-            const response = await api.get(`/api/wishlists/${id}`);
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    },
-
-    deleteWishlist: async (id) => {
-        try {
-            const response = await api.delete(`/api/wishlists/${id}`);
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    }
-};
-
 // Review Services
 export const reviewService = {
     getAllReviews: async (status = 'all') => {
         try {
             const response = await api.get(`/api/reviews?status=${status}`);
-            return response.data;
+            return response.data.reviews;
         } catch (error) {
             throw handleApiError(error);
         }
@@ -641,7 +611,7 @@ export const reviewService = {
     getReviewById: async (id) => {
         try {
             const response = await api.get(`/api/reviews/${id}`);
-            return response.data;
+            return response.data.review;
         } catch (error) {
             throw handleApiError(error);
         }
@@ -659,6 +629,54 @@ export const reviewService = {
     deleteReview: async (id) => {
         try {
             const response = await api.delete(`/api/reviews/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    }
+};
+
+// SEO Services
+export const seoService = {
+    getAllSEOData: async () => {
+        try {
+            const response = await api.get('/api/seo');
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getSEOData: async (pageName) => {
+        try {
+            const response = await api.get(`/api/seo?page_name=${pageName}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    createSEOData: async (seoData) => {
+        try {
+            const response = await api.post('/api/seo', seoData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    updateSEOData: async (pageName, seoData) => {
+        try {
+            const response = await api.put('/api/seo', { page_name: pageName, ...seoData });
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    deleteSEOData: async (pageName) => {
+        try {
+            const response = await api.delete(`/api/seo/${pageName}`);
             return response.data;
         } catch (error) {
             throw handleApiError(error);

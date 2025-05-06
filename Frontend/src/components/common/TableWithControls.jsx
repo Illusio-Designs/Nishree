@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Table from './Table';
-import Pagination from './Pagination';
-import SearchBar from './SearchBar';
-import Filter from './Filter';
-import ActionButton from './ActionButton';
+import React, { useState, useEffect } from "react";
+import Table from "./Table";
+import Pagination from "./Pagination";
+import SearchBar from "./SearchBar";
+import Filter from "./Filter";
+import ActionButton from "./ActionButton";
 import "../../Styles/common/TableControls.css";
 
 const TableWithControls = ({
@@ -13,10 +13,10 @@ const TableWithControls = ({
   searchFields = [],
   filters = [],
   actions = [],
-  onRowClick
+  onRowClick,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({});
   const [filteredData, setFilteredData] = useState([]);
 
@@ -26,14 +26,18 @@ const TableWithControls = ({
       setFilteredData([]);
       return;
     }
-    
+
     let result = [...data];
 
     // Apply search
     if (searchTerm && Array.isArray(searchFields) && searchFields.length > 0) {
-      result = result.filter(item =>
-        searchFields.some(field =>
-          field && item && item[field] && String(item[field]).toLowerCase().includes(searchTerm.toLowerCase())
+      result = result.filter((item) =>
+        searchFields.some(
+          (field) =>
+            field &&
+            item &&
+            item[field] &&
+            String(item[field]).toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     }
@@ -41,22 +45,27 @@ const TableWithControls = ({
     // Apply filters
     Object.entries(selectedFilters).forEach(([key, value]) => {
       if (value) {
-        result = result.filter(item => String(item[key] || '') === String(value));
+        result = result.filter(
+          (item) => String(item[key] || "") === String(value)
+        );
       }
     });
 
     setFilteredData(result);
-  }, [data, searchTerm, selectedFilters]); // Removed searchFields from dependency array
+  }, [data, searchTerm, selectedFilters]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const handleFilterChange = (key, value) => {
-    setSelectedFilters(prev => ({
+    setSelectedFilters((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -78,13 +87,32 @@ const TableWithControls = ({
     );
   };
 
-  const enhancedColumns = actions?.length > 0 
-    ? [...columns, { 
-        key: 'actions', 
-        header: 'Actions',
-        render: (row) => renderActions(row)
-      }] 
-    : columns;
+  // Add serial number column and actions column if needed
+  const enhancedColumns = [
+    {
+      key: "serial",
+      header: "S.No.",
+      render: (row, index) => {
+        // Calculate the actual index in the filtered data
+        const actualIndex = filteredData.findIndex((item) => item === row);
+        return actualIndex + 1;
+      },
+      width: "80px",
+      align: "center",
+    },
+    ...columns,
+    ...(actions?.length > 0
+      ? [
+          {
+            key: "actions",
+            header: "Actions",
+            render: (row) => renderActions(row),
+            width: "120px",
+            align: "center",
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div className="table-with-controls">

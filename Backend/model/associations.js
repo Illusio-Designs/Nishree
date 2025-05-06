@@ -25,9 +25,6 @@ import { Payment } from './paymentModel.js';
 import { Settings } from './settingsModel.js';
 import { Review } from './reviewModel.js';
 import { ReviewImage } from './reviewImageModel.js';
-import { ReviewLike } from './reviewLikeModel.js';
-import { ReviewComment } from './reviewCommentModel.js';
-import { ReviewReport } from './reviewReportModel.js';
 
 // Export all models
 export {
@@ -56,10 +53,7 @@ export {
     Payment,
     Settings,
     Review,
-    ReviewImage,
-    ReviewLike,
-    ReviewComment,
-    ReviewReport
+    ReviewImage
 };
 
 // Add explicit constraint for featured_review_id to fix foreign key issue
@@ -249,90 +243,55 @@ Payment.belongsTo(Order, {
 
 // User to Payment relationship
 User.hasMany(Payment, { foreignKey: 'user_id' });
-Payment.belongsTo(User, { 
-    foreignKey: 'user_id',
+Payment.belongsTo(User, { foreignKey: 'user_id' });
+
+// Cart Associations
+User.hasOne(Cart, { foreignKey: 'user_id' });
+Cart.belongsTo(User, { foreignKey: 'user_id' });
+
+Cart.hasMany(CartItem, { 
+    foreignKey: 'cart_id',
+    onDelete: 'CASCADE'
+});
+CartItem.belongsTo(Cart, { 
+    foreignKey: 'cart_id',
+    onDelete: 'CASCADE'
+});
+
+Product.hasMany(CartItem, { foreignKey: 'product_id' });
+CartItem.belongsTo(Product, { 
+    foreignKey: 'product_id',
     onDelete: 'SET NULL'
 });
 
-// Review system associations
+ProductVariation.hasMany(CartItem, { foreignKey: 'variation_id' });
+CartItem.belongsTo(ProductVariation, { 
+    foreignKey: 'variation_id',
+    onDelete: 'SET NULL'
+});
+
+// Coupon Associations
+Coupon.belongsToMany(Product, {
+    through: 'coupon_products',
+    foreignKey: 'coupon_id',
+    otherKey: 'product_id'
+});
+Product.belongsToMany(Coupon, {
+    through: 'coupon_products',
+    foreignKey: 'product_id',
+    otherKey: 'coupon_id'
+});
+
+// Settings Associations
+Settings.belongsTo(User, { foreignKey: 'updated_by' });
+User.hasMany(Settings, { foreignKey: 'updated_by' });
+
+// Review Associations
+Review.belongsTo(User, { foreignKey: 'user_id' });
 User.hasMany(Review, { foreignKey: 'user_id' });
-Review.belongsTo(User, { 
-    foreignKey: 'user_id',
-    onDelete: 'SET NULL'
-});
 
-Product.hasMany(Review, { 
-    foreignKey: 'product_id',
-    onDelete: 'CASCADE'
-});
-Review.belongsTo(Product, { 
-    foreignKey: 'product_id',
-    onDelete: 'CASCADE'
-});
+Review.belongsTo(Product, { foreignKey: 'product_id' });
+Product.hasMany(Review, { foreignKey: 'product_id' });
 
-Order.hasMany(Review, { foreignKey: 'order_id' });
-Review.belongsTo(Order, { 
-    foreignKey: 'order_id',
-    onDelete: 'SET NULL'
-});
-
-// Handle the circular reference properly
-Product.belongsTo(Review, { 
-    foreignKey: 'featured_review_id', 
-    as: 'FeaturedReview', 
-    constraints: false // Disable automatic constraint creation
-});
-
-Review.hasMany(ReviewImage, { 
-    foreignKey: 'review_id',
-    onDelete: 'CASCADE'
-});
-ReviewImage.belongsTo(Review, { 
-    foreignKey: 'review_id',
-    onDelete: 'CASCADE'
-});
-
-Review.hasMany(ReviewLike, { 
-    foreignKey: 'review_id',
-    onDelete: 'CASCADE'
-});
-ReviewLike.belongsTo(Review, { 
-    foreignKey: 'review_id',
-    onDelete: 'CASCADE'
-});
-
-User.hasMany(ReviewLike, { foreignKey: 'user_id' });
-ReviewLike.belongsTo(User, { 
-    foreignKey: 'user_id',
-    onDelete: 'CASCADE'
-});
-
-Review.hasMany(ReviewComment, { 
-    foreignKey: 'review_id',
-    onDelete: 'CASCADE'
-});
-ReviewComment.belongsTo(Review, { 
-    foreignKey: 'review_id',
-    onDelete: 'CASCADE'
-});
-
-User.hasMany(ReviewComment, { foreignKey: 'user_id' });
-ReviewComment.belongsTo(User, { 
-    foreignKey: 'user_id',
-    onDelete: 'SET NULL'
-});
-
-Review.hasMany(ReviewReport, { 
-    foreignKey: 'review_id',
-    onDelete: 'CASCADE'
-});
-ReviewReport.belongsTo(Review, { 
-    foreignKey: 'review_id',
-    onDelete: 'CASCADE'
-});
-
-User.hasMany(ReviewReport, { foreignKey: 'user_id' });
-ReviewReport.belongsTo(User, { 
-    foreignKey: 'user_id',
-    onDelete: 'SET NULL'
-});
+Review.hasMany(ReviewImage, { foreignKey: 'review_id' });
+ReviewImage.belongsTo(Review, { foreignKey: 'review_id' });

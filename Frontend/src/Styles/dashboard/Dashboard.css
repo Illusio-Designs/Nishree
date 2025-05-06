@@ -32,7 +32,8 @@
   font-family: "Inter", system-ui, -apple-system, sans-serif !important;
 }
 
-.dashboard-layout h1, .dashboard-layout h2{
+.dashboard-layout h1,
+.dashboard-layout h2 {
   font-family: "Inter", system-ui, -apple-system, sans-serif !important;
 }
 
@@ -64,7 +65,7 @@
   scrollbar-width: none;
 }
 
-.customers{
+.customers {
   padding: 20px;
 }
 
@@ -373,7 +374,7 @@
   color: var(--text-primary);
 }
 
-.dropdown-header img{
+.dropdown-header img {
   height: 50px;
   width: 50px;
 }
@@ -404,7 +405,7 @@
   background: var(--hover-bg);
   color: var(--accent);
 }
-button.dropdown-item{
+button.dropdown-item {
   border: none;
   width: 100%;
   justify-content: center;
@@ -416,7 +417,7 @@ button.dropdown-item{
   transition: color 0.2s ease;
 }
 
-.dropdown-header .user-info{
+.dropdown-header .user-info {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -431,7 +432,7 @@ button.dropdown-item{
   padding: 2rem 2rem 2rem;
   overflow-y: auto;
   flex: 1;
-  height: calc(100vh - 120px); 
+  height: calc(100vh - 120px);
   scrollbar-width: none;
 }
 

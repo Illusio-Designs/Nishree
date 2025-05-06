@@ -40,18 +40,12 @@ import Products from "../Pages/Products";
 import Coupons from "../Pages/Coupons";
 import Orders from "../Pages/Orders";
 import Reviews from "../Pages/Reviews";
-import ReviewComments from "../Pages/ReviewComments";
-import ReviewLikes from "../Pages/ReviewLikes";
-import Wishlist from "../Pages/Wishlist";
 import OrderStatusHistory from "../Pages/OrderStatusHistory";
 import ShippingFees from "../Pages/ShippingFees";
 import ShippingAddresses from "../Pages/ShippingAddresses";
 import Payments from "../Pages/Payments";
-
 import Users from "../Pages/Users";
 import SEO from "../Pages/SEO";
-
-// Import dashboard components
 import DashboardOverview from "../Pages/DashboardOverview";
 import Customers from "../Pages/Customers";
 import Category from "../Pages/Category";
@@ -224,33 +218,6 @@ const Dashboard = () => {
             <span className={!isSidebarOpen ? "hidden" : ""}>Reviews</span>
           </Link>
           <Link
-            to="/dashboard/review-comments"
-            className={`nav-item ${
-              location.pathname === "/dashboard/review-comments" ? "active" : ""
-            }`}
-          >
-            <HiOutlineChatBubbleLeftRight className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>Review Comments</span>
-          </Link>
-          <Link
-            to="/dashboard/review-likes"
-            className={`nav-item ${
-              location.pathname === "/dashboard/review-likes" ? "active" : ""
-            }`}
-          >
-            <HiOutlineHeart className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>Review Likes</span>
-          </Link>
-          <Link
-            to="/dashboard/wishlist"
-            className={`nav-item ${
-              location.pathname === "/dashboard/wishlist" ? "active" : ""
-            }`}
-          >
-            <IoHeartOutline className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>Wishlist</span>
-          </Link>
-          <Link
             to="/dashboard/shipping-fees"
             className={`nav-item ${
               location.pathname === "/dashboard/shipping-fees" ? "active" : ""
@@ -333,7 +300,9 @@ const Dashboard = () => {
                       className="dropdown-avatar"
                     />
                     <div className="user-info">
-                      <span className="user-name">{user?.displayName || "Admin"}</span>
+                      <span className="user-name">
+                        {user?.displayName || "Admin"}
+                      </span>
                       <small className="user-email">{user?.email}</small>
                     </div>
                   </div>
@@ -363,7 +332,10 @@ const Dashboard = () => {
                     System Settings
                   </Link>
                   <div className="dropdown-divider" />
-                  <button onClick={handleLogout} className="dropdown-item modal-submit-button">
+                  <button
+                    onClick={handleLogout}
+                    className="dropdown-item modal-submit-button"
+                  >
                     <HiOutlineArrowRightOnRectangle
                       className="item-icon"
                       size={20}
@@ -390,9 +362,6 @@ const Dashboard = () => {
               />
               <Route path="coupons" element={<Coupons />} />
               <Route path="reviews" element={<Reviews />} />
-              <Route path="review-comments" element={<ReviewComments />} />
-              <Route path="review-likes" element={<ReviewLikes />} />
-              <Route path="wishlist" element={<Wishlist />} />
               <Route path="shipping-fees" element={<ShippingFees />} />
               <Route
                 path="shipping-addresses"

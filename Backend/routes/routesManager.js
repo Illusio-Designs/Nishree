@@ -7,7 +7,6 @@ import userRoutes from './userRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
 import productRoutes from './productRoutes.js';
 import orderRoutes from './orderRoutes.js';
-import reviewRoutes from './reviewRoutes.js';
 import sliderRoutes from './sliderRoutes.js';
 import couponRoutes from './couponRoutes.js';
 import wishlistRoutes from './wishlistRoutes.js';
@@ -23,7 +22,6 @@ router.use('/users', userRoutes); // This now includes both auth and user routes
 router.use('/categories', categoryRoutes);
 router.use('/products', productRoutes);
 router.use('/orders', orderRoutes);
-router.use('/reviews', reviewRoutes);
 
 // Feature Routes
 router.use('/sliders', sliderRoutes);

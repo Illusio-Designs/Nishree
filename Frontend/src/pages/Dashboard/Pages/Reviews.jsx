@@ -1,47 +1,69 @@
-import React, { useState, useEffect } from 'react';
-import TableWithControls from '../../../components/common/TableWithControls';
-import Modal from '../../../components/common/Modal';
-import ActionButton from '../../../components/common/ActionButton';
-import Button from '../../../components/common/Button';
-import Filter from '../../../components/common/Filter';
-import { reviewService } from '../../../services';
-import '../../../Styles/dashboard/Reviews.css';
+import React, { useState, useEffect } from "react";
+import { reviewService } from "../../../services";
+import { toast } from "react-toastify";
+import TableWithControls from "../../../components/common/TableWithControls";
+import ActionButton from "../../../components/common/ActionButton";
+import Button from "../../../components/common/Button";
+import Modal from "../../../components/common/Modal";
+import Filter from "../../../components/common/Filter";
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from "react-icons/hi2";
+import "../../../Styles/dashboard/Reviews.css";
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [modalMode, setModalMode] = useState("view");
 
   const columns = [
-    { header: 'Product', accessor: 'productName' },
-    { header: 'Customer', accessor: 'customerName' },
-    { header: 'Rating', accessor: 'rating' },
-    { header: 'Date', accessor: 'createdAt' },
-    { header: 'Status', accessor: 'status' },
+    { key: "productName", header: "Product" },
+    { key: "customerName", header: "Customer" },
     {
-      header: 'Actions',
-      accessor: 'actions',
-      cell: (row) => (
+      key: "rating",
+      header: "Rating",
+      render: (row) => (
+        <div className="rating-stars">
+          {"★".repeat(row.rating)}
+          {"☆".repeat(5 - row.rating)}
+        </div>
+      ),
+    },
+    {
+      key: "createdAt",
+      header: "Date",
+      render: (row) => formatDate(row.createdAt),
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (row) => (
+        <span className={`status-badge ${row.status}`}>{row.status}</span>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      render: (row) => (
         <div className="action-buttons">
           <ActionButton
+            icon={<HiOutlineEye size={20} />}
             onClick={() => handleViewDetails(row)}
             variant="view"
-          >
-            View
-          </ActionButton>
+            tooltip="View Details"
+          />
           <ActionButton
+            icon={<HiOutlinePencil size={20} />}
             onClick={() => handleStatusUpdate(row)}
             variant="edit"
-          >
-            {row.status === 'pending' ? 'Approve' : 'Update'}
-          </ActionButton>
+            tooltip={row.status === "pending" ? "Approve" : "Update Status"}
+          />
           <ActionButton
+            icon={<HiOutlineTrash size={20} />}
             onClick={() => handleDelete(row.id)}
             variant="delete"
-          >
-            Delete
-          </ActionButton>
+            tooltip="Delete Review"
+          />
         </div>
       ),
     },
@@ -56,41 +78,47 @@ const Reviews = () => {
       const data = await reviewService.getAllReviews(filterStatus);
       setReviews(data);
     } catch (error) {
-      console.error('Error fetching reviews:', error);
+      toast.error("Failed to fetch reviews");
+      console.error("Error fetching reviews:", error);
     }
   };
 
   const handleViewDetails = (review) => {
     setSelectedReview(review);
+    setModalMode("view");
     setIsModalOpen(true);
   };
 
   const handleStatusUpdate = async (review) => {
-    const newStatus = review.status === 'pending' ? 'approved' : 'pending';
+    const newStatus = review.status === "pending" ? "approved" : "pending";
     try {
       await reviewService.updateReviewStatus(review.id, { status: newStatus });
+      toast.success(`Review ${newStatus} successfully`);
       fetchReviews();
     } catch (error) {
-      console.error('Error updating review status:', error);
+      toast.error(error.message || "Failed to update review status");
+      console.error("Error updating review status:", error);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this review?')) {
+    if (window.confirm("Are you sure you want to delete this review?")) {
       try {
         await reviewService.deleteReview(id);
+        toast.success("Review deleted successfully");
         fetchReviews();
       } catch (error) {
-        console.error('Error deleting review:', error);
+        toast.error(error.message || "Failed to delete review");
+        console.error("Error deleting review:", error);
       }
     }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -100,10 +128,9 @@ const Reviews = () => {
         <h2 className="dashboard-title">Review Management</h2>
         <Filter
           options={[
-            { value: 'all', label: 'All Reviews' },
-            { value: 'pending', label: 'Pending' },
-            { value: 'approved', label: 'Approved' },
-            { value: 'reported', label: 'Reported' }
+            { value: "all", label: "All Reviews" },
+            { value: "pending", label: "Pending" },
+            { value: "approved", label: "Approved" },
           ]}
           value={filterStatus}
           onChange={setFilterStatus}
@@ -114,7 +141,7 @@ const Reviews = () => {
         data={reviews}
         columns={columns}
         searchPlaceholder="Search reviews..."
-        searchFields={['productName', 'customerName', 'status']}
+        searchFields={["productName", "customerName", "status"]}
       />
 
       <Modal
@@ -163,27 +190,14 @@ const Reviews = () => {
               </div>
             )}
 
-            {selectedReview.comments?.length > 0 && (
-              <div className="comments-section">
-                <h3>Comments</h3>
-                <div>
-                  {selectedReview.comments.map((comment, index) => (
-                    <div key={index} className="comment">
-                      <p className="comment-author">{comment.userName}</p>
-                      <p className="comment-content">{comment.content}</p>
-                      <p className="comment-date">{formatDate(comment.createdAt)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <div className="modal-footer">
               <ActionButton
                 onClick={() => handleStatusUpdate(selectedReview)}
                 variant="primary"
               >
-                {selectedReview.status === 'pending' ? 'Approve' : 'Update Status'}
+                {selectedReview.status === "pending"
+                  ? "Approve"
+                  : "Update Status"}
               </ActionButton>
               <ActionButton
                 onClick={() => setIsModalOpen(false)}

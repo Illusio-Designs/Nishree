@@ -4,14 +4,18 @@ import Modal from "../../../components/common/Modal";
 import InputField from "../../../components/common/InputField";
 import ActionButton from "../../../components/common/ActionButton";
 import Button from "../../../components/common/Button";
+import DropdownSelect from "../../../components/common/DropdownSelect";
 import { FaPlus } from "react-icons/fa";
+import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi2";
 import { couponService } from "../../../services";
+import { toast } from "react-toastify";
 import "../../../Styles/dashboard/Coupons.css";
 
 const Coupons = () => {
   const [coupons, setCoupons] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [modalMode, setModalMode] = useState("add");
   const [formData, setFormData] = useState({
     code: "",
     type: "percentage",
@@ -23,139 +27,116 @@ const Coupons = () => {
     usageLimit: 1,
     status: "active",
   });
-  const [error, setError] = useState("");
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = date.getUTCDate().toString().padStart(2, "0");
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+    const year = date.getUTCFullYear().toString().slice(-2);
+    return `${day}/${month}/${year}`;
+  };
 
   const columns = [
-    { header: "Code", accessor: "code" },
+    { key: "code", header: "Code" },
     {
+      key: "discount",
       header: "Discount",
-      accessor: "value",
-      cell: (row) =>
-        `${row.value}${row.type === "percentage" ? "%" : " Fixed"}`,
+      render: (row) =>
+        `${parseFloat(row.value || 0).toFixed(2)}${
+          row.type === "percentage" ? "%" : " Fixed"
+        }`,
     },
     {
+      key: "startDate",
       header: "Valid From",
-      accessor: "startDate",
-      cell: (row) => new Date(row.startDate).toLocaleDateString(),
+      render: (row) => formatDate(row.startDate),
     },
     {
+      key: "endDate",
       header: "Valid To",
-      accessor: "endDate",
-      cell: (row) => new Date(row.endDate).toLocaleDateString(),
+      render: (row) => formatDate(row.endDate),
     },
-    { header: "Min Purchase", accessor: "minPurchase" },
     {
+      key: "minPurchase",
+      header: "Min Purchase",
+      render: (row) => `₹${parseFloat(row.minPurchase || 0).toFixed(2)}`,
+    },
+    {
+      key: "usage",
       header: "Usage",
-      cell: (row) => `${row.usedCount || 0}/${row.usageLimit || "∞"}`,
+      render: (row) => `${row.usedCount || 0}/${row.usageLimit || "∞"}`,
     },
     {
+      key: "status",
       header: "Status",
-      accessor: "status",
-      cell: (row) => (
-        <span className={`status-${row.status.toLowerCase()}`}>
-          {row.status}
-        </span>
+      render: (row) => (
+        <span className={`status-badge ${row.status}`}>{row.status}</span>
       ),
     },
     {
+      key: "actions",
       header: "Actions",
-      accessor: "actions",
-      cell: (row) => (
-        <div className="flex gap-2">
-          <ActionButton onClick={() => handleEdit(row)} variant="edit">
-            Edit
-          </ActionButton>
-          <ActionButton onClick={() => handleDelete(row.id)} variant="delete">
-            Delete
-          </ActionButton>
+      render: (row) => (
+        <div className="action-buttons">
+          <ActionButton
+            icon={<HiOutlinePencil size={20} />}
+            onClick={() => handleOpenModal("edit", row)}
+            variant="edit"
+            tooltip="Edit Coupon"
+          />
+          <ActionButton
+            icon={<HiOutlineTrash size={20} />}
+            onClick={() => handleDelete(row.id)}
+            variant="delete"
+            tooltip="Delete Coupon"
+          />
         </div>
       ),
     },
   ];
 
-  useEffect(() => {
-    fetchCoupons();
-  }, []);
-
   const fetchCoupons = async () => {
     try {
       const response = await couponService.getAllCoupons();
-      console.log("Coupons response:", response);
-      if (response && response.coupons) {
-        setCoupons(response.coupons);
-      } else {
-        console.error("Invalid response format:", response);
-        setCoupons([]);
-      }
+      setCoupons(response.coupons || []);
     } catch (error) {
-      console.error("Error fetching coupons:", error);
-      setError(error.message || "Failed to fetch coupons");
+      toast.error("Failed to fetch coupons");
+      console.error("Failed to fetch coupons:", error);
     }
-  };
-
-  const handleEdit = (coupon) => {
-    setSelectedCoupon(coupon);
-    setFormData({
-      code: coupon.code,
-      type: coupon.type,
-      value: coupon.value,
-      minPurchase: coupon.minPurchase || 0,
-      maxDiscount: coupon.maxDiscount || "",
-      startDate: new Date(coupon.startDate).toISOString().split("T")[0],
-      endDate: new Date(coupon.endDate).toISOString().split("T")[0],
-      usageLimit: coupon.usageLimit || 1,
-      status: coupon.status,
-    });
-    setIsModalOpen(true);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this coupon?")) {
-      try {
-        await couponService.deleteCoupon(id);
-        fetchCoupons();
-      } catch (error) {
-        console.error("Error deleting coupon:", error);
-      }
+    try {
+      await couponService.deleteCoupon(id);
+      toast.success("Coupon deleted successfully");
+      fetchCoupons();
+    } catch (error) {
+      toast.error(error.message || "Failed to delete coupon");
+      console.error("Failed to delete coupon:", error);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    // Validate form data
-    if (!formData.code) {
-      setError("Coupon code is required");
-      return;
-    }
-
-    if (formData.value <= 0) {
-      setError("Discount value must be greater than 0");
-      return;
-    }
-
-    if (formData.type === "percentage" && formData.value > 100) {
-      setError("Percentage discount cannot exceed 100%");
-      return;
-    }
-
-    const startDate = new Date(formData.startDate);
-    const endDate = new Date(formData.endDate);
-
-    if (endDate <= startDate) {
-      setError("End date must be after start date");
-      return;
-    }
-
-    try {
-      if (selectedCoupon) {
-        await couponService.updateCoupon(selectedCoupon.id, formData);
-      } else {
-        await couponService.createCoupon(formData);
-      }
-
-      setIsModalOpen(false);
+  const handleOpenModal = (mode, coupon = null) => {
+    setModalMode(mode);
+    if (coupon && mode === "edit") {
+      setSelectedCoupon(coupon);
+      setFormData({
+        code: coupon.code || "",
+        type: coupon.type || "percentage",
+        value: coupon.value || "",
+        minPurchase: coupon.minPurchase || 0,
+        maxDiscount: coupon.maxDiscount || "",
+        startDate: coupon.startDate
+          ? new Date(coupon.startDate).toISOString().split("T")[0]
+          : "",
+        endDate: coupon.endDate
+          ? new Date(coupon.endDate).toISOString().split("T")[0]
+          : "",
+        usageLimit: coupon.usageLimit || 1,
+        status: coupon.status || "active",
+      });
+    } else {
       setSelectedCoupon(null);
       setFormData({
         code: "",
@@ -168,56 +149,77 @@ const Coupons = () => {
         usageLimit: 1,
         status: "active",
       });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (!formData.code) {
+        toast.error("Coupon code is required");
+        return;
+      }
+
+      if (formData.value <= 0) {
+        toast.error("Discount value must be greater than 0");
+        return;
+      }
+
+      if (formData.type === "percentage" && formData.value > 100) {
+        toast.error("Percentage discount cannot exceed 100%");
+        return;
+      }
+
+      const startDate = new Date(formData.startDate);
+      const endDate = new Date(formData.endDate);
+
+      if (endDate <= startDate) {
+        toast.error("End date must be after start date");
+        return;
+      }
+
+      if (modalMode === "add") {
+        await couponService.createCoupon(formData);
+        toast.success("Coupon created successfully");
+      } else {
+        await couponService.updateCoupon(selectedCoupon.id, formData);
+        toast.success("Coupon updated successfully");
+      }
+
+      setIsModalOpen(false);
       fetchCoupons();
     } catch (error) {
-      console.error("Error saving coupon:", error);
-      setError(error.message || "Failed to save coupon");
+      toast.error(error.message || `Failed to ${modalMode} coupon`);
+      console.error(`Failed to ${modalMode} coupon:`, error);
     }
   };
+
+  useEffect(() => {
+    fetchCoupons();
+  }, []);
 
   return (
     <div className="coupons-container">
       <div className="header-section">
         <h2 className="dashboard-title">Coupon Management</h2>
-        <Button
-          className="add-button"
-          onClick={() => {
-            setSelectedCoupon(null);
-            setFormData({
-              code: "",
-              type: "percentage",
-              value: "",
-              minPurchase: 0,
-              maxDiscount: "",
-              startDate: "",
-              endDate: "",
-              usageLimit: 1,
-              status: "active",
-            });
-            setIsModalOpen(true);
-          }}
-        >
+        <Button onClick={() => handleOpenModal("add")} className="add-button">
           <FaPlus /> Create Coupon
         </Button>
       </div>
 
       <TableWithControls
-        data={coupons}
         columns={columns}
-        searchPlaceholder="Search coupons..."
+        data={coupons}
         searchFields={["code", "type", "status"]}
       />
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedCoupon(null);
-        }}
-        title={selectedCoupon ? "Edit Coupon" : "Create Coupon"}
+        onClose={() => setIsModalOpen(false)}
+        title={modalMode === "add" ? "Create Coupon" : "Edit Coupon"}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="text-red-500 mb-4">{error}</div>}
+        <form onSubmit={handleSubmit} className="coupon-form">
           <InputField
             label="Coupon Code"
             value={formData.code}
@@ -227,19 +229,24 @@ const Coupons = () => {
             required
           />
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-2">Discount Type</label>
-              <select
-                className="w-full p-2 border rounded"
-                value={formData.type}
-                onChange={(e) =>
-                  setFormData({ ...formData, type: e.target.value })
-                }
-              >
-                <option value="percentage">Percentage</option>
-                <option value="fixed">Fixed Amount</option>
-              </select>
-            </div>
+            <DropdownSelect
+              label="Discount Type"
+              options={[
+                { value: "percentage", label: "Percentage" },
+                { value: "fixed", label: "Fixed Amount" },
+              ]}
+              value={{
+                value: formData.type,
+                label:
+                  formData.type === "percentage"
+                    ? "Percentage"
+                    : "Fixed Amount",
+              }}
+              onChange={(option) =>
+                setFormData({ ...formData, type: option.value })
+              }
+              required
+            />
             <InputField
               label="Discount Value"
               type="number"
@@ -302,28 +309,31 @@ const Coupons = () => {
                 setFormData({ ...formData, usageLimit: e.target.value })
               }
             />
-            <div>
-              <label className="block mb-2">Status</label>
-              <select
-                className="w-full p-2 border rounded"
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({ ...formData, status: e.target.value })
-                }
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
+            <DropdownSelect
+              label="Status"
+              options={[
+                { value: "active", label: "Active" },
+                { value: "inactive", label: "Inactive" },
+              ]}
+              value={{
+                value: formData.status,
+                label: formData.status === "active" ? "Active" : "Inactive",
+              }}
+              onChange={(option) =>
+                setFormData({ ...formData, status: option.value })
+              }
+              required
+            />
           </div>
           <div className="modal-actions">
             <Button type="submit" className="modal-submit-button">
-              {selectedCoupon ? "Update" : "Create"}
+              {modalMode === "add" ? "Create" : "Update"}
             </Button>
             <Button
               type="button"
               onClick={() => setIsModalOpen(false)}
               className="modal-cancel-button"
+              variant="secondary"
             >
               Cancel
             </Button>

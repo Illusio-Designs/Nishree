@@ -1,8 +1,5 @@
 import { Review } from '../model/reviewModel.js';
 import { ReviewImage } from '../model/reviewImageModel.js';
-import { ReviewLike } from '../model/reviewLikeModel.js';
-import { ReviewComment } from '../model/reviewCommentModel.js';
-import { ReviewReport } from '../model/reviewReportModel.js';
 import { Product } from '../model/productModel.js';
 import { Order } from '../model/orderModel.js';
 import { OrderItem } from '../model/orderItemModel.js';
@@ -261,11 +258,6 @@ export const getProductReviews = async (req, res) => {
             {
                 model: ReviewImage,
                 required: false
-            },
-            {
-                model: ReviewLike,
-                attributes: ['id', 'user_id'],
-                required: false
             }
         ];
         
@@ -296,12 +288,6 @@ export const getProductReviews = async (req, res) => {
             order = [['rating', 'DESC'], ['createdAt', 'DESC']];
         } else if (sort === 'lowest') {
             order = [['rating', 'ASC'], ['createdAt', 'DESC']];
-        } else if (sort === 'helpful') {
-            // Sort by number of likes
-            order = [
-                [sequelize.literal('(SELECT COUNT(*) FROM review_likes WHERE review_likes.review_id = Review.id)'), 'DESC'],
-                ['createdAt', 'DESC']
-            ];
         }
         
         // Pagination
@@ -557,11 +543,7 @@ export const updateReview = async (req, res) => {
                     model: User,
                     attributes: ['id', 'username', 'profileImage']
                 },
-                { model: ReviewImage },
-                {
-                    model: ReviewLike,
-                    attributes: ['id', 'user_id']
-                }
+                { model: ReviewImage }
             ]
         });
         
