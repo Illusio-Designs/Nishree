@@ -10,10 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.12.1",
+    "antd": "^5.25.0",
     "axios": "^1.8.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-google-login": "^5.2.2",
     "react-icons": "^4.12.0",
     "react-jss": "^10.10.0",
     "react-router-dom": "^7.4.1",

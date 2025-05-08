@@ -1,4 +1,4 @@
-import { Product, ProductVariation, Attribute, AttributeValue, ProductVariationAttribute, ProductImage, ProductSEO, ProductBadge, ProductBadgeMapping, ProductDiscount } from '../model/associations.js';
+import { Product, ProductVariation, Attribute, AttributeValue, ProductVariationAttribute, ProductImage, ProductSEO, ProductBadge, ProductBadgeMapping, ProductDiscount, Category } from '../model/associations.js';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -24,6 +24,16 @@ const formatProductResponse = (product) => {
             ...img,
             url: `/uploads/products/${img.imageName}`
         }));
+    }
+
+    // Add category details
+    if (productData.Category) {
+        productData.category = {
+            id: productData.Category.id,
+            name: productData.Category.name,
+            slug: productData.Category.slug
+        };
+        delete productData.Category;
     }
 
     // Add variation details
@@ -71,14 +81,32 @@ export const createProduct = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
+        console.log('Received request body:', req.body);
+        console.log('Received files:', req.files);
+
         // Parse form data
-        const name = req.body.name;
-        const description = req.body.description;
+        const name = req.body.name?.trim();
+        const description = req.body.description?.trim();
         const categoryId = req.body.categoryId;
         const status = req.body.status || 'active';
-        const variations = JSON.parse(req.body.variations);
-        const seo = JSON.parse(req.body.seo);
+        const variations = JSON.parse(req.body.variations || '[]');
+        const seo = JSON.parse(req.body.seo || '{}');
         const images = req.files;
+
+        // Validate required fields
+        if (!name) {
+            throw new Error('Product name is required');
+        }
+
+        if (!categoryId) {
+            throw new Error('Category is required');
+        }
+
+        // Validate category
+        const category = await Category.findByPk(categoryId);
+        if (!category) {
+            throw new Error('Invalid category');
+        }
 
         // Create product with basic info
         const product = await Product.create({
@@ -90,45 +118,44 @@ export const createProduct = async (req, res) => {
         }, { transaction });
 
         // Create SEO record
-        if (seo) {
-            await ProductSEO.create({
-                product_id: product.id,
-                meta_title: seo.metaTitle || name,
-                meta_description: seo.metaDescription || description,
-                meta_keywords: seo.metaKeywords,
-                og_title: seo.ogTitle || name,
-                og_description: seo.ogDescription || description,
-                og_image: seo.ogImage
-            }, { transaction });
-        }
+        await ProductSEO.create({
+            product_id: product.id,
+            meta_title: seo.metaTitle || name,
+            meta_description: seo.metaDescription || description,
+            meta_keywords: seo.metaKeywords || '',
+            og_title: seo.ogTitle || name,
+            og_description: seo.ogDescription || description,
+            og_image: seo.ogImage
+        }, { transaction });
 
-        // Handle variations if provided
+        // Handle variations
         if (variations && variations.length > 0) {
             for (const variation of variations) {
-                // Ensure required fields are present
-                if (!variation.price || !variation.attributes) {
-                    throw new Error('Price and attributes are required for each variation');
+                if (!variation.price || isNaN(variation.price) || variation.price <= 0) {
+                    throw new Error('Invalid price for variation');
                 }
 
                 await ProductVariation.create({
                     productId: product.id,
-                    sku: variation.sku || `SKU-${product.id}-${variation.id}`,
+                    sku: variation.sku || `SKU-${product.id}-${Date.now()}`,
                     price: Number(variation.price),
                     comparePrice: variation.comparePrice ? Number(variation.comparePrice) : null,
-                    stock: Number(variation.stock),
+                    stock: Number(variation.stock || 0),
                     weight: variation.weight ? Number(variation.weight) : null,
                     weightUnit: variation.weightUnit || 'g',
-                    dimensions: variation.dimensions ? JSON.stringify(variation.dimensions) : null,
-                    dimensionUnit: variation.dimensionUnit || 'cm',
                     attributes: variation.attributes || {}
                 }, { transaction });
             }
         }
 
-        // Handle images if provided
+        // Handle images
         if (images && images.length > 0) {
-            for (const image of images) {
-                await ProductImage.create({
+            console.log('Processing images:', images.length, 'files');
+            
+            // Create an array of image creation promises
+            const imagePromises = images.map(async (image) => {
+                console.log('Processing image:', image.originalname);
+                return ProductImage.create({
                     product_id: product.id,
                     image_url: `/uploads/products/${image.filename}`,
                     alt_text: name,
@@ -136,14 +163,29 @@ export const createProduct = async (req, res) => {
                     is_primary: false,
                     status: 'active'
                 }, { transaction });
-            }
+            });
+
+            // Wait for all images to be created
+            await Promise.all(imagePromises);
+            console.log('All images processed successfully');
         }
 
         await transaction.commit();
+        
+        // Fetch the complete product with all relations
+        const completeProduct = await Product.findByPk(product.id, {
+            include: [
+                { model: Category },
+                { model: ProductVariation },
+                { model: ProductImage },
+                { model: ProductSEO }
+            ]
+        });
+
         res.status(201).json({
             success: true,
             message: 'Product created successfully',
-            data: formatProductResponse(product)
+            data: formatProductResponse(completeProduct)
         });
     } catch (error) {
         await transaction.rollback();
@@ -185,6 +227,7 @@ export const getAllProducts = async (req, res) => {
             limit: parseInt(limit),
             offset: (parseInt(page) - 1) * parseInt(limit),
             include: [
+                { model: Category },
                 { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
                 { model: ProductImage },
                 { model: ProductBadge, through: ProductBadgeMapping },
@@ -212,6 +255,7 @@ export const getProduct = async (req, res) => {
         
         const product = await Product.findByPk(id, {
             include: [
+                { model: Category },
                 { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
                 { model: ProductImage },
                 { model: ProductBadge, through: ProductBadgeMapping },
@@ -241,17 +285,25 @@ export const updateProduct = async (req, res) => {
             name,
             description,
             categoryId,
-            price,
-            stock,
+            status,
             variations,
             badges,
             seo,
             images
         } = req.body;
 
+        // Validate category if provided
+        if (categoryId) {
+            const category = await Category.findByPk(categoryId);
+            if (!category) {
+                throw new Error('Invalid category');
+            }
+        }
+
         // Find product
         const product = await Product.findByPk(id, {
             include: [
+                { model: Category },
                 { model: ProductVariation },
                 { model: ProductImage },
                 { model: ProductBadge, through: ProductBadgeMapping },
@@ -270,30 +322,29 @@ export const updateProduct = async (req, res) => {
             name,
             description,
             categoryId,
-            price,
-            stock,
+            status,
             slug: name ? slugify(name, { lower: true }) : product.slug
         }, { transaction });
 
-            // Handle variations
+        // Handle variations
         if (variations) {
             // Delete existing variations
-                await ProductVariation.destroy({
+            await ProductVariation.destroy({
                 where: { productId: id },
                 transaction
-                });
+            });
 
-                // Create new variations
-                for (const variation of variations) {
-                    const productVariation = await ProductVariation.create({
+            // Create new variations
+            for (const variation of variations) {
+                const productVariation = await ProductVariation.create({
                     productId: id,
-                        price: variation.price,
-                        stock: variation.stock,
+                    price: variation.price,
+                    stock: variation.stock,
                     sku: variation.sku || uuidv4()
                 }, { transaction });
 
-                    // Handle variation attributes
-                    if (variation.attributes) {
+                // Handle variation attributes
+                if (variation.attributes) {
                     for (const attr of variation.attributes) {
                         const [attribute] = await Attribute.findOrCreate({
                             where: { name: attr.name },
@@ -315,12 +366,12 @@ export const updateProduct = async (req, res) => {
                     }
                 }
             }
-            }
+        }
 
-            // Handle badges
-            if (badges) {
+        // Handle badges
+        if (badges) {
             // Delete existing badge mappings
-                await ProductBadgeMapping.destroy({
+            await ProductBadgeMapping.destroy({
                 where: { productId: id },
                 transaction
             });
@@ -352,7 +403,7 @@ export const updateProduct = async (req, res) => {
                     description: seo.description,
                     keywords: seo.keywords
                 }, { transaction });
-                } else {
+            } else {
                 await ProductSEO.create({
                     productId: id,
                     title: seo.title,

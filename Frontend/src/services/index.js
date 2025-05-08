@@ -5,28 +5,63 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 // Create axios instance
 const api = axios.create({
     baseURL: API_BASE_URL,
+    timeout: 10000, // 10 second timeout
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
 });
 
 // Request interceptor
 api.interceptors.request.use((config) => {
+    console.log("=== API Request ===");
+    console.log("URL:", config.url);
+    console.log("Method:", config.method);
+    console.log("Base URL:", API_BASE_URL);
+    
     const token = localStorage.getItem('token');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log("Authorization header set");
+    } else {
+        console.log("No token found for request");
     }
+    
     if (config.data instanceof FormData) {
         config.headers['Content-Type'] = 'multipart/form-data';
     }
     return config;
+}, (error) => {
+    console.log("=== Request Error ===");
+    console.log("Error:", error.message);
+    return Promise.reject(error);
 });
 
 // Response interceptor
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        console.log("=== API Response Success ===");
+        console.log("Status:", response.status);
+        console.log("Data:", response.data);
+        return response;
+    },
     (error) => {
+        console.log("=== API Response Error ===");
+        console.log("Status:", error.response?.status);
+        console.log("Message:", error.message);
+        console.log("Error Data:", error.response?.data);
+        
+        if (error.code === 'ECONNABORTED') {
+            console.log("Request timed out");
+            return Promise.reject(new Error('Request timed out. Please try again.'));
+        }
+        
         if (error.response?.status === 401) {
+            console.log("Unauthorized - redirecting to login");
             localStorage.removeItem('token');
             window.location.href = '/admin/login';
         }
+        
         return Promise.reject(error);
     }
 );
@@ -209,72 +244,30 @@ export const settingsService = {
 
 // Auth Services
 export const authService = {
-    register: async (formData) => {
+    login: async (credentials) => {
         try {
-            const response = await api.post('/api/users/register', formData);
+            const response = await api.post('/api/users/login', credentials);
             return response.data;
         } catch (error) {
-            throw handleApiError(error);
+            throw error.response?.data || error.message;
         }
     },
 
-    login: async (formData) => {
+    register: async (userData) => {
         try {
-            const response = await api.post('/api/users/login', formData);
-            if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
-                api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-            }
+            const response = await api.post('/api/users/register', userData);
             return response.data;
         } catch (error) {
-            throw handleApiError(error);
+            throw error.response?.data || error.message;
         }
     },
 
     logout: async () => {
         try {
             const response = await api.post('/api/users/logout');
-            localStorage.removeItem('token');
-            delete api.defaults.headers.common['Authorization'];
             return response.data;
         } catch (error) {
-            localStorage.removeItem('token');
-            delete api.defaults.headers.common['Authorization'];
-            throw handleApiError(error);
-        }
-    },
-
-    forgotPassword: async (email) => {
-        try {
-            const response = await api.post('/api/users/forgot-password', { email });
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    },
-
-    resetPassword: async (resetData) => {
-        try {
-            const response = await api.post('/api/users/reset-password', resetData);
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    },
-
-    googleAuth: () => {
-        window.location.href = `${API_BASE_URL}/api/users/auth/google`;
-    },
-
-    googleAuthCallback: async () => {
-        try {
-            const response = await api.get('/api/users/auth/google/callback');
-            if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
-            }
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
+            throw error.response?.data || error.message;
         }
     }
 };
@@ -282,11 +275,32 @@ export const authService = {
 // User Services
 export const userService = {
     getCurrentUser: async () => {
+        console.log("=== getCurrentUser API Call ===");
         try {
+            const token = localStorage.getItem("token");
+            console.log("Token being used:", token ? "Present" : "Missing");
+            
             const response = await api.get('/api/users/me');
-            return response.data;
+            console.log("API Response:", response.data);
+            
+            if (!response.data || !response.data.user) {
+                console.log("No user data in response");
+                return null;
+            }
+            
+            return response.data.user;
         } catch (error) {
-            throw handleApiError(error);
+            console.log("API Error:", {
+                status: error.response?.status,
+                message: error.message,
+                data: error.response?.data
+            });
+            
+            if (error.response?.status === 401) {
+                console.log("Unauthorized - removing token");
+                localStorage.removeItem("token");
+            }
+            throw error.response?.data || error.message;
         }
     },
 
@@ -308,21 +322,21 @@ export const userService = {
         }
     },
 
-    updateUser: async (formData) => {
+    updateUser: async (userData) => {
         try {
-            const response = await api.put('/api/users/update', formData);
+            const response = await api.put('/api/users/me', userData);
             return response.data;
         } catch (error) {
-            throw handleApiError(error);
+            throw error.response?.data || error.message;
         }
     },
 
     changePassword: async (passwordData) => {
         try {
-            const response = await api.put('/api/users/change-password', passwordData);
+            const response = await api.put('/api/users/me/password', passwordData);
             return response.data;
         } catch (error) {
-            throw handleApiError(error);
+            throw error.response?.data || error.message;
         }
     },
 
@@ -348,30 +362,32 @@ export const userService = {
 
 // Category Services
 export const categoryService = {
-    createCategory: async (categoryData) => {
-        try {
-            const response = await api.post('/api/categories', categoryData);
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    },
-
     getAllCategories: async () => {
         try {
             const response = await api.get('/api/categories/admin/all');
-            return response.data;
+            console.log('Category API Response:', response); // Debug log
+            return response.data.categories || [];
         } catch (error) {
-            throw handleApiError(error);
+            console.error('Category API Error:', error); // Debug log
+            throw error.response?.data || error.message;
         }
     },
 
     getCategoryById: async (id) => {
         try {
             const response = await api.get(`/api/categories/${id}`);
+            return response.data.category;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    createCategory: async (categoryData) => {
+        try {
+            const response = await api.post('/api/categories', categoryData);
             return response.data;
         } catch (error) {
-            throw handleApiError(error);
+            throw error.response?.data || error.message;
         }
     },
 
@@ -380,16 +396,16 @@ export const categoryService = {
             const response = await api.put(`/api/categories/${id}`, categoryData);
             return response.data;
         } catch (error) {
-            throw handleApiError(error);
+            throw error.response?.data || error.message;
         }
     },
-    
+
     deleteCategory: async (id) => {
         try {
             const response = await api.delete(`/api/categories/${id}`);
             return response.data;
         } catch (error) {
-            throw handleApiError(error);
+            throw error.response?.data || error.message;
         }
     }
 };

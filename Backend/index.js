@@ -3,13 +3,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import { sequelize, connectDB, syncDatabase } from './config/db.js';
+import { sequelize } from './config/db.js';
 import routesManager from './routes/routesManager.js';
 import passport from './config/passport.js';
 import session from 'express-session';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import settingsRoutes from './routes/settingsRoutes.js';
+import { setupDatabase } from './scripts/setupDatabase.js';
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -84,7 +85,6 @@ app.use('/api/facebook-pixel', facebookPixelRouter);
 app.use('/api/facebook-catalog', facebookCatalogRouter);
 app.use('/api/dashboard', dashboardAnalyticsRouter);
 
-
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -100,12 +100,9 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
     try {
-        // Connect to database
-        await connectDB();
+        // Setup database (creates database if not exists and syncs all models)
+        await setupDatabase();
         
-        // Sync database models with force option
-        await syncDatabase(true);
-
         // Start listening
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);

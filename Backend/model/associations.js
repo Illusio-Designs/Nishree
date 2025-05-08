@@ -25,6 +25,7 @@ import { Payment } from './paymentModel.js';
 import { Settings } from './settingsModel.js';
 import { Review } from './reviewModel.js';
 import { ReviewImage } from './reviewImageModel.js';
+import { SeoMetadata } from './seoMetadataModel.js';
 
 // Export all models
 export {
@@ -53,7 +54,8 @@ export {
     Payment,
     Settings,
     Review,
-    ReviewImage
+    ReviewImage,
+    SeoMetadata
 };
 
 // Add explicit constraint for featured_review_id to fix foreign key issue
@@ -83,6 +85,15 @@ Slider.belongsTo(Category, { foreignKey: 'categoryId' });
 Category.hasMany(Slider, { foreignKey: 'categoryId' });
 
 // Product Associations - Ensure clear foreign key constraints
+Product.belongsTo(Category, { 
+    foreignKey: 'categoryId',
+    onDelete: 'SET NULL'
+});
+Category.hasMany(Product, { 
+    foreignKey: 'categoryId',
+    onDelete: 'SET NULL'
+});
+
 Product.hasMany(ProductVariation, { 
     foreignKey: 'productId',
     onDelete: 'CASCADE'

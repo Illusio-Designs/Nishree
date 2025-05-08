@@ -1,4 +1,4 @@
-import SEOMetadata from '../model/seoMetadataModel.js';
+import { SeoMetadata } from '../model/seoMetadataModel.js';
 
 // Initialize default SEO data for pages
 export const initializeSEOData = async () => {
@@ -37,7 +37,7 @@ export const initializeSEOData = async () => {
         ];
 
         for (const page of defaultPages) {
-            const [existingPage, created] = await SEOMetadata.findOrCreate({
+            const [existingPage, created] = await SeoMetadata.findOrCreate({
                 where: { page_name: page.page_name },
                 defaults: page
             });
@@ -62,7 +62,7 @@ export const getSEOData = async (req, res) => {
             return res.status(400).json({ message: 'Page name is required' });
         }
 
-        const seoData = await SEOMetadata.findOne({
+        const seoData = await SeoMetadata.findOne({
             where: { page_name }
         });
 
@@ -80,7 +80,7 @@ export const getSEOData = async (req, res) => {
 // Get all SEO data
 export const getAllSEOData = async (req, res) => {
     try {
-        const allSEOData = await SEOMetadata.findAll({
+        const allSEOData = await SeoMetadata.findAll({
             order: [['page_name', 'ASC']]
         });
 
@@ -108,7 +108,7 @@ export const updateSEOData = async (req, res) => {
             return res.status(400).json({ message: 'Page name is required' });
         }
 
-        const seoData = await SEOMetadata.findOne({
+        const seoData = await SeoMetadata.findOne({
             where: { page_name }
         });
 
@@ -154,7 +154,7 @@ export const createSEOData = async (req, res) => {
             return res.status(400).json({ message: 'Page name and slug are required' });
         }
 
-        const [seoData, created] = await SEOMetadata.findOrCreate({
+        const [seoData, created] = await SeoMetadata.findOrCreate({
             where: { page_name },
             defaults: {
                 slug,
@@ -190,7 +190,7 @@ export const deleteSEOData = async (req, res) => {
             return res.status(400).json({ message: 'Page name is required' });
         }
 
-        const seoData = await SEOMetadata.findOne({
+        const seoData = await SeoMetadata.findOne({
             where: { page_name }
         });
 

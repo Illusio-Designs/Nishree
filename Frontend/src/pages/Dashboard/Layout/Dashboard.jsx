@@ -351,34 +351,21 @@ const Dashboard = () => {
           <div className="customers-page">
             <Routes>
               <Route index element={<DashboardOverview />} />
-              <Route path="customers" element={<Customers />} />
+              {/* <Route path="customers" element={<Customers />} /> */}
               <Route path="category" element={<Category />} />
               <Route path="slider" element={<Slider />} />
               <Route path="products" element={<Products />} />
-              <Route path="orders" element={<Orders />} />
-              <Route
-                path="order-status-history"
-                element={<OrderStatusHistory />}
-              />
+              {/* <Route path="orders" element={<Orders />} /> */}
+              {/* <Route path="order-status-history" element={<OrderStatusHistory />} /> */}
               <Route path="coupons" element={<Coupons />} />
-              <Route path="reviews" element={<Reviews />} />
-              <Route path="shipping-fees" element={<ShippingFees />} />
-              <Route
-                path="shipping-addresses"
-                element={<ShippingAddresses />}
-              />
+              {/* <Route path="reviews" element={<Reviews />} /> */}
+              {/* <Route path="shipping-fees" element={<ShippingFees />} />
+              <Route path="shipping-addresses" element={<ShippingAddresses />} />
               <Route path="payments" element={<Payments />} />
-              <Route path="users" element={<Users />} />
+              <Route path="users" element={<Users />} /> */}
               <Route path="seo" element={<SEO />} />
-              <Route path="settings" element={<SystemSettings />} />
-              <Route
-                path="settings/profile"
-                element={<ProfileSettings type="profile" />}
-              />
-              <Route
-                path="settings/security"
-                element={<ProfileSettings type="security" />}
-              />
+              {/* <Route path="settings" element={<SystemSettings />} />
+              <Route path="profile-settings" element={<ProfileSettings />} /> */}
             </Routes>
           </div>
         </div>

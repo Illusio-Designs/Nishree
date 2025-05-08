@@ -29,7 +29,7 @@ const sequelize = new Sequelize(
     }
 );
 
-const setupDatabase = async () => {
+export const setupDatabase = async () => {
     try {
         // First, try to connect without selecting a database
         const tempSequelize = new Sequelize('', process.env.DB_USER, process.env.DB_PASSWORD, {
@@ -76,38 +76,115 @@ const setupDatabase = async () => {
         const options = { 
             hooks: false,
             alter: true,
-            // Disable adding indexes for now
             indexes: false
         };
         
-        // Step 1a: First create base tables with just the columns (no foreign keys or indexes)
+        // Step 1a: Create base tables in specific order
         console.log('Step 1a: Creating base tables structure...');
         try {
-            // Create tables in a specific order
-            if (models.User) await models.User.sync(options);
-            if (models.Category) await models.Category.sync(options);
-            if (models.Order) await models.Order.sync(options);
-            if (models.Review) await models.Review.sync(options);
-            
-            // Create Product table but modify it first to remove the featured_review_id temporarily
-            if (models.Product) {
-                console.log('Creating Product table without featured_review_id...');
-                const productAttributes = models.Product.getAttributes();
-                const originalFeaturedReviewId = productAttributes.featured_review_id;
-                delete productAttributes.featured_review_id;
-                await models.Product.sync(options);
-                
-                // Add back the attribute for later use
-                models.Product.rawAttributes.featured_review_id = originalFeaturedReviewId;
-            }
-            
-            // Then create other tables
-            for (const modelName in models) {
-                if (!['User', 'Category', 'Product', 'Order', 'Review'].includes(modelName)) {
-                    await models[modelName].sync(options);
+            // First create independent tables (no foreign keys)
+            const independentTables = [
+                'User', 'Category', 'Attribute', 'AttributeValue',
+                'ProductBadge', 'Coupon', 'ShippingFee', 'Settings',
+                'SeoMetadata'
+            ];
+
+            for (const tableName of independentTables) {
+                if (models[tableName]) {
+                    console.log(`Creating ${tableName} table...`);
+                    await models[tableName].sync(options);
                 }
             }
-            
+
+            // Create Product table first
+            if (models.Product) {
+                console.log('Creating Product table...');
+                await models.Product.sync(options);
+            }
+
+            // Create ProductVariation table
+            if (models.ProductVariation) {
+                console.log('Creating ProductVariation table...');
+                await models.ProductVariation.sync(options);
+            }
+
+            // Create Product related tables that depend on Product
+            const productDependentTables = [
+                'ProductImage', 'ProductVariationAttribute',
+                'ProductDiscount', 'ProductBadgeMapping', 'ProductSEO'
+            ];
+
+            for (const tableName of productDependentTables) {
+                if (models[tableName]) {
+                    console.log(`Creating ${tableName} table...`);
+                    await models[tableName].sync(options);
+                }
+            }
+
+            // Create Order related tables first
+            const orderRelatedTables = [
+                'Order', 'OrderItem', 'OrderStatusHistory',
+                'Payment', 'ShippingAddress'
+            ];
+
+            for (const tableName of orderRelatedTables) {
+                if (models[tableName]) {
+                    console.log(`Creating ${tableName} table...`);
+                    await models[tableName].sync(options);
+                }
+            }
+
+            // Create Review table without foreign keys first
+            if (models.Review) {
+                console.log('Creating Review table without foreign keys...');
+                const reviewAttributes = models.Review.getAttributes();
+                const originalForeignKeys = {
+                    userId: reviewAttributes.userId,
+                    productId: reviewAttributes.productId,
+                    orderId: reviewAttributes.orderId
+                };
+
+                // Temporarily remove foreign key constraints
+                delete reviewAttributes.userId.references;
+                delete reviewAttributes.productId.references;
+                delete reviewAttributes.orderId.references;
+
+                await models.Review.sync(options);
+
+                // Restore foreign key constraints
+                reviewAttributes.userId.references = originalForeignKeys.userId.references;
+                reviewAttributes.productId.references = originalForeignKeys.productId.references;
+                reviewAttributes.orderId.references = originalForeignKeys.orderId.references;
+            }
+
+            if (models.ReviewImage) {
+                console.log('Creating ReviewImage table...');
+                await models.ReviewImage.sync(options);
+            }
+
+            // Create Cart related tables
+            if (models.Cart) {
+                console.log('Creating Cart table...');
+                await models.Cart.sync(options);
+            }
+
+            if (models.CartItem) {
+                console.log('Creating CartItem table...');
+                await models.CartItem.sync(options);
+            }
+
+            // Create Wishlist table
+            if (models.Wishlist) {
+                console.log('Creating Wishlist table...');
+                await models.Wishlist.sync(options);
+            }
+
+            // Create Slider table
+            if (models.Slider) {
+                console.log('Creating Slider table...');
+                await models.Slider.sync(options);
+            }
+
             // Add comparePrice column to product_variations table if it doesn't exist
             console.log('Adding comparePrice column to product_variations table...');
             await sequelize.query(`
@@ -118,18 +195,6 @@ const setupDatabase = async () => {
                 console.log('Note: Some columns might already exist, continuing...');
             });
             
-            // Step 1b: Now manually add the featured_review_id column to products table
-            console.log('Step 1b: Adding featured_review_id column to products table...');
-            await sequelize.query(`
-                ALTER TABLE products 
-                ADD COLUMN featured_review_id INT NULL,
-                ADD CONSTRAINT fk_products_featured_review
-                FOREIGN KEY (featured_review_id) REFERENCES reviews(id)
-                ON DELETE SET NULL ON UPDATE CASCADE
-            `).catch(err => {
-                console.log('Note: featured_review_id column might already exist, continuing...');
-            });
-            
             // Step 2: Apply associations
             console.log('Step 2: Applying associations...');
             await import(`file://${path.join(__dirname, '..', 'model', 'associations.js')}`);
@@ -137,7 +202,7 @@ const setupDatabase = async () => {
             // Step 3: Update tables with foreign keys and indexes
             console.log('Step 3: Updating tables with foreign keys and indexes...');
             
-            // Add indexes to the products table manually
+            // Add indexes to the products table
             console.log('Adding indexes to products table...');
             await sequelize.query(`
                 ALTER TABLE products 
@@ -148,20 +213,37 @@ const setupDatabase = async () => {
                 ADD INDEX idx_products_featured_review_id (featured_review_id)
             `).catch(err => {
                 console.log('Some indexes might already exist, continuing...');
-                console.error(err);
             });
+
+            // Add indexes to other important tables
+            const tablesToIndex = [
+                { table: 'categories', columns: ['slug', 'status'] },
+                { table: 'orders', columns: ['order_number', 'status'] },
+                { table: 'users', columns: ['email', 'status'] },
+                { table: 'product_variations', columns: ['sku', 'status'] },
+                { table: 'reviews', columns: ['product_id', 'user_id'] }
+            ];
+
+            for (const { table, columns } of tablesToIndex) {
+                for (const column of columns) {
+                    await sequelize.query(`
+                        ALTER TABLE ${table}
+                        ADD INDEX idx_${table}_${column} (${column})
+                    `).catch(err => {
+                        console.log(`Index for ${table}.${column} might already exist, continuing...`);
+                    });
+                }
+            }
             
-            // Sync other tables with indexes
-            console.log('Syncing remaining tables with indexes...');
+            // Sync all tables with indexes
+            console.log('Syncing all tables with indexes...');
             const indexOptions = { 
                 hooks: false,
                 alter: true
             };
             
             for (const modelName in models) {
-                if (modelName !== 'Product') {
-                    await models[modelName].sync(indexOptions);
-                }
+                await models[modelName].sync(indexOptions);
             }
         } catch (error) {
             console.error('Error in table creation process:', error);
@@ -169,16 +251,9 @@ const setupDatabase = async () => {
         }
         
         console.log('Database setup completed successfully!');
+        return true;
     } catch (error) {
         console.error('Database setup failed:', error);
+        throw error;
     }
-};
-
-// Execute the setup function
-setupDatabase().then(() => {
-    console.log('Database setup script completed.');
-    process.exit(0);
-}).catch(error => {
-    console.error('Script execution failed:', error);
-    process.exit(1);
-}); 
+}; 

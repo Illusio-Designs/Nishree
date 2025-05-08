@@ -3,22 +3,96 @@ import { authService, userService } from "../services";
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const checkUser = async () => {
+    console.log("=== Auth Check Started ===");
+    console.log("API URL:", import.meta.env.VITE_API_URL || 'http://localhost:5000');
+    
     try {
       const token = localStorage.getItem("token");
+      console.log("Token status:", token ? "Present" : "Missing");
+      
       if (!token) {
+        console.log("No token - setting loading to false");
         setLoading(false);
         return;
       }
 
+      console.log("Fetching user data...");
       const userData = await userService.getCurrentUser();
-      setUser(userData);
+      console.log("User data received:", userData ? "Success" : "Failed");
+      
+      if (userData) {
+        console.log("Setting user data");
+        setUser(userData);
+      } else {
+        console.log("No user data - clearing token");
+        localStorage.removeItem("token");
+        setUser(null);
+      }
     } catch (error) {
-      console.error("Auth check failed:", error);
+      console.log("Auth check error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      
+      localStorage.removeItem("token");
+      setUser(null);
+      setError(error.message || "Authentication failed");
+    } finally {
+      console.log("Setting loading to false");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    console.log("=== AuthProvider Mounted ===");
+    let mounted = true;
+
+    const initAuth = async () => {
+      if (mounted) {
+        await checkUser();
+      }
+    };
+
+    initAuth();
+
+    return () => {
+      console.log("=== AuthProvider Unmounted ===");
+      mounted = false;
+    };
+  }, []);
+
+  const loginUser = async (credentials) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await authService.login(credentials);
+      if (response.token && response.user) {
+        localStorage.setItem("token", response.token);
+        setUser(response.user);
+        return response;
+      }
+    } catch (error) {
+      setError(error.message || "Login failed");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logoutUser = async () => {
+    try {
+      setLoading(true);
+      await authService.logout();
+      localStorage.removeItem("token");
+      setUser(null);
+    } catch (error) {
       localStorage.removeItem("token");
       setUser(null);
     } finally {
@@ -26,66 +100,91 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const loginUser = async (credentials) => {
-    try {
-      const response = await authService.login(credentials);
-      if (response.token && response.user) {
-        setUser(response.user);
-        return response;
-      }
-    } catch (error) {
-      console.error("Login failed:", error);
-      throw error;
-    }
-  };
-
-  const logoutUser = async () => {
-    try {
-      await authService.logout();
-      setUser(null);
-    } catch (error) {
-      console.error("Logout failed:", error);
-      setUser(null);
-    }
-  };
-
   const registerUser = async (userData) => {
     try {
+      setLoading(true);
+      setError(null);
       const response = await authService.register(userData);
       if (response.token && response.user) {
+        localStorage.setItem("token", response.token);
         setUser(response.user);
         return response;
       }
     } catch (error) {
-      console.error("Registration failed:", error);
+      setError(error.message || "Registration failed");
       throw error;
+    } finally {
+      setLoading(false);
     }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#666'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#666'
+      }}>
+        <p>Error: {error}</p>
+        <button 
+          onClick={() => {
+            setError(null);
+            checkUser();
+          }}
+          style={{
+            padding: '8px 16px',
+            marginTop: '16px',
+            cursor: 'pointer'
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  const value = {
+    user,
+    loading,
+    error,
+    isAuthenticated: !!user,
+    login: loginUser,
+    logout: logoutUser,
+    register: registerUser,
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        isAuthenticated: !!user,
-        login: loginUser,
-        logout: logoutUser,
-        register: registerUser,
-      }}
-    >
-      {!loading && children}
+    <AuthContext.Provider value={value}>
+      {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
+function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-};
+}
+
+export { AuthProvider, useAuth };
