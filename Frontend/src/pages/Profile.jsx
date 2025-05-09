@@ -1,230 +1,114 @@
 import React, { useState } from 'react';
+import { FaUser, FaEdit, FaBox, FaMapMarkerAlt } from 'react-icons/fa';
 import Header from "../components/Header";
-import Footer from "../components/Footer";
-import { FaEdit, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
-import '../Styles/Profile.css';
+import Footer from '../components/Footer';
 
-const Profile = () => {
-  const [activeTab, setActiveTab] = useState('profile');
-  const [userData] = useState({
+const ProfilePage = () => {
+  const [activeTab, setActiveTab] = useState('view');
+
+  const user = {
     name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Main St, New York, NY 10001',
-    avatar: 'https://i.pravatar.cc/300',
-  });
-
-  const [orders] = useState([
-    {
-      id: 'ORD001',
-      date: '2024-03-15',
-      status: 'delivered',
-      items: ['Product 1', 'Product 2'],
-      total: '$299.99'
-    },
-    {
-      id: 'ORD002',
-      date: '2024-03-10',
-      status: 'processing',
-      items: ['Product 3'],
-      total: '$149.99'
-    }
-  ]);
-
-  const [addresses] = useState([
-    {
-      id: 1,
-      type: 'Home',
-      address: '123 Main St',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10001',
-      isDefault: true
-    },
-    {
-      id: 2,
-      type: 'Office',
-      address: '456 Business Ave',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10002',
-      isDefault: false
-    }
-  ]);
-
-  const renderProfileInfo = () => (
-    <div className="info-grid">
-      <div className="info-card">
-        <div className="info-label">Email</div>
-        <div className="info-value">
-          <FaEnvelope /> {userData.email}
-        </div>
-      </div>
-      <div className="info-card">
-        <div className="info-label">Phone</div>
-        <div className="info-value">
-          <FaPhone /> {userData.phone}
-        </div>
-      </div>
-      <div className="info-card">
-        <div className="info-label">Address</div>
-        <div className="info-value">
-          <FaMapMarkerAlt /> {userData.address}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderEditProfile = () => (
-    <form className="edit-profile-form">
-      <div className="form-group">
-        <label className="form-label">Full Name</label>
-        <input
-          type="text"
-          className="form-input"
-          value={userData.name}
-          onChange={() => {}}
-        />
-      </div>
-      <div className="form-group">
-        <label className="form-label">Email</label>
-        <input
-          type="email"
-          className="form-input"
-          value={userData.email}
-          onChange={() => {}}
-        />
-      </div>
-      <div className="form-group">
-        <label className="form-label">Phone</label>
-        <input
-          type="tel"
-          className="form-input"
-          value={userData.phone}
-          onChange={() => {}}
-        />
-      </div>
-      <div className="form-group">
-        <label className="form-label">Address</label>
-        <textarea
-          className="form-input"
-          value={userData.address}
-          onChange={() => {}}
-          rows="3"
-        />
-      </div>
-      <button type="submit" className="btn btn-primary">
-        Save Changes
-      </button>
-    </form>
-  );
-
-  const renderOrders = () => (
-    <div className="orders-list">
-      {orders.map(order => (
-        <div key={order.id} className="order-card">
-          <div className="order-header">
-            <span className="order-number">{order.id}</span>
-            <span className="order-date">{order.date}</span>
-          </div>
-          <div className="order-items">
-            {order.items.join(', ')}
-          </div>
-          <div className="order-footer">
-            <span className={`order-status status-${order.status}`}>
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-            </span>
-            <span className="order-total">{order.total}</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderAddresses = () => (
-    <div className="address-section">
-      <button className="btn btn-primary" style={{ marginBottom: '1rem' }}>
-        Add New Address
-      </button>
-      <div className="address-grid">
-        {addresses.map(address => (
-          <div key={address.id} className="address-card">
-            <div className="address-type">{address.type}</div>
-            <div className="address-details">
-              <p>{address.address}</p>
-              <p>{address.city}, {address.state} {address.zipCode}</p>
-            </div>
-            <div className="address-actions">
-              <button className="btn btn-outline">Edit</button>
-              <button className="btn btn-outline">Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'profile':
-        return renderProfileInfo();
-      case 'edit':
-        return renderEditProfile();
-      case 'orders':
-        return renderOrders();
-      case 'addresses':
-        return renderAddresses();
-      default:
-        return renderProfileInfo();
-    }
+    email: 'john@example.com',
+    phone: '+1 234 567 8901',
   };
 
+  const orders = [
+    { id: 'ORD123', item: 'Organic Honey', date: '2025-04-10', amount: '$25.00' },
+    { id: 'ORD124', item: 'Turmeric Powder', date: '2025-04-12', amount: '$18.00' },
+  ];
+
+  const addresses = [
+    '123, Green Street, New York, USA',
+    '456, Blue Avenue, Los Angeles, USA',
+  ];
+
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
-      <div className="profile-container">
-        <div className="profile-wrapper">
-          <div className="profile-header">
-            <img src={userData.avatar} alt="Profile" className="profile-avatar" />
-            <h1 className="profile-name">{userData.name}</h1>
-            <p className="profile-email">{userData.email}</p>
-          </div>
 
-          <div className="profile-tabs">
-            <div
-              className={`profile-tab ${activeTab === 'profile' ? 'active' : ''}`}
-              onClick={() => setActiveTab('profile')}
-            >
-              Profile
-            </div>
-            <div
-              className={`profile-tab ${activeTab === 'edit' ? 'active' : ''}`}
-              onClick={() => setActiveTab('edit')}
-            >
-              Edit Profile
-            </div>
-            <div
-              className={`profile-tab ${activeTab === 'orders' ? 'active' : ''}`}
-              onClick={() => setActiveTab('orders')}
-            >
-              Orders
-            </div>
-            <div
-              className={`profile-tab ${activeTab === 'addresses' ? 'active' : ''}`}
-              onClick={() => setActiveTab('addresses')}
-            >
-              Addresses
-            </div>
-          </div>
+      <div className="flex flex-col items-center justify-start flex-grow p-4 sm:p-8">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">My Profile</h1>
 
-          <div className="profile-content">
-            {renderContent()}
-          </div>
+        <div className="flex space-x-2 mb-6 flex-wrap justify-center">
+          <TabButton label="View Profile" icon={<FaUser />} active={activeTab === 'view'} onClick={() => setActiveTab('view')} />
+          <TabButton label="Edit Profile" icon={<FaEdit />} active={activeTab === 'edit'} onClick={() => setActiveTab('edit')} />
+          <TabButton label="My Orders" icon={<FaBox />} active={activeTab === 'orders'} onClick={() => setActiveTab('orders')} />
+          <TabButton label="My Address" icon={<FaMapMarkerAlt />} active={activeTab === 'address'} onClick={() => setActiveTab('address')} />
+        </div>
+
+        <div className="w-full max-w-3xl bg-white shadow-xl rounded-2xl p-6">
+          {activeTab === 'view' && (
+            <div className="space-y-4">
+              <InfoItem label="Name" value={user.name} />
+              <InfoItem label="Email" value={user.email} />
+              <InfoItem label="Phone" value={user.phone} />
+            </div>
+          )}
+
+          {activeTab === 'edit' && (
+            <form className="space-y-4">
+              <TextField label="Name" defaultValue={user.name} />
+              <TextField label="Email" defaultValue={user.email} type="email" />
+              <TextField label="Phone" defaultValue={user.phone} type="tel" />
+              <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl w-full transition-all">Save Changes</button>
+            </form>
+          )}
+
+          {activeTab === 'orders' && (
+            <div className="space-y-4">
+              {orders.map(order => (
+                <div key={order.id} className="border p-4 rounded-xl shadow-sm">
+                  <p><strong>Order ID:</strong> {order.id}</p>
+                  <p><strong>Item:</strong> {order.item}</p>
+                  <p><strong>Date:</strong> {order.date}</p>
+                  <p><strong>Amount:</strong> {order.amount}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'address' && (
+            <ul className="space-y-2">
+              {addresses.map((addr, index) => (
+                <li key={index} className="bg-gray-100 p-4 rounded-xl shadow-sm">{addr}</li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
+
       <Footer />
-    </>
+    </div>
   );
 };
 
-export default Profile; 
+const TabButton = ({ label, icon, active, onClick }) => (
+  <button
+    className={`flex items-center gap-2 px-4 py-2 rounded-xl shadow-sm transition-all font-medium ${
+      active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-blue-100'
+    }`}
+    onClick={onClick}
+  >
+    {icon} {label}
+  </button>
+);
+
+const InfoItem = ({ label, value }) => (
+  <div>
+    <p className="text-gray-500 text-sm">{label}</p>
+    <p className="text-gray-800 font-medium">{value}</p>
+  </div>
+);
+
+const TextField = ({ label, defaultValue, type = 'text' }) => (
+  <div>
+    <label className="block text-gray-600 mb-1">{label}</label>
+    <input
+      type={type}
+      defaultValue={defaultValue}
+      className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+);
+
+export default ProfilePage;

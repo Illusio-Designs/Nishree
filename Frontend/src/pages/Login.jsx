@@ -177,8 +177,9 @@ const Login = () => {
       // Simulate successful login
       setTimeout(() => {
         toast.success("Login successful!");
+        // Ensure navigate is called after the toast notification to avoid navigation before the toast is displayed
         navigate("/profile", { replace: true });
-      }, 1500);
+      }, 1000);
     } catch (err) {
       toast.error(
         err.message || "Login failed. Please check your credentials."

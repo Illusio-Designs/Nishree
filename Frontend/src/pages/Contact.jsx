@@ -8,7 +8,7 @@ const Contact = () => {
     <>
       <Header />
       <>
-        <div className="contact">
+        <div className="contactpage">
           <div className="contact-container">
             <h1 className="text-center">
               <span>Contact</span> Us
