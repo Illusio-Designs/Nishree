@@ -26,11 +26,11 @@ function AuthProvider({ children }) {
       const userData = await userService.getCurrentUser();
       console.log("User data received:", userData ? "Success" : "Failed");
       
-      if (userData) {
-        console.log("Setting user data");
+      if (userData && userData.id) {
+        console.log("Setting user data:", userData);
         setUser(userData);
       } else {
-        console.log("No user data - clearing token");
+        console.log("Invalid user data - clearing token");
         localStorage.removeItem("token");
         setUser(null);
       }
@@ -41,8 +41,11 @@ function AuthProvider({ children }) {
         data: error.response?.data
       });
       
-      localStorage.removeItem("token");
-      setUser(null);
+      // Only clear token if it's an authentication error
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        setUser(null);
+      }
       setError(error.message || "Authentication failed");
     } finally {
       console.log("Setting loading to false");
@@ -50,22 +53,14 @@ function AuthProvider({ children }) {
     }
   };
 
+  // Add a new effect to handle token changes
   useEffect(() => {
-    console.log("=== AuthProvider Mounted ===");
-    let mounted = true;
-
-    const initAuth = async () => {
-      if (mounted) {
-        await checkUser();
-      }
-    };
-
-    initAuth();
-
-    return () => {
-      console.log("=== AuthProvider Unmounted ===");
-      mounted = false;
-    };
+    const token = localStorage.getItem("token");
+    if (token) {
+      checkUser();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const loginUser = async (credentials) => {

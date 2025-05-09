@@ -57,9 +57,9 @@ api.interceptors.response.use(
         }
         
         if (error.response?.status === 401) {
-            console.log("Unauthorized - redirecting to login");
+            console.log("Unauthorized - clearing token");
             localStorage.removeItem('token');
-            window.location.href = '/admin/login';
+            // Don't redirect here, let the component handle the redirect
         }
         
         return Promise.reject(error);
@@ -283,12 +283,13 @@ export const userService = {
             const response = await api.get('/api/users/me');
             console.log("API Response:", response.data);
             
-            if (!response.data || !response.data.user) {
+            // The API returns user data directly, not nested under a user property
+            if (!response.data) {
                 console.log("No user data in response");
                 return null;
             }
             
-            return response.data.user;
+            return response.data;
         } catch (error) {
             console.log("API Error:", {
                 status: error.response?.status,
@@ -365,10 +366,11 @@ export const categoryService = {
     getAllCategories: async () => {
         try {
             const response = await api.get('/api/categories/admin/all');
-            console.log('Category API Response:', response); // Debug log
-            return response.data.categories || [];
+            console.log('Category API Response:', response);
+            // Return the data array directly
+            return response.data;
         } catch (error) {
-            console.error('Category API Error:', error); // Debug log
+            console.error('Category API Error:', error);
             throw error.response?.data || error.message;
         }
     },
@@ -696,6 +698,63 @@ export const seoService = {
             return response.data;
         } catch (error) {
             throw handleApiError(error);
+        }
+    }
+};
+
+// Attribute Services
+export const attributeService = {
+    getAllAttributes: async () => {
+        try {
+            const response = await api.get('/api/attributes');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    createAttribute: async (attributeData) => {
+        try {
+            const response = await api.post('/api/attributes', attributeData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    updateAttribute: async (id, attributeData) => {
+        try {
+            const response = await api.put(`/api/attributes/${id}`, attributeData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    deleteAttribute: async (id) => {
+        try {
+            const response = await api.delete(`/api/attributes/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    addAttributeValues: async (id, values) => {
+        try {
+            const response = await api.post(`/api/attributes/${id}/values`, { values });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    removeAttributeValues: async (id, valueIds) => {
+        try {
+            const response = await api.delete(`/api/attributes/${id}/values`, { data: { valueIds } });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
         }
     }
 };

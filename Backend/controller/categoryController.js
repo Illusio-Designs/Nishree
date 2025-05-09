@@ -140,11 +140,10 @@ const getAllCategories = async (req, res) => {
             parentId: category.parentId,
             parentName: category.parent ? category.parent.name : null,
             image: category.image,
-            seoTitle: category.seoTitle,
-            seoDescription: category.seoDescription,
-            seoKeywords: category.seoKeywords,
+            metaTitle: category.metaTitle,
+            metaDescription: category.metaDescription,
+            metaKeywords: category.metaKeywords,
             slug: category.slug,
-            metaTags: category.metaTags,
             createdAt: category.createdAt,
             updatedAt: category.updatedAt
         }));

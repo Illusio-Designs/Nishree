@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { productService, categoryService } from "../../../services";
+import { productService, categoryService, attributeService } from "../../../services";
 import { toast } from "react-toastify";
 import TableWithControls from "../../../components/common/TableWithControls";
 import InputField from "../../../components/common/InputField";
@@ -13,6 +13,7 @@ import { FaPlus } from "react-icons/fa";
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [attributes, setAttributes] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("add");
@@ -61,10 +62,21 @@ const Products = () => {
     try {
       const response = await categoryService.getAllCategories();
       console.log('Category API Response:', response); // Debug log
-      setCategories(response.data || []);
+      setCategories(response || []); // Remove .data since response is already the array
     } catch (error) {
       toast.error("Failed to fetch categories");
       console.error("Failed to fetch categories:", error);
+    }
+  };
+
+  const fetchAttributes = async () => {
+    try {
+      const response = await attributeService.getAllAttributes();
+      console.log('Attributes fetched:', response); // Debug log
+      setAttributes(response || []);
+    } catch (error) {
+      toast.error("Failed to fetch attributes");
+      console.error("Failed to fetch attributes:", error);
     }
   };
 
@@ -272,16 +284,28 @@ const Products = () => {
 
   const handleVariationChange = (index, field, value) => {
     const updatedVariations = [...formData.variations];
-    updatedVariations[index] = {
-      ...updatedVariations[index],
-      [field]: value
-    };
+    if (field.startsWith('attributes.')) {
+      const attributeId = field.split('.')[1];
+      updatedVariations[index] = {
+        ...updatedVariations[index],
+        attributes: {
+          ...updatedVariations[index].attributes,
+          [attributeId]: value
+        }
+      };
+    } else {
+      updatedVariations[index] = {
+        ...updatedVariations[index],
+        [field]: value
+      };
+    }
     setFormData({ ...formData, variations: updatedVariations });
   };
 
   useEffect(() => {
     fetchProducts();
     fetchCategories();
+    fetchAttributes();
   }, []);
 
   const columns = [
@@ -338,21 +362,10 @@ const Products = () => {
       )
     },
     {
-      key: "variations",
-      header: "Variations",
-      render: (row) => <span>{row.ProductVariations?.length || 0}</span>
-    },
-    {
       key: "actions",
       header: "Actions",
       render: (row) => (
         <div className="action-buttons">
-          <ActionButton
-            icon={<HiOutlineEye />}
-            onClick={() => handleOpenModal("view", row)}
-            variant="view"
-            tooltip="View Product"
-          />
           <ActionButton
             icon={<HiOutlinePencil />}
             onClick={() => handleOpenModal("edit", row)}
@@ -472,6 +485,45 @@ const Products = () => {
                   min="0"
                   required
                 />
+                
+                {/* Attributes Section */}
+                <div className="attributes-section">
+                  <h5>Attributes</h5>
+                  {attributes && attributes.length > 0 ? (
+                    attributes.map((attribute) => (
+                      <div key={attribute.id} className="attribute-field">
+                        <label>{attribute.name}</label>
+                        {attribute.type === 'select' ? (
+                          <select
+                            value={variation.attributes[attribute.id] || ''}
+                            onChange={(e) => handleVariationChange(index, `attributes.${attribute.id}`, e.target.value)}
+                            required={attribute.isRequired}
+                            className="select-input"
+                          >
+                            <option value="">Select {attribute.name}</option>
+                            {attribute.AttributeValues && attribute.AttributeValues
+                              .filter(value => value.status === 'active')
+                              .map((value) => (
+                                <option key={value.id} value={value.id}>
+                                  {value.value}
+                                </option>
+                              ))}
+                          </select>
+                        ) : (
+                          <InputField
+                            type={attribute.type === 'number' ? 'number' : 'text'}
+                            value={variation.attributes[attribute.id] || ''}
+                            onChange={(e) => handleVariationChange(index, `attributes.${attribute.id}`, e.target.value)}
+                            required={attribute.isRequired}
+                            placeholder={`Enter ${attribute.name}`}
+                          />
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-attributes">No attributes available. Please create attributes first.</p>
+                  )}
+                </div>
               </div>
             ))}
             <Button type="button" onClick={handleAddVariation}>

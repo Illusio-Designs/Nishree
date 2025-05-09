@@ -33,7 +33,7 @@
   }
 }
 
-.modal-content {
+.modal-overlay .modal-content {
   background: white;
   border-radius: 16px;
   width: min(90%, 600px);
@@ -42,8 +42,9 @@
   position: relative;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  scrollbar-width: thin;
+  scrollbar-width: none;
   scrollbar-color: #cbd5e1 transparent;
+  padding: 0;
 }
 
 .modal-header {

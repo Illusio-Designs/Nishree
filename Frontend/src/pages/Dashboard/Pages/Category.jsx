@@ -24,17 +24,30 @@ const Category = () => {
     metaDescription: "",
     metaKeywords: "",
     image: null,
-    createdAt: "",
-    updatedAt: ""
+    slug: ""
   });
 
   const fetchCategories = async () => {
     try {
-      const data = await categoryService.getAllCategories();
-      setCategories(data);
+      console.log('Fetching categories...');
+      const response = await categoryService.getAllCategories();
+      console.log('Raw API response:', response);
+      
+      // The API response is already the array of categories
+      if (Array.isArray(response)) {
+        console.log('Setting categories array:', response);
+        setCategories(response);
+      } else if (response && response.data && Array.isArray(response.data)) {
+        console.log('Setting categories from response.data:', response.data);
+        setCategories(response.data);
+      } else {
+        console.error('Unexpected data format:', response);
+        setCategories([]);
+      }
     } catch (error) {
+      console.error('Error in fetchCategories:', error);
       toast.error('Failed to fetch categories');
-      console.error("Failed to fetch categories:", error);
+      setCategories([]);
     }
   };
 
@@ -60,12 +73,48 @@ const Category = () => {
     }
   };
 
+  const handleOpenModal = async (mode, category = null) => {
+    setModalMode(mode);
+    if (category && mode === 'edit') {
+      console.log('Edit mode with category:', category);
+      console.log('Meta Keywords from API:', category.metaKeywords);
+      setSelectedCategory(category);
+      const formDataToSet = {
+        name: category.name || "",
+        description: category.description || "",
+        parentId: category.parentId || null,
+        status: category.status || 'active',
+        metaTitle: category.metaTitle || category.name || "",
+        metaDescription: category.metaDescription || category.description || "",
+        metaKeywords: category.metaKeywords || category.name || "",
+        image: category.image || null,
+        slug: category.slug || ""
+      };
+      console.log('Setting form data:', formDataToSet);
+      setFormData(formDataToSet);
+    } else {
+      setSelectedCategory(null);
+      setFormData({
+        name: "",
+        description: "",
+        parentId: null,
+        status: 'active',
+        metaTitle: "",
+        metaDescription: "",
+        metaKeywords: "",
+        image: null,
+        slug: ""
+      });
+    }
+    setShowModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formDataToSend = new FormData();
       Object.keys(formData).forEach(key => {
-        if (formData[key] !== null) {
+        if (formData[key] !== null && formData[key] !== undefined) {
           if (key === 'image' && typeof formData[key] === 'string') {
             // Skip if image is a string (existing image URL)
             return;
@@ -90,44 +139,31 @@ const Category = () => {
     }
   };
 
-  const handleOpenModal = async (mode, category = null) => {
-    setModalMode(mode);
-    if (category && mode === 'edit') {
-      const categoryDetails = await fetchCategoryById(category.id);
-      if (categoryDetails) {
-        setSelectedCategory(categoryDetails);
-        setFormData({
-          name: categoryDetails.name || "",
-          description: categoryDetails.description || "",
-          parentId: categoryDetails.parentId || null,
-          status: categoryDetails.status || 'active',
-          metaTitle: categoryDetails.metaTitle || "",
-          metaDescription: categoryDetails.metaDescription || "",
-          metaKeywords: categoryDetails.metaKeywords || "",
-          image: categoryDetails.image || null,
-          createdAt: categoryDetails.createdAt || "",
-          updatedAt: categoryDetails.updatedAt || ""
-        });
+  const handleInputChange = (field, value) => {
+    setFormData(prevData => {
+      const newData = { ...prevData, [field]: value };
+      
+      // Auto-fill meta title and description based on name and description
+      if (field === 'name') {
+        newData.metaTitle = value;
+        // Don't auto-fill meta keywords when name changes to preserve existing keywords
       }
-    } else {
-      setSelectedCategory(null);
-      setFormData({
-        name: "",
-        description: "",
-        parentId: null,
-        status: 'active',
-        metaTitle: "",
-        metaDescription: "",
-        metaKeywords: "",
-        image: null
-      });
-    }
-    setShowModal(true);
+      if (field === 'description') {
+        newData.metaDescription = value;
+      }
+      
+      return newData;
+    });
   };
 
   useEffect(() => {
+    console.log('Component mounted, fetching categories...');
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    console.log('Categories state updated:', categories);
+  }, [categories]);
 
   const columns = [
     { 
@@ -138,7 +174,7 @@ const Category = () => {
           {row.name}
           {row.parentId && (
             <small className="parent-category">
-              Parent ID: {row.parentId}
+              Parent: {row.parentName || row.parentId}
             </small>
           )}
         </div>
@@ -155,6 +191,10 @@ const Category = () => {
       )
     },
     {
+      key: "slug",
+      header: "Slug"
+    },
+    {
       key: "image",
       header: "Image",
       render: (row) => (
@@ -169,7 +209,6 @@ const Category = () => {
         )
       )
     },
-    
     {
       key: "actions",
       header: "Actions",
@@ -219,35 +258,35 @@ const Category = () => {
           <InputField
             label="Category Name"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) => handleInputChange('name', e.target.value)}
             placeholder="Enter category name"
             required
           />
           <InputField
             label="Description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) => handleInputChange('description', e.target.value)}
             placeholder="Enter description"
             multiline
           />
           <InputField
             label="Meta Title"
             value={formData.metaTitle}
-            onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
+            onChange={(e) => handleInputChange('metaTitle', e.target.value)}
             placeholder="Enter meta title"
           />
           <InputField
             label="Meta Description"
             value={formData.metaDescription}
-            onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
+            onChange={(e) => handleInputChange('metaDescription', e.target.value)}
             placeholder="Enter meta description"
             multiline
           />
           <InputField
             label="Meta Keywords"
             value={formData.metaKeywords}
-            onChange={(e) => setFormData({ ...formData, metaKeywords: e.target.value })}
-            placeholder="Enter meta keywords"
+            onChange={(e) => handleInputChange('metaKeywords', e.target.value)}
+            placeholder="Enter meta keywords (comma separated)"
           />
           
           <div className="image-upload-section">

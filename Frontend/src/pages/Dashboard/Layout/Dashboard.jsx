@@ -143,7 +143,7 @@ const Dashboard = () => {
             <HiOutlineHome className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Dashboard</span>
           </Link>
-          <Link
+          {/* <Link
             to="/dashboard/customers"
             className={`nav-item ${
               location.pathname === "/dashboard/customers" ? "active" : ""
@@ -151,7 +151,7 @@ const Dashboard = () => {
           >
             <HiOutlineUsers className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Customers</span>
-          </Link>
+          </Link> */}
           <Link
             to="/dashboard/category"
             className={`nav-item ${
@@ -179,7 +179,7 @@ const Dashboard = () => {
             <IoCartOutline className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Products</span>
           </Link>
-          <Link
+          {/* <Link
             to="/dashboard/orders"
             className={`nav-item ${
               location.pathname === "/dashboard/orders" ? "active" : ""
@@ -198,7 +198,7 @@ const Dashboard = () => {
           >
             <HiOutlineClipboardDocumentList className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Order Status</span>
-          </Link>
+          </Link> */}
           <Link
             to="/dashboard/coupons"
             className={`nav-item ${
@@ -208,7 +208,7 @@ const Dashboard = () => {
             <HiOutlineTicket className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Coupons</span>
           </Link>
-          <Link
+          {/* <Link
             to="/dashboard/reviews"
             className={`nav-item ${
               location.pathname === "/dashboard/reviews" ? "active" : ""
@@ -258,7 +258,7 @@ const Dashboard = () => {
           >
             <HiOutlineUsers className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Users</span>
-          </Link>
+          </Link> */}
           <Link
             to="/dashboard/seo"
             className={`nav-item ${
