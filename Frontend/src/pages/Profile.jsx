@@ -12,14 +12,6 @@ const ProfilePage = () => {
     name: 'Jyoti',
     email: 'jyoti@gmail.com',
     phone: '+91 7493658737',
-    location: 'Delhi, NCR',
-    dob: '02-03-1999',
-    gender: 'Female',
-    height: '5.4',
-    weight: '50',
-    goal: 'Hair & Skin',
-    preference: 'Pure Vegetarian',
-    role: 'User'
   };
 
   const orders = [
