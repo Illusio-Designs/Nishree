@@ -2,113 +2,255 @@ import React, { useState } from 'react';
 import { FaUser, FaEdit, FaBox, FaMapMarkerAlt } from 'react-icons/fa';
 import Header from "../components/Header";
 import Footer from '../components/Footer';
+import "../Styles/Profile.css";
 
 const ProfilePage = () => {
-  const [activeTab, setActiveTab] = useState('view');
+  const [activeTab, setActiveTab] = useState('profile');
+  const [showModal, setShowModal] = useState(false);
 
   const user = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+1 234 567 8901',
+    name: 'Jyoti',
+    email: 'jyoti@gmail.com',
+    phone: '+91 7493658737',
   };
 
   const orders = [
-    { id: 'ORD123', item: 'Organic Honey', date: '2025-04-10', amount: '$25.00' },
-    { id: 'ORD124', item: 'Turmeric Powder', date: '2025-04-12', amount: '$18.00' },
+    {
+      id: '00000',
+      status: 'PENDING',
+      items: [
+        {
+          image: 'https://bootdey.com/img/Content/avatar/avatar6.png',
+          description: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolorem, facilis.',
+          quantity: '₹100 X 2',
+          amount: '₹200',
+          status: 'PENDING'
+        }
+      ],
+      totalPrice: '₹200',
+      totalPaid: '₹200',
+      timeline: [
+        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque Lorem ipsum dolor', date: '21 March, 2014' },
+        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque', date: '21 March, 2014' },
+        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque', date: '21 March, 2014' },
+        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque', date: '21 March, 2014' },
+        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque', date: '21 March, 2014' }
+      ]
+    }
   ];
 
   const addresses = [
-    '123, Green Street, New York, USA',
-    '456, Blue Avenue, Los Angeles, USA',
+    {
+      name: 'Home',
+      address: '123, Green Street, New York, USA',
+      phone: '+91 7493658737'
+    },
+    {
+      name: 'Office',
+      address: '456, Blue Avenue, Los Angeles, USA',
+      phone: '+91 7493658737'
+    }
   ];
 
+  const handleAddAddress = (e) => {
+    e.preventDefault();
+    // Handle address addition logic here
+    setShowModal(false);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="profile-container">
       <Header />
-
-      <div className="flex flex-col items-center justify-start flex-grow p-4 sm:p-8">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">My Profile</h1>
-
-        <div className="flex space-x-2 mb-6 flex-wrap justify-center">
-          <TabButton label="View Profile" icon={<FaUser />} active={activeTab === 'view'} onClick={() => setActiveTab('view')} />
-          <TabButton label="Edit Profile" icon={<FaEdit />} active={activeTab === 'edit'} onClick={() => setActiveTab('edit')} />
-          <TabButton label="My Orders" icon={<FaBox />} active={activeTab === 'orders'} onClick={() => setActiveTab('orders')} />
-          <TabButton label="My Address" icon={<FaMapMarkerAlt />} active={activeTab === 'address'} onClick={() => setActiveTab('address')} />
-        </div>
-
-        <div className="w-full max-w-3xl bg-white shadow-xl rounded-2xl p-6">
-          {activeTab === 'view' && (
-            <div className="space-y-4">
-              <InfoItem label="Name" value={user.name} />
-              <InfoItem label="Email" value={user.email} />
-              <InfoItem label="Phone" value={user.phone} />
-            </div>
-          )}
-
-          {activeTab === 'edit' && (
-            <form className="space-y-4">
-              <TextField label="Name" defaultValue={user.name} />
-              <TextField label="Email" defaultValue={user.email} type="email" />
-              <TextField label="Phone" defaultValue={user.phone} type="tel" />
-              <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl w-full transition-all">Save Changes</button>
-            </form>
-          )}
-
-          {activeTab === 'orders' && (
-            <div className="space-y-4">
-              {orders.map(order => (
-                <div key={order.id} className="border p-4 rounded-xl shadow-sm">
-                  <p><strong>Order ID:</strong> {order.id}</p>
-                  <p><strong>Item:</strong> {order.item}</p>
-                  <p><strong>Date:</strong> {order.date}</p>
-                  <p><strong>Amount:</strong> {order.amount}</p>
+      <div className="main-body">
+        <div className="profile-cards">
+          <div className="profile-card-left">
+            <div className="profile-card">
+              <div className="card-body">
+                <div className="profile-header">
+                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtbEsykx-0fhTred6UwHDYtMFd2UgTJCG4gaklT1dx4suRO4_n5LJr4Gg28kquSX5fpNo&usqp=CAU" 
+                       alt="Admin" 
+                       className="profile-image" />
+                  <h4 className="profile-name">{user.name}</h4>
                 </div>
-              ))}
+                <div className="profile-nav">
+                  <button 
+                    className={`nav-item profile ${activeTab === 'profile' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('profile')}>
+                    <FaUser /> Profile Information
+                  </button>
+                  <button 
+                    className={`nav-item profile ${activeTab === 'orders' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('orders')}>
+                    <FaBox /> Orders
+                  </button>
+                  <button 
+                    className={`nav-item profile ${activeTab === 'address' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('address')}>
+                    <FaMapMarkerAlt /> Address Book
+                  </button>
+                  <button className="nav-item profile">Logout</button>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
 
-          {activeTab === 'address' && (
-            <ul className="space-y-2">
-              {addresses.map((addr, index) => (
-                <li key={index} className="bg-gray-100 p-4 rounded-xl shadow-sm">{addr}</li>
-              ))}
-            </ul>
-          )}
+          <div className="profile-card-right">
+            {activeTab === 'profile' && (
+              <div className="profile-card">
+                <div className="card-body">
+                  <div className="profile-info">
+                    <h5>Profile Information</h5>
+                    <p><strong>Name:</strong> {user.name}</p>
+                    <p><strong>Email Address:</strong> {user.email}</p>
+                    <p><strong>Contact:</strong> {user.phone}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'orders' && (
+              <div className="order-card">
+                {orders.map(order => (
+                  <div key={order.id}>
+                    <div className="card">
+                      <div className="card-body">
+                        <div className="order-header">
+                          <h5>ORDER# {order.id}</h5>
+                        </div>
+                        <div className="order-status">
+                          {[1, 2, 3, 4, 5].map((_, index) => (
+                            <div key={index} className={`status-item ${index === 0 ? 'active' : ''}`}>
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="50" height="50">
+                                {/* SVG path data */}
+                              </svg>
+                              <span>Pending</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'address' && (
+              <div className="card">
+                <div className="card-body">
+                  <h5>Address Book</h5>
+                  <button className="add-address-btn" onClick={() => setShowModal(true)}>
+                    Add Address
+                  </button>
+                  <div className="address-grid">
+                    {addresses.map((addr, index) => (
+                      <div key={index} className="address-card">
+                        <div className="address-type">{addr.name}</div>
+                        <div className="info-value">{addr.address}</div>
+                        <div className="address-actions">
+                          <button className="btn btn-outline">Edit</button>
+                          <button className="btn btn-primary">Delete</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="modal-close" onClick={() => setShowModal(false)}>&times;</span>
+            <h2 className="modal-title">Add Address</h2>
+            <form onSubmit={handleAddAddress}>
+              <div className="form-row">
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="name">Name:</label>
+                    <input type="text" id="name" className="form-control" required />
+                  </div>
+                </div>
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="mobile">Mobile No.:</label>
+                    <input type="tel" id="mobile" className="form-control" required pattern="[0-9]{10}" />
+                  </div>
+                </div>
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="pincode">Pin code:</label>
+                    <input type="text" id="pincode" className="form-control" required />
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="locality">Locality:</label>
+                    <input type="text" id="locality" className="form-control" required />
+                  </div>
+                </div>
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="city">City/District/Town:</label>
+                    <input type="text" id="city" className="form-control" required />
+                  </div>
+                </div>
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="state">State:</label>
+                    <select id="state" className="form-control" required>
+                      <option value="">Select a state</option>
+                      <option value="State 1">State 1</option>
+                      <option value="State 2">State 2</option>
+                      <option value="State 3">State 3</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="address">Address:</label>
+                    <textarea id="address" className="form-control" required></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="landmark">Landmark (Optional):</label>
+                    <input type="text" id="landmark" className="form-control" />
+                  </div>
+                </div>
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="alternatePhone">Alternate Phone (Optional):</label>
+                    <input type="tel" id="alternatePhone" className="form-control" pattern="[0-9]{10}" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-col">
+                  <button type="submit" className="btn btn-primary">Save</button>
+                  <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
   );
 };
-
-const TabButton = ({ label, icon, active, onClick }) => (
-  <button
-    className={`flex items-center gap-2 px-4 py-2 rounded-xl shadow-sm transition-all font-medium ${
-      active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-blue-100'
-    }`}
-    onClick={onClick}
-  >
-    {icon} {label}
-  </button>
-);
-
-const InfoItem = ({ label, value }) => (
-  <div>
-    <p className="text-gray-500 text-sm">{label}</p>
-    <p className="text-gray-800 font-medium">{value}</p>
-  </div>
-);
-
-const TextField = ({ label, defaultValue, type = 'text' }) => (
-  <div>
-    <label className="block text-gray-600 mb-1">{label}</label>
-    <input
-      type={type}
-      defaultValue={defaultValue}
-      className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
-  </div>
-);
 
 export default ProfilePage;
