@@ -462,7 +462,11 @@ export const sliderService = {
 export const productService = {
     createProduct: async (productData) => {
         try {
-            const response = await api.post('/api/products', productData);
+            const response = await api.post('/api/products', productData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -489,7 +493,11 @@ export const productService = {
 
     updateProduct: async (id, productData) => {
         try {
-            const response = await api.put(`/api/products/${id}`, productData);
+            const response = await api.put(`/api/products/${id}`, productData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

@@ -85,7 +85,7 @@ export const setupDatabase = async () => {
             // First create independent tables (no foreign keys)
             const independentTables = [
                 'User', 'Category', 'Attribute', 'AttributeValue',
-                'ProductBadge', 'Coupon', 'ShippingFee', 'Settings',
+                'Coupon', 'ShippingFee', 'Settings',
                 'SeoMetadata'
             ];
 
@@ -110,8 +110,7 @@ export const setupDatabase = async () => {
 
             // Create Product related tables that depend on Product
             const productDependentTables = [
-                'ProductImage', 'ProductVariationAttribute',
-                'ProductDiscount', 'ProductBadgeMapping', 'ProductSEO'
+                'ProductImage', 'ProductSEO'
             ];
 
             for (const tableName of productDependentTables) {
@@ -121,13 +120,22 @@ export const setupDatabase = async () => {
                 }
             }
 
-            // Create Order related tables first
-            const orderRelatedTables = [
-                'Order', 'OrderItem', 'OrderStatusHistory',
+            // Create Order related tables in correct order
+            console.log('Creating Order related tables...');
+            
+            // First create Order table
+            if (models.Order) {
+                console.log('Creating Order table...');
+                await models.Order.sync(options);
+            }
+
+            // Then create tables that depend on Order
+            const orderDependentTables = [
+                'OrderItem', 'OrderStatusHistory',
                 'Payment', 'ShippingAddress'
             ];
 
-            for (const tableName of orderRelatedTables) {
+            for (const tableName of orderDependentTables) {
                 if (models[tableName]) {
                     console.log(`Creating ${tableName} table...`);
                     await models[tableName].sync(options);

@@ -7,7 +7,7 @@ import {
     addAttributeValues,
     removeAttributeValues
 } from '../controller/attributeController.js';
-import { authenticateToken } from '../middleware/authMiddleware.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -15,18 +15,18 @@ const router = express.Router();
 router.get('/', getAllAttributes);
 
 // Create a new attribute
-router.post('/', authenticateToken, createAttribute);
+router.post('/', isAuthenticated, createAttribute);
 
 // Update an attribute
-router.put('/:id', authenticateToken, updateAttribute);
+router.put('/:id', isAuthenticated, updateAttribute);
 
 // Delete an attribute
-router.delete('/:id', authenticateToken, deleteAttribute);
+router.delete('/:id', isAuthenticated, deleteAttribute);
 
 // Add values to an attribute
-router.post('/:id/values', authenticateToken, addAttributeValues);
+router.post('/:id/values', isAuthenticated, addAttributeValues);
 
 // Remove values from an attribute
-router.delete('/:id/values', authenticateToken, removeAttributeValues);
+router.delete('/:id/values', isAuthenticated, removeAttributeValues);
 
 export default router; 

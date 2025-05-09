@@ -12,7 +12,7 @@ import {
     getBestSellers
 } from '../controller/productController.js';
 import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
-import { upload } from '../middleware/uploadMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
