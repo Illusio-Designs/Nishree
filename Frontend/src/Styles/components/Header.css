@@ -46,9 +46,9 @@
 .nav a {
   font-family: Inter;
   color: #000000;
-  font-size: 20px;
+  font-size: 18px;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 600;
 }
 .nav a:hover,
 .nav a.active {
