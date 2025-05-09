@@ -9,8 +9,7 @@ export const Coupon = sequelize.define('Coupon', {
     },
     code: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     type: {
         type: DataTypes.ENUM('percentage', 'fixed'),

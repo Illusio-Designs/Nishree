@@ -1,4 +1,4 @@
-import { Coupon } from '../model/associations.js';
+import { Coupon, CouponUsage } from '../model/associations.js';
 import { Op } from 'sequelize';
 
 // Create a new coupon
@@ -100,7 +100,13 @@ export const createCoupon = async (req, res) => {
 // Get all coupons
 export const getAllCoupons = async (req, res) => {
     try {
-        const coupons = await Coupon.findAll();
+        const coupons = await Coupon.findAll({
+            include: [{
+                model: CouponUsage,
+                as: 'CouponUsages',
+                attributes: ['userId', 'usedAt']
+            }]
+        });
 
         res.status(200).json({
             count: coupons.length,
@@ -120,7 +126,13 @@ export const getCouponById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const coupon = await Coupon.findByPk(id);
+        const coupon = await Coupon.findByPk(id, {
+            include: [{
+                model: CouponUsage,
+                attributes: ['userId', 'usedAt']
+            }]
+        });
+        
         if (!coupon) {
             return res.status(404).json({ message: 'Coupon not found' });
         }
@@ -138,10 +150,14 @@ export const getCouponById = async (req, res) => {
 // Validate a coupon
 export const validateCoupon = async (req, res) => {
     try {
-        const { code, orderAmount } = req.body;
+        const { code, orderAmount, userId } = req.body;
 
         if (!code) {
             return res.status(400).json({ message: 'Coupon code is required' });
+        }
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
         }
 
         // Find the coupon
@@ -158,8 +174,24 @@ export const validateCoupon = async (req, res) => {
             return res.status(404).json({ message: 'Invalid or expired coupon code' });
         }
 
+        // Check if user has already used this coupon
+        const userUsage = await CouponUsage.findOne({
+            where: {
+                couponId: coupon.id,
+                userId: userId
+            }
+        });
+
+        if (userUsage) {
+            return res.status(400).json({ message: 'You have already used this coupon' });
+        }
+
         // Check if coupon is already used to its maximum
-        if (coupon.usageLimit && coupon.usageLimit <= coupon.usageCount) {
+        const totalUsage = await CouponUsage.count({
+            where: { couponId: coupon.id }
+        });
+
+        if (coupon.usageLimit && totalUsage >= coupon.usageLimit) {
             return res.status(400).json({ message: 'Coupon has reached maximum usage limit' });
         }
 
@@ -174,6 +206,9 @@ export const validateCoupon = async (req, res) => {
         let discountAmount = 0;
         if (coupon.type === 'percentage') {
             discountAmount = (orderAmount * coupon.value) / 100;
+            if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+                discountAmount = coupon.maxDiscount;
+            }
         } else {
             discountAmount = coupon.value;
             // Ensure discount doesn't exceed order amount
@@ -200,10 +235,14 @@ export const validateCoupon = async (req, res) => {
 // Apply a coupon (increment used count)
 export const applyCoupon = async (req, res) => {
     try {
-        const { code } = req.body;
+        const { code, userId } = req.body;
 
         if (!code) {
             return res.status(400).json({ message: 'Coupon code is required' });
+        }
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID is required' });
         }
 
         // Find the coupon
@@ -220,14 +259,32 @@ export const applyCoupon = async (req, res) => {
             return res.status(404).json({ message: 'Invalid or expired coupon code' });
         }
 
+        // Check if user has already used this coupon
+        const userUsage = await CouponUsage.findOne({
+            where: {
+                couponId: coupon.id,
+                userId: userId
+            }
+        });
+
+        if (userUsage) {
+            return res.status(400).json({ message: 'You have already used this coupon' });
+        }
+
         // Check if coupon is already used to its maximum
-        if (coupon.usageLimit && coupon.usageLimit <= coupon.usageCount) {
+        const totalUsage = await CouponUsage.count({
+            where: { couponId: coupon.id }
+        });
+
+        if (coupon.usageLimit && totalUsage >= coupon.usageLimit) {
             return res.status(400).json({ message: 'Coupon has reached maximum usage limit' });
         }
 
-        // Increment used count
-        await coupon.update({
-            usageCount: coupon.usageCount + 1
+        // Record the usage
+        await CouponUsage.create({
+            couponId: coupon.id,
+            userId: userId,
+            usedAt: new Date()
         });
 
         res.status(200).json({
@@ -238,6 +295,33 @@ export const applyCoupon = async (req, res) => {
         console.error('Error applying coupon:', error);
         res.status(500).json({
             message: 'Failed to apply coupon',
+            error: error.message
+        });
+    }
+};
+
+// Get coupon usage history for a user
+export const getUserCouponHistory = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const usageHistory = await CouponUsage.findAll({
+            where: { userId },
+            include: [{
+                model: Coupon,
+                attributes: ['code', 'type', 'value', 'minPurchase', 'maxDiscount']
+            }],
+            order: [['usedAt', 'DESC']]
+        });
+
+        res.status(200).json({
+            message: 'Coupon usage history retrieved successfully',
+            history: usageHistory
+        });
+    } catch (error) {
+        console.error('Error fetching coupon history:', error);
+        res.status(500).json({
+            message: 'Failed to fetch coupon history',
             error: error.message
         });
     }

@@ -14,8 +14,7 @@ export const Category = sequelize.define('Category', {
     },
     slug: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     description: {
         type: DataTypes.TEXT,
@@ -23,11 +22,7 @@ export const Category = sequelize.define('Category', {
     },
     parentId: {
         type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'categories',
-            key: 'id'
-        }
+        allowNull: true
     },
     image: {
         type: DataTypes.STRING,

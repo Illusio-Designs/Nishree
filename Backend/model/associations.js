@@ -22,6 +22,7 @@ import { Settings } from './settingsModel.js';
 import { Review } from './reviewModel.js';
 import { ReviewImage } from './reviewImageModel.js';
 import { SeoMetadata } from './seoMetadataModel.js';
+import { CouponUsage } from './couponUsageModel.js';
 
 // Export all models
 export {
@@ -47,7 +48,8 @@ export {
     Settings,
     Review,
     ReviewImage,
-    SeoMetadata
+    SeoMetadata,
+    CouponUsage
 };
 
 // User Associations
@@ -80,7 +82,7 @@ Cart.belongsTo(User, {
 });
 
 // Category Associations
-Category.hasMany(Product, { foreignKey: 'categoryId' });
+Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products' });
 Product.belongsTo(Category, { foreignKey: 'categoryId' });
 
 // Category self-referential association
@@ -88,41 +90,25 @@ Category.hasMany(Category, { as: 'children', foreignKey: 'parentId' });
 Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
 
 // Product Associations
-Product.hasMany(ProductVariation, { 
-    foreignKey: 'productId',
-    onDelete: 'CASCADE'
-});
-ProductVariation.belongsTo(Product, { 
-    foreignKey: 'productId',
-    onDelete: 'CASCADE'
-});
+Product.hasMany(ProductVariation, { foreignKey: 'productId', as: 'ProductVariations' });
+ProductVariation.belongsTo(Product, { foreignKey: 'productId' });
 
-Product.hasMany(ProductImage, { 
-    foreignKey: 'productId',
-    onDelete: 'CASCADE'
-});
-ProductImage.belongsTo(Product, { 
-    foreignKey: 'productId',
-    onDelete: 'CASCADE'
-});
+Product.hasMany(ProductImage, { foreignKey: 'productId', as: 'ProductImages' });
+ProductImage.belongsTo(Product, { foreignKey: 'productId' });
 
-Product.hasOne(ProductSEO, { 
-    foreignKey: 'productId',
-    onDelete: 'CASCADE'
-});
-ProductSEO.belongsTo(Product, { 
-    foreignKey: 'productId',
-    onDelete: 'CASCADE'
-});
+Product.hasOne(ProductSEO, { foreignKey: 'productId', as: 'ProductSEO' });
+ProductSEO.belongsTo(Product, { foreignKey: 'productId' });
 
-// ProductVariation Associations
-ProductVariation.hasMany(ProductImage, { 
+// Product Variation and Attribute Associations
+ProductVariation.belongsToMany(Attribute, { 
+    through: AttributeValue,
     foreignKey: 'variationId',
-    onDelete: 'CASCADE'
+    otherKey: 'attributeId'
 });
-ProductImage.belongsTo(ProductVariation, { 
-    foreignKey: 'variationId',
-    onDelete: 'CASCADE'
+Attribute.belongsToMany(ProductVariation, { 
+    through: AttributeValue,
+    foreignKey: 'attributeId',
+    otherKey: 'variationId'
 });
 
 // Order Associations
@@ -191,3 +177,10 @@ AttributeValue.belongsTo(Attribute, {
     foreignKey: 'attributeId',
     onDelete: 'CASCADE'
 });
+
+// Coupon Associations
+Coupon.hasMany(CouponUsage, { foreignKey: 'couponId', as: 'CouponUsages' });
+CouponUsage.belongsTo(Coupon, { foreignKey: 'couponId' });
+
+User.hasMany(CouponUsage, { foreignKey: 'userId', as: 'CouponUsages' });
+CouponUsage.belongsTo(User, { foreignKey: 'userId' });
