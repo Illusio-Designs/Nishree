@@ -177,7 +177,17 @@ const Products = () => {
       formDataToSend.append("status", formData.status);
       formDataToSend.append("categoryId", formData.categoryId);
       formDataToSend.append("variations", JSON.stringify(validatedVariations));
-      formDataToSend.append("seo", JSON.stringify(formData.seo));
+      
+      // Format SEO data to match backend expectations
+      const seoData = {
+        metaTitle: formData.seo.meta_title,
+        metaDescription: formData.seo.meta_description,
+        metaKeywords: formData.seo.meta_keywords,
+        ogTitle: formData.seo.og_title,
+        ogDescription: formData.seo.og_description,
+        ogImage: formData.seo.og_image
+      };
+      formDataToSend.append("seo", JSON.stringify(seoData));
 
       // Add images
       if (formData.images && formData.images.length > 0) {
