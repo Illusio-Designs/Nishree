@@ -17,12 +17,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Initialize image handler
-const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/user'));
+const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/users'));
 
 // Helper function to add image URL to user response
 const addImageUrlToResponse = (userResponse) => {
     if (userResponse.profileImage) {
-        userResponse.profileImageUrl = `/uploads/user/${userResponse.profileImage}`;
+        userResponse.profileImageUrl = `/uploads/users/${userResponse.profileImage}`;
     }
     return userResponse;
 };
@@ -341,21 +341,31 @@ export const updatePassword = async (req, res) => {
 // **Delete User**
 export const deleteUser = async (req, res) => {
     try {
-        const user = await User.findByPk(req.user.id);
+        const { id } = req.params;
+
+        const user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        
-        // Delete profile image if exists
-        if (user.profileImage) {
-            await imageHandler.deleteFile(imageHandler.getImagePath(user.profileImage));
+
+        // Delete profile image
+        if (user.profile_image) {
+            await imageHandler.deleteImage(user.profile_image);
         }
-        
+
         await user.destroy();
-        res.json({ message: 'User deleted successfully' });
+
+        res.json({ 
+            success: true, 
+            message: 'User deleted successfully' 
+        });
     } catch (error) {
-        console.error('Delete user error:', error);
-        res.status(500).json({ message: 'Failed to delete user', error: error.message });
+        console.error('Error deleting user:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to delete user', 
+            error: error.message 
+        });
     }
 };
 
@@ -393,19 +403,46 @@ export const getProfile = async (req, res) => {
 // Update user profile
 export const updateProfile = async (req, res) => {
     try {
-        const { id } = req.user; // Assuming you have user ID in the request
-        const updates = req.body;
+        const { id } = req.params;
+        const updateData = req.body;
 
         const user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        await user.update(updates);
-        res.json({ message: 'Profile updated successfully', user });
+        // Handle profile image update
+        if (req.file) {
+            try {
+                updateData.profile_image = await imageHandler.handleUserProfileImage(
+                    user.profile_image,
+                    req.file.path,
+                    user.id
+                );
+            } catch (error) {
+                console.error('Error handling profile image update:', error);
+                return res.status(500).json({ 
+                    success: false,
+                    message: 'Failed to process image',
+                    error: error.message 
+                });
+            }
+        }
+
+        await user.update(updateData);
+        
+        res.json({ 
+            success: true, 
+            message: 'Profile updated successfully', 
+            data: user 
+        });
     } catch (error) {
         console.error('Error updating profile:', error);
-        res.status(500).json({ message: 'Failed to update profile', error: error.message });
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to update profile', 
+            error: error.message 
+        });
     }
 };
 

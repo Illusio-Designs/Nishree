@@ -10,8 +10,7 @@ const Settings = sequelize.define('Settings', {
     },
     key: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     value: {
         type: DataTypes.TEXT,
@@ -58,7 +57,8 @@ const Settings = sequelize.define('Settings', {
 }, {
     tableName: 'settings',
     underscored: true,
-    timestamps: true
+    timestamps: true,
+    indexes: []
 });
 
 export { Settings };

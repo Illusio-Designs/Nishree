@@ -281,186 +281,66 @@ export const getProduct = async (req, res) => {
 
 // Update product
 export const updateProduct = async (req, res) => {
-    const transaction = await sequelize.transaction();
-    
     try {
         const { id } = req.params;
-        console.log('\n=== UPDATE PRODUCT REQUEST ===');
-        console.log('Product ID:', id);
-        console.log('Request Body:', JSON.stringify(req.body, null, 2));
-        console.log('Files:', req.files ? req.files.map(f => ({
-            filename: f.filename,
-            originalname: f.originalname,
-            mimetype: f.mimetype,
-            size: f.size
-        })) : 'No files');
+        const updateData = req.body;
 
-        // Parse form data
-        const name = req.body.name?.trim();
-        const description = req.body.description?.trim();
-        const categoryId = req.body.categoryId;
-        const status = req.body.status || 'active';
-        const variations = JSON.parse(req.body.variations || '[]');
-        const seo = JSON.parse(req.body.seo || '{}');
-        const images = req.files;
-
-        console.log('\n=== PARSED UPDATE DATA ===');
-        console.log('Name:', name);
-        console.log('Description:', description);
-        console.log('Category ID:', categoryId);
-        console.log('Status:', status);
-        console.log('Variations:', JSON.stringify(variations, null, 2));
-        console.log('SEO:', JSON.stringify(seo, null, 2));
-        console.log('New Images Count:', images?.length || 0);
-
-        // Validate category if provided
-        if (categoryId) {
-            const category = await Category.findByPk(categoryId);
-            if (!category) {
-                throw new Error('Invalid category');
-            }
-        }
-
-        // Find product
-        const product = await Product.findByPk(id, {
-            include: [
-                { model: Category },
-                { model: ProductVariation },
-                { model: ProductImage },
-                { model: ProductSEO }
-            ],
-            transaction
-        });
-
+        const product = await Product.findByPk(id);
         if (!product) {
-            await transaction.rollback();
-            return res.status(404).json({ 
-                success: false,
-                message: 'Product not found' 
-            });
+            return res.status(404).json({ message: 'Product not found' });
         }
 
-        console.log('\n=== UPDATING PRODUCT ===');
-        // Update basic info
-        await product.update({
-            name,
-            description,
-            categoryId,
-            status,
-            slug: name ? slugify(name, { lower: true }) : product.slug
-        }, { transaction });
-        console.log('Basic product info updated');
-
-        // Handle variations
-        if (variations) {
-            console.log('\n=== UPDATING VARIATIONS ===');
-            // Delete existing variations
-            await ProductVariation.destroy({
-                where: { productId: id },
-                transaction
-            });
-            console.log('Existing variations deleted');
-
-            // Create new variations with unique SKUs
-            for (const variation of variations) {
-                const timestamp = Date.now();
-                const randomString = Math.random().toString(36).substring(2, 8);
-                const uniqueSku = variation.sku || `SKU-${id}-${timestamp}-${randomString}`;
-
-                console.log('Creating variation with SKU:', uniqueSku);
-                const variationRecord = await ProductVariation.create({
-                    productId: id,
-                    sku: uniqueSku,
-                    price: Number(variation.price) || 0,
-                    comparePrice: variation.comparePrice ? Number(variation.comparePrice) : null,
-                    stock: Number(variation.stock || 0),
-                    weight: variation.weight ? Number(variation.weight) : null,
-                    weightUnit: variation.weightUnit || 'g',
-                    dimensions: variation.dimensions || null,
-                    dimensionUnit: variation.dimensionUnit || 'cm',
-                    attributes: variation.attributes || {}
-                }, { transaction });
-                console.log('Variation created with ID:', variationRecord.id);
+        // Handle main image update
+        if (req.file) {
+            try {
+                updateData.image = await imageHandler.handleProductImage(
+                    product.image,
+                    req.file.path,
+                    product.id
+                );
+            } catch (error) {
+                console.error('Error handling product image update:', error);
+                return res.status(500).json({ 
+                    success: false,
+                    message: 'Failed to process image',
+                    error: error.message 
+                });
             }
         }
 
-        // Handle SEO
-        if (seo) {
-            console.log('\n=== UPDATING SEO ===');
-            if (product.ProductSEO) {
-                await product.ProductSEO.update({
-                    meta_title: seo.metaTitle || name,
-                    meta_description: seo.metaDescription || description,
-                    meta_keywords: seo.metaKeywords || '',
-                    og_title: seo.ogTitle || name,
-                    og_description: seo.ogDescription || description,
-                    og_image: seo.ogImage
-                }, { transaction });
-                console.log('SEO record updated');
-            } else {
-                const seoRecord = await ProductSEO.create({
-                    product_id: id,
-                    meta_title: seo.metaTitle || name,
-                    meta_description: seo.metaDescription || description,
-                    meta_keywords: seo.metaKeywords || '',
-                    og_title: seo.ogTitle || name,
-                    og_description: seo.ogDescription || description,
-                    og_image: seo.ogImage
-                }, { transaction });
-                console.log('New SEO record created with ID:', seoRecord.id);
+        // Handle gallery images if provided
+        if (req.files && req.files.gallery) {
+            try {
+                const galleryImages = await Promise.all(
+                    req.files.gallery.map((file, index) => 
+                        imageHandler.handleProductGalleryImage(
+                            product.gallery?.[index],
+                            file.path,
+                            product.id,
+                            index
+                        )
+                    )
+                );
+                updateData.gallery = galleryImages;
+            } catch (error) {
+                console.error('Error handling product gallery update:', error);
+                return res.status(500).json({ 
+                    success: false,
+                    message: 'Failed to process gallery images',
+                    error: error.message 
+                });
             }
         }
 
-        // Handle images
-        if (images && images.length > 0) {
-            console.log('\n=== PROCESSING NEW IMAGES ===');
-            console.log('Total new images to process:', images.length);
-            
-            // Create an array of image creation promises
-            const imagePromises = images.map(async (image, index) => {
-                console.log(`Processing image ${index + 1}:`, image.originalname);
-                const imageRecord = await ProductImage.create({
-                    product_id: id,
-                    image_url: `/uploads/products/${image.filename}`,
-                    alt_text: name,
-                    display_order: index,
-                    is_primary: index === 0,
-                    status: 'active'
-                }, { transaction });
-                console.log(`Image ${index + 1} created with ID:`, imageRecord.id);
-                return imageRecord;
-            });
-
-            // Wait for all images to be created
-            await Promise.all(imagePromises);
-            console.log('All new images processed successfully');
-        }
-
-        await transaction.commit();
-        console.log('\n=== TRANSACTION COMMITTED ===');
-
-        // Fetch updated product
-        const updatedProduct = await Product.findByPk(id, {
-            include: [
-                { model: Category },
-                { model: ProductVariation },
-                { model: ProductImage },
-                { model: ProductSEO }
-            ]
-        });
-
-        console.log('\n=== PRODUCT UPDATE COMPLETE ===');
-        console.log('Final product data:', JSON.stringify(formatProductResponse(updatedProduct), null, 2));
-
-        res.json({
-            success: true,
-            message: 'Product updated successfully',
-            data: formatProductResponse(updatedProduct)
+        await product.update(updateData);
+        
+        res.json({ 
+            success: true, 
+            message: 'Product updated successfully', 
+            data: product 
         });
     } catch (error) {
-        await transaction.rollback();
-        console.error('\n=== ERROR IN PRODUCT UPDATE ===');
-        console.error('Error details:', error);
+        console.error('Error updating product:', error);
         res.status(500).json({ 
             success: false,
             message: 'Failed to update product', 
@@ -471,52 +351,33 @@ export const updateProduct = async (req, res) => {
 
 // Delete product
 export const deleteProduct = async (req, res) => {
-    const transaction = await sequelize.transaction();
-    
     try {
         const { id } = req.params;
-        
-        const product = await Product.findByPk(id, {
-            include: [{ model: ProductImage }],
-            transaction
-        });
 
+        const product = await Product.findByPk(id);
         if (!product) {
-            await transaction.rollback();
-            return res.status(404).json({ 
-                success: false,
-                message: 'Product not found' 
-            });
+            return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Delete product images from storage
-        if (product.ProductImages && product.ProductImages.length > 0) {
-            for (const image of product.ProductImages) {
-                try {
-                    // Extract filename from image_url
-                    const filename = image.image_url.split('/').pop();
-                    if (filename) {
-                        const imagePath = path.join(__dirname, '../uploads/products', filename);
-                        await imageHandler.deleteFile(imagePath);
-                    }
-                } catch (error) {
-                    console.error('Error deleting image file:', error);
-                    // Continue with other images even if one fails
-                }
-            }
+        // Delete main image
+        if (product.image) {
+            await imageHandler.deleteImage(product.image);
         }
 
-        // Delete product and all related records
-        await product.destroy({ transaction });
+        // Delete gallery images
+        if (product.gallery && product.gallery.length > 0) {
+            await Promise.all(
+                product.gallery.map(image => imageHandler.deleteImage(image))
+            );
+        }
 
-        await transaction.commit();
+        await product.destroy();
 
         res.json({ 
-            success: true,
+            success: true, 
             message: 'Product deleted successfully' 
         });
     } catch (error) {
-        await transaction.rollback();
         console.error('Error deleting product:', error);
         res.status(500).json({ 
             success: false,

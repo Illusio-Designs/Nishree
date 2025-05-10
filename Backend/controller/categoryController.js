@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Initialize image handler
-const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/category'));
+const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/categories'));
 
 // Helper function to format category response
 const formatCategoryResponse = (category) => {
@@ -158,52 +158,31 @@ const getAllCategories = async (req, res) => {
 // Delete Category
 const deleteCategory = async (req, res) => {
     try {
-        const categoryId = req.params.id;
-        
-        // Check if category exists
-        const category = await Category.findByPk(categoryId);
+        const { id } = req.params;
+
+        const category = await Category.findByPk(id);
         if (!category) {
             return res.status(404).json({ message: 'Category not found' });
         }
 
-        // Check if category is being used as a parent
-        const hasChildren = await Category.findOne({
-            where: { parentId: categoryId }
-        });
-
-        if (hasChildren) {
-            return res.status(400).json({ 
-                message: 'Cannot delete category: it has child categories',
-                error: 'HAS_CHILD_CATEGORIES'
-            });
-        }
-
-        // Check if category is being used in products (if you have products)
-        // const hasProducts = await Product.findOne({
-        //     where: { categoryId: categoryId }
-        // });
-        // if (hasProducts) {
-        //     return res.status(400).json({ 
-        //         message: 'Cannot delete category: it is being used in products',
-        //         error: 'CATEGORY_IN_USE'
-        //     });
-        // }
-
-        // Delete image if exists
+        // Delete associated image
         if (category.image) {
-            try {
-                await imageHandler.deleteFile(imageHandler.getImagePath(category.image));
-            } catch (imageError) {
-                console.error('Error deleting image:', imageError);
-                // Continue with category deletion even if image deletion fails
-            }
+            await imageHandler.deleteImage(category.image);
         }
-        
+
         await category.destroy();
-        res.status(200).json({ message: 'Category deleted successfully' });
+
+        res.json({ 
+            success: true, 
+            message: 'Category deleted successfully' 
+        });
     } catch (error) {
-        console.error('Delete category error:', error);
-        res.status(500).json({ message: error.message });
+        console.error('Error deleting category:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to delete category', 
+            error: error.message 
+        });
     }
 };
 
@@ -238,79 +217,46 @@ const getCategory = async (req, res) => {
 // Update updateCategory function
 const updateCategory = async (req, res) => {
     try {
-        const category = await Category.findByPk(req.params.id);
+        const { id } = req.params;
+        const updateData = req.body;
+
+        const category = await Category.findByPk(id);
         if (!category) {
             return res.status(404).json({ message: 'Category not found' });
         }
 
-        const { 
-            name, 
-            description, 
-            status, 
-            parentId, 
-            metaTitle, 
-            metaDescription, 
-            metaKeywords
-        } = req.body;
-        
-        // Generate new slug if name is changed
-        const slug = name !== category.name ? slugify(name, { lower: true }) : category.slug;
-
-        // Check for duplicate slug if name is changed
-        if (name !== category.name) {
-            const existingCategory = await Category.findOne({
-                where: { 
-                    [Op.or]: [
-                        { name },
-                        { slug }
-                    ],
-                    id: { [Op.ne]: category.id }
-                }
-            });
-
-            if (existingCategory) {
-                return res.status(400).json({ 
-                    message: 'Category with this name already exists',
-                    error: 'DUPLICATE_CATEGORY_NAME'
+        // Handle image update
+        if (req.file) {
+            try {
+                updateData.image = await imageHandler.handleCategoryImage(
+                    category.image,
+                    req.file.path,
+                    category.id
+                );
+            } catch (error) {
+                console.error('Error handling category image update:', error);
+                return res.status(500).json({ 
+                    success: false,
+                    message: 'Failed to process image',
+                    error: error.message 
                 });
             }
         }
 
-        let image = category.image;
-
-        // Handle image update logic...
-
-        await category.update({
-            name,
-            description,
-            status,
-            parentId,
-            image,
-            metaTitle,
-            metaDescription,
-            metaKeywords,
-            slug
-        });
-
-        // Get updated category with parent info
-        const updatedCategory = await Category.findByPk(category.id, {
-            include: [{
-                model: Category,
-                as: 'parent',
-                attributes: ['id', 'name']
-            }]
-        });
-
-        // Format response
-        const categoryResponse = formatCategoryResponse(updatedCategory);
-
-        res.status(200).json({ 
+        await category.update(updateData);
+        
+        res.json({ 
+            success: true, 
             message: 'Category updated successfully', 
-            category: categoryResponse 
+            data: category 
         });
     } catch (error) {
-        console.error('Update category error:', error);
-        res.status(500).json({ message: error.message });
+        console.error('Error updating category:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to update category', 
+            error: error.message 
+        });
     }
 };
 

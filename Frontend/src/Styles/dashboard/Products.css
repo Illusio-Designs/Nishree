@@ -677,11 +677,11 @@
 
 .attribute-form .checkbox-field input[type="checkbox"] {
   width: auto;
-}
+  }
 
 .attribute-values {
   margin-top: 15px;
-}
+  }
 
 .value-input-group {
   display: flex;
@@ -957,22 +957,22 @@
 .react-select-container .react-select__option {
   padding: 8px 12px;
   cursor: pointer;
-}
+  }
 
 .react-select-container .react-select__option--is-focused {
   background-color: #f0f7ff;
-}
+  }
 
 .react-select-container .react-select__option--is-selected {
   background-color: #4a90e2;
   color: white;
-}
+  }
 
 .react-select-container .react-select__multi-value {
   background-color: #e8f0fe;
   border-radius: 4px;
   margin: 2px;
-}
+  }
 
 .react-select-container .react-select__multi-value__label {
   color: #4a90e2;

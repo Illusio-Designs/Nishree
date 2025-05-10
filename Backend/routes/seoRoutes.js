@@ -3,10 +3,10 @@ import {
     getSEOData, 
     getAllSEOData, 
     updateSEOData, 
-    createSEOData, 
-    deleteSEOData 
+    createSEOData
 } from '../controller/seoController.js';
 import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
@@ -16,7 +16,11 @@ router.get('/', getSEOData); // Get SEO data for a specific page (?page_name=hom
 // Admin routes
 router.get('/all', isAuthenticated, authorize(['admin']), getAllSEOData);
 router.post('/create', isAuthenticated, authorize(['admin']), createSEOData);
-router.put('/update', isAuthenticated, authorize(['admin']), updateSEOData);
-router.delete('/:page_name', isAuthenticated, authorize(['admin']), deleteSEOData);
+router.put('/update', 
+    isAuthenticated, 
+    authorize(['admin']), 
+    upload.single('image'), 
+    updateSEOData
+);
 
 export default router; 

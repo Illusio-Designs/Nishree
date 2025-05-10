@@ -33,6 +33,46 @@ class ImageHandler {
         }
     }
 
+    async deleteImage(imageUrl) {
+        try {
+            if (!imageUrl) return false;
+            
+            // Remove the /uploads prefix if it exists
+            const relativePath = imageUrl.startsWith('/uploads/') 
+                ? imageUrl.substring(9) // Remove '/uploads/'
+                : imageUrl;
+            
+            const fullPath = path.join(__dirname, '..', 'uploads', relativePath);
+            return await this.deleteFile(fullPath);
+        } catch (error) {
+            console.error('Error deleting image:', error);
+            return false;
+        }
+    }
+
+    async handleImageUpdate(oldImageUrl, newImageFile, options = {}) {
+        try {
+            // Delete old image if exists
+            if (oldImageUrl) {
+                await this.deleteImage(oldImageUrl);
+            }
+
+            // Process new image if provided
+            if (newImageFile) {
+                const result = await this.processImage(newImageFile, options);
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to process image');
+                }
+                return `/uploads/${options.type || 'images'}/${result.filename}`;
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Error handling image update:', error);
+            throw error;
+        }
+    }
+
     async processImage(inputFile, options = {}) {
         const {
             width = 200,
@@ -56,7 +96,6 @@ class ImageHandler {
                 .toFile(outputPath);
 
             // Add a small delay before deleting the original file
-            // This ensures the sharp process has fully released the file
             await new Promise(resolve => setTimeout(resolve, 100));
 
             // Delete the original uploaded file
@@ -66,7 +105,6 @@ class ImageHandler {
                 }
             } catch (deleteError) {
                 console.warn('Warning: Could not delete original file:', deleteError.message);
-                // Continue processing even if delete fails
             }
 
             console.log('Image processed successfully:', outputFilename);
@@ -92,89 +130,69 @@ class ImageHandler {
         }
     }
 
-    async handleProfileImage(oldImagePath, newImageFile, userId) {
+    // Product Image Handlers
+    async handleProductImage(oldImageUrl, newImageFile, productId) {
         try {
-            // Delete old image if exists
-            if (oldImagePath) {
-                const oldImageFullPath = path.join(this.uploadDir, oldImagePath);
-                await this.deleteFile(oldImageFullPath);
-            }
-
-            // Process new image
-            const result = await this.processImage(newImageFile, {
-                width: 200,
-                height: 200,
-                quality: 80,
+            return await this.handleImageUpdate(oldImageUrl, newImageFile, {
+                width: 800,
+                height: 800,
+                quality: 85,
                 format: 'webp',
-                filename: `profile-${userId}-${Date.now()}`
+                filename: `product-${productId}-${Date.now()}`,
+                type: 'products'
             });
-
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-            console.log('Profile image handled successfully:', result.filename);
-            return result.filename;
         } catch (error) {
-            console.error('Error handling profile image:', error);
+            console.error('Error handling product image:', error);
             throw error;
         }
     }
 
-    async handleCategoryImage(oldImagePath, newImageFile) {
+    async handleProductGalleryImage(oldImageUrl, newImageFile, productId, index) {
         try {
-            // Delete old image if exists
-            if (oldImagePath) {
-                const oldImageFullPath = path.join(this.uploadDir, oldImagePath);
-                await this.deleteFile(oldImageFullPath);
-            }
-
-            // Process new image
-            const result = await this.processImage(newImageFile, {
+            return await this.handleImageUpdate(oldImageUrl, newImageFile, {
                 width: 800,
-                height: 600,
-                quality: 80,
+                height: 800,
+                quality: 85,
                 format: 'webp',
-                filename: `category-${Date.now()}`
+                filename: `product-${productId}-gallery-${index}-${Date.now()}`,
+                type: 'products/gallery'
             });
+        } catch (error) {
+            console.error('Error handling product gallery image:', error);
+            throw error;
+        }
+    }
 
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-            console.log('Category image handled successfully:', result.filename);
-            return result.filename;
+    // Category Image Handlers
+    async handleCategoryImage(oldImageUrl, newImageFile, categoryId) {
+        try {
+            return await this.handleImageUpdate(oldImageUrl, newImageFile, {
+                width: 400,
+                height: 400,
+                quality: 85,
+                format: 'webp',
+                filename: `category-${categoryId}-${Date.now()}`,
+                type: 'categories'
+            });
         } catch (error) {
             console.error('Error handling category image:', error);
             throw error;
         }
     }
 
-    async handleSliderImage(oldImagePath, newImageFile) {
+    // User Image Handlers
+    async handleUserProfileImage(oldImageUrl, newImageFile, userId) {
         try {
-            // Delete old image if exists
-            if (oldImagePath) {
-                const oldImageFullPath = path.join(this.uploadDir, oldImagePath);
-                await this.deleteFile(oldImageFullPath);
-            }
-
-            // Process new image
-            const result = await this.processImage(newImageFile, {
-                width: 1920,
-                height: 1080,
-                quality: 80,
+            return await this.handleImageUpdate(oldImageUrl, newImageFile, {
+                width: 200,
+                height: 200,
+                quality: 85,
                 format: 'webp',
-                filename: `slider-${Date.now()}`
+                filename: `user-${userId}-${Date.now()}`,
+                type: 'users'
             });
-
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-            console.log('Slider image handled successfully:', result.filename);
-            return result.filename;
         } catch (error) {
-            console.error('Error handling slider image:', error);
+            console.error('Error handling user profile image:', error);
             throw error;
         }
     }
