@@ -18,10 +18,10 @@ const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/slider'))
 // Configure storage for uploaded files
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../uploads/sliders'));
+        cb(null, path.join(__dirname, '../uploads/slider'));
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
+        cb(null, `slider-${uuidv4()}.webp`);
     }
 });
 
@@ -179,7 +179,6 @@ export const getSliderById = async (req, res) => {
 
 // Update Slider
 export const updateSlider = async (req, res) => {
-    
     try {
         const slider = await Slider.findByPk(req.params.id);
         if (!slider) {
@@ -191,7 +190,7 @@ export const updateSlider = async (req, res) => {
         // Add this code here
         let categoryIdToUse = Number(categoryId);
         if (categoryIdToUse === "" || isNaN(categoryIdToUse)) {
-          categoryIdToUse = null;
+            categoryIdToUse = null;
         }
         
         if (categoryIdToUse) {
@@ -204,8 +203,15 @@ export const updateSlider = async (req, res) => {
         let image = slider.image;
 
         if (req.file) {
+            // Delete old image if it exists
             if (slider.image) {
-                await imageHandler.deleteFile(imageHandler.getImagePath(slider.image));
+                const oldImagePath = path.join(__dirname, '../uploads/slider', slider.image);
+                try {
+                    await fs.unlink(oldImagePath);
+                    console.log('Old image deleted successfully:', oldImagePath);
+                } catch (error) {
+                    console.error('Error deleting old image:', error);
+                }
             }
 
             const result = await imageHandler.processImage(req.file.path, {
@@ -229,10 +235,10 @@ export const updateSlider = async (req, res) => {
             buttonText,
             buttonType,
             buttonStyle,
-            categoryId,
+            categoryId: categoryIdToUse,
             image,
             status: status || 'active',
-            position: position || 0
+            position: position ? Number(position) : 0
         });
 
         const updatedSlider = await Slider.findByPk(slider.id, {
@@ -296,7 +302,13 @@ export const deleteSlider = async (req, res) => {
 
         // Delete image if exists
         if (slider.image) {
-            await imageHandler.deleteFile(imageHandler.getImagePath(slider.image));
+            const imagePath = path.join(__dirname, '../uploads/slider', slider.image);
+            try {
+                await fs.unlink(imagePath);
+                console.log('Image deleted successfully:', imagePath);
+            } catch (error) {
+                console.error('Error deleting image:', error);
+            }
         }
 
         await slider.destroy();

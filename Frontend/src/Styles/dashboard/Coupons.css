@@ -15,23 +15,6 @@
   color: #333;
 }
 
-.add-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.add-button:hover {
-  background-color: #45a049;
-}
-
 .coupon-form {
   display: flex;
   flex-direction: column;
