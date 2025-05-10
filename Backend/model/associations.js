@@ -18,7 +18,6 @@ import { ShippingAddress } from './shippingAddressModel.js';
 import { ShippingFee } from './shippingFeeModel.js';
 import { OrderStatusHistory } from './orderStatusHistoryModel.js';
 import { Payment } from './paymentModel.js';
-import { Settings } from './settingsModel.js';
 import { Review } from './reviewModel.js';
 import { ReviewImage } from './reviewImageModel.js';
 import { SeoMetadata } from './seoMetadataModel.js';
@@ -45,7 +44,6 @@ export {
     ShippingFee,
     OrderStatusHistory,
     Payment,
-    Settings,
     Review,
     ReviewImage,
     SeoMetadata,
@@ -96,8 +94,8 @@ ProductVariation.belongsTo(Product, { foreignKey: 'productId' });
 Product.hasMany(ProductImage, { foreignKey: 'productId', as: 'ProductImages' });
 ProductImage.belongsTo(Product, { foreignKey: 'productId' });
 
-Product.hasOne(ProductSEO, { foreignKey: 'productId', as: 'ProductSEO' });
-ProductSEO.belongsTo(Product, { foreignKey: 'productId' });
+Product.hasOne(ProductSEO, { foreignKey: 'product_id', as: 'ProductSEO' });
+ProductSEO.belongsTo(Product, { foreignKey: 'product_id' });
 
 // Product Variation and Attribute Associations
 ProductVariation.belongsToMany(Attribute, { 
@@ -177,7 +175,6 @@ AttributeValue.belongsTo(Attribute, {
     foreignKey: 'attributeId',
     onDelete: 'CASCADE'
 });
-
 // Coupon Associations
 Coupon.hasMany(CouponUsage, { foreignKey: 'couponId', as: 'CouponUsages' });
 CouponUsage.belongsTo(Coupon, { foreignKey: 'couponId' });

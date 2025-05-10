@@ -36,7 +36,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<Home />} />
-      <Route path="/product" element={<Product />} />
+      <Route path="/products" element={<Product />} />
       <Route path="/collection" element={<Collection />} />
       <Route path="/about" element={<About />} />
       <Route path="/productinner" element={<Productinner />} />

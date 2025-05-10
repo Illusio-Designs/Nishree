@@ -134,18 +134,13 @@ export const setupDatabase = async () => {
                 });
             }
 
-            // Create Coupon table separately with minimal indexes
+            // Create Coupon table without indexes
             if (models.Coupon) {
-                console.log('Creating Coupon table with minimal indexes...');
+                console.log('Creating Coupon table without indexes...');
                 await models.Coupon.sync({
                     hooks: false,
                     alter: true,
-                    indexes: [
-                        {
-                            unique: true,
-                            fields: ['code']
-                        }
-                    ]
+                    indexes: false
                 });
             }
 
@@ -318,6 +313,14 @@ export const setupDatabase = async () => {
                 ADD UNIQUE INDEX idx_product_variations_sku (sku)
                     `).catch(err => {
                 console.log('Index for product_variations.sku might already exist, continuing...');
+            });
+
+            // Add essential index for coupons
+            await executeQuery(`
+                ALTER TABLE coupons
+                ADD UNIQUE INDEX idx_coupons_code (code)
+            `).catch(err => {
+                console.log('Index for coupons.code might already exist, continuing...');
             });
 
             await executeQuery(`

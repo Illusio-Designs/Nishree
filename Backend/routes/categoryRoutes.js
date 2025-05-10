@@ -5,7 +5,8 @@ import {
     getCategory,
     updateCategory,
     deleteCategory,
-    getPublicCategories
+    getPublicCategories,
+    getPublicCategoryById
 } from '../controller/categoryController.js';
 import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
@@ -13,13 +14,14 @@ import upload from '../middleware/uploadMiddleware.js';
 const router = express.Router();
 
 // Public routes
-router.get('/public', getPublicCategories);
-router.get('/:id', getCategory);
+router.get('/public/categories', getPublicCategories);
+router.get('/public/categories/:id', getPublicCategoryById);
 
 // Admin routes (requires authentication)
 router.get('/admin/all', isAuthenticated, authorize(['admin']), getAllCategories);
-router.post('/', isAuthenticated, authorize(['admin']), upload.single('image'), createCategory);
-router.put('/:id', isAuthenticated, authorize(['admin']), upload.single('image'), updateCategory);
-router.delete('/:id', isAuthenticated, authorize(['admin']), deleteCategory);
+router.get('/admin/:id', isAuthenticated, authorize(['admin']), getCategory);
+router.post('/admin', isAuthenticated, authorize(['admin']), upload.single('image'), createCategory);
+router.put('/admin/:id', isAuthenticated, authorize(['admin']), upload.single('image'), updateCategory);
+router.delete('/admin/:id', isAuthenticated, authorize(['admin']), deleteCategory);
 
 export default router;

@@ -1,26 +1,42 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 import hero from "../assets/collectionbg.png";
 import vector2 from "../assets/Vector (18).png";
 import vector3 from "../assets/Vector (22).png";
 import vector4 from "../assets/Vector (23).png";
 import vector5 from "../assets/Vector (24).png";
-import img1 from "../assets/p-01.jpg.png";
-import img2 from "../assets/Link.png";
+import { getPublicCategories } from "../services/publicindex";
 import "../Styles/Collection.css";
 
-// New product data
-const products = [
-  { name: "Blend Spices", image: img1 },
-  { name: "Papad", image: img2 },
-  { name: "Masala", image: img1 },
-  { name: "Premix Masala", image: img2 },
-];
-
 const Collection = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getPublicCategories();
+        setCategories(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleCategoryClick = (categoryId) => {
+    navigate(`/products?category=${categoryId}`);
+  };
+
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
     const observer = new IntersectionObserver(
@@ -70,25 +86,36 @@ const Collection = () => {
                 width="30"
                 height="30"
                 fill="currentColor"
-                class="bi bi-mouse"
+                className="bi bi-mouse"
                 viewBox="0 0 16 16"
               >
                 <path d="M8 3a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 3m4 8a4 4 0 0 1-8 0V5a4 4 0 1 1 8 0zM8 0a5 5 0 0 0-5 5v6a5 5 0 0 0 10 0V5a5 5 0 0 0-5-5" />
               </svg>
             </div>
             <div className="blog-cards">
-              {products.map((product, index) => (
-                <div className="blog-card" key={index}>
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="blog-image"
-                  />
-                  <h3>{product.name}</h3>
-                  <hr className="hr" />
-                  <p>EXPLORE PRODUCTS</p>
-                </div>
-              ))}
+              {loading ? (
+                <div>Loading categories...</div>
+              ) : error ? (
+                <div>Error: {error}</div>
+              ) : (
+                categories.map((category) => (
+                  <div 
+                    className="blog-card" 
+                    key={category.id}
+                    onClick={() => handleCategoryClick(category.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <img
+                      src={category.image ? `${import.meta.env.VITE_API_URL}/uploads/categories/${category.image}` : hero}
+                      alt={category.name}
+                      className="blog-image"
+                    />
+                    <h3>{category.name}</h3>
+                    <hr className="hr" />
+                    <p>EXPLORE PRODUCTS</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

@@ -143,7 +143,7 @@ const Dashboard = () => {
             <HiOutlineHome className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Dashboard</span>
           </Link>
-          {/* <Link
+          <Link
             to="/dashboard/customers"
             className={`nav-item ${
               location.pathname === "/dashboard/customers" ? "active" : ""
@@ -151,7 +151,7 @@ const Dashboard = () => {
           >
             <HiOutlineUsers className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Customers</span>
-          </Link> */}
+          </Link>
           <Link
             to="/dashboard/category"
             className={`nav-item ${
@@ -351,7 +351,7 @@ const Dashboard = () => {
           <div className="customers-page">
             <Routes>
               <Route index element={<DashboardOverview />} />
-              {/* <Route path="customers" element={<Customers />} /> */}
+              <Route path="customers" element={<Customers />} />
               <Route path="category" element={<Category />} />
               <Route path="slider" element={<Slider />} />
               <Route path="products" element={<Products />} />

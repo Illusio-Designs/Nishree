@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEye, FaEyeSlash, FaLock, FaEnvelope, FaUser } from "react-icons/fa";
 import { createUseStyles } from "react-jss";
+import { registerUser } from "../services/publicindex";
 
 // React-JSS styles
 const useStyles = createUseStyles({
@@ -182,18 +183,15 @@ const Register = () => {
       const registrationData = {
         username: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        role: 'consumer' // Set default role as consumer
       };
 
-      // Mock registration without API call
-      // In a real app, you would call the register function from AuthContext
-      // await register(registrationData);
+      // Call the register API
+      const response = await registerUser(registrationData);
       
-      // Simulate successful registration
-      setTimeout(() => {
-        toast.success("Registration successful!");
-        navigate("/login", { replace: true });
-      }, 1500);
+      toast.success("Registration successful!");
+      navigate("/login", { replace: true });
     } catch (err) {
       toast.error(
         err.message || "Registration failed. Please try again."
@@ -330,8 +328,6 @@ const Register = () => {
                 <p className={classes.errorMessage}>{errors.confirmPassword}</p>
               )}
             </div>
-
-
 
             <div className={`form-group ${classes.formGroup}`}>
               <button

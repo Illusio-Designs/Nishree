@@ -1,4 +1,5 @@
 import { Category } from '../model/categoryModel.js';
+import { Product, ProductVariation, ProductImage, ProductSEO } from '../model/associations.js';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -214,7 +215,6 @@ const getCategory = async (req, res) => {
 };
 
 // Update Category
-// Update updateCategory function
 const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
@@ -294,6 +294,84 @@ const getPublicCategories = async (req, res) => {
     }
 };
 
+// Get Public Category by ID
+const getPublicCategoryById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const category = await Category.findOne({
+            where: {
+                id,
+                status: 'active'
+            },
+            include: [
+                {
+                    model: Category,
+                    as: 'parent',
+                    attributes: ['id', 'name']
+                },
+                {
+                    model: Product,
+                    as: 'products',
+                    where: { status: 'active' },
+                    required: false,
+                    include: [
+                        { 
+                            model: ProductVariation,
+                            as: 'ProductVariations',
+                            attributes: ['id', 'price', 'comparePrice', 'stock']
+                        },
+                        { 
+                            model: ProductImage,
+                            as: 'ProductImages',
+                            attributes: ['image_url', 'is_primary']
+                        },
+                        { 
+                            model: ProductSEO,
+                            as: 'ProductSEO',
+                            attributes: ['meta_title', 'meta_description']
+                        }
+                    ]
+                }
+            ],
+            attributes: ['id', 'name', 'description', 'image', 'slug', 'parentId']
+        });
+
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        // Format response
+        const categoryResponse = {
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            parentId: category.parentId,
+            parentName: category.parent ? category.parent.name : null,
+            image: category.image,
+            slug: category.slug,
+            products: category.products ? category.products.map(product => ({
+                id: product.id,
+                name: product.name,
+                description: product.description,
+                slug: product.slug,
+                status: product.status,
+                price: product.ProductVariations?.[0]?.price || 0,
+                comparePrice: product.ProductVariations?.[0]?.comparePrice || null,
+                stock: product.ProductVariations?.[0]?.stock || 0,
+                image: product.ProductImages?.find(img => img.is_primary)?.image_url || null,
+                metaTitle: product.ProductSEO?.meta_title,
+                metaDescription: product.ProductSEO?.meta_description
+            })) : []
+        };
+
+        res.status(200).json(categoryResponse);
+    } catch (error) {
+        console.error('Get public category error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 export {
     createCategory,
     getAllCategories,
@@ -301,5 +379,6 @@ export {
     updateCategory,
     deleteCategory,
     getPublicCategories,
+    getPublicCategoryById,
     upload
 };

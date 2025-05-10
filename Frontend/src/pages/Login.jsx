@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from "react-icons/fa";
 import { createUseStyles } from "react-jss";
+import { loginUser } from "../services/publicindex";
 // React-JSS styles
 const useStyles = createUseStyles({
   "@keyframes slideLeft": {
@@ -170,16 +171,14 @@ const Login = () => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      // Mock login without API call
-      // In a real app, you would call the login function from AuthContext
-      // await login(formData);
+      // Call the login API
+      const response = await loginUser(formData);
       
-      // Simulate successful login
-      setTimeout(() => {
-        toast.success("Login successful!");
-        // Ensure navigate is called after the toast notification to avoid navigation before the toast is displayed
-        navigate("/profile", { replace: true });
-      }, 1000);
+      // Store the token in localStorage
+      localStorage.setItem('token', response.token);
+      
+      toast.success("Login successful!");
+      navigate("/profile", { replace: true });
     } catch (err) {
       toast.error(
         err.message || "Login failed. Please check your credentials."

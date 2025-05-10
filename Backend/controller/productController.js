@@ -180,9 +180,9 @@ export const createProduct = async (req, res) => {
         const completeProduct = await Product.findByPk(product.id, {
             include: [
                 { model: Category },
-                { model: ProductVariation },
-                { model: ProductImage },
-                { model: ProductSEO }
+                { model: ProductVariation, as: 'ProductVariations' },
+                { model: ProductImage, as: 'ProductImages' },
+                { model: ProductSEO, as: 'ProductSEO' }
             ]
         });
 
@@ -236,9 +236,9 @@ export const getAllProducts = async (req, res) => {
             offset: (parseInt(page) - 1) * parseInt(limit),
             include: [
                 { model: Category },
-                { model: ProductVariation },
-                { model: ProductImage },
-                { model: ProductSEO }
+                { model: ProductVariation, as: 'ProductVariations' },
+                { model: ProductImage, as: 'ProductImages' },
+                { model: ProductSEO, as: 'ProductSEO' }
             ]
         });
 
@@ -262,9 +262,9 @@ export const getProduct = async (req, res) => {
         const product = await Product.findByPk(id, {
             include: [
                 { model: Category },
-                { model: ProductVariation },
-                { model: ProductImage },
-                { model: ProductSEO }
+                { model: ProductVariation, as: 'ProductVariations' },
+                { model: ProductImage, as: 'ProductImages' },
+                { model: ProductSEO, as: 'ProductSEO' }
             ]
         });
 
