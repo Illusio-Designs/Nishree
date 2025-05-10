@@ -9,8 +9,9 @@ import passport from './config/passport.js';
 import session from 'express-session';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import settingsRoutes from './routes/settingsRoutes.js';
-import { setupDatabase } from './scripts/setupDatabase.js';
+import { setupDatabase, findAvailablePort } from './scripts/setupDatabase.js';
+import { initializeSeoData } from './utils/initializeSeoData.js';
+import fs from 'fs';
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -36,28 +37,38 @@ app.use(cors({
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
     maxAge: 86400 // 24 hours
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
-// Configure morgan to skip repetitive API calls to reduce console log spam
-app.use(morgan('combined', {
-    skip: function (req, res) {
-        // Skip logging for /api/users/me requests that return 304 (not modified)
-        return req.path === '/api/users/me' && res.statusCode === 304;
-    }
-}));
+// Body parsing middleware
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(cookieParser());
+app.use(morgan('dev'));
 
 // Session configuration
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 
 // Initialize Passport and restore authentication state from session
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = join(__dirname, 'uploads');
+const seoUploadsDir = join(uploadsDir, 'seo');
+
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+if (!fs.existsSync(seoUploadsDir)) {
+    fs.mkdirSync(seoUploadsDir, { recursive: true });
+}
 
 // Serve static files
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
@@ -87,23 +98,25 @@ app.use('/api/dashboard', dashboardAnalyticsRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
+    console.error('Error:', err);
+    res.status(err.status || 500).json({
         success: false,
-        message: 'Something went wrong!',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        message: err.message || 'Something went wrong!',
+        error: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
 });
 
-// Start server
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
     try {
-        // Setup database (creates database if not exists and syncs all models)
+        // Setup database
         await setupDatabase();
         
-        // Start listening
+        // Initialize default SEO data
+        await initializeSeoData();
+        
+        // Start server
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
         });
@@ -113,9 +126,7 @@ const startServer = async () => {
     }
 };
 
-if (process.env.NODE_ENV !== 'test') {
     startServer();
-}
 
 export { app };
 export default app;

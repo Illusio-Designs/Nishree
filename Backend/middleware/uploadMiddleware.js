@@ -6,52 +6,52 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure upload directories exist
-const createUploadDirs = () => {
-    const dirs = [
-        path.join(__dirname, '../uploads'),
-        path.join(__dirname, '../uploads/products'),
-        path.join(__dirname, '../uploads/categories'),
-        path.join(__dirname, '../uploads/users')
-    ];
-
-    dirs.forEach(dir => {
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-    });
+// Define upload directories
+const UPLOAD_DIRS = {
+    products: path.join(__dirname, '../uploads/products'),
+    categories: path.join(__dirname, '../uploads/categories'),
+    users: path.join(__dirname, '../uploads/users'),
+    seo: path.join(__dirname, '../uploads/seo'),
+    slider: path.join(__dirname, '../uploads/slider')
 };
 
-// Create directories
-createUploadDirs();
+// Create directories if they don't exist
+Object.values(UPLOAD_DIRS).forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+});
 
 // Configure storage
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        let uploadPath = path.join(__dirname, '../uploads');
-        
-        // Determine the correct upload directory based on the field name
-        if (file.fieldname === 'images') {
-            uploadPath = path.join(uploadPath, 'products');
-        } else if (file.fieldname === 'categoryImage') {
-            uploadPath = path.join(uploadPath, 'categories');
-        } else if (file.fieldname === 'profileImage') {
-            uploadPath = path.join(uploadPath, 'users');
+    destination: (req, file, cb) => {
+        // Determine the upload directory based on the route
+        let uploadDir = UPLOAD_DIRS.products; // default
+
+        if (req.originalUrl.includes('/categories')) {
+            uploadDir = UPLOAD_DIRS.categories;
+        } else if (req.originalUrl.includes('/users')) {
+            uploadDir = UPLOAD_DIRS.users;
+        } else if (req.originalUrl.includes('/seo')) {
+            uploadDir = UPLOAD_DIRS.seo;
+        } else if (req.originalUrl.includes('/slider')) {
+            uploadDir = UPLOAD_DIRS.slider;
         }
-        
-        cb(null, uploadPath);
+
+        cb(null, uploadDir);
     },
-    filename: function (req, file, cb) {
+    filename: (req, file, cb) => {
+        // Generate unique filename
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        const ext = path.extname(file.originalname);
+        cb(null, file.fieldname + '-' + uniqueSuffix + ext);
     }
 });
 
 // File filter
 const fileFilter = (req, file, cb) => {
     // Accept images only
-    if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
-        req.fileValidationError = 'Only image files are allowed!';
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
         return cb(new Error('Only image files are allowed!'), false);
     }
     cb(null, true);
@@ -62,7 +62,7 @@ const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB max file size
+        fileSize: 5 * 1024 * 1024 // 5MB limit
     }
 });
 

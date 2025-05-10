@@ -164,89 +164,115 @@ export const setupDatabase = async () => {
                 });
             }
 
+            // Helper function to execute query with database selection
+            const executeQuery = async (query) => {
+                const dbName = process.env.DB_NAME || process.env.DB_DATABASE;
+                // First select the database
+                await sequelize.query(`USE ${dbName}`);
+                // Then execute the actual query
+                return await sequelize.query(query);
+            };
+
             // Create ProductVariation table
             if (models.ProductVariation) {
                 console.log('Creating ProductVariation table without indexes...');
-                await models.ProductVariation.sync(noIndexOptions);
-            }
+                try {
+                    // Create table without any indexes or constraints
+                    await executeQuery(`
+                        CREATE TABLE IF NOT EXISTS product_variations (
+                            id INT NOT NULL AUTO_INCREMENT,
+                            productId INT NOT NULL,
+                            sku VARCHAR(255) NOT NULL,
+                            price DECIMAL(10,2) NOT NULL,
+                            comparePrice DECIMAL(10,2) NULL,
+                            stock INT NOT NULL DEFAULT 0,
+                            attributes JSON NOT NULL DEFAULT ('{}'),
+                            createdAt DATETIME NOT NULL,
+                            updatedAt DATETIME NOT NULL,
+                            PRIMARY KEY (id)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+                    `);
 
-            // Create Product related tables that depend on Product
-            const productDependentTables = [
-                'ProductImage', 'ProductSEO'
-            ];
+                    // Add foreign key constraint
+                    await executeQuery(`
+                        ALTER TABLE product_variations
+                        ADD CONSTRAINT fk_product_variations_product
+                        FOREIGN KEY (productId) REFERENCES products(id)
+                        ON DELETE CASCADE
+                    `).catch(err => {
+                        console.log('Foreign key constraint might already exist, continuing...');
+                    });
 
-            for (const tableName of productDependentTables) {
-                if (models[tableName]) {
-                    console.log(`Creating ${tableName} table without indexes...`);
-                    await models[tableName].sync(noIndexOptions);
+                } catch (error) {
+                    console.error('Error creating ProductVariation table:', error);
+                    console.log('Continuing with other tables...');
                 }
             }
 
-            // Create Order related tables in correct order
-            console.log('Creating Order related tables without indexes...');
-            
-            // First create Order table
+            // Create Order table
             if (models.Order) {
                 console.log('Creating Order table without indexes...');
-                await models.Order.sync(noIndexOptions);
-            }
+                try {
+                    // Create table without any indexes or constraints
+                    await executeQuery(`
+                        CREATE TABLE IF NOT EXISTS orders (
+                            id INT NOT NULL AUTO_INCREMENT,
+                            userId INT NOT NULL,
+                            order_number VARCHAR(255) NOT NULL,
+                            status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') NOT NULL DEFAULT 'pending',
+                            total_amount DECIMAL(10,2) NOT NULL,
+                            shipping_address_id INT,
+                            payment_id INT,
+                            createdAt DATETIME NOT NULL,
+                            updatedAt DATETIME NOT NULL,
+                            PRIMARY KEY (id)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+                    `);
 
-            // Then create tables that depend on Order
-            const orderDependentTables = [
-                'OrderItem', 'OrderStatusHistory',
-                'Payment', 'ShippingAddress'
-            ];
+                    // Add foreign key constraints
+                    await executeQuery(`
+                        ALTER TABLE orders
+                        ADD CONSTRAINT fk_orders_user
+                        FOREIGN KEY (userId) REFERENCES users(id)
+                        ON DELETE CASCADE,
+                        ADD CONSTRAINT fk_orders_shipping_address
+                        FOREIGN KEY (shipping_address_id) REFERENCES shipping_addresses(id)
+                        ON DELETE SET NULL,
+                        ADD CONSTRAINT fk_orders_payment
+                        FOREIGN KEY (payment_id) REFERENCES payments(id)
+                        ON DELETE SET NULL
+                    `).catch(err => {
+                        console.log('Foreign key constraints might already exist, continuing...');
+                    });
 
-            for (const tableName of orderDependentTables) {
-                if (models[tableName]) {
-                    console.log(`Creating ${tableName} table without indexes...`);
-                    await models[tableName].sync(noIndexOptions);
+                } catch (error) {
+                    console.error('Error creating Order table:', error);
+                    console.log('Continuing with other tables...');
                 }
             }
 
-            // Create Review table without foreign keys first
-            if (models.Review) {
-                console.log('Creating Review table without indexes...');
-                await models.Review.sync(noIndexOptions);
-            }
+            // Create other tables without indexes
+            const otherTables = [
+                'ProductImage', 'ProductSEO', 'OrderItem', 'OrderStatusHistory',
+                'Payment', 'ShippingAddress', 'Review', 'ReviewImage',
+                'Cart', 'CartItem', 'Wishlist', 'Slider'
+            ];
 
-            if (models.ReviewImage) {
-                console.log('Creating ReviewImage table without indexes...');
-                await models.ReviewImage.sync(noIndexOptions);
+            for (const tableName of otherTables) {
+                if (models[tableName]) {
+                    console.log(`Creating ${tableName} table without indexes...`);
+                    try {
+                        await models[tableName].sync({
+                            hooks: false,
+                            alter: true,
+                            indexes: false
+                        });
+                    } catch (error) {
+                        console.error(`Error creating ${tableName} table:`, error);
+                        console.log('Continuing with other tables...');
+                    }
+                }
             }
-
-            // Create Cart related tables
-            if (models.Cart) {
-                console.log('Creating Cart table without indexes...');
-                await models.Cart.sync(noIndexOptions);
-            }
-
-            if (models.CartItem) {
-                console.log('Creating CartItem table without indexes...');
-                await models.CartItem.sync(noIndexOptions);
-            }
-
-            // Create Wishlist table
-            if (models.Wishlist) {
-                console.log('Creating Wishlist table without indexes...');
-                await models.Wishlist.sync(noIndexOptions);
-            }
-
-            // Create Slider table
-            if (models.Slider) {
-                console.log('Creating Slider table without indexes...');
-                await models.Slider.sync(noIndexOptions);
-            }
-
-            // Add comparePrice column to product_variations table if it doesn't exist
-            console.log('Adding comparePrice column to product_variations table...');
-            await sequelize.query(`
-                ALTER TABLE product_variations 
-                ADD COLUMN IF NOT EXISTS comparePrice DECIMAL(10,2) NULL,
-                ADD COLUMN IF NOT EXISTS attributes JSON NOT NULL DEFAULT ('{}')
-            `).catch(err => {
-                console.log('Note: Some columns might already exist, continuing...');
-            });
             
             // Step 2: Apply associations
             console.log('Step 2: Applying associations...');
@@ -255,39 +281,50 @@ export const setupDatabase = async () => {
             // Step 3: Add essential indexes only
             console.log('Step 3: Adding essential indexes...');
             
-            // Define essential indexes for each table
-            const essentialIndexes = {
-                orders: [
-                    { column: 'order_number', unique: true },
-                    { column: 'status' }
-                ],
-                users: [
-                    { column: 'email', unique: true }
-                ],
-                product_variations: [
-                    { column: 'sku', unique: true }
-                ]
-            };
+            // Add essential indexes for users
+            await executeQuery(`
+                ALTER TABLE users
+                ADD UNIQUE INDEX idx_users_email (email)
+            `).catch(err => {
+                console.log('Index for users.email might already exist, continuing...');
+            });
 
-            // Add essential indexes
-            for (const [table, indexes] of Object.entries(essentialIndexes)) {
-                for (const index of indexes) {
-                    const uniqueClause = index.unique ? 'UNIQUE' : '';
-                    await sequelize.query(`
-                        ALTER TABLE ${table}
-                        ADD ${uniqueClause} INDEX idx_${table}_${index.column} (${index.column})
-                    `).catch(err => {
-                        console.log(`Index for ${table}.${index.column} might already exist, continuing...`);
-                    });
-                }
-            }
-
-            // Add parentId index to categories separately
-            await sequelize.query(`
+            // Add parentId index to categories
+            await executeQuery(`
                 ALTER TABLE categories
                 ADD INDEX idx_categories_parentId (parentId)
             `).catch(err => {
-                console.log('ParentId index might already exist, continuing...');
+                console.log('Index for categories.parentId might already exist, continuing...');
+            });
+
+            // Add essential indexes for orders
+            await executeQuery(`
+                ALTER TABLE orders
+                ADD UNIQUE INDEX idx_orders_order_number (order_number)
+            `).catch(err => {
+                console.log('Index for orders.order_number might already exist, continuing...');
+            });
+
+            await executeQuery(`
+                ALTER TABLE orders
+                ADD INDEX idx_orders_status (status)
+            `).catch(err => {
+                console.log('Index for orders.status might already exist, continuing...');
+            });
+
+            // Add essential indexes for product_variations
+            await executeQuery(`
+                ALTER TABLE product_variations
+                ADD UNIQUE INDEX idx_product_variations_sku (sku)
+                    `).catch(err => {
+                console.log('Index for product_variations.sku might already exist, continuing...');
+            });
+
+            await executeQuery(`
+                ALTER TABLE product_variations
+                ADD INDEX idx_product_variations_productId (productId)
+            `).catch(err => {
+                console.log('Index for product_variations.productId might already exist, continuing...');
             });
 
             console.log('Database setup completed successfully!');
@@ -300,4 +337,25 @@ export const setupDatabase = async () => {
         console.error('Database setup failed:', error);
         throw error;
     }
+};
+
+// Add port handling function
+export const findAvailablePort = async (startPort) => {
+    const net = await import('net');
+    return new Promise((resolve, reject) => {
+        const server = net.createServer();
+        server.unref();
+        server.on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                resolve(findAvailablePort(startPort + 1));
+            } else {
+                reject(err);
+            }
+        });
+        server.listen(startPort, () => {
+            server.close(() => {
+                resolve(startPort);
+            });
+        });
+    });
 }; 

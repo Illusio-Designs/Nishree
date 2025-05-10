@@ -666,7 +666,7 @@ export const reviewService = {
 export const seoService = {
     getAllSEOData: async () => {
         try {
-            const response = await api.get('/api/seo');
+            const response = await api.get('/api/seo/all');
             return response.data;
         } catch (error) {
             throw handleApiError(error);
@@ -675,7 +675,7 @@ export const seoService = {
 
     getSEOData: async (pageName) => {
         try {
-            const response = await api.get(`/api/seo?page_name=${pageName}`);
+            const response = await api.get(`/api/seo/page/${pageName}`);
             return response.data;
         } catch (error) {
             throw handleApiError(error);
@@ -684,7 +684,7 @@ export const seoService = {
 
     createSEOData: async (seoData) => {
         try {
-            const response = await api.post('/api/seo', seoData);
+            const response = await api.post('/api/seo/create', seoData);
             return response.data;
         } catch (error) {
             throw handleApiError(error);
@@ -693,7 +693,7 @@ export const seoService = {
 
     updateSEOData: async (pageName, seoData) => {
         try {
-            const response = await api.put('/api/seo', { page_name: pageName, ...seoData });
+            const response = await api.put('/api/seo/update', { page_name: pageName, ...seoData });
             return response.data;
         } catch (error) {
             throw handleApiError(error);
