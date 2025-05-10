@@ -180,7 +180,7 @@ const SEO = () => {
               name="meta_description"
               value={formData.meta_description}
               onChange={handleInputChange}
-              className="form-textarea"
+              className="textarea-input"
               rows="5"
               style={{ minHeight: "120px", width: "100%", padding: "12px" }}
               required
@@ -192,7 +192,7 @@ const SEO = () => {
               name="meta_keywords"
               value={formData.meta_keywords}
               onChange={handleInputChange}
-              className="form-textarea"
+              className="textarea-input"
               rows="3"
               style={{ minHeight: "80px", width: "100%", padding: "12px" }}
               placeholder="Enter keywords separated by commas"
@@ -263,9 +263,9 @@ const SEO = () => {
               name="meta_description"
               value={formData.meta_description}
               onChange={handleInputChange}
-              className="form-textarea"
+              className="textarea-input"
               rows="5"
-              style={{ minHeight: "120px", width: "100%", padding: "12px" }}
+              style={{ padding: "12px" }}
               required
             ></textarea>
           </div>
@@ -275,9 +275,9 @@ const SEO = () => {
               name="meta_keywords"
               value={formData.meta_keywords}
               onChange={handleInputChange}
-              className="form-textarea"
+              className="textarea-input"
               rows="3"
-              style={{ minHeight: "80px", width: "100%", padding: "12px" }}
+              style={{ padding: "12px" }}
               placeholder="Enter keywords separated by commas"
             ></textarea>
           </div>

@@ -1,5 +1,6 @@
 .hero-section {
     position: relative;
+    width: 100%;
     height: 100vh;
     overflow: hidden;
 }
@@ -130,6 +131,49 @@
     text-align: center;
 }
 
+.slider-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.slider-item {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.slider-item.active {
+    opacity: 1;
+}
+
+.slider-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slider-content {
+    position: absolute;
+    bottom: 20%;
+    left: 10%;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    max-width: 600px;
+}
+
+.slider-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.slider-content p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
 .slider-dots {
     position: absolute;
     bottom: 20px;
@@ -137,7 +181,6 @@
     transform: translateX(-50%);
     display: flex;
     gap: 10px;
-    z-index: 10;
 }
 
 .dot {
@@ -146,16 +189,23 @@
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
-    transition: all 0.3s ease;
-    transform: scale(1);
+    transition: background-color 0.3s ease;
 }
 
 .dot.active {
-    background-color: #ffffff;
-    transform: scale(1.2);
+    background-color: white;
 }
 
-.dot:hover {
-    transform: scale(1.1);
+.loading, .error, .no-sliders {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.error {
+    color: #ff0000;
 }
 

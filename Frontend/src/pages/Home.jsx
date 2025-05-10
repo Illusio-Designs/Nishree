@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import "../Styles/Home.css";
-import hero from "../assets/aromatic-spice-collection-adds-flavor-cooking-generated-by-ai 1.png";
 import about from "../assets/img.png";
 import ProductCard from "../components/Productcard";
 import vector1 from "../assets/Vector (17).png";
@@ -13,46 +12,40 @@ import Testimonials from "../components/Testimonials";
 import BlogCard from "../components/BlogCard";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
-
-// Temporary test slider data
-const testSliders = [
-  {
-    id: 1,
-    title: "Flavors That Inspire, Traditions That Unite",
-    image: hero,
-  },
-  {
-    id: 2,
-    title: "Discover Authentic Indian Spices",
-    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=2070&auto=format&fit=crop",
-  },
-  {
-    id: 3,
-    title: "Premium Quality Products for Your Kitchen",
-    image: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?q=80&w=1974&auto=format&fit=crop",
-  }
-];
+import { getPublicSliders } from '../services/publicindex';
 
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [sliders] = useState(testSliders);
+  const [sliders, setSliders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const getSlideClass = (index) => {
-    if (index === currentSlide) return 'active';
-    if (index === (currentSlide - 1 + sliders.length) % sliders.length) return 'prev';
-    if (index === (currentSlide + 1) % sliders.length) return 'next';
-    return '';
-  };
+  useEffect(() => {
+    const fetchSliders = async () => {
+      try {
+        setLoading(true);
+        const data = await getPublicSliders();
+        setSliders(data);
+      } catch (err) {
+        console.error('Error fetching sliders:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchSliders();
+  }, []);
+
+  // Auto-advance slides every 5 seconds
   useEffect(() => {
     if (sliders.length > 0) {
       const timer = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % sliders.length);
       }, 5000);
-
       return () => clearInterval(timer);
     }
-  }, [sliders]);
+  }, [sliders.length]);
 
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
@@ -68,7 +61,6 @@ const Home = () => {
     );
 
     sections.forEach((section) => observer.observe(section));
-
     return () => observer.disconnect();
   }, []);
 
@@ -76,26 +68,38 @@ const Home = () => {
     <>
       <Header />
       <div className="hero-section section">
-        {sliders.map((slider, index) => (
-          <div key={slider.id} className={`hero-img ${getSlideClass(index)}`}>
-            <img src={slider.image} className="img-fluid" alt={slider.title} />
-            {index === currentSlide && (
-              <div className="hero-text">
-                <h1>{slider.title}</h1>
-                <button className="btn">Shop Now</button>
+        {loading ? (
+          <div className="loading">Loading sliders...</div>
+        ) : error ? (
+          <div className="error">Error: {error}</div>
+        ) : sliders.length > 0 ? (
+          <div className="slider-container">
+            {sliders.map((slider, index) => (
+              <div
+                key={slider._id}
+                className={`slider-item ${index === currentSlide ? 'active' : ''}`}
+                style={{ display: index === currentSlide ? 'block' : 'none' }}
+              >
+                <img src={slider.image} alt={slider.title} className="slider-image" />
+                <div className="slider-content">
+                  <h2>{slider.title}</h2>
+                  {slider.description && <p>{slider.description}</p>}
+                </div>
               </div>
-            )}
+            ))}
+            <div className="slider-dots">
+              {sliders.map((_, index) => (
+                <span
+                  key={index}
+                  className={`dot ${index === currentSlide ? "active" : ""}`}
+                  onClick={() => setCurrentSlide(index)}
+                />
+              ))}
+            </div>
           </div>
-        ))}
-        <div className="slider-dots">
-          {sliders.map((_, index) => (
-            <span
-              key={index}
-              className={`dot ${index === currentSlide ? "active" : ""}`}
-              onClick={() => setCurrentSlide(index)}
-            />
-          ))}
-        </div>
+        ) : (
+          <div className="no-sliders">No sliders available</div>
+        )}
       </div>
       <div className="background section">
         <div className="about">
