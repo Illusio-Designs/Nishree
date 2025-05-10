@@ -268,7 +268,7 @@ export const getPublicSliders = async (req, res) => {
                 attributes: ['id', 'name', 'slug']
             }],
             order: [['position', 'ASC']],
-            attributes: ['id', 'title', 'description', 'buttonText', 'buttonType', 'buttonStyle', 'image', 'categoryId']
+            attributes: ['id', 'title', 'description', 'buttonText', 'image', 'categoryId']
         });
 
         const slidersResponse = sliders.map(slider => {
