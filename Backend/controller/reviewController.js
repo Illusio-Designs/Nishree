@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { Op } from 'sequelize';
 import { sequelize } from '../config/db.js';
-import { upload } from '../middleware/uploadMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 // Get directory name for ES modules
 const __filename = fileURLToPath(import.meta.url);

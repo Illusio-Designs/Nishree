@@ -8,7 +8,7 @@ import {
     getPublicCategories
 } from '../controller/categoryController.js';
 import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
-import { upload } from '../middleware/uploadMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 

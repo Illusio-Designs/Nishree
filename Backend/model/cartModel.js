@@ -13,7 +13,9 @@ export const Cart = sequelize.define('Cart', {
         references: {
             model: 'users',
             key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     },
     status: {
         type: DataTypes.ENUM('active', 'abandoned', 'converted'),
@@ -22,6 +24,8 @@ export const Cart = sequelize.define('Cart', {
 }, {
     tableName: 'carts',
     timestamps: true,
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_general_ci',
     underscored: true,
     indexes: [
         {

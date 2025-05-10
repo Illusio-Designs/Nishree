@@ -1,9 +1,9 @@
-import { Product, ProductVariation, Attribute, AttributeValue, ProductVariationAttribute, ProductImage, ProductSEO, ProductBadge, ProductBadgeMapping, ProductDiscount, Category } from '../model/associations.js';
+import { Product, ProductVariation, Attribute, AttributeValue, ProductImage, ProductSEO, Category } from '../model/associations.js';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import ImageHandler from '../utils/imageHandler.js';
-import { upload } from '../middleware/uploadMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 import slugify from 'slugify';
 import { sequelize } from '../config/db.js';
 import { Op } from 'sequelize';
@@ -40,37 +40,8 @@ const formatProductResponse = (product) => {
     if (productData.variations) {
         productData.variations = productData.variations.map(variation => ({
             ...variation,
-            attributes: variation.attributeValues?.map(av => ({
-                name: av.attribute.name,
-                value: av.value
-            }))
+            attributes: variation.attributes || {}
         }));
-    }
-
-    // Add badge details
-    if (productData.badges) {
-        productData.badges = productData.badges.map(badge => ({
-            name: badge.name,
-            type: badge.badgeType,
-            color: badge.colorCode,
-            icon: badge.iconName
-        }));
-    }
-
-    // Add active discount details if any
-    if (productData.discounts && productData.discounts.length > 0) {
-        const activeDiscount = productData.discounts.find(d => 
-            new Date(d.startDate) <= new Date() && 
-            (!d.endDate || new Date(d.endDate) >= new Date())
-        );
-        if (activeDiscount) {
-            productData.activeDiscount = {
-                type: activeDiscount.discountType,
-                value: activeDiscount.discountValue,
-                startDate: activeDiscount.startDate,
-                endDate: activeDiscount.endDate
-            };
-        }
     }
 
     return productData;
@@ -81,8 +52,14 @@ export const createProduct = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
-        console.log('Received request body:', req.body);
-        console.log('Received files:', req.files);
+        console.log('=== CREATE PRODUCT REQUEST ===');
+        console.log('Request Body:', JSON.stringify(req.body, null, 2));
+        console.log('Files:', req.files ? req.files.map(f => ({
+            filename: f.filename,
+            originalname: f.originalname,
+            mimetype: f.mimetype,
+            size: f.size
+        })) : 'No files');
 
         // Parse form data
         const name = req.body.name?.trim();
@@ -92,6 +69,15 @@ export const createProduct = async (req, res) => {
         const variations = JSON.parse(req.body.variations || '[]');
         const seo = JSON.parse(req.body.seo || '{}');
         const images = req.files;
+
+        console.log('\n=== PARSED DATA ===');
+        console.log('Name:', name);
+        console.log('Description:', description);
+        console.log('Category ID:', categoryId);
+        console.log('Status:', status);
+        console.log('Variations:', JSON.stringify(variations, null, 2));
+        console.log('SEO:', JSON.stringify(seo, null, 2));
+        console.log('Images Count:', images?.length || 0);
 
         // Validate required fields
         if (!name) {
@@ -108,6 +94,7 @@ export const createProduct = async (req, res) => {
             throw new Error('Invalid category');
         }
 
+        console.log('\n=== CREATING PRODUCT ===');
         // Create product with basic info
         const product = await Product.create({
             name,
@@ -116,9 +103,11 @@ export const createProduct = async (req, res) => {
             status,
             slug: slugify(name, { lower: true })
         }, { transaction });
+        console.log('Product created with ID:', product.id);
 
+        console.log('\n=== CREATING SEO ===');
         // Create SEO record
-        await ProductSEO.create({
+        const seoRecord = await ProductSEO.create({
             product_id: product.id,
             meta_title: seo.metaTitle || name,
             meta_description: seo.metaDescription || description,
@@ -127,42 +116,56 @@ export const createProduct = async (req, res) => {
             og_description: seo.ogDescription || description,
             og_image: seo.ogImage
         }, { transaction });
+        console.log('SEO record created with ID:', seoRecord.id);
 
         // Handle variations
         if (variations && variations.length > 0) {
+            console.log('\n=== CREATING VARIATIONS ===');
             for (const variation of variations) {
                 if (!variation.price || isNaN(variation.price) || variation.price <= 0) {
                     throw new Error('Invalid price for variation');
                 }
 
-                await ProductVariation.create({
+                const timestamp = Date.now();
+                const randomString = Math.random().toString(36).substring(2, 8);
+                const uniqueSku = variation.sku || `SKU-${product.id}-${timestamp}-${randomString}`;
+
+                console.log('Creating variation with SKU:', uniqueSku);
+                // Create variation
+                const variationRecord = await ProductVariation.create({
                     productId: product.id,
-                    sku: variation.sku || `SKU-${product.id}-${Date.now()}`,
+                    sku: uniqueSku,
                     price: Number(variation.price),
                     comparePrice: variation.comparePrice ? Number(variation.comparePrice) : null,
                     stock: Number(variation.stock || 0),
                     weight: variation.weight ? Number(variation.weight) : null,
                     weightUnit: variation.weightUnit || 'g',
+                    dimensions: variation.dimensions || null,
+                    dimensionUnit: variation.dimensionUnit || 'cm',
                     attributes: variation.attributes || {}
                 }, { transaction });
+                console.log('Variation created with ID:', variationRecord.id);
             }
         }
 
         // Handle images
         if (images && images.length > 0) {
-            console.log('Processing images:', images.length, 'files');
+            console.log('\n=== PROCESSING IMAGES ===');
+            console.log('Total images to process:', images.length);
             
             // Create an array of image creation promises
-            const imagePromises = images.map(async (image) => {
-                console.log('Processing image:', image.originalname);
-                return ProductImage.create({
+            const imagePromises = images.map(async (image, index) => {
+                console.log(`Processing image ${index + 1}:`, image.originalname);
+                const imageRecord = await ProductImage.create({
                     product_id: product.id,
                     image_url: `/uploads/products/${image.filename}`,
                     alt_text: name,
-                    display_order: 0,
-                    is_primary: false,
+                    display_order: index,
+                    is_primary: index === 0,
                     status: 'active'
                 }, { transaction });
+                console.log(`Image ${index + 1} created with ID:`, imageRecord.id);
+                return imageRecord;
             });
 
             // Wait for all images to be created
@@ -171,6 +174,7 @@ export const createProduct = async (req, res) => {
         }
 
         await transaction.commit();
+        console.log('\n=== TRANSACTION COMMITTED ===');
         
         // Fetch the complete product with all relations
         const completeProduct = await Product.findByPk(product.id, {
@@ -182,6 +186,9 @@ export const createProduct = async (req, res) => {
             ]
         });
 
+        console.log('\n=== PRODUCT CREATION COMPLETE ===');
+        console.log('Final product data:', JSON.stringify(formatProductResponse(completeProduct), null, 2));
+
         res.status(201).json({
             success: true,
             message: 'Product created successfully',
@@ -189,7 +196,8 @@ export const createProduct = async (req, res) => {
         });
     } catch (error) {
         await transaction.rollback();
-        console.error('Error creating product:', error);
+        console.error('\n=== ERROR IN PRODUCT CREATION ===');
+        console.error('Error details:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to create product',
@@ -228,11 +236,9 @@ export const getAllProducts = async (req, res) => {
             offset: (parseInt(page) - 1) * parseInt(limit),
             include: [
                 { model: Category },
-                { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
+                { model: ProductVariation },
                 { model: ProductImage },
-                { model: ProductBadge, through: ProductBadgeMapping },
-                { model: ProductSEO },
-                { model: ProductDiscount }
+                { model: ProductSEO }
             ]
         });
 
@@ -256,11 +262,9 @@ export const getProduct = async (req, res) => {
         const product = await Product.findByPk(id, {
             include: [
                 { model: Category },
-                { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
+                { model: ProductVariation },
                 { model: ProductImage },
-                { model: ProductBadge, through: ProductBadgeMapping },
-                { model: ProductSEO },
-                { model: ProductDiscount }
+                { model: ProductSEO }
             ]
         });
 
@@ -281,16 +285,33 @@ export const updateProduct = async (req, res) => {
     
     try {
         const { id } = req.params;
-        const {
-            name,
-            description,
-            categoryId,
-            status,
-            variations,
-            badges,
-            seo,
-            images
-        } = req.body;
+        console.log('\n=== UPDATE PRODUCT REQUEST ===');
+        console.log('Product ID:', id);
+        console.log('Request Body:', JSON.stringify(req.body, null, 2));
+        console.log('Files:', req.files ? req.files.map(f => ({
+            filename: f.filename,
+            originalname: f.originalname,
+            mimetype: f.mimetype,
+            size: f.size
+        })) : 'No files');
+
+        // Parse form data
+        const name = req.body.name?.trim();
+        const description = req.body.description?.trim();
+        const categoryId = req.body.categoryId;
+        const status = req.body.status || 'active';
+        const variations = JSON.parse(req.body.variations || '[]');
+        const seo = JSON.parse(req.body.seo || '{}');
+        const images = req.files;
+
+        console.log('\n=== PARSED UPDATE DATA ===');
+        console.log('Name:', name);
+        console.log('Description:', description);
+        console.log('Category ID:', categoryId);
+        console.log('Status:', status);
+        console.log('Variations:', JSON.stringify(variations, null, 2));
+        console.log('SEO:', JSON.stringify(seo, null, 2));
+        console.log('New Images Count:', images?.length || 0);
 
         // Validate category if provided
         if (categoryId) {
@@ -306,7 +327,6 @@ export const updateProduct = async (req, res) => {
                 { model: Category },
                 { model: ProductVariation },
                 { model: ProductImage },
-                { model: ProductBadge, through: ProductBadgeMapping },
                 { model: ProductSEO }
             ],
             transaction
@@ -314,9 +334,13 @@ export const updateProduct = async (req, res) => {
 
         if (!product) {
             await transaction.rollback();
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Product not found' 
+            });
         }
 
+        console.log('\n=== UPDATING PRODUCT ===');
         // Update basic info
         await product.update({
             name,
@@ -325,136 +349,123 @@ export const updateProduct = async (req, res) => {
             status,
             slug: name ? slugify(name, { lower: true }) : product.slug
         }, { transaction });
+        console.log('Basic product info updated');
 
         // Handle variations
         if (variations) {
+            console.log('\n=== UPDATING VARIATIONS ===');
             // Delete existing variations
             await ProductVariation.destroy({
                 where: { productId: id },
                 transaction
             });
+            console.log('Existing variations deleted');
 
-            // Create new variations
+            // Create new variations with unique SKUs
             for (const variation of variations) {
-                const productVariation = await ProductVariation.create({
+                const timestamp = Date.now();
+                const randomString = Math.random().toString(36).substring(2, 8);
+                const uniqueSku = variation.sku || `SKU-${id}-${timestamp}-${randomString}`;
+
+                console.log('Creating variation with SKU:', uniqueSku);
+                const variationRecord = await ProductVariation.create({
                     productId: id,
-                    price: variation.price,
-                    stock: variation.stock,
-                    sku: variation.sku || uuidv4()
+                    sku: uniqueSku,
+                    price: Number(variation.price) || 0,
+                    comparePrice: variation.comparePrice ? Number(variation.comparePrice) : null,
+                    stock: Number(variation.stock || 0),
+                    weight: variation.weight ? Number(variation.weight) : null,
+                    weightUnit: variation.weightUnit || 'g',
+                    dimensions: variation.dimensions || null,
+                    dimensionUnit: variation.dimensionUnit || 'cm',
+                    attributes: variation.attributes || {}
                 }, { transaction });
-
-                // Handle variation attributes
-                if (variation.attributes) {
-                    for (const attr of variation.attributes) {
-                        const [attribute] = await Attribute.findOrCreate({
-                            where: { name: attr.name },
-                            transaction
-                        });
-
-                        const [attributeValue] = await AttributeValue.findOrCreate({
-                            where: {
-                                attributeId: attribute.id,
-                                value: attr.value
-                            },
-                            transaction
-                        });
-
-                        await ProductVariationAttribute.create({
-                            variationId: productVariation.id,
-                            attributeValueId: attributeValue.id
-                        }, { transaction });
-                    }
-                }
-            }
-        }
-
-        // Handle badges
-        if (badges) {
-            // Delete existing badge mappings
-            await ProductBadgeMapping.destroy({
-                where: { productId: id },
-                transaction
-            });
-
-            // Create new badge mappings
-            for (const badge of badges) {
-                const [productBadge] = await ProductBadge.findOrCreate({
-                    where: { name: badge.name },
-                    defaults: {
-                        badgeType: badge.type,
-                        colorCode: badge.color,
-                        iconName: badge.icon
-                    },
-                    transaction
-                });
-
-                await ProductBadgeMapping.create({
-                    productId: id,
-                    badgeId: productBadge.id
-                }, { transaction });
+                console.log('Variation created with ID:', variationRecord.id);
             }
         }
 
         // Handle SEO
         if (seo) {
+            console.log('\n=== UPDATING SEO ===');
             if (product.ProductSEO) {
                 await product.ProductSEO.update({
-                    title: seo.title,
-                    description: seo.description,
-                    keywords: seo.keywords
+                    meta_title: seo.metaTitle || name,
+                    meta_description: seo.metaDescription || description,
+                    meta_keywords: seo.metaKeywords || '',
+                    og_title: seo.ogTitle || name,
+                    og_description: seo.ogDescription || description,
+                    og_image: seo.ogImage
                 }, { transaction });
+                console.log('SEO record updated');
             } else {
-                await ProductSEO.create({
-                    productId: id,
-                    title: seo.title,
-                    description: seo.description,
-                    keywords: seo.keywords
+                const seoRecord = await ProductSEO.create({
+                    product_id: id,
+                    meta_title: seo.metaTitle || name,
+                    meta_description: seo.metaDescription || description,
+                    meta_keywords: seo.metaKeywords || '',
+                    og_title: seo.ogTitle || name,
+                    og_description: seo.ogDescription || description,
+                    og_image: seo.ogImage
                 }, { transaction });
+                console.log('New SEO record created with ID:', seoRecord.id);
             }
         }
 
         // Handle images
-        if (images) {
-            // Delete existing images
-            await ProductImage.destroy({
-                where: { productId: id },
-                transaction
-            });
-
-            // Create new images
-            for (const image of images) {
-                await ProductImage.create({
+        if (images && images.length > 0) {
+            console.log('\n=== PROCESSING NEW IMAGES ===');
+            console.log('Total new images to process:', images.length);
+            
+            // Create an array of image creation promises
+            const imagePromises = images.map(async (image, index) => {
+                console.log(`Processing image ${index + 1}:`, image.originalname);
+                const imageRecord = await ProductImage.create({
                     product_id: id,
-                    image_url: `/uploads/products/${image.name}`,
+                    image_url: `/uploads/products/${image.filename}`,
                     alt_text: name,
-                    display_order: 0,
-                    is_primary: image.isPrimary || false,
+                    display_order: index,
+                    is_primary: index === 0,
                     status: 'active'
                 }, { transaction });
-            }
+                console.log(`Image ${index + 1} created with ID:`, imageRecord.id);
+                return imageRecord;
+            });
+
+            // Wait for all images to be created
+            await Promise.all(imagePromises);
+            console.log('All new images processed successfully');
         }
 
         await transaction.commit();
+        console.log('\n=== TRANSACTION COMMITTED ===');
 
         // Fetch updated product
         const updatedProduct = await Product.findByPk(id, {
             include: [
-                { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
+                { model: Category },
+                { model: ProductVariation },
                 { model: ProductImage },
-                { model: ProductBadge, through: ProductBadgeMapping },
-                { model: ProductSEO },
-                { model: ProductDiscount }
+                { model: ProductSEO }
             ]
         });
 
+        console.log('\n=== PRODUCT UPDATE COMPLETE ===');
+        console.log('Final product data:', JSON.stringify(formatProductResponse(updatedProduct), null, 2));
+
         res.json({
+            success: true,
             message: 'Product updated successfully',
-            product: formatProductResponse(updatedProduct)
+            data: formatProductResponse(updatedProduct)
         });
     } catch (error) {
         await transaction.rollback();
-        console.error('Error updating product:', error);
-        res.status(500).json({ message: 'Failed to update product', error: error.message });
+        console.error('\n=== ERROR IN PRODUCT UPDATE ===');
+        console.error('Error details:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to update product', 
+            error: error.message 
+        });
     }
 };
 
@@ -472,12 +483,27 @@ export const deleteProduct = async (req, res) => {
 
         if (!product) {
             await transaction.rollback();
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Product not found' 
+            });
         }
 
-        // Delete product images
-        for (const image of product.ProductImages) {
-            await imageHandler.deleteFile(path.join(__dirname, '../uploads/products', image.imageName));
+        // Delete product images from storage
+        if (product.ProductImages && product.ProductImages.length > 0) {
+            for (const image of product.ProductImages) {
+                try {
+                    // Extract filename from image_url
+                    const filename = image.image_url.split('/').pop();
+                    if (filename) {
+                        const imagePath = path.join(__dirname, '../uploads/products', filename);
+                        await imageHandler.deleteFile(imagePath);
+                    }
+                } catch (error) {
+                    console.error('Error deleting image file:', error);
+                    // Continue with other images even if one fails
+                }
+            }
         }
 
         // Delete product and all related records
@@ -485,11 +511,18 @@ export const deleteProduct = async (req, res) => {
 
         await transaction.commit();
 
-        res.json({ message: 'Product deleted successfully' });
+        res.json({ 
+            success: true,
+            message: 'Product deleted successfully' 
+        });
     } catch (error) {
         await transaction.rollback();
         console.error('Error deleting product:', error);
-        res.status(500).json({ message: 'Failed to delete product', error: error.message });
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to delete product', 
+            error: error.message 
+        });
     }
 };
 
@@ -547,11 +580,9 @@ export const getProductsByCategory = async (req, res) => {
         const products = await Product.findAll({
             where: { categoryId },
             include: [
-                { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
+                { model: ProductVariation },
                 { model: ProductImage },
-                { model: ProductBadge, through: ProductBadgeMapping },
-                { model: ProductSEO },
-                { model: ProductDiscount }
+                { model: ProductSEO }
             ]
         });
 
@@ -578,11 +609,9 @@ export const searchProducts = async (req, res) => {
                 }
             },
             include: [
-                { model: ProductVariation, include: [{ model: AttributeValue, include: [{ model: Attribute }] }] },
+                { model: ProductVariation },
                 { model: ProductImage },
-                { model: ProductBadge, through: ProductBadgeMapping },
-                { model: ProductSEO },
-                { model: ProductDiscount }
+                { model: ProductSEO }
             ]
         });
 

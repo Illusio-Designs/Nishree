@@ -6,7 +6,7 @@ import ActionButton from "../../../components/common/ActionButton";
 import Button from "../../../components/common/Button";
 import DropdownSelect from "../../../components/common/DropdownSelect";
 import { FaPlus } from "react-icons/fa";
-import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi2";
+import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from "react-icons/hi2";
 import { couponService } from "../../../services";
 import { toast } from "react-toastify";
 import "../../../Styles/dashboard/Coupons.css";
@@ -16,6 +16,7 @@ const Coupons = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [modalMode, setModalMode] = useState("add");
+  const [showUsageModal, setShowUsageModal] = useState(false);
   const [formData, setFormData] = useState({
     code: "",
     type: "percentage",
@@ -65,7 +66,11 @@ const Coupons = () => {
     {
       key: "usage",
       header: "Usage",
-      render: (row) => `${row.usedCount || 0}/${row.usageLimit || "∞"}`,
+      render: (row) => {
+        const totalUsage = row.CouponUsages?.length || 0;
+        const uniqueUsers = new Set(row.CouponUsages?.map(usage => usage.userId) || []).size;
+        return `${uniqueUsers}/${row.usageLimit || "∞"} users`;
+      },
     },
     {
       key: "status",
@@ -107,14 +112,21 @@ const Coupons = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await couponService.deleteCoupon(id);
-      toast.success("Coupon deleted successfully");
-      fetchCoupons();
-    } catch (error) {
-      toast.error(error.message || "Failed to delete coupon");
-      console.error("Failed to delete coupon:", error);
+    if (window.confirm("Are you sure you want to delete this coupon?")) {
+      try {
+        await couponService.deleteCoupon(id);
+        toast.success("Coupon deleted successfully");
+        fetchCoupons();
+      } catch (error) {
+        toast.error(error.message || "Failed to delete coupon");
+        console.error("Failed to delete coupon:", error);
+      }
     }
+  };
+
+  const handleViewUsage = (coupon) => {
+    setSelectedCoupon(coupon);
+    setShowUsageModal(true);
   };
 
   const handleOpenModal = (mode, coupon = null) => {
@@ -198,6 +210,50 @@ const Coupons = () => {
   useEffect(() => {
     fetchCoupons();
   }, []);
+
+  const renderUsageModal = () => (
+    <Modal
+      isOpen={showUsageModal}
+      onClose={() => setShowUsageModal(false)}
+      title={`Coupon Usage - ${selectedCoupon?.code}`}
+    >
+      <div className="usage-details">
+        <div className="usage-stats">
+          <div className="stat-item">
+            <label>Total Usage:</label>
+            <span>{selectedCoupon?.CouponUsages?.length || 0}</span>
+          </div>
+          <div className="stat-item">
+            <label>Usage Limit:</label>
+            <span>{selectedCoupon?.usageLimit || "∞"}</span>
+          </div>
+        </div>
+        <div className="usage-list">
+          <h4>Usage History</h4>
+          {selectedCoupon?.CouponUsages?.length > 0 ? (
+            <table className="usage-table">
+              <thead>
+                <tr>
+                  <th>User ID</th>
+                  <th>Used At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedCoupon.CouponUsages.map((usage, index) => (
+                  <tr key={index}>
+                    <td>{usage.userId}</td>
+                    <td>{formatDate(usage.usedAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="no-usage">No usage history available</p>
+          )}
+        </div>
+      </div>
+    </Modal>
+  );
 
   return (
     <div className="coupons-container">
@@ -340,6 +396,7 @@ const Coupons = () => {
           </div>
         </form>
       </Modal>
+      {renderUsageModal()}
     </div>
   );
 };

@@ -72,117 +72,170 @@ export const setupDatabase = async () => {
             }
         }
         
-        // Create tables without foreign keys
-        const options = { 
-            hooks: false,
-            alter: true,
-            indexes: false
-        };
-        
         // Step 1a: Create base tables in specific order
         console.log('Step 1a: Creating base tables structure...');
         try {
             // First create independent tables (no foreign keys)
             const independentTables = [
-                'User', 'Category', 'Attribute', 'AttributeValue',
-                'ProductBadge', 'Coupon', 'ShippingFee', 'Settings',
-                'SeoMetadata'
+                'User', 'AttributeValue',
+                'ShippingFee', 'SeoMetadata'
             ];
+
+            // Create tables without indexes first
+            const noIndexOptions = { 
+                hooks: false,
+                alter: true,
+                indexes: false
+            };
 
             for (const tableName of independentTables) {
                 if (models[tableName]) {
-                    console.log(`Creating ${tableName} table...`);
-                    await models[tableName].sync(options);
+                    console.log(`Creating ${tableName} table without indexes...`);
+                    await models[tableName].sync(noIndexOptions);
                 }
             }
 
-            // Create Product table first
+            // Create Settings table without additional indexes
+            if (models.Settings) {
+                console.log('Creating Settings table...');
+                await models.Settings.sync({
+                    hooks: false,
+                    alter: true
+                });
+            }
+
+            // Create Attribute table separately with minimal indexes
+            if (models.Attribute) {
+                console.log('Creating Attribute table with minimal indexes...');
+                await models.Attribute.sync({
+                    hooks: false,
+                    alter: true,
+                    indexes: [
+                        {
+                            unique: true,
+                            fields: ['name']
+                        }
+                    ]
+                });
+            }
+
+            // Create Category table separately with minimal indexes
+            if (models.Category) {
+                console.log('Creating Category table with minimal indexes...');
+                await models.Category.sync({
+                    hooks: false,
+                    alter: true,
+                    indexes: [
+                        {
+                            unique: true,
+                            fields: ['slug']
+                        }
+                    ]
+                });
+            }
+
+            // Create Coupon table separately with minimal indexes
+            if (models.Coupon) {
+                console.log('Creating Coupon table with minimal indexes...');
+                await models.Coupon.sync({
+                    hooks: false,
+                    alter: true,
+                    indexes: [
+                        {
+                            unique: true,
+                            fields: ['code']
+                        }
+                    ]
+                });
+            }
+
+            // Create Product table separately with minimal indexes
             if (models.Product) {
-                console.log('Creating Product table...');
-                await models.Product.sync(options);
+                console.log('Creating Product table with minimal indexes...');
+                await models.Product.sync({
+                    hooks: false,
+                    alter: true,
+                    indexes: [
+                        {
+                            unique: true,
+                            fields: ['slug']
+                        }
+                    ]
+                });
             }
 
             // Create ProductVariation table
             if (models.ProductVariation) {
-                console.log('Creating ProductVariation table...');
-                await models.ProductVariation.sync(options);
+                console.log('Creating ProductVariation table without indexes...');
+                await models.ProductVariation.sync(noIndexOptions);
             }
 
             // Create Product related tables that depend on Product
             const productDependentTables = [
-                'ProductImage', 'ProductVariationAttribute',
-                'ProductDiscount', 'ProductBadgeMapping', 'ProductSEO'
+                'ProductImage', 'ProductSEO'
             ];
 
             for (const tableName of productDependentTables) {
                 if (models[tableName]) {
-                    console.log(`Creating ${tableName} table...`);
-                    await models[tableName].sync(options);
+                    console.log(`Creating ${tableName} table without indexes...`);
+                    await models[tableName].sync(noIndexOptions);
                 }
             }
 
-            // Create Order related tables first
-            const orderRelatedTables = [
-                'Order', 'OrderItem', 'OrderStatusHistory',
+            // Create Order related tables in correct order
+            console.log('Creating Order related tables without indexes...');
+            
+            // First create Order table
+            if (models.Order) {
+                console.log('Creating Order table without indexes...');
+                await models.Order.sync(noIndexOptions);
+            }
+
+            // Then create tables that depend on Order
+            const orderDependentTables = [
+                'OrderItem', 'OrderStatusHistory',
                 'Payment', 'ShippingAddress'
             ];
 
-            for (const tableName of orderRelatedTables) {
+            for (const tableName of orderDependentTables) {
                 if (models[tableName]) {
-                    console.log(`Creating ${tableName} table...`);
-                    await models[tableName].sync(options);
+                    console.log(`Creating ${tableName} table without indexes...`);
+                    await models[tableName].sync(noIndexOptions);
                 }
             }
 
             // Create Review table without foreign keys first
             if (models.Review) {
-                console.log('Creating Review table without foreign keys...');
-                const reviewAttributes = models.Review.getAttributes();
-                const originalForeignKeys = {
-                    userId: reviewAttributes.userId,
-                    productId: reviewAttributes.productId,
-                    orderId: reviewAttributes.orderId
-                };
-
-                // Temporarily remove foreign key constraints
-                delete reviewAttributes.userId.references;
-                delete reviewAttributes.productId.references;
-                delete reviewAttributes.orderId.references;
-
-                await models.Review.sync(options);
-
-                // Restore foreign key constraints
-                reviewAttributes.userId.references = originalForeignKeys.userId.references;
-                reviewAttributes.productId.references = originalForeignKeys.productId.references;
-                reviewAttributes.orderId.references = originalForeignKeys.orderId.references;
+                console.log('Creating Review table without indexes...');
+                await models.Review.sync(noIndexOptions);
             }
 
             if (models.ReviewImage) {
-                console.log('Creating ReviewImage table...');
-                await models.ReviewImage.sync(options);
+                console.log('Creating ReviewImage table without indexes...');
+                await models.ReviewImage.sync(noIndexOptions);
             }
 
             // Create Cart related tables
             if (models.Cart) {
-                console.log('Creating Cart table...');
-                await models.Cart.sync(options);
+                console.log('Creating Cart table without indexes...');
+                await models.Cart.sync(noIndexOptions);
             }
 
             if (models.CartItem) {
-                console.log('Creating CartItem table...');
-                await models.CartItem.sync(options);
+                console.log('Creating CartItem table without indexes...');
+                await models.CartItem.sync(noIndexOptions);
             }
 
             // Create Wishlist table
             if (models.Wishlist) {
-                console.log('Creating Wishlist table...');
-                await models.Wishlist.sync(options);
+                console.log('Creating Wishlist table without indexes...');
+                await models.Wishlist.sync(noIndexOptions);
             }
 
             // Create Slider table
             if (models.Slider) {
-                console.log('Creating Slider table...');
-                await models.Slider.sync(options);
+                console.log('Creating Slider table without indexes...');
+                await models.Slider.sync(noIndexOptions);
             }
 
             // Add comparePrice column to product_variations table if it doesn't exist
@@ -199,59 +252,50 @@ export const setupDatabase = async () => {
             console.log('Step 2: Applying associations...');
             await import(`file://${path.join(__dirname, '..', 'model', 'associations.js')}`);
             
-            // Step 3: Update tables with foreign keys and indexes
-            console.log('Step 3: Updating tables with foreign keys and indexes...');
+            // Step 3: Add essential indexes only
+            console.log('Step 3: Adding essential indexes...');
             
-            // Add indexes to the products table
-            console.log('Adding indexes to products table...');
-            await sequelize.query(`
-                ALTER TABLE products 
-                ADD INDEX idx_products_slug (slug),
-                ADD INDEX idx_products_status (status),
-                ADD INDEX idx_products_avg_rating (avg_rating),
-                ADD INDEX idx_products_review_count (review_count),
-                ADD INDEX idx_products_featured_review_id (featured_review_id)
-            `).catch(err => {
-                console.log('Some indexes might already exist, continuing...');
-            });
+            // Define essential indexes for each table
+            const essentialIndexes = {
+                orders: [
+                    { column: 'order_number', unique: true },
+                    { column: 'status' }
+                ],
+                users: [
+                    { column: 'email', unique: true }
+                ],
+                product_variations: [
+                    { column: 'sku', unique: true }
+                ]
+            };
 
-            // Add indexes to other important tables
-            const tablesToIndex = [
-                { table: 'categories', columns: ['slug', 'status'] },
-                { table: 'orders', columns: ['order_number', 'status'] },
-                { table: 'users', columns: ['email', 'status'] },
-                { table: 'product_variations', columns: ['sku', 'status'] },
-                { table: 'reviews', columns: ['product_id', 'user_id'] }
-            ];
-
-            for (const { table, columns } of tablesToIndex) {
-                for (const column of columns) {
+            // Add essential indexes
+            for (const [table, indexes] of Object.entries(essentialIndexes)) {
+                for (const index of indexes) {
+                    const uniqueClause = index.unique ? 'UNIQUE' : '';
                     await sequelize.query(`
                         ALTER TABLE ${table}
-                        ADD INDEX idx_${table}_${column} (${column})
+                        ADD ${uniqueClause} INDEX idx_${table}_${index.column} (${index.column})
                     `).catch(err => {
-                        console.log(`Index for ${table}.${column} might already exist, continuing...`);
+                        console.log(`Index for ${table}.${index.column} might already exist, continuing...`);
                     });
                 }
             }
-            
-            // Sync all tables with indexes
-            console.log('Syncing all tables with indexes...');
-            const indexOptions = { 
-                hooks: false,
-                alter: true
-            };
-            
-            for (const modelName in models) {
-                await models[modelName].sync(indexOptions);
-            }
+
+            // Add parentId index to categories separately
+            await sequelize.query(`
+                ALTER TABLE categories
+                ADD INDEX idx_categories_parentId (parentId)
+            `).catch(err => {
+                console.log('ParentId index might already exist, continuing...');
+            });
+
+            console.log('Database setup completed successfully!');
+            return true;
         } catch (error) {
             console.error('Error in table creation process:', error);
             throw error;
         }
-        
-        console.log('Database setup completed successfully!');
-        return true;
     } catch (error) {
         console.error('Database setup failed:', error);
         throw error;

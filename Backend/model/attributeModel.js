@@ -9,8 +9,7 @@ export const Attribute = sequelize.define('Attribute', {
     },
     name: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     type: {
         type: DataTypes.ENUM('text', 'number', 'select', 'color', 'size'),

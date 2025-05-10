@@ -9,8 +9,12 @@ import Modal from "../../../components/common/Modal";
 import "../../../Styles/dashboard/Products.css";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from "react-icons/hi2";
 import { FaPlus } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import Select from 'react-select';
+import makeAnimated from 'react-select/animated';
 
 const Products = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [attributes, setAttributes] = useState([]);
@@ -18,6 +22,11 @@ const Products = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("add");
   const [currentStep, setCurrentStep] = useState(1);
+  const [showAttributeModal, setShowAttributeModal] = useState(false);
+  const [newAttribute, setNewAttribute] = useState({
+    name: "",
+    values: ""
+  });
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -60,12 +69,33 @@ const Products = () => {
 
   const fetchCategories = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error("Please login to access this feature");
+        navigate('/login');
+        return;
+      }
+
       const response = await categoryService.getAllCategories();
-      console.log('Category API Response:', response); // Debug log
-      setCategories(response || []); // Remove .data since response is already the array
+      console.log('Category API Response:', response);
+      
+      if (response && Array.isArray(response)) {
+        setCategories(response);
+      } else if (response && response.categories) {
+        setCategories(response.categories);
+      } else {
+        setCategories([]);
+        toast.error("No categories available");
+      }
     } catch (error) {
-      toast.error("Failed to fetch categories");
-      console.error("Failed to fetch categories:", error);
+      console.error('Failed to fetch categories:', error);
+      if (error.response?.status === 401) {
+        toast.error("Please login to access this feature");
+        navigate('/login');
+      } else {
+        toast.error(error.message || "Failed to fetch categories");
+      }
+      setCategories([]);
     }
   };
 
@@ -147,7 +177,17 @@ const Products = () => {
       formDataToSend.append("status", formData.status);
       formDataToSend.append("categoryId", formData.categoryId);
       formDataToSend.append("variations", JSON.stringify(validatedVariations));
-      formDataToSend.append("seo", JSON.stringify(formData.seo));
+      
+      // Format SEO data to match backend expectations
+      const seoData = {
+        metaTitle: formData.seo.meta_title,
+        metaDescription: formData.seo.meta_description,
+        metaKeywords: formData.seo.meta_keywords,
+        ogTitle: formData.seo.og_title,
+        ogDescription: formData.seo.og_description,
+        ogImage: formData.seo.og_image
+      };
+      formDataToSend.append("seo", JSON.stringify(seoData));
 
       // Add images
       if (formData.images && formData.images.length > 0) {
@@ -156,22 +196,22 @@ const Products = () => {
         });
       }
 
-      // Add badges if any
-      if (formData.badges && formData.badges.length > 0) {
-        formDataToSend.append("badges", JSON.stringify(formData.badges));
+      try {
+        if (modalMode === "add") {
+          const response = await productService.createProduct(formDataToSend);
+          toast.success("Product created successfully");
+          setShowModal(false);
+          fetchProducts();
+        } else {
+          const response = await productService.updateProduct(selectedProduct.id, formDataToSend);
+          toast.success("Product updated successfully");
+          setShowModal(false);
+          fetchProducts();
+        }
+      } catch (error) {
+        console.error("Error submitting product:", error);
+        toast.error(error.message || "Failed to submit product");
       }
-
-      if (modalMode === "add") {
-        await productService.createProduct(formDataToSend);
-        toast.success("Product created successfully");
-      } else {
-        await productService.updateProduct(selectedProduct.id, formDataToSend);
-        toast.success("Product updated successfully");
-      }
-
-      setShowModal(false);
-      setCurrentStep(1);
-      fetchProducts();
     } catch (error) {
       console.error("Error submitting product:", error);
       toast.error(error.message || `Failed to ${modalMode} product`);
@@ -195,9 +235,9 @@ const Products = () => {
           stock: v.stock || 0,
           weight: v.weight || 0,
           weightUnit: v.weightUnit || "g",
-          dimensions: v.dimensions || { length: 0, width: 0, height: 0 },
+          dimensions: typeof v.dimensions === 'string' ? JSON.parse(v.dimensions) : (v.dimensions || { length: 0, width: 0, height: 0 }),
           dimensionUnit: v.dimensionUnit || "cm",
-          attributes: v.attributes || {}
+          attributes: typeof v.attributes === 'string' ? JSON.parse(v.attributes) : (v.attributes || {})
         })) || [
           {
             sku: "",
@@ -219,7 +259,11 @@ const Products = () => {
           og_description: "",
           og_image: ""
         },
-        images: [],
+        images: product.ProductImages?.map(img => ({
+          url: img.image_url,
+          alt: img.alt_text,
+          isPrimary: img.is_primary
+        })) || [],
         badges: product.ProductBadges?.map(b => ({
           name: b.name,
           type: b.badgeType,
@@ -302,11 +346,49 @@ const Products = () => {
     setFormData({ ...formData, variations: updatedVariations });
   };
 
+  const handleCreateAttribute = async (e) => {
+    e.preventDefault();
+    try {
+      const attributeData = {
+        name: newAttribute.name,
+        type: 'select',
+        isRequired: false,
+        values: newAttribute.values.split(',').map(v => v.trim()).filter(v => v !== '')
+      };
+
+      const response = await attributeService.createAttribute(attributeData);
+      toast.success("Attribute created successfully");
+      setShowAttributeModal(false);
+      setNewAttribute({
+        name: "",
+        values: ""
+      });
+      fetchAttributes(); // Refresh the attributes list
+    } catch (error) {
+      toast.error(error.message || "Failed to create attribute");
+    }
+  };
+
+  const handleAttributeValueChange = (index, value) => {
+    const newValues = [...newAttribute.values];
+    newValues[index] = value;
+    setNewAttribute({
+      ...newAttribute,
+      values: newValues
+    });
+  };
+
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     fetchProducts();
     fetchCategories();
     fetchAttributes();
-  }, []);
+  }, [navigate]);
 
   const columns = [
     {
@@ -392,7 +474,20 @@ const Products = () => {
             <InputField
               label="Name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => {
+                const newName = e.target.value;
+                setFormData({
+                  ...formData,
+                  name: newName,
+                  seo: {
+                    ...formData.seo,
+                    meta_title: newName,
+                    meta_description: newName,
+                    og_title: newName,
+                    og_description: newName
+                  }
+                });
+              }}
               required
             />
             <InputField
@@ -413,11 +508,15 @@ const Products = () => {
                 className="select-input"
               >
                 <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
+                {categories && categories.length > 0 ? (
+                  categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>No categories available</option>
+                )}
               </select>
             </div>
             <InputField
@@ -486,42 +585,248 @@ const Products = () => {
                   required
                 />
                 
+                {/* Weight Section */}
+                <div className="weight-section">
+                  <InputField
+                    label="Weight"
+                    type="number"
+                    value={variation.weight || 0}
+                    onChange={(e) => handleVariationChange(index, "weight", parseFloat(e.target.value))}
+                    min="0"
+                    step="0.01"
+                  />
+                  <div className="input-field">
+                    <label>Weight Unit</label>
+                    <select
+                      value={variation.weightUnit || 'g'}
+                      onChange={(e) => handleVariationChange(index, "weightUnit", e.target.value)}
+                      className="select-input"
+                    >
+                      <option value="g">Grams (g)</option>
+                      <option value="kg">Kilograms (kg)</option>
+                      <option value="lb">Pounds (lb)</option>
+                      <option value="oz">Ounces (oz)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Dimensions Section */}
+                <div className="dimensions-section">
+                  <h5>Dimensions</h5>
+                  <div className="dimensions-inputs">
+                    <InputField
+                      label="Length"
+                      type="number"
+                      value={variation.dimensions?.length || 0}
+                      onChange={(e) => handleVariationChange(index, "dimensions", {
+                        ...variation.dimensions,
+                        length: parseFloat(e.target.value)
+                      })}
+                      min="0"
+                      step="0.01"
+                    />
+                    <InputField
+                      label="Width"
+                      type="number"
+                      value={variation.dimensions?.width || 0}
+                      onChange={(e) => handleVariationChange(index, "dimensions", {
+                        ...variation.dimensions,
+                        width: parseFloat(e.target.value)
+                      })}
+                      min="0"
+                      step="0.01"
+                    />
+                    <InputField
+                      label="Height"
+                      type="number"
+                      value={variation.dimensions?.height || 0}
+                      onChange={(e) => handleVariationChange(index, "dimensions", {
+                        ...variation.dimensions,
+                        height: parseFloat(e.target.value)
+                      })}
+                      min="0"
+                      step="0.01"
+                    />
+                    <div className="input-field">
+                      <label>Dimension Unit</label>
+                      <select
+                        value={variation.dimensionUnit || 'cm'}
+                        onChange={(e) => handleVariationChange(index, "dimensionUnit", e.target.value)}
+                        className="select-input"
+                      >
+                        <option value="cm">Centimeters (cm)</option>
+                        <option value="m">Meters (m)</option>
+                        <option value="in">Inches (in)</option>
+                        <option value="ft">Feet (ft)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
                 {/* Attributes Section */}
                 <div className="attributes-section">
-                  <h5>Attributes</h5>
+                  <div className="attributes-header">
+                    <h5>Attributes</h5>
+                    <Button
+                      type="button"
+                      onClick={() => setShowAttributeModal(true)}
+                      className="add-attribute-button"
+                      variant="secondary"
+                    >
+                      Create New Attribute
+                    </Button>
+                  </div>
+
+                  {/* Attribute Selection Dropdown */}
+                  <div className="attribute-selection">
+                    <select
+                      className="select-input"
+                      onChange={(e) => {
+                        const selectedAttributeId = e.target.value;
+                        if (selectedAttributeId) {
+                          const selectedAttribute = attributes.find(attr => attr.id === parseInt(selectedAttributeId));
+                          if (selectedAttribute) {
+                            const updatedVariations = [...formData.variations];
+                            const updatedAttributes = { ...updatedVariations[index].attributes };
+                            if (!updatedAttributes[selectedAttributeId]) {
+                              updatedAttributes[selectedAttributeId] = [];
+                            }
+                            updatedVariations[index] = {
+                              ...updatedVariations[index],
+                              attributes: updatedAttributes
+                            };
+                            setFormData({ ...formData, variations: updatedVariations });
+                          }
+                        }
+                      }}
+                      value=""
+                    >
+                      <option value="">Select an attribute</option>
+                      {attributes
+                        .filter(attr => !variation.attributes[attr.id])
+                        .map(attribute => (
+                          <option key={attribute.id} value={attribute.id}>
+                            {attribute.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                  
                   {attributes && attributes.length > 0 ? (
-                    attributes.map((attribute) => (
-                      <div key={attribute.id} className="attribute-field">
-                        <label>{attribute.name}</label>
-                        {attribute.type === 'select' ? (
-                          <select
-                            value={variation.attributes[attribute.id] || ''}
-                            onChange={(e) => handleVariationChange(index, `attributes.${attribute.id}`, e.target.value)}
-                            required={attribute.isRequired}
-                            className="select-input"
-                          >
-                            <option value="">Select {attribute.name}</option>
-                            {attribute.AttributeValues && attribute.AttributeValues
-                              .filter(value => value.status === 'active')
-                              .map((value) => (
-                                <option key={value.id} value={value.id}>
-                                  {value.value}
-                                </option>
-                              ))}
-                          </select>
-                        ) : (
-                          <InputField
-                            type={attribute.type === 'number' ? 'number' : 'text'}
-                            value={variation.attributes[attribute.id] || ''}
-                            onChange={(e) => handleVariationChange(index, `attributes.${attribute.id}`, e.target.value)}
-                            required={attribute.isRequired}
-                            placeholder={`Enter ${attribute.name}`}
-                          />
-                        )}
-                      </div>
-                    ))
+                    <div className="attributes-list">
+                      {attributes
+                        .filter(attr => variation.attributes[attr.id])
+                        .map((attribute) => (
+                          <div key={attribute.id} className="attribute-item">
+                            <div className="attribute-header">
+                              <label>{attribute.name}</label>
+                              <Button
+                                type="button"
+                                variant="danger"
+                                onClick={() => {
+                                  const updatedVariations = [...formData.variations];
+                                  const updatedAttributes = { ...updatedVariations[index].attributes };
+                                  delete updatedAttributes[attribute.id];
+                                  updatedVariations[index] = {
+                                    ...updatedVariations[index],
+                                    attributes: updatedAttributes
+                                  };
+                                  setFormData({ ...formData, variations: updatedVariations });
+                                }}
+                                className="remove-attribute-button"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                            {attribute.type === 'select' ? (
+                              <div className="multi-select-container">
+                                <Select
+                                  isMulti
+                                  closeMenuOnSelect={false}
+                                  components={makeAnimated()}
+                                  options={attribute.AttributeValues
+                                    ?.filter(value => value.status === 'active')
+                                    .map(value => ({
+                                      value: value.id,
+                                      label: value.value,
+                                      isSelected: variation.attributes[attribute.id]?.includes(value.id)
+                                    }))}
+                                  value={attribute.AttributeValues
+                                    ?.filter(value => value.status === 'active')
+                                    .filter(value => variation.attributes[attribute.id]?.includes(value.id))
+                                    .map(value => ({
+                                      value: value.id,
+                                      label: value.value
+                                    }))}
+                                  onChange={(selectedOptions) => {
+                                    const selectedValues = selectedOptions ? selectedOptions.map(option => option.value) : [];
+                                    handleVariationChange(index, `attributes.${attribute.id}`, selectedValues);
+                                  }}
+                                  className="react-select-container"
+                                  classNamePrefix="react-select"
+                                  placeholder={`Select ${attribute.name}`}
+                                  isClearable
+                                  styles={{
+                                    control: (base) => ({
+                                      ...base,
+                                      minHeight: '38px',
+                                      borderColor: '#ddd',
+                                      '&:hover': {
+                                        borderColor: '#4a90e2'
+                                      }
+                                    }),
+                                    option: (base, state) => ({
+                                      ...base,
+                                      backgroundColor: state.isSelected ? '#4a90e2' : state.isFocused ? '#f0f7ff' : 'white',
+                                      color: state.isSelected ? 'white' : '#333',
+                                      '&:hover': {
+                                        backgroundColor: state.isSelected ? '#4a90e2' : '#f0f7ff'
+                                      }
+                                    }),
+                                    multiValue: (base) => ({
+                                      ...base,
+                                      backgroundColor: '#e8f0fe',
+                                      borderRadius: '4px'
+                                    }),
+                                    multiValueLabel: (base) => ({
+                                      ...base,
+                                      color: '#4a90e2',
+                                      fontWeight: '500'
+                                    }),
+                                    multiValueRemove: (base) => ({
+                                      ...base,
+                                      color: '#4a90e2',
+                                      '&:hover': {
+                                        backgroundColor: '#d0e3ff',
+                                        color: '#2c5282'
+                                      }
+                                    })
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <InputField
+                                type={attribute.type === 'number' ? 'number' : 'text'}
+                                value={variation.attributes[attribute.id] || ''}
+                                onChange={(e) => handleVariationChange(index, `attributes.${attribute.id}`, e.target.value)}
+                                required={attribute.isRequired}
+                                placeholder={`Enter ${attribute.name}`}
+                              />
+                            )}
+                          </div>
+                        ))}
+                    </div>
                   ) : (
-                    <p className="no-attributes">No attributes available. Please create attributes first.</p>
+                    <div className="no-attributes">
+                      <p>No attributes available.</p>
+                      <Button
+                        type="button"
+                        onClick={() => setShowAttributeModal(true)}
+                        className="create-attribute-button"
+                      >
+                        Create New Attribute
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -573,34 +878,141 @@ const Products = () => {
         return (
           <div className="form-section">
             <h3>Product Images</h3>
-            <InputField
-              type="file"
-              label="Product Images"
-              onChange={(e) => setFormData({ ...formData, images: e.target.files })}
-              accept="image/*"
-              multiple
-            />
-            {selectedProduct && selectedProduct.ProductImages && (
-              <div className="existing-images">
-                <h4>Existing Images</h4>
-                <div className="image-grid">
-                  {selectedProduct.ProductImages.map((image, index) => (
-                    <div key={index} className="image-item">
-                      <img
-                        src={`${import.meta.env.VITE_API_URL}${image.image_url}`}
-                        alt={`Product ${index + 1}`}
-                      />
+            <div className="image-upload-section">
+              <div className="image-upload-grid">
+                {selectedProduct?.ProductImages?.map((image, index) => (
+                  <div key={`existing-${index}`} className="image-preview-item">
+                    <img
+                      src={`${import.meta.env.VITE_API_URL}${image.image_url}`}
+                      alt={`Existing ${index + 1}`}
+                    />
+                    <div className="image-overlay">
+                      <span className="image-label">Existing Image</span>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+                {formData.images && Array.from(formData.images).map((file, index) => (
+                  <div key={`preview-${index}`} className="image-preview-item">
+                    <img 
+                      src={file instanceof File ? URL.createObjectURL(file) : `${import.meta.env.VITE_API_URL}${file.url}`} 
+                      alt={`Preview ${index + 1}`} 
+                    />
+                    <div className="image-overlay">
+                      <button
+                        type="button"
+                        className="remove-image-button"
+                        onClick={() => {
+                          const newFiles = Array.from(formData.images).filter((_, i) => i !== index);
+                          const dataTransfer = new DataTransfer();
+                          newFiles.forEach(file => dataTransfer.items.add(file));
+                          setFormData({ ...formData, images: dataTransfer.files });
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <label className="image-upload-button">
+                  <input
+                    type="file"
+                    name="images"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files) {
+                        // Create a new FileList containing both existing and new files
+                        const dataTransfer = new DataTransfer();
+                        
+                        // Add existing files if any
+                        if (formData.images && formData.images.length > 0) {
+                          Array.from(formData.images).forEach(file => {
+                            if (file instanceof File) {
+                              dataTransfer.items.add(file);
+                            }
+                          });
+                        }
+                        
+                        // Add new files
+                        Array.from(files).forEach(file => {
+                          dataTransfer.items.add(file);
+                        });
+                        
+                        setFormData(prev => ({ ...prev, images: dataTransfer.files }));
+                      }
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                  <div className="upload-placeholder">
+                    <FaPlus />
+                    <span>Add Images</span>
+                  </div>
+                </label>
               </div>
-            )}
+              <small className="upload-hint">
+                Supported formats: JPG, PNG, GIF. Max file size: 5MB
+              </small>
+            </div>
           </div>
         );
       default:
         return null;
     }
   };
+
+  const renderAttributeModal = () => (
+    <Modal
+      isOpen={showAttributeModal}
+      onClose={() => {
+        setShowAttributeModal(false);
+        setNewAttribute({
+          name: "",
+          values: ""
+        });
+      }}
+      title="Create New Attribute"
+    >
+      <form onSubmit={handleCreateAttribute} className="attribute-form">
+        <InputField
+          label="Attribute Name"
+          value={newAttribute.name}
+          onChange={(e) => setNewAttribute({ ...newAttribute, name: e.target.value })}
+          required
+        />
+        
+        <div className="attribute-values">
+          <label>Values (comma separated)</label>
+          <InputField
+            value={newAttribute.values}
+            onChange={(e) => setNewAttribute({ ...newAttribute, values: e.target.value })}
+            placeholder="Enter values separated by commas (e.g., Small, Medium, Large)"
+            required
+          />
+        </div>
+
+        <div className="modal-actions">
+          <Button type="submit" className="modal-submit-button">
+            Create Attribute
+          </Button>
+          <Button
+            type="button"
+            onClick={() => {
+              setShowAttributeModal(false);
+              setNewAttribute({
+                name: "",
+                values: ""
+              });
+            }}
+            className="modal-cancel-button"
+            variant="secondary"
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
 
   return (
     <div className="products-manager">
@@ -674,6 +1086,7 @@ const Products = () => {
           </div>
         </form>
       </Modal>
+      {renderAttributeModal()}
     </div>
   );
 };

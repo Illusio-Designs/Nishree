@@ -6,7 +6,7 @@ import fs from 'fs/promises';
 import fsSync from 'fs';
 import { Op } from 'sequelize';
 import ImageHandler from '../utils/imageHandler.js';
-import { upload } from '../middleware/uploadMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 import slugify from 'slugify';
 
 // Get directory name for ES modules

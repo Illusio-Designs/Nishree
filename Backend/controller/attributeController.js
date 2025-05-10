@@ -29,14 +29,14 @@ export const createAttribute = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
-        const { name, type, isRequired, displayOrder, values } = req.body;
+        const { name, values } = req.body;
 
         // Create attribute
         const attribute = await Attribute.create({
             name,
-            type: type || 'text',
-            isRequired: isRequired || false,
-            displayOrder: displayOrder || 0,
+            type: 'select', // Default to select type since we're using values
+            isRequired: false,
+            displayOrder: 0,
             status: 'active'
         }, { transaction });
 
@@ -45,7 +45,7 @@ export const createAttribute = async (req, res) => {
             const valuePromises = values.map((value, index) => 
                 AttributeValue.create({
                     attributeId: attribute.id,
-                    value: value,
+                    value: value.trim(),
                     displayOrder: index,
                     status: 'active'
                 }, { transaction })

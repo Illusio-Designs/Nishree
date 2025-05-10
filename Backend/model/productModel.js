@@ -13,8 +13,7 @@ export const Product = sequelize.define('Product', {
     },
     slug: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     description: {
         type: DataTypes.TEXT,
@@ -56,10 +55,7 @@ export const Product = sequelize.define('Product', {
     indexes: [
         {
             unique: true,
-            fields: ['slug'] 
-        },
-        {
-            fields: ['status']
+            fields: ['slug']
         }
     ]
 });
