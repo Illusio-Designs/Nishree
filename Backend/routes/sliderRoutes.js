@@ -14,6 +14,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/public', getPublicSliders);
+router.get('/all', getPublicSliders);
 router.get('/:id', getSliderById);
 
 // Admin routes (requires authentication)
