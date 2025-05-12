@@ -19,6 +19,11 @@ const Product = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0
+  });
   const categoryId = searchParams.get('category');
 
   useEffect(() => {
@@ -31,7 +36,7 @@ const Product = () => {
           setCategory(categoryData);
         }
 
-        // Fetch products
+        // Fetch products with pagination and filters
         const params = {
           category: categoryId,
           page: searchParams.get('page') || 1,
@@ -41,9 +46,21 @@ const Product = () => {
         };
 
         const response = await getAllPublicProducts(params);
-        setProducts(response.data.products);
+        
+        if (response.success) {
+          setProducts(response.data.products);
+          setPagination({
+            page: response.data.page,
+            totalPages: response.data.totalPages,
+            total: response.data.total
+          });
+        } else {
+          throw new Error(response.message || 'Failed to fetch products');
+        }
+        
         setLoading(false);
       } catch (err) {
+        console.error('Error fetching data:', err);
         setError(err.message);
         setLoading(false);
       }
@@ -99,14 +116,33 @@ const Product = () => {
           ) : error ? (
             <div className="error">Error: {error}</div>
           ) : products.length > 0 ? (
-            <div className="products-grid">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                />
-              ))}
-            </div>
+            <>
+              <div className="products-grid">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                  />
+                ))}
+              </div>
+              {pagination.totalPages > 1 && (
+                <div className="pagination">
+                  <button 
+                    onClick={() => searchParams.set('page', pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                  >
+                    Previous
+                  </button>
+                  <span>Page {pagination.page} of {pagination.totalPages}</span>
+                  <button 
+                    onClick={() => searchParams.set('page', pagination.page + 1)}
+                    disabled={pagination.page === pagination.totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="no-products">No products found</div>
           )}

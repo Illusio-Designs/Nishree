@@ -1,15 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
 import bg from "../assets/Vector 1.png";
+import placeholderImage from "../assets/placeholder-image.png";
 import "../Styles/components/Productcard.css";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const { addToWishlist, removeFromWishlist, wishlistItems } = useWishlist();
   const { addToCart } = useCart();
+  const [imageError, setImageError] = useState(false);
 
   // Get primary image or first image from ProductImages array
   const getProductImage = (product) => {
@@ -23,20 +25,15 @@ const ProductCard = ({ product }) => {
     return product.ProductImages[0].image_url;
   };
 
-  // Debug logs for product data
-  console.log('Product Data:', {
-    id: product?.id,
-    name: product?.name,
-    price: product?.ProductVariations?.[0]?.price,
-    images: product?.ProductImages
-  });
-
-  // Debug log for API URL
-  console.log('API URL:', import.meta.env.VITE_API_URL);
-
-  // Get the product image URL
-  const imageUrl = product ? `${import.meta.env.VITE_API_URL}${getProductImage(product)}` : '';
-  console.log('Final Image URL:', imageUrl);
+  // Get price from first variation
+  const getProductPrice = (product) => {
+    if (!product?.ProductVariations?.length) return { price: 0, comparePrice: null };
+    const variation = product.ProductVariations[0];
+    return {
+      price: variation.price || 0,
+      comparePrice: variation.comparePrice || null
+    };
+  };
 
   const isInWishlist = product ? wishlistItems.some(item => item.id === product.id) : false;
 
@@ -61,6 +58,10 @@ const ProductCard = ({ product }) => {
     toast.success('Added to cart');
   };
 
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   // If no product is provided, show a placeholder
   if (!product) {
     return (
@@ -79,7 +80,7 @@ const ProductCard = ({ product }) => {
             </svg>
           </div>
           <div className="product-img">
-            <div className="placeholder-image"></div>
+            <img src={placeholderImage} className="img-fluid" alt="placeholder" />
           </div>
           <div>
             <img src={bg} className="img-fluid" alt="bg" />
@@ -123,9 +124,8 @@ const ProductCard = ({ product }) => {
     );
   }
 
-  // Get price from first variation
-  const price = product.ProductVariations?.[0]?.price || 0;
-  const comparePrice = product.ProductVariations?.[0]?.comparePrice;
+  const { price, comparePrice } = getProductPrice(product);
+  const imageUrl = product ? `${import.meta.env.VITE_API_URL}${getProductImage(product)}` : '';
 
   return (
     <div className="products-card">
@@ -144,14 +144,10 @@ const ProductCard = ({ product }) => {
         </div>
         <div className="product-img">
           <img 
-            src={imageUrl}
+            src={imageError ? placeholderImage : imageUrl}
             className="img-fluid" 
             alt={product.name}
-            onError={(e) => {
-              console.error('Image failed to load:', imageUrl);
-              e.target.onerror = null;
-              e.target.src = '/placeholder-image.jpg';
-            }}
+            onError={handleImageError}
           />
         </div>
         <div>
