@@ -179,18 +179,18 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      // Create registration data object
+      // Create registration data object with consumer role only
       const registrationData = {
         username: formData.name,
         email: formData.email,
         password: formData.password,
-        role: 'consumer' // Set default role as consumer
+        role: 'consumer' // Force role to be consumer
       };
 
       // Call the register API
       const response = await registerUser(registrationData);
       
-      toast.success("Registration successful!");
+      toast.success("Registration successful! Please login to continue.");
       navigate("/login", { replace: true });
     } catch (err) {
       toast.error(

@@ -487,3 +487,93 @@ export const searchProducts = async (req, res) => {
     }
 };
 
+// Get public product by ID
+export const getPublicProductById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const product = await Product.findByPk(id, {
+            include: [
+                { model: Category },
+                { model: ProductVariation, as: 'ProductVariations' },
+                { model: ProductImage, as: 'ProductImages' },
+                { model: ProductSEO, as: 'ProductSEO' }
+            ]
+        });
+
+        if (!product) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Product not found' 
+            });
+        }
+
+        res.json({
+            success: true,
+            data: formatProductResponse(product)
+        });
+    } catch (error) {
+        console.error('Error getting public product:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to get product', 
+            error: error.message 
+        });
+    }
+};
+
+// Get all public products
+export const getAllPublicProducts = async (req, res) => {
+    try {
+        const { category, search, sort, page = 1, limit = 10 } = req.query;
+        
+        // Build filter
+        const filter = { status: 'active' }; // Only get active products
+        if (category) filter.categoryId = category;
+        if (search) {
+            filter[Op.or] = [
+                { name: { [Op.iLike]: `%${search}%` } },
+                { description: { [Op.iLike]: `%${search}%` } }
+            ];
+        }
+
+        // Build sort options
+        const sortOptions = [];
+        if (sort) {
+            const [field, order] = sort.split(':');
+            sortOptions.push([field, order.toUpperCase()]);
+        }
+
+        // Get products with pagination
+        const products = await Product.findAndCountAll({
+            where: filter,
+            order: sortOptions,
+            limit: parseInt(limit),
+            offset: (parseInt(page) - 1) * parseInt(limit),
+            include: [
+                { model: Category },
+                { model: ProductVariation, as: 'ProductVariations' },
+                { model: ProductImage, as: 'ProductImages' },
+                { model: ProductSEO, as: 'ProductSEO' }
+            ]
+        });
+
+        res.json({
+            success: true,
+            data: {
+                products: products.rows.map(formatProductResponse),
+                total: products.count,
+                page: parseInt(page),
+                totalPages: Math.ceil(products.count / parseInt(limit))
+            }
+        });
+    } catch (error) {
+        console.error('Error getting public products:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to get products', 
+            error: error.message 
+        });
+    }
+};
+

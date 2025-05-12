@@ -5,7 +5,7 @@ import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from '../components/Footer';
 import ProductCard from "../components/Productcard";
-import { getPublicCategoryById } from '../services/publicindex';
+import { getPublicCategoryById, getAllPublicProducts } from '../services/publicindex';
 import hero from "../assets/productbj.png";
 import vector2 from "../assets/Vector (18).png";
 import vector3 from "../assets/Vector (22).png";
@@ -16,20 +16,32 @@ import "../Styles/Product.css"
 const Product = () => {
   const [searchParams] = useSearchParams();
   const [category, setCategory] = useState(null);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const categoryId = searchParams.get('category');
 
   useEffect(() => {
-    const fetchCategory = async () => {
-      if (!categoryId) {
-        setLoading(false);
-        return;
-      }
-
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const data = await getPublicCategoryById(categoryId);
-        setCategory(data);
+        // Fetch category if categoryId is present
+        if (categoryId) {
+          const categoryData = await getPublicCategoryById(categoryId);
+          setCategory(categoryData);
+        }
+
+        // Fetch products
+        const params = {
+          category: categoryId,
+          page: searchParams.get('page') || 1,
+          limit: searchParams.get('limit') || 10,
+          sort: searchParams.get('sort'),
+          search: searchParams.get('search')
+        };
+
+        const response = await getAllPublicProducts(params);
+        setProducts(response.data.products);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -37,8 +49,8 @@ const Product = () => {
       }
     };
 
-    fetchCategory();
-  }, [categoryId]);
+    fetchData();
+  }, [categoryId, searchParams]);
 
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
@@ -86,9 +98,9 @@ const Product = () => {
             <div className="loading">Loading products...</div>
           ) : error ? (
             <div className="error">Error: {error}</div>
-          ) : category?.products?.length > 0 ? (
+          ) : products.length > 0 ? (
             <div className="products-grid">
-              {category.products.map((product) => (
+              {products.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -96,7 +108,7 @@ const Product = () => {
               ))}
             </div>
           ) : (
-            <div className="no-products">No products found in this category</div>
+            <div className="no-products">No products found</div>
           )}
         </div>
         {!category && (

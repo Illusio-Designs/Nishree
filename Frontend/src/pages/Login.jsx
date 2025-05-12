@@ -174,6 +174,12 @@ const Login = () => {
       // Call the login API
       const response = await loginUser(formData);
       
+      // Check if user is an admin
+      if (response.user && response.user.role === 'admin') {
+        toast.error("This login is for consumers only. Please use the admin login page.");
+        return;
+      }
+      
       // Store the token in localStorage
       localStorage.setItem('token', response.token);
       

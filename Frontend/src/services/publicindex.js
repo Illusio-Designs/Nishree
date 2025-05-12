@@ -70,3 +70,30 @@ export const getPublicSliders = async () => {
         throw error.response?.data || error.message;
     }
 };
+
+// Get public product by ID
+export const getPublicProductById = async (productId) => {
+    try {
+        const response = await axios.get(`${API_URL}/api/products/public/${productId}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
+// Get all public products
+export const getAllPublicProducts = async (params = {}) => {
+    try {
+        const queryParams = new URLSearchParams();
+        if (params.category) queryParams.append('category', params.category);
+        if (params.search) queryParams.append('search', params.search);
+        if (params.sort) queryParams.append('sort', params.sort);
+        if (params.page) queryParams.append('page', params.page);
+        if (params.limit) queryParams.append('limit', params.limit);
+
+        const response = await axios.get(`${API_URL}/api/products/public?${queryParams.toString()}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};

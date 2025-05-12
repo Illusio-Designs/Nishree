@@ -9,7 +9,9 @@ import {
     searchProducts,
     getFeaturedProducts,
     getNewArrivals,
-    getBestSellers
+    getBestSellers,
+    getPublicProductById,
+    getAllPublicProducts
 } from '../controller/productController.js';
 import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
@@ -17,7 +19,8 @@ import upload from '../middleware/uploadMiddleware.js';
 const router = express.Router();
 
 // Public routes
-router.get('/', getAllProducts);
+router.get('/public', getAllPublicProducts);
+router.get('/public/:id', getPublicProductById);
 router.get('/search', searchProducts);
 router.get('/featured', getFeaturedProducts);
 router.get('/new-arrivals', getNewArrivals);

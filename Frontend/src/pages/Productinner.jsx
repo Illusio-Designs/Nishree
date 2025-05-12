@@ -1,9 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Header from "../components/Header";
 import "../Styles/Productinner.css";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
+import { getPublicProductById } from "../services/publicindex";
 import productImage from "../assets/4 (1) 2.png";
 import offer from "../assets/offer.png";
 import truck from "../assets/truck.png";
@@ -23,6 +25,36 @@ import card2 from "../assets/img (6).png";
 import card3 from "../assets/img (7).png";
 
 const Productinner = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        console.log('Fetching product with ID:', id);
+        const response = await getPublicProductById(id);
+        console.log('Product response:', response);
+        
+        if (response.success && response.data) {
+          setProduct(response.data);
+        } else {
+          setError('Product data not found in response');
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        setError(err.message || 'Failed to fetch product');
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
     const observer = new IntersectionObserver(
@@ -77,35 +109,47 @@ const Productinner = () => {
     },
   ];
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!product) return <div>Product not found</div>;
+
   return (
     <>
       <Header />
       <div className="background product-inner section">
         <div className="products-info">
           <div className="product-left">
-            <img src={productImage} alt="Chole Masala" className="main-image" />
+            <img 
+              src={`${import.meta.env.VITE_API_URL}${product.ProductImages?.[0]?.image_url}`} 
+              alt={product.name} 
+              className="main-image" 
+            />
             <div className="thumbnail-list">
-              {[...Array(4)].map((_, i) => (
-                <img key={i} src={productImage} alt="thumb" className="thumb" />
+              {product.ProductImages?.map((image, i) => (
+                <img 
+                  key={i} 
+                  src={`${import.meta.env.VITE_API_URL}${image.image_url}`} 
+                  alt={`${product.name} - ${i + 1}`} 
+                  className="thumb" 
+                />
               ))}
             </div>
           </div>
 
           <div className="product-right">
             <div className="badge">Best Seller</div>
-            <h1>Signature Garam Masala</h1>
-            <p className="desc">
-              A perfect blend of bold spices for authentic Indian curries.
-            </p>
-            <p className="desc">
-              A perfect blend of bold spices for authentic Indian curries.
-            </p>
+            <h1>{product.name}</h1>
+            <p className="desc">{product.description}</p>
 
             <select className="weight-select">
-              <option>100gm</option>
+              {product.ProductVariations?.map((variation, index) => (
+                <option key={index} value={variation.id}>
+                  {variation.weight}{variation.weightUnit}
+                </option>
+              ))}
             </select>
 
-            <p className="price">₹250</p>
+            <p className="price">₹{product.ProductVariations?.[0]?.price || 0}</p>
 
             <div className="actions">
               <button className="btn-red">Add to Cart</button>

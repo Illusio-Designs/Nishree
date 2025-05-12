@@ -21,7 +21,7 @@ const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
-  return user ? children : <Navigate to="/admin/login" />;
+  return user?.role === 'admin' ? children : <Navigate to="/admin/login" />;
 };
 
 const ProtectedRoute = ({ children }) => {
@@ -37,9 +37,10 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<Home />} />
       <Route path="/products" element={<Product />} />
+      <Route path="/product" element={<Navigate to="/products" replace />} />
       <Route path="/collection" element={<Collection />} />
       <Route path="/about" element={<About />} />
-      <Route path="/productinner" element={<Productinner />} />
+      <Route path="/productinner/:id" element={<Productinner />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
@@ -70,6 +71,9 @@ const AppRoutes = () => {
           </AdminRoute>
         }
       />
+
+      {/* Catch all route - redirect to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
