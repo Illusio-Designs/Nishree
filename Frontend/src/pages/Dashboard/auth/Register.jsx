@@ -12,7 +12,7 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "admin",
+    role: "consumer",
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ const Register = () => {
         username: formData.username,
         email: formData.email,
         password: formData.password,
-        role: "admin",
+        role: formData.role,
       });
       toast.success("Registration successful!");
       navigate("/dashboard");
@@ -54,7 +54,7 @@ const Register = () => {
       <ToastContainer position="top-center" className="toast" />
       <div className="register-card">
         <div>
-          <h2 className="register-title">Create Admin Account</h2>
+          <h2 className="register-title">Create Account</h2>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -65,7 +65,7 @@ const Register = () => {
               type="text"
               required
               className="register-input"
-              placeholder="Admin Username"
+              placeholder="Username"
               value={formData.username}
               onChange={handleChange}
               autoComplete="username"
@@ -78,7 +78,7 @@ const Register = () => {
               type="email"
               required
               className="register-input"
-              placeholder="Admin Email address"
+              placeholder="Email address"
               value={formData.email}
               onChange={handleChange}
               autoComplete="email"
@@ -130,20 +130,32 @@ const Register = () => {
             </div>
           </div>
 
+          <div className="input-group">
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="register-input"
+            >
+              <option value="consumer">Consumer</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
           <div>
             <button
               type="submit"
               className="register-button"
               disabled={isLoading}
             >
-              {isLoading ? "Registering Admin..." : "Register as Admin"}
+              {isLoading ? "Registering..." : "Register"}
             </button>
           </div>
         </form>
 
         <div className="text-center">
           <Link to="/admin/login" className="login-link">
-            Already have an admin account? Login
+            Already have an account? Login
           </Link>
         </div>
       </div>

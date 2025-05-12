@@ -70,7 +70,7 @@ const ProductCard = ({ product }) => {
               >
                 <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
               </svg>
-              <p>0.0</p>
+              <span>0.0</span>
             </p>
           </div>
           <div className="product-price">
@@ -116,7 +116,7 @@ const ProductCard = ({ product }) => {
         </div>
         <div className="product-img">
           <img 
-            src={product.image} 
+            src={`${import.meta.env.VITE_API_URL}${product.image}`}
             className="img-fluid" 
             alt={product.name}
             onError={(e) => {
@@ -141,14 +141,14 @@ const ProductCard = ({ product }) => {
             >
               <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
             </svg>
-            <p>4.5</p>
+            <span>4.5</span>
           </p>
         </div>
         <div className="product-price">
           <div className="prices">
-            <p className="discount-price">₹{product.price?.toFixed(2) || '0.00'}</p>
+            <p className="discount-price">₹{Number(product.price || 0).toFixed(2)}</p>
             {product.comparePrice && (
-              <p className="current-price">₹{product.comparePrice.toFixed(2)}</p>
+              <p className="current-price">₹{Number(product.comparePrice).toFixed(2)}</p>
             )}
           </div>
           <div className="product-cart" onClick={handleAddToCart}>

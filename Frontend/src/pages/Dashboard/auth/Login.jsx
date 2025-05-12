@@ -36,7 +36,7 @@ const Login = () => {
     <div className="auth-container">
       <ToastContainer position="top-center" className="toast" />
       <div className="auth-card">
-        <h2 className="auth-title">Admin Login</h2>
+        <h2 className="auth-title">Login</h2>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
@@ -45,7 +45,7 @@ const Login = () => {
               type="email"
               required
               className="auth-input"
-              placeholder="Admin Email"
+              placeholder="Email"
               value={formData.email}
               onChange={handleChange}
               autoComplete="email"
@@ -79,14 +79,14 @@ const Login = () => {
 
           <div className="form-group">
             <button type="submit" disabled={isLoading} className="auth-button">
-              {isLoading ? "Signing in..." : "Sign in as Admin"}
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
 
         <div className="text-center">
           <Link to="/admin/register" className="auth-link">
-            Don't have an admin account? Sign up
+            Don't have an account? Sign up
           </Link>
         </div>
       </div>
