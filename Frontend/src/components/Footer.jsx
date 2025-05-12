@@ -20,8 +20,6 @@ const Footer = () => {
             <div className="footer-links">
               <a href="/about">About Us</a>
               <a href="/product">Products</a>
-              <a href="#">Recipes</a>
-              <a href="#">Blog</a>
               <a href="/contact">Contact Us</a>
             </div>
           </div>

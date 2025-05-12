@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Header from "../components/Header";
 import "../Styles/Home.css";
 import about from "../assets/img.png";
@@ -17,10 +17,13 @@ import { getPublicSliders } from '../services/publicindex';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Home = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [sliders, setSliders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const backgroundRef = useRef(null);
+  const wrapperRef = useRef(null);
+  const titleRef = useRef(null);
 
   useEffect(() => {
     const fetchSliders = async () => {
@@ -29,19 +32,12 @@ const Home = () => {
         const data = await getPublicSliders();
         console.log('Fetched sliders data:', data);
         
-        // Handle both array and object with sliders property
         const sliderData = Array.isArray(data) ? data : (data.sliders || []);
         
-        // Add full URL path to images with correct directory name
         const slidersWithFullUrls = sliderData.map(slider => ({
           ...slider,
-          image: `${API_URL}/uploads/slider/${slider.image}`
+          image: slider.image.startsWith('http') ? slider.image : `${API_URL}/uploads/slider/${slider.image}`
         }));
-        
-        console.log('Slider images with full URLs:', slidersWithFullUrls.map(slider => ({
-          title: slider.title,
-          imageUrl: slider.image
-        })));
         
         setSliders(slidersWithFullUrls);
       } catch (err) {
@@ -55,15 +51,52 @@ const Home = () => {
     fetchSliders();
   }, []);
 
-  // Auto-advance slides every 5 seconds
   useEffect(() => {
     if (sliders.length > 0) {
-      const timer = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % sliders.length);
-      }, 5000);
-      return () => clearInterval(timer);
+      updateSlider();
     }
-  }, [sliders.length]);
+  }, [currentIndex, sliders]);
+
+  const updateBackground = () => {
+    if (backgroundRef.current && sliders[currentIndex]) {
+      backgroundRef.current.style.backgroundImage = `url(${sliders[currentIndex].image})`;
+    }
+  };
+
+  const updateTitle = () => {
+    if (titleRef.current) {
+      const items = sliders.map((slider) => slider.title);
+      titleRef.current.innerHTML = "";
+      
+      items.forEach((item) => {
+        const span = document.createElement("span");
+        span.textContent = item;
+        titleRef.current.appendChild(span);
+      });
+      
+      titleRef.current.style.transform = `translateY(-${currentIndex * 52}px)`;
+    }
+  };
+
+  const updateSlider = () => {
+    if (wrapperRef.current) {
+      wrapperRef.current.style.transform = `translateX(-${currentIndex * 270}px)`;
+    }
+    updateBackground();
+    updateTitle();
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIndex < sliders.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    }
+  };
 
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
@@ -91,44 +124,53 @@ const Home = () => {
         ) : error ? (
           <div className="error">Error: {error}</div>
         ) : sliders.length > 0 ? (
-          <div className="slider-container">
-            {sliders.map((slider, index) => {
-              const imageUrl = `${API_URL}/uploads/slider/${slider.image}`;
-              console.log(`Slider ${index} image URL:`, imageUrl);
-              return (
-                <div
-                  key={slider.id || slider._id || index}
-                  className={`slider-item ${index === currentSlide ? 'active' : ''}`}
-                  style={{ display: index === currentSlide ? 'block' : 'none' }}
-                >
-                  <img 
-                    src={imageUrl} 
-                    alt={slider.title} 
-                    className="slider-image"
-                    onError={(e) => {
-                      console.error('Image failed to load:', imageUrl);
-                      e.target.onerror = null;
-                      e.target.src = about; // Use local fallback image
-                    }}
-                  />
-                  <div className="slider-content">
-                    <h2>{slider.title}</h2>
-                    {slider.description && <p>{slider.description}</p>}
-                    {slider.buttonText && (
-                      <button className="btn-red">{slider.buttonText}</button>
-                    )}
+          <div className="rotating-slider">
+            <div className="rotating-slider__content">
+              <div className="rotating-slider__background" ref={backgroundRef} />
+              <div className="rotating-slider__wrapper" ref={wrapperRef}>
+                {sliders.map((slider, index) => (
+                  <div
+                    key={slider.id || slider._id || index}
+                    className={`rotating-slider__slide ${index === currentIndex ? 'active' : ''}`}
+                    data-title={slider.title}
+                  >
+                    <img
+                      src={slider.image}
+                      alt={slider.title}
+                      className="rotating-slider__image"
+                      onError={(e) => {
+                        console.error('Image failed to load:', slider.image);
+                        e.target.onerror = null;
+                        e.target.src = about;
+                      }}
+                    />
                   </div>
-                </div>
-              );
-            })}
-            <div className="slider-dots">
-              {sliders.map((_, index) => (
-                <span
-                  key={`dot-${index}`}
-                  className={`dot ${index === currentSlide ? "active" : ""}`}
-                  onClick={() => setCurrentSlide(index)}
-                />
-              ))}
+                ))}
+              </div>
+              <div className="rotating-slider__list" ref={titleRef} />
+              <div className="slider-content">
+                <h2>{sliders[currentIndex]?.title}</h2>
+                {sliders[currentIndex]?.description && <p>{sliders[currentIndex].description}</p>}
+                {sliders[currentIndex]?.buttonText && (
+                  <button className="btn-red">{sliders[currentIndex].buttonText}</button>
+                )}
+              </div>
+              <div className="rotating-slider__navigation">
+                <button
+                  className={`rotating-slider__prev ${currentIndex === 0 ? 'hidden' : ''}`}
+                  onClick={handlePrev}
+                  disabled={currentIndex === 0}
+                >
+                  ←
+                </button>
+                <button
+                  className={`rotating-slider__next ${currentIndex === sliders.length - 1 ? 'hidden' : ''}`}
+                  onClick={handleNext}
+                  disabled={currentIndex === sliders.length - 1}
+                >
+                  →
+                </button>
+              </div>
             </div>
           </div>
         ) : (

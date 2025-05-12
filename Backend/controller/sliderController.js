@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
         cb(null, path.join(__dirname, '../uploads/slider'));
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
+        cb(null, `slider-${uuidv4()}.webp`);
     }
 });
 
@@ -142,11 +142,24 @@ export const getSliderById = async (req, res) => {
 export const updateSlider = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, link, order } = req.body;
+        const { title, description, buttonText, buttonType, buttonStyle, categoryId, status, position } = req.body;
 
         const slider = await Slider.findByPk(id);
         if (!slider) {
             return res.status(404).json({ message: 'Slider not found' });
+        }
+
+        // Handle category ID
+        let categoryIdToUse = Number(categoryId);
+        if (categoryIdToUse === "" || isNaN(categoryIdToUse)) {
+            categoryIdToUse = null;
+        }
+        
+        if (categoryIdToUse) {
+            const category = await Category.findByPk(categoryIdToUse);
+            if (!category) {
+                return res.status(400).json({ message: 'Category not found' });
+            }
         }
 
         // Handle image update
@@ -169,31 +182,35 @@ export const updateSlider = async (req, res) => {
                 console.error('Error handling image update:', error);
                 return res.status(500).json({ 
                     success: false,
-                    message: 'Failed to process image',
+                    message: 'Failed to update image',
                     error: error.message 
                 });
             }
         }
 
-        // Update fields
+        // Update slider
         await slider.update({
-            title: title || slider.title,
-            description: description || slider.description,
-            link: link || slider.link,
-            order: order !== undefined ? order : slider.order,
+            title,
+            description,
+            buttonText,
+            buttonType,
+            buttonStyle,
+            categoryId: categoryIdToUse,
+            status,
+            position,
             image
         });
 
-        res.json({ 
-            success: true, 
-            message: 'Slider updated successfully', 
-            data: slider 
+        res.status(200).json({ 
+            success: true,
+            message: 'Slider updated successfully',
+            data: slider
         });
     } catch (error) {
-        console.error('Error updating slider:', error);
+        console.error('Update slider error:', error);
         res.status(500).json({ 
             success: false,
-            message: 'Failed to update slider', 
+            message: 'Failed to update slider',
             error: error.message 
         });
     }
