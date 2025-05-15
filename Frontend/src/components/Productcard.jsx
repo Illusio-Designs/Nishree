@@ -1,17 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
+import { getAllPublicProducts } from '../services/publicindex';
 import bg from "../assets/Vector 1.png";
 import placeholderImage from "../assets/placeholder-image.png";
 import "../Styles/components/Productcard.css";
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product: propProduct }) => {
   const navigate = useNavigate();
   const { addToWishlist, removeFromWishlist, wishlistItems } = useWishlist();
   const { addToCart } = useCart();
   const [imageError, setImageError] = useState(false);
+  const [product, setProduct] = useState(propProduct);
+  const [loading, setLoading] = useState(!propProduct);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!propProduct) {
+        try {
+          const response = await getAllPublicProducts({ limit: 1 });
+          if (response.success && response.data.products.length > 0) {
+            setProduct(response.data.products[0]);
+          }
+        } catch (error) {
+          console.error('Error fetching product:', error);
+          toast.error('Failed to load product');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchProduct();
+  }, [propProduct]);
 
   // Get primary image or first image from ProductImages array
   const getProductImage = (product) => {
@@ -62,8 +85,8 @@ const ProductCard = ({ product }) => {
     setImageError(true);
   };
 
-  // If no product is provided, show a placeholder
-  if (!product) {
+  // If loading or no product is provided, show a placeholder
+  if (loading || !product) {
     return (
       <div className="products-card">
         <div className="card">
@@ -86,7 +109,7 @@ const ProductCard = ({ product }) => {
             <img src={bg} className="img-fluid" alt="bg" />
           </div>
           <div>
-            <p className="product-name">Loading...</p>
+            <p className="product-name">{loading ? 'Loading...' : 'No product available'}</p>
             <p className="rating">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
