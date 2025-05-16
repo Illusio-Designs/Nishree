@@ -90,11 +90,6 @@ const Product = () => {
   return (
     <>
       <Header />
-      <div>
-        <div>loading: {String(loading)}</div>
-        <div>error: {String(error)}</div>
-        <div>product: {JSON.stringify(products)}</div>
-      </div>
       <div className="hero-section section">
         <div className="hero-img-section">
           <img src={hero} className="img-fluid" alt="hero" />
