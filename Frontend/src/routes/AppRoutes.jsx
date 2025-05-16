@@ -16,18 +16,19 @@ import AdminForgotPassword from "../pages/Dashboard/auth/ForgotPassword";
 import AdminResetPassword from "../pages/Dashboard/auth/ResetPassword";
 import Dashboard from "../pages/Dashboard/Layout/Dashboard";
 import { useAuth } from "../context/AuthContext";
+import Loader from "../components/Loader";
 
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader size="medium" />;
   return user?.role === 'admin' ? children : <Navigate to="/admin/login" />;
 };
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader size="medium" />;
   return user ? children : <Navigate to="/login" />;
 };
 

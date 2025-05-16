@@ -13,6 +13,7 @@ import BlogCard from "../components/BlogCard";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 import { getPublicSliders } from '../services/publicindex';
+import Loader from "../components/Loader";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -120,7 +121,10 @@ const Home = () => {
       <Header />
       <div className="hero-section section">
         {loading ? (
-          <div className="loading">Loading sliders...</div>
+          <div className="loading">
+            <Loader size="large" />
+            <p>Loading sliders...</p>
+          </div>
         ) : error ? (
           <div className="error">Error: {error}</div>
         ) : sliders.length > 0 ? (

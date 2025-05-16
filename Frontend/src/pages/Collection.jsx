@@ -11,6 +11,7 @@ import vector4 from "../assets/Vector (23).png";
 import vector5 from "../assets/Vector (24).png";
 import { getPublicCategories } from "../services/publicindex";
 import "../Styles/Collection.css";
+import Loader from "../components/Loader";
 
 const Collection = () => {
   const [categories, setCategories] = useState([]);
@@ -94,7 +95,10 @@ const Collection = () => {
             </div>
             <div className="blog-cards">
               {loading ? (
-                <div>Loading categories...</div>
+                <div className="loading">
+                  <Loader size="large" />
+                  <p>Loading categories...</p>
+                </div>
               ) : error ? (
                 <div>Error: {error}</div>
               ) : (

@@ -12,6 +12,7 @@ import vector3 from "../assets/Vector (22).png";
 import vector4 from "../assets/Vector (23).png";
 import vector5 from "../assets/Vector (24).png";
 import "../Styles/Product.css"
+import Loader from "../components/Loader";
 
 const Product = () => {
   const [searchParams] = useSearchParams();
@@ -112,7 +113,10 @@ const Product = () => {
             </h1>
           </div>
           {loading ? (
-            <div className="loading">Loading products...</div>
+            <div className="loading">
+              <Loader size="large" />
+              <p>Loading products...</p>
+            </div>
           ) : error ? (
             <div className="error">Error: {error}</div>
           ) : products.length > 0 ? (

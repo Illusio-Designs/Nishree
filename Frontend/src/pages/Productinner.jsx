@@ -20,6 +20,7 @@ import { getPublicProductById, getPublicCoupons, getPublicProductReviews, create
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
+import Loader from "../components/Loader";
 
 // Base URL for API
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -381,7 +382,7 @@ const Productinner = () => {
   if (loading || !imagesLoaded) {
     return (
       <div className="loading-container">
-        <div className="loading-spinner"></div>
+        <Loader size="large" />
         <p>Loading product details...</p>
       </div>
     );
@@ -776,7 +777,10 @@ const Productinner = () => {
 
           <div className="reviews-list">
             {reviewLoading ? (
-              <div className="loading">Loading reviews...</div>
+              <div className="loading">
+                <Loader size="small" />
+                <p>Loading reviews...</p>
+              </div>
             ) : reviews.length > 0 ? (
               reviews.map((review) => (
                 <div key={review.id} className="review-card">

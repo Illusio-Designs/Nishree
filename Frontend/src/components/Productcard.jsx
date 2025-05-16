@@ -52,9 +52,17 @@ const ProductCard = ({ product: propProduct }) => {
   const getProductPrice = (product) => {
     if (!product?.ProductVariations?.length) return { price: 0, comparePrice: null };
     const variation = product.ProductVariations[0];
+    const currentPrice = variation.price || 0;
+    const originalPrice = variation.comparePrice || currentPrice;
+    
+    // Ensure original price is higher than current price
+    const comparePrice = originalPrice > currentPrice ? originalPrice : currentPrice;
+    const price = originalPrice > currentPrice ? currentPrice : originalPrice;
+    
     return {
-      price: variation.price || 0,
-      comparePrice: variation.comparePrice || null
+      price,
+      comparePrice,
+      discountAmount: comparePrice - price
     };
   };
 
@@ -147,7 +155,7 @@ const ProductCard = ({ product: propProduct }) => {
     );
   }
 
-  const { price, comparePrice } = getProductPrice(product);
+  const { price, comparePrice, discountAmount } = getProductPrice(product);
   const imageUrl = product ? `${import.meta.env.VITE_API_URL}${getProductImage(product)}` : '';
 
   return (
@@ -195,9 +203,8 @@ const ProductCard = ({ product: propProduct }) => {
         <div className="product-price">
           <div className="prices">
             <p className="discount-price">₹{Number(price).toFixed(2)}</p>
-            {comparePrice && (
-              <p className="current-price">₹{Number(comparePrice).toFixed(2)}</p>
-            )}
+            <p className="current-price">₹{Number(comparePrice).toFixed(2)}</p>
+            
           </div>
           <div className="product-cart" onClick={handleAddToCart}>
             <svg

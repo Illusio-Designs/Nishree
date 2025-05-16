@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { authService, userService } from "../services";
+import Loader from "../components/Loader";
 
 const AuthContext = createContext(null);
 
@@ -119,11 +120,9 @@ function AuthProvider({ children }) {
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        height: '100vh',
-        fontSize: '1.2rem',
-        color: '#666'
+        height: '100vh' 
       }}>
-        Loading...
+        <Loader size="large" />
       </div>
     );
   }

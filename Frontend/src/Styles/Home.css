@@ -117,7 +117,7 @@
 .about-img, .about-text{
     width: 50%;
 }
-.about-img img{
+.hero-section .about-img img{
     height: 650px;
     width: 650px;
 }
