@@ -1,5 +1,8 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js'; // Ensure to use .js extension
+import { sequelize } from '../config/db.js';
+import { User } from './userModel.js';
+import { Product } from './productModel.js';
+import { ReviewImage } from './reviewImageModel.js';
 
 export const Review = sequelize.define('Review', {
     id: {
@@ -7,36 +10,33 @@ export const Review = sequelize.define('Review', {
         primaryKey: true,
         autoIncrement: true
     },
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'users',
-            key: 'id'
-        }
-    },
     productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-            model: 'products',
-            key: 'id'
-        }
+        field: 'productId'
     },
-    orderId: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        references: {
-            model: 'orders',
-            key: 'id'
+        field: 'userId'
+    },
+    guestName: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    guestEmail: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isEmail: true
         }
     },
     rating: {
-        type: DataTypes.DECIMAL(2, 1),
+        type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
-            min: 1.0,
-            max: 5.0
+            min: 1,
+            max: 5
         }
     },
     review: {
@@ -47,31 +47,42 @@ export const Review = sequelize.define('Review', {
         type: DataTypes.ENUM('pending', 'approved', 'rejected'),
         defaultValue: 'pending'
     },
-    verifiedPurchase: {
+    verified_purchase: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
-    isFeatured: {
+    is_featured: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
-    adminNotes: {
+    admin_notes: {
         type: DataTypes.TEXT,
         allowNull: true
     }
 }, {
     tableName: 'reviews',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    charset: 'utf8mb4',
-    collate: 'utf8mb4_general_ci',
-    indexes: [
-        {
-            fields: ['userId']
-        },
-        {
-            fields: ['productId']
-        }
-    ]
-}); 
+    timestamps: true
+});
+
+// Associations define the relationships. FKs will be created based on these and foreignKey field names.
+Review.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'User',
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE'
+});
+
+Review.belongsTo(Product, {
+    foreignKey: 'productId',
+    as: 'Product',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+});
+
+Review.hasMany(ReviewImage, {
+    foreignKey: 'reviewId',
+    as: 'ReviewImages',
+    onDelete: 'CASCADE'
+});
+
+export default Review; 

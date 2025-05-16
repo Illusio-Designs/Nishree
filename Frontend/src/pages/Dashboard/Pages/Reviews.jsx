@@ -6,7 +6,13 @@ import ActionButton from "../../../components/common/ActionButton";
 import Button from "../../../components/common/Button";
 import Modal from "../../../components/common/Modal";
 import Filter from "../../../components/common/Filter";
-import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from "react-icons/hi2";
+import { 
+  HiOutlinePencil, 
+  HiOutlineTrash, 
+  HiOutlineEye, 
+  HiOutlineCheck, 
+  HiOutlineXMark 
+} from "react-icons/hi2";
 import "../../../Styles/dashboard/Reviews.css";
 
 const Reviews = () => {
@@ -15,6 +21,8 @@ const Reviews = () => {
   const [selectedReview, setSelectedReview] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [modalMode, setModalMode] = useState("view");
+  const [loading, setLoading] = useState(false);
+  const [adminNotes, setAdminNotes] = useState("");
 
   const columns = [
     { key: "productName", header: "Product" },
@@ -52,11 +60,27 @@ const Reviews = () => {
             variant="view"
             tooltip="View Details"
           />
+          {row.status === "pending" && (
+            <>
+              <ActionButton
+                icon={<HiOutlineCheck size={20} />}
+                onClick={() => handleModerate(row.id, "approved")}
+                variant="success"
+                tooltip="Approve Review"
+              />
+              <ActionButton
+                icon={<HiOutlineXMark size={20} />}
+                onClick={() => handleModerate(row.id, "rejected")}
+                variant="danger"
+                tooltip="Reject Review"
+              />
+            </>
+          )}
           <ActionButton
             icon={<HiOutlinePencil size={20} />}
-            onClick={() => handleStatusUpdate(row)}
+            onClick={() => handleEditReview(row)}
             variant="edit"
-            tooltip={row.status === "pending" ? "Approve" : "Update Status"}
+            tooltip="Edit Review"
           />
           <ActionButton
             icon={<HiOutlineTrash size={20} />}
@@ -74,12 +98,22 @@ const Reviews = () => {
   }, [filterStatus]);
 
   const fetchReviews = async () => {
+    setLoading(true);
     try {
-      const data = await reviewService.getAllReviews(filterStatus);
-      setReviews(data);
+      const response = await reviewService.getAllReviews(filterStatus);
+      if (response && Array.isArray(response)) {
+        setReviews(response);
+      } else {
+        console.error('Invalid response format:', response);
+        toast.error("Invalid response format from server");
+        setReviews([]);
+      }
     } catch (error) {
-      toast.error("Failed to fetch reviews");
       console.error("Error fetching reviews:", error);
+      toast.error(error.message || "Failed to fetch reviews");
+      setReviews([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,15 +123,21 @@ const Reviews = () => {
     setIsModalOpen(true);
   };
 
-  const handleStatusUpdate = async (review) => {
-    const newStatus = review.status === "pending" ? "approved" : "pending";
+  const handleEditReview = (review) => {
+    setSelectedReview(review);
+    setAdminNotes(review.admin_notes || "");
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  const handleModerate = async (id, status) => {
     try {
-      await reviewService.updateReviewStatus(review.id, { status: newStatus });
-      toast.success(`Review ${newStatus} successfully`);
+      await reviewService.moderateReview(id, { status });
+      toast.success(`Review ${status} successfully`);
       fetchReviews();
     } catch (error) {
-      toast.error(error.message || "Failed to update review status");
-      console.error("Error updating review status:", error);
+      toast.error(error.message || "Failed to moderate review");
+      console.error("Error moderating review:", error);
     }
   };
 
@@ -110,6 +150,34 @@ const Reviews = () => {
       } catch (error) {
         toast.error(error.message || "Failed to delete review");
         console.error("Error deleting review:", error);
+      }
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await reviewService.moderateReview(selectedReview.id, {
+        admin_notes: adminNotes,
+        is_featured: selectedReview.is_featured
+      });
+      toast.success("Review updated successfully");
+      setIsModalOpen(false);
+      fetchReviews();
+    } catch (error) {
+      toast.error(error.message || "Failed to update review");
+      console.error("Error updating review:", error);
+    }
+  };
+
+  const handleDeleteImage = async (imageId) => {
+    if (window.confirm("Are you sure you want to delete this image?")) {
+      try {
+        await reviewService.deleteReviewImage(imageId);
+        toast.success("Image deleted successfully");
+        fetchReviews();
+      } catch (error) {
+        toast.error(error.message || "Failed to delete image");
+        console.error("Error deleting image:", error);
       }
     }
   };
@@ -131,6 +199,7 @@ const Reviews = () => {
             { value: "all", label: "All Reviews" },
             { value: "pending", label: "Pending" },
             { value: "approved", label: "Approved" },
+            { value: "rejected", label: "Rejected" },
           ]}
           value={filterStatus}
           onChange={setFilterStatus}
@@ -142,6 +211,7 @@ const Reviews = () => {
         columns={columns}
         searchPlaceholder="Search reviews..."
         searchFields={["productName", "customerName", "status"]}
+        loading={loading}
       />
 
       <Modal
@@ -149,8 +219,9 @@ const Reviews = () => {
         onClose={() => {
           setIsModalOpen(false);
           setSelectedReview(null);
+          setAdminNotes("");
         }}
-        title="Review Details"
+        title={modalMode === "view" ? "Review Details" : "Edit Review"}
       >
         {selectedReview && (
           <div className="modal-content">
@@ -179,32 +250,69 @@ const Reviews = () => {
                 <h3>Review Images</h3>
                 <div className="review-images">
                   {selectedReview.images.map((image, index) => (
-                    <img
-                      key={index}
-                      src={image.url}
-                      alt={`Review image ${index + 1}`}
-                      className="review-image"
-                    />
+                    <div key={index} className="image-container">
+                      <img
+                        src={image.url}
+                        alt={`Review image ${index + 1}`}
+                        className="review-image"
+                      />
+                      <button
+                        className="delete-image-btn"
+                        onClick={() => handleDeleteImage(image.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
 
+            {modalMode === "edit" && (
+              <div className="info-section">
+                <h3>Admin Notes</h3>
+                <textarea
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  placeholder="Add admin notes..."
+                  className="admin-notes"
+                />
+                <div className="checkbox-container">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={selectedReview.is_featured}
+                      onChange={(e) =>
+                        setSelectedReview({
+                          ...selectedReview,
+                          is_featured: e.target.checked,
+                        })
+                      }
+                    />
+                    Feature this review
+                  </label>
+                </div>
+              </div>
+            )}
+
             <div className="modal-footer">
-              <ActionButton
-                onClick={() => handleStatusUpdate(selectedReview)}
-                variant="primary"
-              >
-                {selectedReview.status === "pending"
-                  ? "Approve"
-                  : "Update Status"}
-              </ActionButton>
-              <ActionButton
-                onClick={() => setIsModalOpen(false)}
-                variant="secondary"
-              >
-                Close
-              </ActionButton>
+              {modalMode === "edit" ? (
+                <>
+                  <Button onClick={handleSaveEdit} variant="primary">
+                    Save Changes
+                  </Button>
+                  <Button
+                    onClick={() => setIsModalOpen(false)}
+                    variant="secondary"
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={() => setIsModalOpen(false)} variant="secondary">
+                  Close
+                </Button>
+              )}
             </div>
           </div>
         )}

@@ -2,6 +2,8 @@
   background-color: #f5f5f5;
   padding: 0;
   margin: 0;
+  position: relative;
+  z-index: 0;
 }
 
 .products-info {
@@ -153,41 +155,95 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  color: #1f2937;
 }
 
 .offer-list {
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
+  margin-top: 15px;
 }
 
 .offer-box {
   background: #fff;
-  padding: 5px 15px;
+  padding: 15px;
   border-radius: 12px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-  width: 150px;
-  font-size: 0.85rem;
+  width: 200px;
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.offer-box h4 {
-  margin: 0 0 6px;
+.offer-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.coupon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.coupon-header h4 {
+  margin: 0;
   font-weight: 700;
-  font-size: 14px;
-  font-family: Nunito Sans;
+  font-size: 16px;
+  color: #dc2626;
+  font-family: 'Nunito Sans', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.copy-coupon-btn {
+  padding: 4px 12px;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.copy-coupon-btn:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.copy-coupon-btn:active {
+  transform: scale(0.95);
 }
 
 .offer-box p {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   font-weight: 400;
-  font-size: 10px;
-  font-family: Nunito Sans;
+  font-size: 14px;
   color: #4b5563;
+  font-family: 'Nunito Sans', sans-serif;
+  line-height: 1.4;
 }
 
-.offer-box span {
-  color: #FAA215;
-  font-weight: 500;
+.offer-box .validity {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 0;
+}
+
+.no-coupons {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Remove old styles */
+.apply-coupon-btn,
+.coupon-error {
+  display: none;
 }
 
 .icons-section {
@@ -227,17 +283,21 @@
   background: #ffffff;
   padding: 40px 5%;
   margin: 0;
+  min-height: 200px;
 }
 
 .section {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  visibility: hidden;
+  will-change: opacity, transform;
 }
 
 .section.visible {
   opacity: 1;
   transform: translateY(0);
+  visibility: visible;
 }
 
 .Facts {
@@ -245,6 +305,7 @@
   background-color: #ffffff;
   padding: 40px 5%;
   margin: 0;
+  min-height: 200px;
 }
 
 .fact-content {
@@ -610,6 +671,7 @@
 .whychooseus {
   background: #fff;
   padding: 60px 5%;
+  min-height: 200px;
 }
 
 .products-heading {
@@ -672,6 +734,7 @@
 .legacy {
   background: #f9f9f9;
   padding: 60px 5%;
+  min-height: 200px;
 }
 
 .testimonials {
@@ -824,113 +887,258 @@
   }
 }
 
-/* Review Section */
+/* Review Section Styles */
 .review-section {
+  padding: 2rem;
   background: #fff;
-  padding: 60px 5%;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 2rem 0;
+}
+
+.review-stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.average-rating {
+  text-align: center;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.average-rating h3 {
+  font-size: 2.5rem;
+  color: #333;
   margin: 0;
 }
 
+.rating-breakdown {
+  flex: 1;
+}
+
+.rating-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.bar-container {
+  flex: 1;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  background: #ffc107;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.review-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.reviewer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.verified-badge {
+  background: #28a745;
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.review-text {
+  margin: 1rem 0;
+  line-height: 1.6;
+  color: #333;
+}
+
+.review-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.review-image-container {
+  position: relative;
+  padding-top: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.review-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.review-image:hover {
+  transform: scale(1.05);
+}
+
+.review-date {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
+
+.stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.star {
+  color: #ffc107;
+  font-size: 1.25rem;
+}
+
+/* Review Form Styles */
 .review-form-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 30px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .review-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.star-rating {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.star-rating label {
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.stars {
-  display: flex;
-  gap: 5px;
-}
-
-.star {
-  font-size: 24px;
-  color: #f59e0b;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.star:hover {
-  color: #fbbf24;
-}
-
-.star.active {
-  color: #f59e0b;
+  gap: 1.5rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .form-group label {
-  font-weight: 600;
-  color: #1f2937;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
 .form-group textarea {
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
   resize: vertical;
   min-height: 100px;
-  font-family: inherit;
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
-}
-
-.form-group textarea:focus {
-  outline: none;
-  border-color: #dc2626;
 }
 
 .submit-review {
   background: #dc2626;
-  color: white;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
   border: none;
-  padding: 12px 24px;
+  border-radius: 4px;
   font-size: 1rem;
-  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  font-weight: 600;
-  align-self: flex-start;
 }
 
 .submit-review:hover {
   background: #b91c1c;
 }
 
-@media (max-width: 768px) {
-  .review-form-container {
-    padding: 20px;
-  }
+.submit-review:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
 
-  .star {
-    font-size: 20px;
-  }
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
 
-  .submit-review {
-    width: 100%;
-  }
+.no-reviews {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Ensure sections have proper spacing */
+.product-inner,
+.productinner,
+.whychooseus,
+.legacy,
+.Facts,
+.review-section {
+  margin: 40px 0;
+  padding: 40px 5%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Add a minimum height to ensure sections are visible */
+.product-inner,
+.productinner,
+.whychooseus,
+.legacy,
+.Facts,
+.review-section {
+  min-height: 200px;
+}
+
+/* Ensure proper stacking context */
+.background {
+  position: relative;
+  z-index: 0;
+}
+
+/* Add smooth scrolling to the page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ensure proper spacing between sections */
+.section + .section {
+  margin-top: 40px;
 }

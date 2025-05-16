@@ -477,4 +477,29 @@ export const getCoupon = async (req, res) => {
         console.error('Error fetching coupon:', error);
         res.status(500).json({ message: 'Failed to fetch coupon', error: error.message });
     }
+};
+
+// Get all active public coupons
+export const getPublicCoupons = async (req, res) => {
+    try {
+        const coupons = await Coupon.findAll({
+            where: {
+                status: 'active',
+                startDate: { [Op.lte]: new Date() },
+                endDate: { [Op.gte]: new Date() }
+            },
+            attributes: ['id', 'code', 'type', 'value', 'minPurchase', 'maxDiscount', 'endDate']
+        });
+
+        res.status(200).json({
+            count: coupons.length,
+            coupons
+        });
+    } catch (error) {
+        console.error('Error fetching public coupons:', error);
+        res.status(500).json({
+            message: 'Failed to fetch coupons',
+            error: error.message
+        });
+    }
 }; 

@@ -627,8 +627,11 @@ export const couponService = {
 export const reviewService = {
     getAllReviews: async (status = 'all') => {
         try {
-            const response = await api.get(`/api/reviews?status=${status}`);
-            return response.data.reviews;
+            const response = await api.get(`/api/reviews/admin/all?status=${status}`);
+            if (response.data && response.data.reviews) {
+                return response.data.reviews;
+            }
+            throw new Error('Invalid response format from server');
         } catch (error) {
             throw handleApiError(error);
         }
@@ -636,7 +639,7 @@ export const reviewService = {
 
     getReviewById: async (id) => {
         try {
-            const response = await api.get(`/api/reviews/${id}`);
+            const response = await api.get(`/api/reviews/admin/${id}`);
             return response.data.review;
         } catch (error) {
             throw handleApiError(error);
@@ -645,7 +648,7 @@ export const reviewService = {
 
     updateReviewStatus: async (id, statusData) => {
         try {
-            const response = await api.put(`/api/reviews/${id}/status`, statusData);
+            const response = await api.put(`/api/reviews/admin/${id}/status`, statusData);
             return response.data;
         } catch (error) {
             throw handleApiError(error);
@@ -654,7 +657,25 @@ export const reviewService = {
 
     deleteReview: async (id) => {
         try {
-            const response = await api.delete(`/api/reviews/${id}`);
+            const response = await api.delete(`/api/reviews/admin/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    moderateReview: async (id, moderationData) => {
+        try {
+            const response = await api.put(`/api/reviews/admin/${id}/moderate`, moderationData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    deleteReviewImage: async (imageId) => {
+        try {
+            const response = await api.delete(`/api/reviews/admin/images/${imageId}`);
             return response.data;
         } catch (error) {
             throw handleApiError(error);

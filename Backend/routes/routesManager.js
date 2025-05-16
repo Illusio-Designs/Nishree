@@ -16,6 +16,7 @@ import shippingFeeRoutes from './shippingFeeRoutes.js';
 import orderStatusHistoryRoutes from './orderStatusHistoryRoutes.js';
 import seoRoutes from './seoRoutes.js';
 import attributeRoutes from './attributeRoutes.js';
+import reviewRoutes from './reviewRoutes.js';
 
 // Core Routes
 router.use('/users', userRoutes); // This now includes both auth and user routes
@@ -33,6 +34,10 @@ router.use('/shipping-fees', shippingFeeRoutes);
 router.use('/order-status', orderStatusHistoryRoutes);
 router.use('/seo', seoRoutes);
 router.use('/attributes', attributeRoutes);
+
+
+// Review routes
+router.use('/reviews', reviewRoutes);
 
 // Health Check Route
 router.get('/health', (req, res) => {

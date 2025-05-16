@@ -5,7 +5,8 @@ import {
     getCoupon,
     updateCoupon,
     deleteCoupon,
-    validateCoupon
+    validateCoupon,
+    getPublicCoupons
 } from '../controller/couponController.js';
 import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // Public routes
 router.post('/validate', validateCoupon);
+router.get('/public', getPublicCoupons);
 
 // Admin routes
 router.post('/', isAuthenticated, authorize(['admin']), createCoupon);

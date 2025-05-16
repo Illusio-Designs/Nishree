@@ -208,7 +208,7 @@ const Dashboard = () => {
             <HiOutlineTicket className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Coupons</span>
           </Link>
-          {/* <Link
+          <Link
             to="/dashboard/reviews"
             className={`nav-item ${
               location.pathname === "/dashboard/reviews" ? "active" : ""
@@ -217,7 +217,7 @@ const Dashboard = () => {
             <HiOutlineStar className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Reviews</span>
           </Link>
-          <Link
+          {/* <Link
             to="/dashboard/shipping-fees"
             className={`nav-item ${
               location.pathname === "/dashboard/shipping-fees" ? "active" : ""
@@ -358,7 +358,7 @@ const Dashboard = () => {
               {/* <Route path="orders" element={<Orders />} /> */}
               {/* <Route path="order-status-history" element={<OrderStatusHistory />} /> */}
               <Route path="coupons" element={<Coupons />} />
-              {/* <Route path="reviews" element={<Reviews />} /> */}
+              <Route path="reviews" element={<Reviews />} />
               {/* <Route path="shipping-fees" element={<ShippingFees />} />
               <Route path="shipping-addresses" element={<ShippingAddresses />} />
               <Route path="payments" element={<Payments />} />

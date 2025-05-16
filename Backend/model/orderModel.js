@@ -19,8 +19,7 @@ export const Order = sequelize.define('Order', {
     },
     order_number: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     total_amount: {
         type: DataTypes.DECIMAL(10, 2),
@@ -57,21 +56,23 @@ export const Order = sequelize.define('Order', {
     charset: 'utf8mb4',
     collate: 'utf8mb4_general_ci',
     underscored: true,
-    indexes: [
-        {
-            fields: ['user_id']
-        },
-        {
-            unique: true,
-            fields: ['order_number']
-        },
-        {
-            fields: ['status']
-        },
-        {
-            fields: ['payment_status']
-        }
-    ]
+    indexes: [] // Remove all indexes initially
+});
+
+// Add indexes after model definition
+Order.addHook('afterSync', async () => {
+    try {
+        // Add unique constraint on order_number
+        await sequelize.query('ALTER TABLE orders ADD UNIQUE INDEX idx_order_number (order_number)');
+        // Add index on user_id
+        await sequelize.query('ALTER TABLE orders ADD INDEX idx_user_id (user_id)');
+        // Add index on status
+        await sequelize.query('ALTER TABLE orders ADD INDEX idx_status (status)');
+        // Add index on payment_status
+        await sequelize.query('ALTER TABLE orders ADD INDEX idx_payment_status (payment_status)');
+    } catch (error) {
+        console.error('Error adding indexes:', error);
+    }
 });
 
 export default Order; 

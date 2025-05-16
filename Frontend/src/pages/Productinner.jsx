@@ -16,8 +16,10 @@ import div5 from "../assets/div (8).png";
 import div6 from "../assets/div (9).png";
 import div7 from "../assets/div (10).png";
 import div8 from "../assets/div (11).png";
-import { getPublicProductById } from "../services/publicindex";
-import { useParams } from "react-router-dom";
+import { getPublicProductById, getPublicCoupons, getPublicProductReviews, createPublicReview } from "../services/publicindex";
+import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
 
 // Base URL for API
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -31,6 +33,7 @@ const PLACEHOLDER_IMAGES = {
 
 const Productinner = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,6 +42,22 @@ const Productinner = () => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewMessage, setReviewMessage] = useState('');
+  const [coupons, setCoupons] = useState([]);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponError, setCouponError] = useState('');
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState(null);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewFiles, setReviewFiles] = useState([]);
+  const [reviewName, setReviewName] = useState('');
+  const [reviewEmail, setReviewEmail] = useState('');
+  const navigate = useNavigate();
 
   // Function to construct full image URL
   const getImageUrl = useCallback((imagePath) => {
@@ -47,6 +66,15 @@ const Productinner = () => {
     // Remove any leading slashes to prevent double slashes
     const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
     return `${API_BASE_URL}/${cleanPath}`;
+  }, []);
+
+  // Add a new function for review images
+  const getReviewImageUrl = useCallback((imagePath) => {
+    if (!imagePath) return PLACEHOLDER_IMAGES.main;
+    if (imagePath.startsWith('http')) return imagePath;
+    // Remove any leading slashes to prevent double slashes
+    const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+    return `${API_BASE_URL}/uploads/reviews/${cleanPath}`;
   }, []);
 
   const fetchProduct = useCallback(async () => {
@@ -110,20 +138,40 @@ const Productinner = () => {
       },
       { 
         threshold: 0.1,
-        rootMargin: '0px'
+        rootMargin: '50px'
       }
     );
 
     sections.forEach((section) => {
       observer.observe(section);
       // Force initial visibility check
-      if (section.getBoundingClientRect().top < window.innerHeight) {
+      const rect = section.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
         section.classList.add("visible");
       }
     });
 
     return () => observer.disconnect();
   }, [product]);
+
+  // Add a scroll event listener to handle section visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = document.querySelectorAll(".section");
+      sections.forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.75 && rect.bottom > 0) {
+          section.classList.add("visible");
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    // Initial check
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleVariationChange = useCallback((e) => {
     const variation = product.ProductVariations.find(
@@ -169,6 +217,166 @@ const Productinner = () => {
         });
     }
   }, [product, getImageUrl]);
+
+  // Fetch coupons
+  const fetchCoupons = useCallback(async () => {
+    try {
+      const response = await getPublicCoupons();
+      setCoupons(response.coupons || []);
+    } catch (error) {
+      console.error('Error fetching coupons:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCoupons();
+  }, [fetchCoupons]);
+
+  // Calculate discount when coupon is selected
+  useEffect(() => {
+    if (selectedCoupon && selectedVariation) {
+      let discount = 0;
+      if (selectedCoupon.type === 'percentage') {
+        discount = (selectedVariation.price * selectedCoupon.value) / 100;
+        if (selectedCoupon.maxDiscount && discount > selectedCoupon.maxDiscount) {
+          discount = selectedCoupon.maxDiscount;
+        }
+      } else {
+        discount = selectedCoupon.value;
+      }
+      setDiscountAmount(discount);
+    } else {
+      setDiscountAmount(0);
+    }
+  }, [selectedCoupon, selectedVariation]);
+
+  // Fetch reviews
+  const fetchReviews = useCallback(async () => {
+    try {
+      setReviewLoading(true);
+      const response = await getPublicProductReviews(id, {
+        page: reviewPage,
+        limit: 5,
+        sort: 'recent'
+      });
+      setReviews(response.reviews);
+      setReviewStats(response.stats);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      toast.error('Failed to load reviews');
+    } finally {
+      setReviewLoading(false);
+    }
+  }, [id, reviewPage]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    setSubmittingReview(true);
+
+    try {
+        console.log('Starting review submission...');
+        console.log('Product object:', product);
+        console.log('Product ID from params:', id);
+        console.log('Product ID from object:', product?.id);
+        console.log('Review Rating:', reviewRating);
+        console.log('Review Text:', reviewText);
+        console.log('User:', user);
+        console.log('Review Name:', reviewName);
+        console.log('Review Email:', reviewEmail);
+        console.log('Review Files:', reviewFiles);
+
+        // Validate required fields
+        if (!product?.id) {
+            console.error('Product ID is missing');
+            toast.error('Product information is missing. Please refresh the page and try again.');
+            setSubmittingReview(false);
+            return;
+        }
+
+        if (!reviewRating || reviewRating < 1 || reviewRating > 5) {
+            console.error('Invalid rating');
+            toast.error('Please provide a valid rating (1-5)');
+            setSubmittingReview(false);
+            return;
+        }
+
+        if (!reviewText?.trim()) {
+            console.error('Review text is missing');
+            toast.error('Please provide your review text');
+            setSubmittingReview(false);
+            return;
+        }
+
+        const formData = new FormData();
+        // Use the ID from the URL params if product.id is not available
+        const productId = product?.id || id;
+        console.log('Using product ID:', productId);
+        
+        formData.append('productId', productId);
+        formData.append('rating', reviewRating);
+        formData.append('comment', reviewText);
+        
+        // Use user data if logged in, otherwise use form data
+        if (user) {
+            console.log('Using logged-in user data');
+            formData.append('name', user.username);
+            formData.append('email', user.email);
+        } else {
+            console.log('Using guest user data');
+            if (!reviewName?.trim() || !reviewEmail?.trim()) {
+                console.error('Missing name or email for guest review');
+                toast.error('Please provide your name and email');
+                setSubmittingReview(false);
+                return;
+            }
+            formData.append('name', reviewName);
+            formData.append('email', reviewEmail);
+        }
+
+        // Append files if any
+        if (reviewFiles.length > 0) {
+            console.log('Appending review files:', reviewFiles.length);
+            reviewFiles.forEach(file => {
+                formData.append('files', file);
+            });
+        }
+
+        // Log the final FormData contents
+        console.log('FormData contents:');
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        console.log('Sending review submission request...');
+        const response = await createPublicReview(formData);
+        console.log('Review submission response:', response);
+        
+        if (response.success) {
+            console.log('Review submitted successfully');
+            toast.success('Review submitted successfully! It will be visible after approval.');
+            setReviewRating(0);
+            setReviewText('');
+            setReviewFiles([]);
+            setReviewName('');
+            setReviewEmail('');
+            fetchReviews(); // Refresh reviews
+        }
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        console.error('Error details:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+        });
+        toast.error(error.response?.data?.message || 'Error submitting review');
+    } finally {
+        setSubmittingReview(false);
+    }
+  };
 
   if (loading || !imagesLoaded) {
     return (
@@ -281,34 +489,67 @@ const Productinner = () => {
               <div className="no-variations">No variations available</div>
             )}
 
+            <div className="offers-section">
+              <h3><img src={offer} alt="offer" height="20px"/> Available Coupons</h3>
+              <div className="offer-list">
+                {coupons.length > 0 ? (
+                  coupons.map((coupon) => (
+                    <div key={coupon.id} className="offer-box">
+                      <div className="coupon-header">
+                        <h4>{coupon.code}</h4>
+                        <button 
+                          className="copy-coupon-btn"
+                          onClick={() => {
+                            navigator.clipboard.writeText(coupon.code);
+                            // Show temporary success message
+                            const btn = document.querySelector(`[data-coupon="${coupon.code}"]`);
+                            if (btn) {
+                              btn.textContent = 'Copied!';
+                              setTimeout(() => {
+                                btn.textContent = 'Copy';
+                              }, 2000);
+                            }
+                          }}
+                          data-coupon={coupon.code}
+                        >
+                          Copy
+                        </button>
+                      </div>
+                      <p>
+                        {coupon.type === 'percentage' 
+                          ? `${coupon.value}% off`
+                          : `₹${coupon.value} off`}
+                        {coupon.minPurchase && ` on orders above ₹${coupon.minPurchase}`}
+                      </p>
+                      <p className="validity">
+                        Valid till: {new Date(coupon.endDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-coupons">
+                    <p>No active coupons available at the moment</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {selectedVariation && (
               <>
                 <p className="price">₹{selectedVariation.price}</p>
                 {selectedVariation.comparePrice && (
                   <p className="compare-price">₹{selectedVariation.comparePrice}</p>
                 )}
+                {discountAmount > 0 && (
+                  <p className="discount">Discount: -₹{discountAmount}</p>
+                )}
+                <p className="final-price">Final Price: ₹{selectedVariation.price - discountAmount}</p>
               </>
             )}
 
             <div className="actions">
               <button className="btn-red">Add to Cart</button>
               <button className="buy-btn">Buy Now</button>
-            </div>
-
-            <div className="offers-section">
-              <h3><img src={offer} alt="offer" height="20px"/> Offers</h3>
-              <div className="offer-list">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="offer-box">
-                    <h4>Cashback</h4>
-                    <p>
-                      Upto ₹12.09 cashback as Amazon Pay Balance when you pay
-                      with…
-                    </p>
-                    <span>1 offer ▸</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
             <div className="icons-section">
@@ -499,36 +740,168 @@ const Productinner = () => {
 
       <div className="background section">
         <div className="review-section section">
+          <h2 className="text-center">Customer Reviews</h2>
+          
+          {reviewStats && (
+            <div className="review-stats">
+              <div className="average-rating">
+                <h3>{reviewStats.average}</h3>
+                <div className="stars">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span key={star} className="star">
+                      {star <= Math.round(reviewStats.average) ? '★' : '☆'}
+                    </span>
+                  ))}
+                </div>
+                <p>{reviewStats.total} reviews</p>
+              </div>
+              <div className="rating-breakdown">
+                {[5, 4, 3, 2, 1].map((rating) => (
+                  <div key={rating} className="rating-bar">
+                    <span>{rating} ★</span>
+                    <div className="bar-container">
+                      <div 
+                        className="bar" 
+                        style={{ 
+                          width: `${(reviewStats.ratings[rating] / reviewStats.total) * 100}%` 
+                        }}
+                      ></div>
+                    </div>
+                    <span>{reviewStats.ratings[rating]}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="reviews-list">
+            {reviewLoading ? (
+              <div className="loading">Loading reviews...</div>
+            ) : reviews.length > 0 ? (
+              reviews.map((review) => (
+                <div key={review.id} className="review-card">
+                  <div className="review-header">
+                    <div className="reviewer-info">
+                      <img 
+                        src={review.User?.profileImage || 'https://via.placeholder.com/40'} 
+                        alt={review.User?.username} 
+                        className="reviewer-avatar"
+                      />
+                      <div>
+                        <h4>{review.User?.username}</h4>
+                        <div className="stars">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span key={star} className="star">
+                              {star <= review.rating ? '★' : '☆'}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    {review.verified_purchase && (
+                      <span className="verified-badge">Verified Purchase</span>
+                    )}
+                  </div>
+                  <p className="review-text">{review.review}</p>
+                  {review.ReviewImages && review.ReviewImages.length > 0 && (
+                    <div className="review-images">
+                      {review.ReviewImages.map((image) => (
+                        <img 
+                          key={image.id} 
+                          src={getReviewImageUrl(image.file_name)} 
+                          alt="Review" 
+                          className="review-image"
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <p className="review-date">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="no-reviews">No reviews yet. Be the first to review this product!</p>
+            )}
+          </div>
+
           <h2 className="text-center">Write a Review</h2>
           <div className="review-form-container">
-            <form className="review-form">
+            <form className="review-form" onSubmit={handleReviewSubmit}>
               <div className="star-rating">
                 <label>Rating:</label>
                 <div className="stars">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <span
                       key={star}
-                      className="star"
-                      onClick={() => setRating(star)}
+                      className={`star ${star <= (hoverRating || reviewRating) ? 'active' : ''}`}
+                      onClick={() => setReviewRating(star)}
                       onMouseEnter={() => setHoverRating(star)}
                       onMouseLeave={() => setHoverRating(0)}
                     >
-                      {star <= (hoverRating || rating) ? '★' : '☆'}
+                      {star <= (hoverRating || reviewRating) ? '★' : '☆'}
                     </span>
                   ))}
                 </div>
               </div>
+
+              {!user && (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="review-name">Your Name:</label>
+                    <input
+                      type="text"
+                      id="review-name"
+                      value={reviewName}
+                      onChange={(e) => setReviewName(e.target.value)}
+                      placeholder="Enter your name"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="review-email">Your Email:</label>
+                    <input
+                      type="email"
+                      id="review-email"
+                      value={reviewEmail}
+                      onChange={(e) => setReviewEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="form-group">
                 <label htmlFor="review-message">Your Review:</label>
                 <textarea
                   id="review-message"
-                  value={reviewMessage}
-                  onChange={(e) => setReviewMessage(e.target.value)}
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
                   placeholder="Share your experience with this product..."
                   rows="4"
+                  required
                 />
               </div>
-              <button type="submit" className="submit-review">Submit Review</button>
+
+              <div className="form-group">
+                <label htmlFor="review-files">Add Images (optional):</label>
+                <input
+                  type="file"
+                  id="review-files"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => setReviewFiles(Array.from(e.target.files))}
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                className="submit-review"
+                disabled={submittingReview}
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
             </form>
           </div>
         </div>

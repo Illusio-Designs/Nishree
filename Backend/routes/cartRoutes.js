@@ -1,24 +1,31 @@
 import express from 'express';
 import { 
-    getCart,
+    getUserCart,
     addToCart,
     updateCartItem,
     removeFromCart,
-    clearCart,
-    applyCoupon,
-    removeCoupon
+    clearCart
 } from '../controller/cartController.js';
-import { isAuthenticated } from '../middleware/authMiddleware.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Protected routes
-router.get('/', isAuthenticated, getCart);
-router.post('/add', isAuthenticated, addToCart);
-router.put('/update/:itemId', isAuthenticated, updateCartItem);
-router.delete('/remove/:itemId', isAuthenticated, removeFromCart);
-router.delete('/clear', isAuthenticated, clearCart);
-router.post('/coupon/apply', isAuthenticated, applyCoupon);
-router.delete('/coupon/remove', isAuthenticated, removeCoupon);
+// All cart routes require authentication
+router.use(authMiddleware);
+
+// Get user's cart
+router.get('/', getUserCart);
+
+// Add item to cart
+router.post('/add', addToCart);
+
+// Update cart item quantity
+router.put('/item/:productId', updateCartItem);
+
+// Remove item from cart
+router.delete('/item/:productId', removeFromCart);
+
+// Clear cart
+router.delete('/clear', clearCart);
 
 export default router; 

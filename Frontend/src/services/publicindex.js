@@ -97,3 +97,57 @@ export const getAllPublicProducts = async (params = {}) => {
         throw error.response?.data || error.message;
     }
 };
+
+// Get all public coupons
+export const getPublicCoupons = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/api/coupons/public`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
+// Get public reviews for a product
+export const getPublicProductReviews = async (productId, params = {}) => {
+    try {
+        const queryParams = new URLSearchParams();
+        if (params.page) queryParams.append('page', params.page);
+        if (params.limit) queryParams.append('limit', params.limit);
+        if (params.sort) queryParams.append('sort', params.sort);
+
+        const response = await axios.get(`${API_URL}/api/reviews/public/${productId}?${queryParams.toString()}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
+
+// Create a public review
+export const createPublicReview = async (reviewData) => {
+    try {
+        const formData = new FormData();
+        formData.append('productId', reviewData.get('productId'));
+        formData.append('rating', reviewData.get('rating'));
+        formData.append('comment', reviewData.get('comment'));
+        formData.append('name', reviewData.get('name'));
+        formData.append('email', reviewData.get('email'));
+
+        // Append files if they exist
+        const files = reviewData.getAll('files');
+        if (files && files.length > 0) {
+            files.forEach(file => {
+                formData.append('files', file);
+            });
+        }
+
+        const response = await axios.post(`${API_URL}/api/reviews/public`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};
