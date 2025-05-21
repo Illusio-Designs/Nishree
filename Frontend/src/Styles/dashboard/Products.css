@@ -817,11 +817,6 @@
   border-top: 1px solid #e0e0e0;
 }
 
-.modal-submit-button,
-.modal-cancel-button {
-  min-width: 120px;
-}
-
 .weight-section,
 .dimensions-section {
   margin: 15px 0;

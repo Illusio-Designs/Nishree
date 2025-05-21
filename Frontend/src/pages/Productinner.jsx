@@ -145,34 +145,10 @@ const Productinner = () => {
 
     sections.forEach((section) => {
       observer.observe(section);
-      // Force initial visibility check
-      const rect = section.getBoundingClientRect();
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
-        section.classList.add("visible");
-      }
     });
 
     return () => observer.disconnect();
   }, [product]);
-
-  // Add a scroll event listener to handle section visibility
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = document.querySelectorAll(".section");
-      sections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.75 && rect.bottom > 0) {
-          section.classList.add("visible");
-        }
-      });
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    // Initial check
-    handleScroll();
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleVariationChange = useCallback((e) => {
     const variation = product.ProductVariations.find(
@@ -490,31 +466,43 @@ const Productinner = () => {
               <div className="no-variations">No variations available</div>
             )}
 
+            
+
+            {selectedVariation && (
+              <>
+                <p className="price">₹{selectedVariation.price - discountAmount}</p>
+                {discountAmount > 0 && (
+                  <p className="compare-price">
+                     ₹{selectedVariation.comparePrice}
+                  </p>
+                )}
+              </>
+            )}
+
+            <div className="actions">
+              <button className="btn-red">Add to Cart</button>
+              <button className="buy-btn">Buy Now</button>
+            </div>
+
             <div className="offers-section">
               <h3><img src={offer} alt="offer" height="20px"/> Available Coupons</h3>
               <div className="offer-list">
                 {coupons.length > 0 ? (
                   coupons.map((coupon) => (
-                    <div key={coupon.id} className="offer-box">
+                    <div key={coupon.id} className="offer-box" onClick={(e) => {
+                      navigator.clipboard.writeText(coupon.code);
+                      const tooltip = document.createElement('div');
+                      tooltip.className = 'tooltip';
+                      tooltip.textContent = 'Copied!';
+                      tooltip.style.left = `${e.clientX}px`;
+                      tooltip.style.top = `${e.clientY}px`;
+                      document.body.appendChild(tooltip);
+                      setTimeout(() => {
+                        document.body.removeChild(tooltip);
+                      }, 2000);
+                    }}>
                       <div className="coupon-header">
                         <h4>{coupon.code}</h4>
-                        <button 
-                          className="copy-coupon-btn"
-                          onClick={() => {
-                            navigator.clipboard.writeText(coupon.code);
-                            // Show temporary success message
-                            const btn = document.querySelector(`[data-coupon="${coupon.code}"]`);
-                            if (btn) {
-                              btn.textContent = 'Copied!';
-                              setTimeout(() => {
-                                btn.textContent = 'Copy';
-                              }, 2000);
-                            }
-                          }}
-                          data-coupon={coupon.code}
-                        >
-                          Copy
-                        </button>
                       </div>
                       <p>
                         {coupon.type === 'percentage' 
@@ -533,24 +521,6 @@ const Productinner = () => {
                   </div>
                 )}
               </div>
-            </div>
-
-            {selectedVariation && (
-              <>
-                <p className="price">₹{selectedVariation.price}</p>
-                {selectedVariation.comparePrice && (
-                  <p className="compare-price">₹{selectedVariation.comparePrice}</p>
-                )}
-                {discountAmount > 0 && (
-                  <p className="discount">Discount: -₹{discountAmount}</p>
-                )}
-                <p className="final-price">Final Price: ₹{selectedVariation.price - discountAmount}</p>
-              </>
-            )}
-
-            <div className="actions">
-              <button className="btn-red">Add to Cart</button>
-              <button className="buy-btn">Buy Now</button>
             </div>
 
             <div className="icons-section">

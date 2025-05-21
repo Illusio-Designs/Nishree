@@ -182,7 +182,7 @@ const Product = () => {
             </div>
           </div>
           <div className="feature">
-            <div className="feature-icon">
+            <div className="feature-icon premium-icon">
               <img src={vector3} alt="icon" />
             </div>
             <div className="feature-text">

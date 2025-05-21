@@ -60,11 +60,9 @@ span {
 }
 
 .background {
-  background-image: url("../assets/—Pngtree—texture of recycled cardboard with_15735637 1.png");
+  background-image: url("../assets/—Pngtree—texture of recycled cardboard with_15735637 1.jpg");
   background-repeat: no-repeat;
   background-size: cover;
-  background-position: center;
-  padding: 0 0 50px 0;
 }
 
 .nishree {
@@ -90,6 +88,9 @@ span {
   height: 50px;
   padding-bottom: 20px;
 }
+.feature-icon.premium-icon img {
+  width: 41px !important;
+}
 .feature-text h4 {
   padding-bottom: 10px;
   font-size: 20px;
@@ -100,7 +101,7 @@ span {
   font-weight: 400;
 }
 .blog-section {
-  padding: 4rem 2rem 1rem;
+  padding: 4rem 2rem;
 }
 .blog-cards {
   display: grid;

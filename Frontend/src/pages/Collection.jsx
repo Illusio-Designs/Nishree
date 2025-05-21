@@ -141,8 +141,8 @@ const Collection = () => {
               </div>
             </div>
             <div className="feature">
-              <div className="feature-icon">
-                <img src={vector3} alt="icon" />
+              <div className="feature-icon premium-icon">
+                <img src={vector3} alt="icon"/>
               </div>
               <div className="feature-text">
                 <h4>Premium Quality</h4>
