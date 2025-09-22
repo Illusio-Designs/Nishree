@@ -1,18 +1,13 @@
-import { Slider } from '../model/sliderModel.js';
-import { Category } from '../model/categoryModel.js';
-import { v4 as uuidv4 } from 'uuid';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs/promises';
-import fsSync from 'fs';
-import ImageHandler from '../utils/imageHandler.js';
-import multer from 'multer';
+const { Slider } = require('../model/sliderModel.js');
+const { Category } = require('../model/categoryModel.js');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const fs = require('fs/promises');
+const fsSync = require('fs');
+const ImageHandler = require('../utils/imageHandler.js');
+const multer = require('multer');
 
-// Get directory name for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Initialize image handler
+// In CommonJS, __filename and __dirname are available
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/slider'));
 
 // Configure storage for uploaded files
@@ -26,23 +21,32 @@ const storage = multer.diskStorage({
 });
 
 // Create the upload middleware
-export const upload = multer({ storage });
+const upload = multer({ storage });
 
 // Helper function to format slider response
 const formatSliderResponse = (slider) => {
     const sliderData = slider.toJSON();
     sliderData.categoryName = slider.category ? slider.category.name : null;
-    // Generate buttonLink dynamically
-    sliderData.buttonLink = slider.categoryId ? `/category/${slider.categoryId}` : null;
+    
+    // Debug environment variables
+    console.log('Environment variables:', {
+        API_URL: process.env.API_URL,
+        BACKEND_URL: process.env.BACKEND_URL,
+        NODE_ENV: process.env.NODE_ENV
+    });
+    
+    // Add full image path with API URL
+    const baseUrl = process.env.API_URL || process.env.BACKEND_URL || 'https://api.crosscoin.in';
+    sliderData.image = `${baseUrl}/uploads/slider/${sliderData.image}`;
+    console.log('Formatted slider image path:', sliderData.image);
     delete sliderData.category;
     return sliderData;
 };
 
 // Create Slider
-// In createSlider function
-export const createSlider = async (req, res) => {
+const createSlider = async (req, res) => {
     try {
-        const { title, description, link, order } = req.body;
+        const { title, description } = req.body;
 
         if (!req.file) {
             return res.status(400).json({ message: 'Image is required' });
@@ -66,14 +70,13 @@ export const createSlider = async (req, res) => {
             });
         }
 
-        const image = `/uploads/slider/${result.filename}`;
+        const image = result.filename; // Store only filename
+        console.log('Created slider image filename:', image);
 
         const slider = await Slider.create({
             title,
             description,
-            image,
-            link,
-            order: order || 0
+            image
         });
 
         res.status(201).json({ 
@@ -92,19 +95,18 @@ export const createSlider = async (req, res) => {
 };
 
 // Get All Sliders
-// In sliderController.js, modify the getAllSliders function:
-export const getAllSliders = async (req, res) => {
+const getAllSliders = async (req, res) => {
     try {
         const sliders = await Slider.findAll({
             include: [{
                 model: Category,
                 as: 'category',
                 attributes: ['id', 'name']
-            }],
-            order: [['position', 'ASC']]
+            }]
         });
 
         const slidersResponse = sliders.map(formatSliderResponse);
+        console.log('All sliders image paths:', slidersResponse.map(s => s.image));
 
         res.status(200).json({ sliders: slidersResponse });
     } catch (error) {
@@ -114,7 +116,7 @@ export const getAllSliders = async (req, res) => {
 };
 
 // Get Slider by ID
-export const getSliderById = async (req, res) => {
+const getSliderById = async (req, res) => {
     try {
         const slider = await Slider.findByPk(req.params.id, {
             include: [{
@@ -139,10 +141,10 @@ export const getSliderById = async (req, res) => {
 };
 
 // Update Slider
-export const updateSlider = async (req, res) => {
+const updateSlider = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, buttonText, buttonType, buttonStyle, categoryId, status, position } = req.body;
+        const { title, description, buttonText, categoryId, status } = req.body;
 
         const slider = await Slider.findByPk(id);
         if (!slider) {
@@ -166,7 +168,7 @@ export const updateSlider = async (req, res) => {
         let image = slider.image;
         if (req.file) {
             try {
-                image = await imageHandler.handleImageUpdate(
+                const updatedImagePath = await imageHandler.handleImageUpdate(
                     slider.image,
                     req.file.path,
                     {
@@ -178,6 +180,8 @@ export const updateSlider = async (req, res) => {
                         type: 'slider'
                     }
                 );
+                // Extract just the filename from the returned path
+                image = updatedImagePath ? updatedImagePath.split('/').pop() : slider.image;
             } catch (error) {
                 console.error('Error handling image update:', error);
                 return res.status(500).json({ 
@@ -193,12 +197,9 @@ export const updateSlider = async (req, res) => {
             title,
             description,
             buttonText,
-            buttonType,
-            buttonStyle,
             categoryId: categoryIdToUse,
             status,
-            position,
-            image
+            image // This will only change if a new file was uploaded
         });
 
         res.status(200).json({ 
@@ -217,7 +218,7 @@ export const updateSlider = async (req, res) => {
 };
 
 // Get Public Sliders
-export const getPublicSliders = async (req, res) => {
+const getPublicSliders = async (req, res) => {
     try {
         const sliders = await Slider.findAll({
             where: {
@@ -228,7 +229,7 @@ export const getPublicSliders = async (req, res) => {
                 as: 'category',
                 attributes: ['id', 'name', 'slug']
             }],
-            order: [['position', 'ASC']],
+            order: [['createdAt', 'DESC']],
             attributes: ['id', 'title', 'description', 'buttonText', 'image', 'categoryId']
         });
 
@@ -236,6 +237,8 @@ export const getPublicSliders = async (req, res) => {
             const sliderData = slider.toJSON();
             sliderData.categoryName = slider.category ? slider.category.name : null;
             sliderData.categorySlug = slider.category ? slider.category.slug : null;
+            // Add full image path
+            sliderData.image = `${process.env.API_URL || process.env.BACKEND_URL || 'https://api.crosscoin.in'}/uploads/slider/${sliderData.image}`;
             delete sliderData.category;
             return sliderData;
         });
@@ -248,7 +251,7 @@ export const getPublicSliders = async (req, res) => {
 };
 
 // Delete Slider
-export const deleteSlider = async (req, res) => {
+const deleteSlider = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -276,5 +279,15 @@ export const deleteSlider = async (req, res) => {
             error: error.message 
         });
     }
+};
+
+module.exports = {
+    createSlider,
+    getAllSliders,
+    getSliderById,
+    updateSlider,
+    getPublicSliders,
+    deleteSlider,
+    upload
 };
 

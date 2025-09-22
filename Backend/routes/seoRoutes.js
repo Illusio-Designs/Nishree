@@ -1,12 +1,13 @@
-import express from 'express';
-import { 
+const express = require('express');
+const {
     getSEOData, 
     getAllSEOData, 
     updateSEOData, 
-    createSEOData
-} from '../controller/seoController.js';
-import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
-import upload from '../middleware/uploadMiddleware.js';
+    createSEOData,
+    deleteSEOData
+} = require('../controller/seoController.js');
+const { isAuthenticated, authorize } = require('../middleware/authMiddleware.js');
+const { upload } = require('../middleware/uploadMiddleware.js');
 
 const router = express.Router();
 
@@ -15,12 +16,18 @@ router.get('/', getSEOData); // Get SEO data for a specific page (?page_name=hom
 
 // Admin routes
 router.get('/all', isAuthenticated, authorize(['admin']), getAllSEOData);
-router.post('/create', isAuthenticated, authorize(['admin']), createSEOData);
+router.post('/create', 
+    isAuthenticated, 
+    authorize(['admin']), 
+    upload.single('meta_image'), 
+    createSEOData
+);
 router.put('/update', 
     isAuthenticated, 
     authorize(['admin']), 
-    upload.single('image'), 
+    upload.single('meta_image'), 
     updateSEOData
 );
+router.delete('/:pageName', isAuthenticated, authorize(['admin']), deleteSEOData);
 
-export default router; 
+module.exports = router; 

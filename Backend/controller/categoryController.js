@@ -1,34 +1,34 @@
-import { Category } from '../model/categoryModel.js';
-import { Product, ProductVariation, ProductImage, ProductSEO } from '../model/associations.js';
-import { v4 as uuidv4 } from 'uuid';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs/promises';
-import fsSync from 'fs';
-import { Op } from 'sequelize';
-import ImageHandler from '../utils/imageHandler.js';
-import upload from '../middleware/uploadMiddleware.js';
-import slugify from 'slugify';
+const { Category } = require('../model/categoryModel.js');
+const { Product, ProductVariation, ProductImage, ProductSEO } = require('../model/associations.js');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const fs = require('fs/promises');
+const fsSync = require('fs');
+const { Op } = require('sequelize');
+const ImageHandler = require('../utils/imageHandler.js');
+const { categoryUpload } = require('../middleware/uploadMiddleware.js');
+const slugify = require('slugify');
 
-// Get directory name for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Initialize image handler
+// In CommonJS, __filename and __dirname are available
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/categories'));
 
 // Helper function to format category response
 const formatCategoryResponse = (category) => {
     const categoryData = category.toJSON();
     categoryData.parentName = category.parent ? category.parent.name : null;
+    // Add full image path
+    categoryData.image = `/uploads/categories/${categoryData.image}`;
+    console.log('Formatted category image path:', categoryData.image);
     delete categoryData.parent;
     return categoryData;
 };
 
 // Create Category
-// Update createCategory function
 const createCategory = async (req, res) => {
     try {
+        console.log('Request body:', req.body);
+        console.log('Request file:', req.file);
+
         const { 
             name, 
             description, 
@@ -38,9 +38,21 @@ const createCategory = async (req, res) => {
             metaDescription, 
             metaKeywords
         } = req.body;
+
+        // Validate required fields
+        if (!name) {
+            return res.status(400).json({
+                message: 'Category name is required',
+                error: 'MISSING_REQUIRED_FIELD'
+            });
+        }
         
         // Generate slug from name
-        const slug = slugify(name, { lower: true });
+        const slug = slugify(name.toString(), { 
+            lower: true,
+            strict: true,
+            trim: true
+        });
 
         // Check for duplicate category name
         const existingCategory = await Category.findOne({
@@ -68,14 +80,15 @@ const createCategory = async (req, res) => {
                     height: 600,
                     quality: 80,
                     format: 'webp',
-                    filename: `category-${uuidv4()}`
+                    filename: `category-${Date.now()}`
                 });
 
                 if (!result.success) {
                     throw new Error(result.error);
                 }
 
-                image = result.filename;
+                image = result.filename; // Store only filename
+                console.log('Created category image filename:', image);
             } catch (imageError) {
                 console.error('Error processing image:', imageError);
                 return res.status(500).json({ 
@@ -92,8 +105,8 @@ const createCategory = async (req, res) => {
             status,
             parentId,
             image,
-            metaTitle,
-            metaDescription,
+            metaTitle: metaTitle || name,
+            metaDescription: metaDescription || description,
             metaKeywords,
             slug
         });
@@ -116,7 +129,10 @@ const createCategory = async (req, res) => {
         });
     } catch (error) {
         console.error('Create category error:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ 
+            message: 'Failed to create category',
+            error: error.message 
+        });
     }
 };
 
@@ -133,22 +149,15 @@ const getAllCategories = async (req, res) => {
         });
 
         // Format the response
-        const formattedCategories = categories.map(category => ({
-            id: category.id,
-            name: category.name,
-            description: category.description,
-            status: category.status,
-            parentId: category.parentId,
-            parentName: category.parent ? category.parent.name : null,
-            image: category.image,
-            metaTitle: category.metaTitle,
-            metaDescription: category.metaDescription,
-            metaKeywords: category.metaKeywords,
-            slug: category.slug,
-            createdAt: category.createdAt,
-            updatedAt: category.updatedAt
-        }));
+        const formattedCategories = categories.map(category => {
+            const categoryData = category.toJSON();
+            categoryData.parentName = category.parent ? category.parent.name : null;
+            categoryData.image = `/uploads/categories/${categoryData.image}`;
+            delete categoryData.parent;
+            return categoryData;
+        });
 
+        console.log('All categories image paths:', formattedCategories.map(c => c.image));
         res.status(200).json(formattedCategories);
     } catch (error) {
         console.error('Get all categories error:', error);
@@ -188,7 +197,7 @@ const deleteCategory = async (req, res) => {
 };
 
 // Get Category by ID
-const getCategory = async (req, res) => {
+const getCategoryById = async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -228,11 +237,20 @@ const updateCategory = async (req, res) => {
         // Handle image update
         if (req.file) {
             try {
-                updateData.image = await imageHandler.handleCategoryImage(
-                    category.image,
-                    req.file.path,
-                    category.id
-                );
+                const result = await imageHandler.processImage(req.file.path, {
+                    width: 800,
+                    height: 600,
+                    quality: 80,
+                    format: 'webp',
+                    filename: `category-${Date.now()}`
+                });
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                updateData.image = result.filename; // Store only filename
+                console.log('Updated category image filename:', updateData.image);
             } catch (error) {
                 console.error('Error handling category image update:', error);
                 return res.status(500).json({ 
@@ -283,7 +301,7 @@ const getPublicCategories = async (req, res) => {
             description: category.description,
             parentId: category.parentId,
             parentName: category.parent ? category.parent.name : null,
-            image: category.image,
+            image: category.image ? `/uploads/categories/${category.image}` : null,
             slug: category.slug
         }));
 
@@ -294,14 +312,19 @@ const getPublicCategories = async (req, res) => {
     }
 };
 
-// Get Public Category by ID
-const getPublicCategoryById = async (req, res) => {
+// Get Public Category by Name
+const getPublicCategoryByName = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { name } = req.params;
+        
+        // Decode URL-encoded category name
+        const decodedName = decodeURIComponent(name);
+        console.log('Original name:', name);
+        console.log('Decoded name:', decodedName);
         
         const category = await Category.findOne({
             where: {
-                id,
+                name: decodedName,
                 status: 'active'
             },
             include: [
@@ -348,37 +371,64 @@ const getPublicCategoryById = async (req, res) => {
             description: category.description,
             parentId: category.parentId,
             parentName: category.parent ? category.parent.name : null,
-            image: category.image,
+            image: category.image ? `/uploads/categories/${category.image}` : null,
             slug: category.slug,
-            products: category.products ? category.products.map(product => ({
-                id: product.id,
-                name: product.name,
-                description: product.description,
-                slug: product.slug,
-                status: product.status,
-                price: product.ProductVariations?.[0]?.price || 0,
-                comparePrice: product.ProductVariations?.[0]?.comparePrice || null,
-                stock: product.ProductVariations?.[0]?.stock || 0,
-                image: product.ProductImages?.find(img => img.is_primary)?.image_url || null,
-                metaTitle: product.ProductSEO?.meta_title,
-                metaDescription: product.ProductSEO?.meta_description
-            })) : []
+            products: category.products ? category.products.map(product => {
+                let image = null;
+                // Try primary image
+                const primaryImage = product.ProductImages?.find(img => img.is_primary);
+                if (primaryImage && primaryImage.image_url) {
+                    image = primaryImage.image_url.startsWith('http') || primaryImage.image_url.startsWith('/uploads/')
+                        ? primaryImage.image_url
+                        : `/uploads/products/${primaryImage.image_url}`;
+                }
+                // Fallback to first image if no primary
+                if (!image && product.ProductImages && product.ProductImages.length > 0) {
+                    const firstImage = product.ProductImages[0];
+                    if (firstImage.image_url) {
+                        image = firstImage.image_url.startsWith('http') || firstImage.image_url.startsWith('/uploads/')
+                            ? firstImage.image_url
+                            : `/uploads/products/${firstImage.image_url}`;
+                    }
+                }
+                // Fallback to default image if still null
+                if (!image) {
+                    image = '/assets/card1-left.webp';
+                }
+                return {
+                    id: product.id,
+                    name: product.name,
+                    description: product.description,
+                    slug: product.slug,
+                    status: product.status,
+                    price: product.ProductVariations?.[0]?.price || 0,
+                    comparePrice: product.ProductVariations?.[0]?.comparePrice || null,
+                    stock: product.ProductVariations?.[0]?.stock || 0,
+                    image,
+                    metaTitle: product.ProductSEO?.meta_title,
+                    metaDescription: product.ProductSEO?.meta_description,
+                    weight: product.weight,
+                    weightUnit: product.weightUnit,
+                    dimensions: product.dimensions,
+                    dimensionUnit: product.dimensionUnit
+                };
+            }) : []
         };
 
         res.status(200).json(categoryResponse);
     } catch (error) {
-        console.error('Get public category error:', error);
+        console.error('Get public category by name error:', error);
         res.status(500).json({ message: error.message });
     }
 };
 
-export {
+module.exports = {
     createCategory,
     getAllCategories,
-    getCategory,
+    getCategoryById,
     updateCategory,
     deleteCategory,
     getPublicCategories,
-    getPublicCategoryById,
-    upload
+    getPublicCategoryByName,
+    categoryUpload
 };

@@ -1,18 +1,22 @@
-import express from 'express';
-import {
+const express = require('express');
+const {
     getAllAttributes,
     createAttribute,
     updateAttribute,
     deleteAttribute,
     addAttributeValues,
-    removeAttributeValues
-} from '../controller/attributeController.js';
-import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
+    removeAttributeValues,
+    getAttributeById
+} = require('../controller/attributeController.js');
+const { isAuthenticated, authorize } = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
 
 // Get all attributes
 router.get('/', getAllAttributes);
+
+// Get attribute by ID
+router.get('/:id', getAttributeById);
 
 // Create a new attribute
 router.post('/', isAuthenticated, createAttribute);
@@ -29,4 +33,4 @@ router.post('/:id/values', isAuthenticated, addAttributeValues);
 // Remove values from an attribute
 router.delete('/:id/values', isAuthenticated, removeAttributeValues);
 
-export default router; 
+module.exports = router;

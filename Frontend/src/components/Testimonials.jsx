@@ -1,73 +1,101 @@
-import React from "react";
-import "../Styles/components/Testimonials.css";
-import img1 from "../assets/img (1).png";
-import img2 from "../assets/img (2).png";
-import img3 from "../assets/img (3).png";
-
-const StarIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    fill="currentColor"
-    className="bi bi-star-fill star"
-    viewBox="0 0 16 16"
-  >
-    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
-  </svg>
-);
+import React, { useRef, useState, useEffect } from "react";
+import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
+import { getPublicProductReviews, getAllPublicReviews } from '../services/publicindex';
 
 const Testimonials = () => {
-  const testimonials = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      image: img1,
-      text: '"The spices are incredibly fresh and authentic. Love using them in my cooking!"',
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      image: img2,
-      text: '"Best buttermilk masala I\'ve ever tried. Reminds me of homemade chaas!"',
-    },
-    {
-      id: 3,
-      name: "John Roi",
-      image: img3,
-      text: '"The papads are perfectly crispy and full of flavor. A must-have!"',
-    },
-  ];
+  const sliderRef = useRef(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        // Fetch all approved reviews for testimonials
+        const response = await getAllPublicReviews({ limit: 20, sort: 'highest' });
+        if (response.success && response.reviews && response.reviews.length > 0) {
+          setReviews(response.reviews);
+        } else {
+          setReviews([]);
+        }
+      } catch (err) {
+        console.error('Error fetching reviews:', err);
+        setReviews([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  const scrollSlider = (direction) => {
+    const scrollAmount = 400;
+    if (sliderRef.current) {
+      if (direction === 'left') {
+        sliderRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      } else {
+        sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="testimonials-section">
+        <h3 className="section-title">CUSTOMER SATISFACTION</h3>
+        <div className="testimonials-container">
+          <div className="loading">Loading testimonials...</div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!reviews.length) {
+    return (
+      <section className="testimonials-section">
+        <h3 className="section-title">CUSTOMER SATISFACTION</h3>
+        <div className="testimonials-container">
+          <div className="loading">No testimonials available yet.</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="testimonials">
-      <h1 className="text-center">
-        <span>What Our</span> Customers Say
-      </h1>
+    <section className="testimonials-section">
+      <h3 className="section-title">CUSTOMER SATISFACTION</h3>
       <div className="testimonials-container">
-        {testimonials.map((testimonial) => (
-          <div key={testimonial.id} className="testimonial-card">
-            <div className="user-info">
-              <img
-                src={testimonial.image}
-                alt={testimonial.name}
-                className="user-avatar"
-              />
-              <div className="name-stars">
-                <h3>{testimonial.name}</h3>
-                <div className="stars">
-                  {[...Array(5)].map((_, i) => (
-                    <StarIcon key={i} />
-                  ))}
+        {reviews.length > 2 && (
+          <button className="slider-arrow slider-arrow-left" aria-label="Previous testimonial" onClick={() => scrollSlider('left')}>
+            <IoIosArrowBack />
+          </button>
+        )}
+        <div className="testimonials-slider" ref={sliderRef}>
+          {reviews.map((review, idx) => (
+            <div className="testimonial-card" key={idx}>
+              <p className="testimonial-text">{review.review}</p>
+              <div className="testimonial-user">
+                <div>
+                  <div className="testimonial-name">{review.reviewerName}</div>
+                  <div className="testimonial-rating">
+                    {Array.from({ length: review.rating }).map((_, i) => (
+                      <span key={i} className="testimonial-star">★</span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-            <p className="testimonial-text">{testimonial.text}</p>
-          </div>
-        ))}
+          ))}
+        </div>
+        {reviews.length > 2 && (
+          <button className="slider-arrow slider-arrow-right" aria-label="Next testimonial" onClick={() => scrollSlider('right')}>
+            <IoIosArrowForward />
+          </button>
+        )}
       </div>
     </section>
   );
 };
 
-export default Testimonials;
+export default Testimonials; 

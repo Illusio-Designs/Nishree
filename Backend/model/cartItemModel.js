@@ -1,13 +1,13 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js';
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db.js');
 
-export const CartItem = sequelize.define('CartItem', {
+const CartItem = sequelize.define('CartItem', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    cart_id: {
+    cartId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -15,11 +15,19 @@ export const CartItem = sequelize.define('CartItem', {
             key: 'id'
         }
     },
-    product_id: {
+    productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
             model: 'products',
+            key: 'id'
+        }
+    },
+    variationId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'product_variations',
             key: 'id'
         }
     },
@@ -31,6 +39,10 @@ export const CartItem = sequelize.define('CartItem', {
     price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
+    },
+    selected_size: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'cart_items',
@@ -42,6 +54,11 @@ export const CartItem = sequelize.define('CartItem', {
         },
         {
             fields: ['product_id']
+        },
+        {
+            fields: ['variation_id']
         }
     ]
-}); 
+});
+
+module.exports = { CartItem }; 

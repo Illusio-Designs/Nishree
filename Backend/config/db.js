@@ -1,6 +1,5 @@
-import { Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
-
+const { Sequelize } = require('sequelize');
+const dotenv = require('dotenv');
 dotenv.config();
 
 const sequelize = new Sequelize(
@@ -28,9 +27,9 @@ const connectDB = async () => {
         await sequelize.authenticate();
         console.log('Database connection established successfully.');
         
-        // Only sync without force to preserve data
-        await sequelize.sync({ alter: false });
-        console.log('Database synchronized without dropping tables.');
+        // Sync the database with alterations to apply schema changes
+        await syncDatabase(true);
+        console.log('Database synchronized on connection.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
         throw error;
@@ -61,7 +60,7 @@ const syncDatabase = async (force = false) => {
     }
 };
 
-export {
+module.exports = {
     sequelize,
     connectDB,
     syncDatabase

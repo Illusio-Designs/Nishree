@@ -1,11 +1,13 @@
-import { Payment } from '../model/paymentModel.js';
-import { Order } from '../model/orderModel.js';
-import { Op } from 'sequelize';
-import { sequelize } from '../config/db.js';
-import { PaymentService } from '../services/paymentService.js';
+const { Payment } = require('../model/paymentModel.js');
+const { Order } = require('../model/orderModel.js');
+const { Op } = require('sequelize');
+const { sequelize } = require('../config/db.js');
+const { PaymentService } = require('../services/paymentService.js');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
 
 // Process a payment
-export const processPayment = async (req, res) => {
+module.exports.processPayment = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -154,7 +156,7 @@ export const processPayment = async (req, res) => {
 };
 
 // Get payment status for an order
-export const getPaymentStatus = async (req, res) => {
+module.exports.getPaymentStatus = async (req, res) => {
     try {
         const orderId = req.params.orderId;
         const userId = req.user.id;
@@ -190,7 +192,7 @@ export const getPaymentStatus = async (req, res) => {
 };
 
 // Process a refund
-export const processRefund = async (req, res) => {
+module.exports.processRefund = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -266,7 +268,7 @@ export const processRefund = async (req, res) => {
 };
 
 // Get all payments (admin only)
-export const getAllPayments = async (req, res) => {
+module.exports.getAllPayments = async (req, res) => {
     try {
         const { status, payment_type, start_date, end_date, page = 1, limit = 10 } = req.query;
         
@@ -313,7 +315,7 @@ export const getAllPayments = async (req, res) => {
 };
 
 // Confirm Payment
-export const confirmPayment = async (req, res) => {
+module.exports.confirmPayment = async (req, res) => {
     try {
         const { paymentIntentId } = req.params; // Assuming the payment intent ID is passed as a URL parameter
 
@@ -335,7 +337,7 @@ export const confirmPayment = async (req, res) => {
 };
 
 // Create Payment Intent
-export const createPaymentIntent = async (req, res) => {
+module.exports.createPaymentIntent = async (req, res) => {
     try {
         const { amount, currency } = req.body; // Assuming amount and currency are passed in the request body
 
@@ -357,7 +359,7 @@ export const createPaymentIntent = async (req, res) => {
 };
 
 // Get all payments for the authenticated user
-export const getUserPayments = async (req, res) => {
+module.exports.getUserPayments = async (req, res) => {
     try {
         const userId = req.user.id; // Assuming user ID is available in the request
 
@@ -378,7 +380,7 @@ export const getUserPayments = async (req, res) => {
 };
 
 // Process a refund
-export const refundPayment = async (req, res) => {
+module.exports.refundPayment = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -448,4 +450,78 @@ export const refundPayment = async (req, res) => {
         console.error('Error processing refund:', error);
         res.status(500).json({ message: 'Failed to process refund', error: error.message });
     }
+};
+
+// Razorpay order creation
+module.exports.createRazorpayOrder = async (req, res) => {
+    try {
+        const { amount, currency = 'INR', receipt } = req.body;
+        console.log('Backend: Received amount to create Razorpay order:', amount);
+        if (!amount) {
+            return res.status(400).json({ message: 'Amount is required' });
+        }
+
+        // Initialize Razorpay instance
+        const razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET
+        });
+
+        // Create order
+        const options = {
+            amount: amount, // amount is already in paise (frontend sends it in paise)
+            currency,
+            receipt: receipt || `rcpt_${Date.now()}`,
+        };
+        console.log('Backend: Sending these options to Razorpay:', options);
+        const order = await razorpay.orders.create(options);
+        res.json({ order });
+    } catch (error) {
+        console.error('Error creating Razorpay order:', error);
+        res.status(500).json({ message: 'Failed to create Razorpay order', error: error.message });
+    }
+};
+
+module.exports.razorpayCallback = async (req, res) => {
+  const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_number } = req.body;
+
+  // Find the order by order_number
+  const order = await Order.findOne({ where: { order_number } });
+  if (!order) {
+    return res.redirect('/UnifiedCheckout?payment=failed');
+  }
+
+  // Verify signature
+  const generated_signature = crypto
+    .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+    .update(razorpay_order_id + '|' + razorpay_payment_id)
+    .digest('hex');
+
+  if (generated_signature === razorpay_signature) {
+    // Mark order as paid
+    order.payment_status = 'paid';
+    order.status = 'processing';
+    await order.save();
+
+    // Update payment record as successful
+    await Payment.update(
+      { status: 'successful', transaction_id: razorpay_payment_id },
+      { where: { order_id: order.id } }
+    );
+
+    return res.redirect(`/ThankYou?order_number=${order.order_number}`);
+  } else {
+    // Mark order as failed
+    order.payment_status = 'failed';
+    order.status = 'pending';
+    await order.save();
+
+    // Update payment record as failed
+    await Payment.update(
+      { status: 'failed' },
+      { where: { order_id: order.id } }
+    );
+
+    return res.redirect('/UnifiedCheckout?payment=failed');
+  }
 }; 

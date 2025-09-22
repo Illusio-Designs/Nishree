@@ -1,8 +1,8 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js';
-import { Category } from './categoryModel.js'; // Import the Category model
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db.js');
+const { Category } = require('./categoryModel.js');
 
-export const Slider = sequelize.define('Slider', {
+const Slider = sequelize.define('Slider', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -24,10 +24,6 @@ export const Slider = sequelize.define('Slider', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    link: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
     categoryId: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -36,35 +32,28 @@ export const Slider = sequelize.define('Slider', {
             key: 'id'
         }
     },
-    position: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0
-    },
     status: {
         type: DataTypes.ENUM('active', 'inactive'),
         defaultValue: 'active'
     },
-    startDate: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    endDate: {
-        type: DataTypes.DATE,
-        allowNull: true
+    position: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
     }
 }, {
     timestamps: true,
     tableName: 'sliders',
     indexes: [
         {
-            fields: ['position']
+            fields: ['status']
         },
         {
-            fields: ['status']
+            fields: ['position']
         }
     ]
 });
 
-// Define the association with the Category model
 Slider.belongsTo(Category, { as: 'category', foreignKey: 'categoryId' });
+
+module.exports = { Slider };
 

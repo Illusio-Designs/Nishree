@@ -1,22 +1,24 @@
 // routes/routesManager.js
-import express from 'express';
+const express = require('express');
 const router = express.Router();
 
 // Import all route modules
-import userRoutes from './userRoutes.js';
-import categoryRoutes from './categoryRoutes.js';
-import productRoutes from './productRoutes.js';
-import orderRoutes from './orderRoutes.js';
-import sliderRoutes from './sliderRoutes.js';
-import couponRoutes from './couponRoutes.js';
-import wishlistRoutes from './wishlistRoutes.js';
-import shippingAddressRoutes from './shippingAddressRoutes.js';
-import paymentRoutes from './paymentRoutes.js';
-import shippingFeeRoutes from './shippingFeeRoutes.js';
-import orderStatusHistoryRoutes from './orderStatusHistoryRoutes.js';
-import seoRoutes from './seoRoutes.js';
-import attributeRoutes from './attributeRoutes.js';
-import reviewRoutes from './reviewRoutes.js';
+const userRoutes = require('./userRoutes.js');
+const categoryRoutes = require('./categoryRoutes.js');
+const productRoutes = require('./productRoutes.js');
+const orderRoutes = require('./orderRoutes.js');
+const sliderRoutes = require('./sliderRoutes.js');
+const couponRoutes = require('./couponRoutes.js');
+const wishlistRoutes = require('./wishlistRoutes.js');
+const shippingAddressRoutes = require('./shippingAddressRoutes.js');
+const paymentRoutes = require('./paymentRoutes.js');
+const shippingFeeRoutes = require('./shippingFeeRoutes.js');
+const orderStatusHistoryRoutes = require('./orderStatusHistoryRoutes.js');
+const seoRoutes = require('./seoRoutes.js');
+const attributeRoutes = require('./attributeRoutes.js');
+const reviewRoutes = require('./reviewRoutes.js');
+const cartRoutes = require('./cartRoutes.js');
+const policyRoutes = require('./policyRoutes.js');
 
 // Core Routes
 router.use('/users', userRoutes); // This now includes both auth and user routes
@@ -31,13 +33,19 @@ router.use('/wishlist', wishlistRoutes);
 router.use('/shipping-addresses', shippingAddressRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/shipping-fees', shippingFeeRoutes);
-router.use('/order-status', orderStatusHistoryRoutes);
+router.use('/order-status-history', orderStatusHistoryRoutes);
 router.use('/seo', seoRoutes);
 router.use('/attributes', attributeRoutes);
 
 
 // Review routes
 router.use('/reviews', reviewRoutes);
+
+// Cart routes
+router.use('/cart', cartRoutes);
+
+// Policy routes
+router.use('/policies', policyRoutes);
 
 // Health Check Route
 router.get('/health', (req, res) => {
@@ -49,4 +57,4 @@ router.get('/health', (req, res) => {
     });
 });
 
-export default router;
+module.exports = router;

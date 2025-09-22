@@ -1,0 +1,75 @@
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.common-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #F3F4F5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.common-table th {
+  background-color: #180D3E;
+  color: white;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.common-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(24, 13, 62, 0.1);
+  color: #180D3E;
+}
+
+.common-table tr:hover {
+  background-color: rgba(24, 13, 62, 0.05);
+}
+
+.common-table tr.clickable {
+  cursor: pointer;
+}
+
+.action-column {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  margin-left: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #180D3E;
+}
+
+.action-icon {
+  font-size: 14px;
+}
+
+.common-table .status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.common-table .status.active {
+  background-color: rgba(206, 30, 54, 0.1);
+  color: #CE1E36;
+}
+
+.common-table .status.inactive {
+  background-color: rgba(24, 13, 62, 0.1);
+  color: #180D3E;
+}

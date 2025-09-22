@@ -1,7 +1,7 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/db.js';
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db.js');
 
-export const ProductImage = sequelize.define('ProductImage', {
+const ProductImage = sequelize.define('ProductImage', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -14,6 +14,15 @@ export const ProductImage = sequelize.define('ProductImage', {
             model: 'products',
             key: 'id'
         }
+    },
+    product_variation_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'product_variations',
+            key: 'id'
+        },
+        comment: 'If set, this image belongs to a specific product variation.'
     },
     image_url: {
         type: DataTypes.STRING,
@@ -47,4 +56,6 @@ export const ProductImage = sequelize.define('ProductImage', {
             fields: ['display_order']
         }
     ]
-}); 
+});
+
+module.exports = { ProductImage }; 

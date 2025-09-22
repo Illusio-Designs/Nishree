@@ -1,184 +1,149 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { authService, userService } from "../services";
-import Loader from "../components/Loader";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { userService, authService } from '../services';
+import { loginUser, registerUser, getCurrentUser as getPublicCurrentUser, logout as publicLogout } from '../services/publicindex';
+import { useContext as useReactContext } from 'react';
+import { WishlistContext } from './WishlistContext';
+import { 
+  showLoginSuccessToast, 
+  showLoginErrorToast, 
+  showRegisterSuccessToast, 
+  showRegisterErrorToast, 
+  showLogoutSuccessToast 
+} from '../utils/toast';
 
 const AuthContext = createContext(null);
 
-function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const { setIsAuthenticated } = useContext(WishlistContext) || {};
+    const apiCalledRef = useRef(false);
 
-  const checkUser = async () => {
-    console.log("=== Auth Check Started ===");
-    console.log("API URL:", import.meta.env.VITE_API_URL || 'http://localhost:5000');
-    
-    try {
-      const token = localStorage.getItem("token");
-      console.log("Token status:", token ? "Present" : "Missing");
-      
-      if (!token) {
-        console.log("No token - setting loading to false");
-        setLoading(false);
-        return;
-      }
+    const checkAuth = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Unified check for current user
+                try {
+                    const userData = await userService.getCurrentUser();
+                    setUser(userData);
+                } catch {
+                    try {
+                        const userData = await getPublicCurrentUser();
+                        setUser(userData);
+                    } catch {
+                        // If both fail, clear token but don't redirect
+                        localStorage.removeItem('token');
+                        setUser(null);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            localStorage.removeItem('token');
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-      console.log("Fetching user data...");
-      const userData = await userService.getCurrentUser();
-      console.log("User data received:", userData ? "Success" : "Failed");
-      
-      if (userData && userData.id) {
-        console.log("Setting user data:", userData);
-        setUser(userData);
-      } else {
-        console.log("Invalid user data - clearing token");
-        localStorage.removeItem("token");
-        setUser(null);
-      }
-    } catch (error) {
-      console.log("Auth check error:", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data
-      });
-      
-      // Only clear token if it's an authentication error
-      if (error.response?.status === 401) {
-        localStorage.removeItem("token");
-        setUser(null);
-      }
-      setError(error.message || "Authentication failed");
-    } finally {
-      console.log("Setting loading to false");
-      setLoading(false);
-    }
-  };
+    useEffect(() => {
+        if (apiCalledRef.current) return; // Prevent multiple calls
+        apiCalledRef.current = true;
+        console.log('API BEING CALLED: Auth data fetch');
+        checkAuth();
+    }, [checkAuth]);
 
-  // Add a new effect to handle token changes
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      checkUser();
-    } else {
-      setLoading(false);
-    }
-  }, []);
+    const login = useCallback(async (credentials) => {
+        try {
+            const response = await loginUser(credentials);
+            if (response.user.role !== 'consumer' && response.user.role !== 'customer') {
+                throw new Error('Only consumer accounts can log in here.');
+            }
+            localStorage.setItem('token', response.token);
+            setUser(response.user);
+            if (setIsAuthenticated) {
+                setIsAuthenticated(true);
+            }
+            showLoginSuccessToast();
+            return response;
+        } catch (error) {
+            showLoginErrorToast(error.message);
+            throw error;
+        }
+    }, [setIsAuthenticated]);
 
-  const loginUser = async (credentials) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await authService.login(credentials);
-      if (response.token && response.user) {
-        localStorage.setItem("token", response.token);
-        setUser(response.user);
-        return response;
-      }
-    } catch (error) {
-      setError(error.message || "Login failed");
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+    const adminLogin = useCallback(async (credentials) => {
+        try {
+            const response = await authService.login(credentials);
+            localStorage.setItem('token', response.token);
+            setUser(response.user);
+            if (setIsAuthenticated) {
+                setIsAuthenticated(true);
+            }
+            showLoginSuccessToast();
+            return response;
+        } catch (error) {
+            showLoginErrorToast(error.message);
+            throw error;
+        }
+    }, [setIsAuthenticated]);
 
-  const logoutUser = async () => {
-    try {
-      setLoading(true);
-      await authService.logout();
-      localStorage.removeItem("token");
-      setUser(null);
-    } catch (error) {
-      localStorage.removeItem("token");
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const register = useCallback(async (userData) => {
+        try {
+            const response = await registerUser(userData);
+            showRegisterSuccessToast();
+            return response;
+        } catch (error) {
+            showRegisterErrorToast(error.message);
+            throw error;
+        }
+    }, []);
 
-  const registerUser = async (userData) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await authService.register(userData);
-      if (response.token && response.user) {
-        localStorage.setItem("token", response.token);
-        setUser(response.user);
-        return response;
-      }
-    } catch (error) {
-      setError(error.message || "Registration failed");
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+    const logout = useCallback(async () => {
+        try {
+            // Try public logout first
+            try {
+                await publicLogout();
+            } catch {
+                await userService.logout();
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            localStorage.removeItem('token');
+            setUser(null);
+            if (setIsAuthenticated) {
+                setIsAuthenticated(false);
+            }
+            showLogoutSuccessToast();
+        }
+    }, [setIsAuthenticated]);
 
-  if (loading) {
+    const value = {
+        user,
+        loading,
+        login,
+        adminLogin,
+        logout,
+        register,
+        checkAuth,
+        isAuthenticated: !!user
+    };
+
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
-        <Loader size="large" />
-      </div>
+        <AuthContext.Provider value={value}>
+            {!loading && children}
+        </AuthContext.Provider>
     );
-  }
+};
 
-  if (error) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '1.2rem',
-        color: '#666'
-      }}>
-        <p>Error: {error}</p>
-        <button 
-          onClick={() => {
-            setError(null);
-            checkUser();
-          }}
-          style={{
-            padding: '8px 16px',
-            marginTop: '16px',
-            cursor: 'pointer'
-          }}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};
 
-  const value = {
-    user,
-    loading,
-    error,
-    isAuthenticated: !!user,
-    login: loginUser,
-    logout: logoutUser,
-    register: registerUser,
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
-
-export { AuthProvider, useAuth };
+export default AuthContext; 

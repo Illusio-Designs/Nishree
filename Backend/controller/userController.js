@@ -1,22 +1,15 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import passport from 'passport';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
-import { User } from '../model/userModel.js';
-import nodemailer from 'nodemailer';
-import ImageHandler from '../utils/imageHandler.js';
-import upload from '../middleware/uploadMiddleware.js';
-import dotenv from 'dotenv';
-
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const passport = require('passport');
+const path = require('path');
+const fs = require('fs');
+const { User } = require('../model/userModel.js');
+const nodemailer = require('nodemailer');
+const ImageHandler = require('../utils/imageHandler.js');
+const { upload } = require('../middleware/uploadMiddleware.js');
+const dotenv = require('dotenv');
 dotenv.config();
 
-// Get directory name for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/users'));
 
 // Helper function to add image URL to user response
@@ -28,9 +21,11 @@ const addImageUrlToResponse = (userResponse) => {
 };
 
 // **User Registration**
-export const register = async (req, res) => {
+module.exports.register = async (req, res) => {
     try {
-        const { username, email, password, role } = req.body;
+        const { username, email, password } = req.body;
+        // Ignore any role from the frontend, always set to 'consumer'
+        const role = 'consumer';
 
         if (!username || !email || !password) {
             return res.status(400).json({ message: 'All fields are required' });
@@ -45,7 +40,7 @@ export const register = async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            role: role || 'consumer'
+            role
         });
 
         // Remove password from response
@@ -60,7 +55,7 @@ export const register = async (req, res) => {
 };
 
 // **User Login**
-export const login = async (req, res) => {
+module.exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -70,6 +65,11 @@ export const login = async (req, res) => {
 
         const user = await User.findOne({ where: { email } });
         if (!user) return res.status(400).json({ message: 'User not found' });
+
+        // Only allow login for consumer role
+        if (user.role !== 'consumer') {
+            return res.status(403).json({ message: 'Only consumer accounts can login here.' });
+        }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
@@ -91,13 +91,50 @@ export const login = async (req, res) => {
     }
 };
 
+// **Admin Login**
+module.exports.adminLogin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        const user = await User.findOne({ where: { email } });
+        if (!user) return res.status(400).json({ message: 'User not found' });
+
+        // Only allow login for admin role
+        if (user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied. Only admin accounts can log in here.' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '1d' }
+        );
+
+        // Remove password from response
+        const userResponse = user.toJSON();
+        delete userResponse.password;
+
+        res.json({ message: 'Admin login successful', token, user: userResponse });
+    } catch (error) {
+        console.error('Admin login error:', error);
+        res.status(500).json({ message: 'Admin login failed', error: error.message });
+    }
+};
+
 // **Google Authentication**
-export const googleAuth = passport.authenticate('google', {
+module.exports.googleAuth = passport.authenticate('google', {
     scope: ['profile', 'email']
 });
 
 // **Google Auth Callback**
-export const googleAuthCallback = (req, res) => {
+module.exports.googleAuthCallback = (req, res) => {
     try {
         const token = jwt.sign(
             { id: req.user.id, email: req.user.email, role: req.user.role }, 
@@ -117,7 +154,7 @@ export const googleAuthCallback = (req, res) => {
 };
 
 // **Forgot Password**
-export const forgotPassword = async (req, res) => {
+module.exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
         
@@ -190,7 +227,7 @@ export const forgotPassword = async (req, res) => {
 };
 
 // **Reset Password**
-export const resetPassword = async (req, res) => {
+module.exports.resetPassword = async (req, res) => {
     try {
         const { resetToken, password, confirmPassword } = req.body;
 
@@ -221,7 +258,7 @@ export const resetPassword = async (req, res) => {
 };
 
 // **Get Current User**
-export const getCurrentUser = async (req, res) => {
+module.exports.getCurrentUser = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id, {
             attributes: { exclude: ['password', 'resetToken', 'resetTokenExpiry'] }
@@ -242,7 +279,7 @@ export const getCurrentUser = async (req, res) => {
 };
 
 // **Update User**
-export const updateUser = async (req, res) => {
+module.exports.updateUser = async (req, res) => {
     try {
         const updates = Object.keys(req.body);
         const allowedUpdates = ['username', 'email'];
@@ -305,7 +342,7 @@ export const updateUser = async (req, res) => {
 };
 
 // **Update Password**
-export const updatePassword = async (req, res) => {
+module.exports.updatePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         
@@ -339,7 +376,7 @@ export const updatePassword = async (req, res) => {
 };
 
 // **Delete User**
-export const deleteUser = async (req, res) => {
+module.exports.deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -370,7 +407,7 @@ export const deleteUser = async (req, res) => {
 };
 
 // **Get All Users**
-export const getAllUsers = async (req, res) => {
+module.exports.getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll({
             attributes: { exclude: ['password'] }
@@ -383,7 +420,7 @@ export const getAllUsers = async (req, res) => {
 };
 
 // Get user profile
-export const getProfile = async (req, res) => {
+module.exports.getProfile = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id, {
             attributes: { exclude: ['password'] }
@@ -401,7 +438,7 @@ export const getProfile = async (req, res) => {
 };
 
 // Update user profile
-export const updateProfile = async (req, res) => {
+module.exports.updateProfile = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
@@ -447,7 +484,7 @@ export const updateProfile = async (req, res) => {
 };
 
 // Add the missing logout function
-export const logout = (req, res) => {
+module.exports.logout = (req, res) => {
     try {
         // Clear the token from client storage
         res.clearCookie('token');
@@ -475,7 +512,7 @@ export const logout = (req, res) => {
 };
 
 // Add missing verifyEmail function
-export const verifyEmail = async (req, res) => {
+module.exports.verifyEmail = async (req, res) => {
     try {
         const { token } = req.params;
         const user = await User.findOne({ where: { verificationToken: token } });
@@ -496,7 +533,7 @@ export const verifyEmail = async (req, res) => {
 };
 
 // Add missing changePassword function
-export const changePassword = async (req, res) => {
+module.exports.changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
         const user = await User.findByPk(req.user.id);
@@ -521,9 +558,5 @@ export const changePassword = async (req, res) => {
     }
 };
 
-// Export all functions individually
-export {
-    upload
-};
-
-// Remove the userController object export
+// Export upload if needed
+module.exports.upload = upload;

@@ -1,210 +1,292 @@
-import 'dotenv/config';
-import { Sequelize } from 'sequelize';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
+require("dotenv").config();
+const { sequelize } = require("../config/db.js");
+const path = require("path");
+const fs = require("fs");
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// In CommonJS, __filename and __dirname are available
 
-// Create Sequelize instance
-const sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
-    {
+const setupDatabase = async () => {
+  try {
+    // First, try to connect without selecting a database
+    const { Sequelize } = require("sequelize");
+    const tempSequelize = new Sequelize(
+      "",
+      process.env.DB_USER,
+      process.env.DB_PASSWORD,
+      {
         host: process.env.DB_HOST,
-        dialect: process.env.DB_DIALECT || 'mysql',
-        logging: console.log,
-        pool: {
-            max: 5,
-            min: 0,
-            acquire: 30000,
-            idle: 10000
-        },
-        define: {
-            charset: 'utf8mb4',
-            collate: 'utf8mb4_general_ci',
-            engine: 'InnoDB'
-        }
-    }
-);
+        dialect: process.env.DB_DIALECT || "mysql",
+        logging: false,
+      }
+    );
 
-export const setupDatabase = async () => {
+    // Create database if it doesn't exist with proper collation
+    await tempSequelize.query(
+      `CREATE DATABASE IF NOT EXISTS ${process.env.DB_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`
+    );
+    await tempSequelize.close();
+
+    // Now connect to the specific database
+    await sequelize.authenticate();
+    console.log("Database connection established successfully.");
+
+    // Load models
+    console.log("Loading models and creating/altering tables...");
+
+    const modelDir = path.join(__dirname, "..", "model");
+    const modelFiles = fs
+      .readdirSync(modelDir)
+      .filter((file) => file.endsWith("Model.js"));
+
+    const models = {};
+    for (const file of modelFiles) {
+      const modelPath = path.join(modelDir, file);
+      const modelModule = require(modelPath);
+      const modelName =
+        file.charAt(0).toUpperCase() + file.slice(1).replace("Model.js", "");
+
+      // Handle different export structures
+      let model;
+      if (modelModule[modelName]) {
+        model = modelModule[modelName];
+      } else if (modelModule.default) {
+        model = modelModule.default;
+      } else if (typeof modelModule === "function") {
+        model = modelModule;
+      }
+
+      if (model && typeof model.sync === "function") {
+        console.log(`Loaded model: ${modelName}`);
+        models[modelName] = model;
+      } else {
+        console.warn(
+          `Skipping non-model file or model without sync method: ${file}`
+        );
+      }
+    }
+
+    // Apply associations BEFORE syncing
+    console.log("Applying model associations...");
     try {
-        // First, try to connect without selecting a database
-        const tempSequelize = new Sequelize('', process.env.DB_USER, process.env.DB_PASSWORD, {
-            host: process.env.DB_HOST,
-            dialect: process.env.DB_DIALECT || 'mysql',
-            logging: false
-        });
-
-        // Create database if it doesn't exist with proper collation
-        await tempSequelize.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || process.env.DB_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`);
-        await tempSequelize.close();
-
-        // Now connect to the specific database
-        await sequelize.authenticate();
-        console.log('Database connection established successfully.');
-        
-        // Step 1: Load models and create/alter tables
-        console.log('Step 1: Loading models and creating/altering tables...');
-        
-        const modelDir = path.join(__dirname, '..', 'model');
-        const modelFiles = fs.readdirSync(modelDir)
-            .filter(file => file.endsWith('Model.js'));
-        
-        const models = {};
-        for (const file of modelFiles) {
-            const modelPath = `file://${path.join(modelDir, file)}`;
-            const modelModule = await import(modelPath);
-            const modelName = file.charAt(0).toUpperCase() + file.slice(1).replace('Model.js', '');
-            const model = modelModule[modelName];
-            if (model && model.sync) {
-                console.log(`Loaded model: ${modelName}`);
-                models[modelName] = model;
-            } else {
-                console.warn(`Skipping non-model file or model without sync method: ${file} (loaded as ${modelName})`);
-            }
-        }
-        
-        // Step 1a: Sync essential base tables FIRST (those not depending on others for FKs initially)
-        console.log('Step 1a: Syncing essential base tables (User, Product, Attribute, Category, etc.)...');
-        const baseTableNames = ['User', 'Product', 'Attribute', 'Category', 'Settings', 'ShippingFee', 'SeoMetadata', 'Coupon', 'AttributeValue'];
-        for (const modelName of baseTableNames) {
-            if (models[modelName]) {
-                console.log(`Syncing ${modelName} table (alter:true)...`);
-                await models[modelName].sync({ alter: true, hooks: false });
-            } else {
-                console.warn(`Model ${modelName} not found for syncing in base tables.`);
-            }
-        }
-        
-        // Step 1b: Sync other tables that might have FKs 
-        // (Review, ReviewImage, ProductImage, ProductSEO, ProductVariation, Order, OrderItem, etc.)
-        console.log('Step 1b: Syncing dependent tables (Review, ProductVariation, Order, etc.)...');
-        const dependentTableNames = [
-            'Review', 'ReviewImage', 'ProductImage', 'ProductSEO', 
-            'ProductVariation', 'Order', 'OrderItem', 'OrderStatusHistory',
-            'Payment', 'ShippingAddress', 'Cart', 'CartItem', 'Wishlist', 'Slider'
-        ];
-        
-        for (const modelName of dependentTableNames) {
-            if (models[modelName]) {
-                console.log(`Syncing ${modelName} table structure (alter:true)...`);
-                // The foreign key definitions within the model attributes should be handled by alter:true.
-                // If ER_CANT_CREATE_TABLE (errno: 150) persists for specific tables,
-                // it implies an issue with the referenced table/column not existing or a mismatch
-                // that `alter:true` cannot resolve automatically for the FK part.
-                await models[modelName].sync({ 
-                    alter: true, 
-                    hooks: false,
-                });
-            } else {
-                console.warn(`Model ${modelName} not found for syncing in dependent tables.`);
-            }
-        }
-        
-        // Step 2: Apply associations explicitly defined in associations.js
-        // This step is crucial for ensuring all relationships and foreign keys are correctly established.
-        console.log('Step 2: Applying associations from associations.js...');       
-        try {
-            const associationsPath = path.join(__dirname, '..', 'model', 'associations.js');
-            if (fs.existsSync(associationsPath)) {
-                 await import(`file://${associationsPath}`);
-                 console.log('Successfully applied associations from associations.js');
-            } else {
-                console.warn('associations.js not found, skipping explicit association application. Ensure models define associations correctly.');
-            }
-        } catch (assocError) {
-            console.error('Error applying associations from associations.js:', assocError);
-            // Continue if associations fail, as models might have self-defined them, but log error.
-        }
-        
-        // Step 2.5: Sync all models again after associations to establish FKs...
-        console.log('Step 2.5: Syncing all models again after associations to establish FKs...');
-        for (const modelName in models) {
-            if (models[modelName]) {
-                console.log(`Post-association sync for ${modelName}...`);
-                await models[modelName].sync({ alter: true, hooks: false });
-            }
-        }
-        
-        // Step 3: Add specific essential indexes (those not handled by Sequelize's default unique constraints or model indexes)
-        console.log('Step 3: Adding specific essential database indexes...');
-            const executeQuery = async (query) => {
-                const dbName = process.env.DB_NAME || process.env.DB_DATABASE;
-                await sequelize.query(`USE ${dbName}`);
-                return await sequelize.query(query);
-            };
-
-        // Manually ensure Foreign Keys for 'reviews' table
-        console.log('Ensuring Foreign Key for reviews.productId to products.id...');
-        await executeQuery(
-            `ALTER TABLE reviews ADD CONSTRAINT IF NOT EXISTS fk_reviews_product FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE ON UPDATE CASCADE`
-        ).catch(err => console.warn('Warning: Could not create fk_reviews_product:', err.original ? err.original.sqlMessage : err.message));
-
-        console.log('Ensuring Foreign Key for reviews.userId to users.id...');
-        await executeQuery(
-            `ALTER TABLE reviews ADD CONSTRAINT IF NOT EXISTS fk_reviews_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE`
-        ).catch(err => console.warn('Warning: Could not create fk_reviews_user:', err.original ? err.original.sqlMessage : err.message));
-
-        // Add other critical FKs manually if needed, e.g., for ReviewImage
-        console.log('Ensuring Foreign Key for review_images.reviewId to reviews.id...');
-        await executeQuery(
-            `ALTER TABLE review_images ADD CONSTRAINT IF NOT EXISTS fk_review_images_review FOREIGN KEY (reviewId) REFERENCES reviews(id) ON DELETE CASCADE ON UPDATE CASCADE`
-        ).catch(err => console.warn('Warning: Could not create fk_review_images_review:', err.original ? err.original.sqlMessage : err.message));
-        
-        // Add essential indexes using IF NOT EXISTS
-        await executeQuery(`ALTER TABLE users ADD UNIQUE INDEX IF NOT EXISTS idx_users_email (email)`).catch(err => console.warn('Idx users.email:', err.original ? err.original.sqlMessage : err.message));
-        await executeQuery(`ALTER TABLE categories ADD INDEX IF NOT EXISTS idx_categories_parentId (parentId)`).catch(err => console.warn('Idx categories.parentId:', err.original ? err.original.sqlMessage : err.message));
-        await executeQuery(`ALTER TABLE orders ADD UNIQUE INDEX IF NOT EXISTS idx_orders_order_number (order_number)`).catch(err => console.warn('Idx orders.order_number:', err.original ? err.original.sqlMessage : err.message));
-        await executeQuery(`ALTER TABLE orders ADD INDEX IF NOT EXISTS idx_orders_status (status)`).catch(err => console.warn('Idx orders.status:', err.original ? err.original.sqlMessage : err.message));
-        // The unique index on product_variations.sku should be handled by the model definition (sku: { unique: true })
-        // await executeQuery(`ALTER TABLE product_variations ADD UNIQUE INDEX IF NOT EXISTS idx_product_variations_sku (sku)`).catch(err => console.warn('Idx product_variations.sku:', err.original ? err.original.sqlMessage : err.message));
-        await executeQuery(`ALTER TABLE product_variations ADD INDEX IF NOT EXISTS idx_product_variations_productId (productId)`).catch(err => console.warn('Idx product_variations.productId:', err.original ? err.original.sqlMessage : err.message));
-        await executeQuery(`ALTER TABLE coupons ADD UNIQUE INDEX IF NOT EXISTS idx_coupons_code (code)`).catch(err => console.warn('Idx coupons.code:', err.original ? err.original.sqlMessage : err.message));
-        
-        // Ensure Review table FKs are considered (they are defined in the model, sync should handle)
-        // If Review table still causes issues, an explicit ALTER TABLE for its FKs might be needed here AFTER associations.js
-        // For example, for Review to User FK:
-        // await executeQuery(`
-        //     ALTER TABLE reviews ADD CONSTRAINT IF NOT EXISTS fk_reviews_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE`
-        // ).catch(err => console.warn('Warning: Could not create fk_reviews_user:', err.message));
-
-            console.log('Database setup completed successfully!');
-            return true;
-    } catch (error) {
-        console.error('Database setup failed:', error);
-        if (error.parent && error.parent.sqlMessage) { // More generic check for parent error
-            console.error('Detailed SQL Error:', error.parent.sqlMessage);
-            if (error.sql) {
-                console.error('Faulty SQL (from Sequelize error object):', error.sql);
-            }
-        } else if (error.original && error.original.sqlMessage) { // For errors from direct executeQuery
-             console.error('Detailed SQL Error (executeQuery):', error.original.sqlMessage);
-        }
-        throw error;
+      const associationsPath = path.join(
+        __dirname,
+        "..",
+        "model",
+        "associations.js"
+      );
+      if (fs.existsSync(associationsPath)) {
+        require(associationsPath);
+        console.log("✓ Associations applied successfully");
+      } else {
+        console.warn(
+          "⚠️ associations.js not found. Models should define their own associations."
+        );
+      }
+    } catch (assocError) {
+      console.error("❌ Error applying associations:", assocError.message);
     }
+
+    // Sync all tables at once (this creates all tables and relationships)
+    // AUTOMATION: Always alter tables to match the latest model definitions (auto-migration)
+    console.log("Syncing all tables...");
+    await sequelize.sync({ alter: true, hooks: false });
+    console.log("✓ All tables synced");
+
+    // Fix shipping_addresses table constraints for guest users
+    console.log("Fixing shipping_addresses table constraints...");
+    try {
+      // Drop the existing foreign key constraint if it exists
+      await sequelize.query(`
+                ALTER TABLE shipping_addresses 
+                DROP FOREIGN KEY IF EXISTS shipping_addresses_ibfk_1
+            `);
+
+      // Drop any other foreign key constraints that might exist
+      const [constraints] = await sequelize.query(`
+                SELECT CONSTRAINT_NAME 
+                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+                WHERE TABLE_SCHEMA = DATABASE() 
+                AND TABLE_NAME = 'shipping_addresses' 
+                AND REFERENCED_TABLE_NAME = 'users'
+            `);
+
+      for (const constraint of constraints) {
+        await sequelize.query(`
+                    ALTER TABLE shipping_addresses 
+                    DROP FOREIGN KEY ${constraint.CONSTRAINT_NAME}
+                `);
+      }
+
+      // Add the correct foreign key constraint that allows NULL values
+      await sequelize.query(`
+                ALTER TABLE shipping_addresses 
+                ADD CONSTRAINT shipping_addresses_user_id_fk 
+                FOREIGN KEY (user_id) REFERENCES users(id) 
+                ON DELETE CASCADE ON UPDATE CASCADE
+            `);
+
+      // Add foreign key constraint for guest_user_id
+      await sequelize.query(`
+                ALTER TABLE shipping_addresses 
+                ADD CONSTRAINT shipping_addresses_guest_user_id_fk 
+                FOREIGN KEY (guest_user_id) REFERENCES guest_users(id) 
+                ON DELETE CASCADE ON UPDATE CASCADE
+            `);
+
+      console.log("✓ Shipping address constraints fixed");
+    } catch (constraintError) {
+      console.log(
+        "⚠️ Constraint fix skipped (constraints may already be correct):",
+        constraintError.message
+      );
+    }
+
+    // Fix order_status_history table constraints
+    console.log("Fixing order_status_history table constraints...");
+    try {
+      // Drop existing foreign key constraints if they exist
+      const [constraints] = await sequelize.query(`
+        SELECT CONSTRAINT_NAME
+        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'order_status_history'
+        AND REFERENCED_TABLE_NAME = 'users'
+      `);
+
+      for (const constraint of constraints) {
+        await sequelize.query(`
+          ALTER TABLE order_status_history
+          DROP FOREIGN KEY ${constraint.CONSTRAINT_NAME}
+        `);
+      }
+
+      // Ensure updated_by column allows NULL values
+      await sequelize.query(`
+        ALTER TABLE order_status_history
+        MODIFY COLUMN updated_by INT NULL
+      `);
+
+      // Add foreign key constraint for order_id (this should work fine)
+      await sequelize.query(`
+        ALTER TABLE order_status_history
+        ADD CONSTRAINT order_status_history_order_id_fk
+        FOREIGN KEY (order_id) REFERENCES orders(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+      `);
+
+      console.log("✓ Order status history constraints fixed");
+    } catch (constraintError) {
+      console.log(
+        "⚠️ Order status history constraint fix skipped (constraints may already be correct):",
+        constraintError.message
+      );
+    }
+
+    // Fix payments table constraints for guest users
+    console.log("Fixing payments table constraints for guest users...");
+    try {
+      // Drop existing foreign key constraints if they exist
+      const [userConstraints] = await sequelize.query(`
+        SELECT CONSTRAINT_NAME
+        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'payments'
+        AND REFERENCED_TABLE_NAME = 'users'
+      `);
+
+      for (const constraint of userConstraints) {
+        await sequelize.query(`
+          ALTER TABLE payments
+          DROP FOREIGN KEY ${constraint.CONSTRAINT_NAME}
+        `);
+      }
+
+      // Ensure user_id column allows NULL values
+      await sequelize.query(`
+        ALTER TABLE payments
+        MODIFY COLUMN user_id INT NULL
+      `);
+
+      // Add foreign key constraint for user_id (allows NULL)
+      await sequelize.query(`
+        ALTER TABLE payments
+        ADD CONSTRAINT payments_user_id_fk
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+      `);
+
+      // Add foreign key constraint for guest_user_id
+      await sequelize.query(`
+        ALTER TABLE payments
+        ADD CONSTRAINT payments_guest_user_id_fk
+        FOREIGN KEY (guest_user_id) REFERENCES guest_users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+      `);
+
+      console.log("✓ Payments constraints fixed for guest users");
+    } catch (constraintError) {
+      console.log(
+        "⚠️ Payments constraint fix skipped (constraints may already be correct):",
+        constraintError.message
+      );
+    }
+
+    // Now it's safe to create the admin user
+    if (models["User"]) {
+      const bcrypt = require("bcryptjs");
+      const adminEmail = "admin@admin.com";
+      const adminPassword = "Admin@123";
+      const adminUsername = "admin";
+      const adminRole = "admin";
+      const existingAdmin = await models["User"].findOne({
+        where: { email: adminEmail },
+      });
+      if (!existingAdmin) {
+        const hashedPassword = await bcrypt.hash(adminPassword, 10);
+        await models["User"].create({
+          username: adminUsername,
+          email: adminEmail,
+          password: hashedPassword,
+          role: adminRole,
+        });
+        console.log("✓ Admin user created: admin@admin.com / Admin@123");
+      } else {
+        console.log("✓ Admin user already exists");
+      }
+    }
+
+    console.log("✓ Database setup completed successfully!");
+    return true;
+  } catch (error) {
+    console.error("❌ Database setup failed:", error.message);
+    if (error.parent?.sqlMessage) {
+      console.error("SQL Error:", error.parent.sqlMessage);
+      if (error.sql) {
+        console.error("Faulty SQL:", error.sql);
+      }
+    }
+    throw error;
+  }
 };
 
-// Add port handling function
-export const findAvailablePort = async (startPort) => {
-    const net = await import('net');
-    return new Promise((resolve, reject) => {
-        const server = net.createServer();
-        server.unref();
-        server.on('error', (err) => {
-            if (err.code === 'EADDRINUSE') {
-                resolve(findAvailablePort(startPort + 1));
-            } else {
-                reject(err);
-            }
-        });
-        server.listen(startPort, () => {
-            server.close(() => {
-                resolve(startPort);
-            });
-        });
+const findAvailablePort = async (startPort) => {
+  const net = require("net");
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.unref();
+    server.on("error", (err) => {
+      if (err.code === "EADDRINUSE") {
+        resolve(findAvailablePort(startPort + 1));
+      } else {
+        reject(err);
+      }
     });
-}; 
+    server.listen(startPort, () => {
+      server.close(() => {
+        resolve(startPort);
+      });
+    });
+  });
+};
+
+module.exports = { setupDatabase, findAvailablePort };
