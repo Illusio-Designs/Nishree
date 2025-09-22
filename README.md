@@ -1,7 +1,7 @@
 # Nishree E-Commerce Platform
 
 <div align="center">
-  <img src="Frontend/public/assets/logo.png" alt="Logo" width="200"/>
+  <img src="Frontend/public/assets/Logo.png" alt="Logo" width="200"/>
   
   [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
   [![Next.js](https://img.shields.io/badge/Next.js-14.1.0-black.svg)](https://nextjs.org/)
