@@ -1,35 +1,19 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ShippingAddress = sequelize.define('ShippingAddress', {
+export const ShippingAddress = sequelize.define('ShippingAddress', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    user_id: {
+    userId: {
         type: DataTypes.INTEGER,
-        allowNull: true, // Allow null for guest users
+        allowNull: false,
         references: {
             model: 'users',
             key: 'id'
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
-    },
-    guest_user_id: {
-        type: DataTypes.INTEGER,
-        allowNull: true, // Allow null for registered users
-        references: {
-            model: 'guest_users',
-            key: 'id'
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
-    },
-    full_name: {
-        type: DataTypes.STRING(255),
-        allowNull: false
+        }
     },
     address: {
         type: DataTypes.TEXT,
@@ -43,20 +27,19 @@ const ShippingAddress = sequelize.define('ShippingAddress', {
         type: DataTypes.STRING(100),
         allowNull: false
     },
-    pincode: {
-        type: DataTypes.STRING(20),
-        allowNull: false
-    },
-    phone: {
+    postalCode: {
         type: DataTypes.STRING(20),
         allowNull: false
     },
     country: {
         type: DataTypes.STRING(100),
-        allowNull: true,
-        defaultValue: 'India'
+        allowNull: false
     },
-    is_default: {
+    phoneNumber: {
+        type: DataTypes.STRING(20),
+        allowNull: false
+    },
+    isDefault: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     }
@@ -67,12 +50,7 @@ const ShippingAddress = sequelize.define('ShippingAddress', {
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            fields: ['user_id']
-        },
-        {
-            fields: ['guest_user_id']
+            fields: ['userId']
         }
     ]
-});
-
-module.exports = { ShippingAddress }; 
+}); 

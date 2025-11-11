@@ -1,27 +1,27 @@
-const express = require('express');
-const {
+import express from 'express';
+import { 
     createCategory,
     getAllCategories,
-    getCategoryById,
+    getCategory,
     updateCategory,
     deleteCategory,
     getPublicCategories,
-    getPublicCategoryByName
-} = require('../controller/categoryController.js');
-const { isAuthenticated, authorize } = require('../middleware/authMiddleware.js');
-const { categoryUpload } = require('../middleware/uploadMiddleware.js');
+    getPublicCategoryById
+} from '../controller/categoryController.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
 // Public routes
-router.get('/public', getPublicCategories);
-router.get('/public/name/:name', getPublicCategoryByName);
+router.get('/public/categories', getPublicCategories);
+router.get('/public/categories/:id', getPublicCategoryById);
 
-// Admin routes
-router.post('/', isAuthenticated, authorize(['admin']), categoryUpload.single('image'), createCategory);
-router.put('/:id', isAuthenticated, authorize(['admin']), categoryUpload.single('image'), updateCategory);
-router.delete('/:id', isAuthenticated, authorize(['admin']), deleteCategory);
-router.get('/', isAuthenticated, authorize(['admin']), getAllCategories);
-router.get('/:id', isAuthenticated, authorize(['admin']), getCategoryById);
+// Admin routes (requires authentication)
+router.get('/admin/all', isAuthenticated, authorize(['admin']), getAllCategories);
+router.get('/admin/:id', isAuthenticated, authorize(['admin']), getCategory);
+router.post('/admin', isAuthenticated, authorize(['admin']), upload.single('image'), createCategory);
+router.put('/admin/:id', isAuthenticated, authorize(['admin']), upload.single('image'), updateCategory);
+router.delete('/admin/:id', isAuthenticated, authorize(['admin']), deleteCategory);
 
-module.exports = router;
+export default router;

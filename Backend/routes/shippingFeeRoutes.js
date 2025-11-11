@@ -1,12 +1,11 @@
-const express = require('express');
-const {
+import express from 'express';
+import { 
     getAllShippingFees,
-    createShippingFee,
-    updateShippingFee,
+    createOrUpdateShippingFee,
     getShippingFeeByType,
     deleteShippingFee
-} = require('../controller/shippingFeeController.js');
-const { isAuthenticated, authorize } = require('../middleware/authMiddleware.js');
+} from '../controller/shippingFeeController.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -15,8 +14,7 @@ router.get('/', getAllShippingFees);
 router.get('/:type', getShippingFeeByType);
 
 // Admin routes
-router.post('/', isAuthenticated, authorize(['admin']), createShippingFee);
-router.put('/:id', isAuthenticated, authorize(['admin']), updateShippingFee);
+router.post('/', isAuthenticated, authorize(['admin']), createOrUpdateShippingFee);
 router.delete('/:id', isAuthenticated, authorize(['admin']), deleteShippingFee);
 
-module.exports = router; 
+export default router; 

@@ -1,10 +1,10 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
-const { User } = require('./userModel.js');
-const { Product } = require('./productModel.js');
-const { ReviewImage } = require('./reviewImageModel.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js';
+import { User } from './userModel.js';
+import { Product } from './productModel.js';
+import { ReviewImage } from './reviewImageModel.js';
 
-const Review = sequelize.define('Review', {
+export const Review = sequelize.define('Review', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -85,4 +85,4 @@ Review.hasMany(ReviewImage, {
     onDelete: 'CASCADE'
 });
 
-module.exports = { Review }; 
+export default Review; 

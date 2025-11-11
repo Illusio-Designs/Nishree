@@ -1,5 +1,5 @@
-const express = require('express');
-const {
+import express from 'express';
+import { 
     createProduct,
     getAllProducts,
     getProduct,
@@ -10,17 +10,17 @@ const {
     getFeaturedProducts,
     getNewArrivals,
     getBestSellers,
-    getPublicProductBySlug,
+    getPublicProductById,
     getAllPublicProducts
-} = require('../controller/productController.js');
-const { isAuthenticated, authorize } = require('../middleware/authMiddleware.js');
-const { productUpload } = require('../middleware/uploadMiddleware.js');
+} from '../controller/productController.js';
+import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
+import upload from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
 // Public routes
 router.get('/public', getAllPublicProducts);
-router.get('/public/:slug', getPublicProductBySlug);
+router.get('/public/:id', getPublicProductById);
 router.get('/search', searchProducts);
 router.get('/featured', getFeaturedProducts);
 router.get('/new-arrivals', getNewArrivals);
@@ -28,19 +28,9 @@ router.get('/best-sellers', getBestSellers);
 router.get('/category/:categoryId', getProductsByCategory);
 router.get('/:id', getProduct);
 
-// Multer error handler middleware
-const multerErrorHandler = (err, req, res, next) => {
-  if (err) {
-    console.error('Multer error:', err);
-    return res.status(400).json({ success: false, message: err.message });
-  }
-  next();
-};
-
 // Admin routes
-router.get('/', isAuthenticated, authorize(['admin']), getAllProducts);
-router.post('/', isAuthenticated, authorize(['admin']), productUpload.any(), multerErrorHandler, createProduct);
-router.put('/:id', isAuthenticated, authorize(['admin']), productUpload.any(), multerErrorHandler, updateProduct);
+router.post('/', isAuthenticated, authorize(['admin']), upload.array('images', 5), createProduct);
+router.put('/:id', isAuthenticated, authorize(['admin']), upload.array('images', 5), updateProduct);
 router.delete('/:id', isAuthenticated, authorize(['admin']), deleteProduct);
 
-module.exports = router; 
+export default router; 

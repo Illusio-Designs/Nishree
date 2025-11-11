@@ -54,11 +54,10 @@
 .react-select__multi-value__remove {
   color: #666 !important;
   padding: 0 4px !important;
-}
-
-.react-select__multi-value__remove:hover {
-  background-color: #dc3545 !important;
-  color: white !important;
+  &:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+  }
 }
 
 .react-select__indicator-separator {
@@ -68,11 +67,9 @@
 .react-select__clear-indicator,
 .react-select__dropdown-indicator {
   color: #666 !important;
-}
-
-.react-select__clear-indicator:hover,
-.react-select__dropdown-indicator:hover {
-  color: #333 !important;
+  &:hover {
+    color: #333 !important;
+  }
 }
 
 /* Disabled state */
@@ -84,10 +81,9 @@
 /* Error state */
 .dropdown-select.has-error .react-select__control {
   border-color: #dc3545 !important;
-}
-
-.dropdown-select.has-error .react-select__control:hover {
-  border-color: #bd2130 !important;
+  &:hover {
+    border-color: #bd2130 !important;
+  }
 }
 
 /* Loading state */
@@ -100,4 +96,4 @@
   color: #666 !important;
   text-align: center;
   padding: 8px !important;
-} 
+}

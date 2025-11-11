@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../styles/common/Switch.css';
+import '../../Styles/common/Switch.css';
 
 const Switch = ({ checked, onChange, label }) => (
   <label className="switch-root">

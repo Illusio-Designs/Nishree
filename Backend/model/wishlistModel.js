@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js';
 
-const Wishlist = sequelize.define('Wishlist', {
+export const Wishlist = sequelize.define('Wishlist', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -40,5 +40,3 @@ const Wishlist = sequelize.define('Wishlist', {
         }
     ]
 });
-
-module.exports = { Wishlist };

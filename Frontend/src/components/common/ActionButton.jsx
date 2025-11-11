@@ -2,7 +2,7 @@ import React from "react";
 import { HiOutlineEye, HiOutlinePencil, HiOutlineTrash, HiOutlineCheck } from "react-icons/hi2";
 import { IoToggle, IoToggleOutline, IoClose } from "react-icons/io5";
 
-import "../../styles/common/ActionButton.css";
+import "../../Styles/common/ActionButton.css";
 
 const ActionButton = ({ 
   icon, 
@@ -53,4 +53,4 @@ const ActionButton = ({
   );
 };
 
-export default ActionButton; 
+export default ActionButton;

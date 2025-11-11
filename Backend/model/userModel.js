@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Use named import
 
-const User = sequelize.define('User', {
+export const User = sequelize.define('User', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -53,5 +53,3 @@ const User = sequelize.define('User', {
         }
     ]
 });
-
-module.exports = { User };

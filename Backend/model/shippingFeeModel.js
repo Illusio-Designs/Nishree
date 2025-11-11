@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ShippingFee = sequelize.define('ShippingFee', {
+export const ShippingFee = sequelize.define('ShippingFee', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -12,6 +12,16 @@ const ShippingFee = sequelize.define('ShippingFee', {
         allowNull: false
     },
     fee: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0.00
+    },
+    weightBasedFee: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0.00
+    },
+    locationBasedFee: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0.00
@@ -26,6 +36,4 @@ const ShippingFee = sequelize.define('ShippingFee', {
             fields: ['orderType']
         }
     ]
-});
-
-module.exports = { ShippingFee }; 
+}); 

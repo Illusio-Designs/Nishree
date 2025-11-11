@@ -1,0 +1,20 @@
+.hero-product-text {
+  position: relative;
+  padding: 13% 8% 8% 50%;
+  text-align: center;
+  align-items: center;
+  color: #ffffff;
+}
+.hero-product-text h1 {
+  color: #ffffff;
+  font-size: 70px;
+  font-weight: 700;
+}
+.hero-product-text p {
+  font-size: 25px;
+  line-height: 46px;
+  font-family: "Inter", sans-serif;
+}
+.products-heading h2 {
+  font-size: 35px;
+}

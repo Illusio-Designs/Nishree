@@ -1,8 +1,10 @@
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
-// In CommonJS, __filename and __dirname are available
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Define upload directories
 const UPLOAD_DIRS = {
@@ -25,14 +27,14 @@ Object.values(UPLOAD_DIRS).forEach(dir => {
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         // Determine the upload directory based on the route
-        let uploadDir = UPLOAD_DIRS.categories; // Default to categories
+        let uploadDir = path.join(__dirname, '../uploads');
         
         if (req.originalUrl.includes('/reviews')) {
-            uploadDir = UPLOAD_DIRS.reviews;
+            uploadDir = path.join(uploadDir, 'reviews');
         } else if (req.originalUrl.includes('/products')) {
-            uploadDir = UPLOAD_DIRS.products;
+            uploadDir = path.join(uploadDir, 'products');
         } else if (req.originalUrl.includes('/users')) {
-            uploadDir = UPLOAD_DIRS.users;
+            uploadDir = path.join(uploadDir, 'users');
         } else if (req.originalUrl.includes('/seo')) {
             uploadDir = UPLOAD_DIRS.seo;
         } else if (req.originalUrl.includes('/slider')) {
@@ -51,11 +53,11 @@ const storage = multer.diskStorage({
 
 // File filter function
 const fileFilter = (req, file, cb) => {
-    // Accept images only
-    if (file.mimetype.startsWith('image/')) {
+    // Accept images and videos
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
         cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only images are allowed.'), false);
+        cb(new Error('Invalid file type. Only images and videos are allowed.'), false);
     }
 };
 
@@ -65,27 +67,8 @@ const upload = multer({
     fileFilter: fileFilter,
     limits: {
         fileSize: 5 * 1024 * 1024, // 5MB limit
-        files: 5 // Maximum 5 files per upload for products
+        files: 5 // Maximum 5 files per upload
     }
 });
 
-// Create specific upload instances for different routes
-const productUpload = multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
-        files: 100 // Increased limit to handle many product and variation images
-    }
-});
-
-const categoryUpload = multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 5 * 1024 * 1024,
-        files: 1 // Single file for categories
-    }
-});
-
-module.exports = { upload, productUpload, categoryUpload };
+export default upload; 

@@ -1,12 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { getWishlist, addToWishlist as apiAddToWishlist, removeFromWishlist as apiRemoveFromWishlist, clearWishlist as apiClearWishlist } from '../services/publicindex';
-import { fbqTrack } from '../components/common/Analytics';
-import { 
-  showAddToWishlistSuccessToast, 
-  showAddToWishlistErrorToast, 
-  showRemoveFromWishlistSuccessToast, 
-  showClearWishlistSuccessToast 
-} from '../utils/toast';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const WishlistContext = createContext();
 
@@ -18,226 +10,38 @@ export const useWishlist = () => {
   return context;
 };
 
-function forceEnvImageBase(url) {
-  if (!url || typeof url !== 'string') return '/assets/card1-left.webp';
-  if (url.startsWith('http')) {
-    if (url.includes('localhost:5000')) {
-      const baseUrl = process.env.NEXT_PUBLIC_IMAGE_URL || 'https://crosscoin.in';
-      const path = url.replace(/^https?:\/\/[^/]+/, '');
-      return `${baseUrl}${path}`;
-    }
-    return url;
-  }
-  const baseUrl = process.env.NEXT_PUBLIC_IMAGE_URL || 'https://crosscoin.in';
-  return `${baseUrl}${url}`;
-}
-
 export const WishlistProvider = ({ children }) => {
-  const [wishlist, setWishlist] = useState([]);
-  const [wishlistCount, setWishlistCount] = useState(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
-  const apiCalledRef = useRef(false);
-
-  // Load wishlist from backend or localStorage on initial render
-  useEffect(() => {
-    if (apiCalledRef.current) return; // Prevent multiple calls
-    apiCalledRef.current = true;
-    console.log('API BEING CALLED: Wishlist data fetch');
-    const fetchWishlist = async () => {
-      if (isAuthenticated) {
-        try {
-          const backendWishlist = await getWishlist();
-          console.log('Backend wishlist:', backendWishlist); // Debug log
-          setWishlist(backendWishlist.map(item => {
-            const product = item.Product;
-            let primaryImage = '';
-            if (product?.ProductImages && product.ProductImages.length > 0 && product.ProductImages[0].image_url) {
-              primaryImage = forceEnvImageBase(product.ProductImages[0].image_url);
-            } else if (product?.image) {
-              primaryImage = forceEnvImageBase(product.image);
-            } else {
-              primaryImage = '/assets/card1-left.webp';
-            }
-            // Get price and comparePrice from the first variation
-            const firstVariation = product?.ProductVariations?.[0] || {};
-            return {
-              ...product,
-              id: product.id,
-              image: primaryImage,
-              price: firstVariation.price || 0,
-              comparePrice: firstVariation.comparePrice || 0,
-              addedAt: item.addedAt || new Date().toISOString()
-            };
-          }));
-        } catch {
-          setWishlist([]);
-        }
-      } else {
-        const savedWishlist = localStorage.getItem('wishlist');
-        if (savedWishlist) {
-          const parsedWishlist = JSON.parse(savedWishlist);
-          setWishlist(parsedWishlist);
-        }
-      }
-    };
-    fetchWishlist();
-  }, [isAuthenticated]);
+  const [wishlistItems, setWishlistItems] = useState(() => {
+    const savedWishlist = localStorage.getItem('wishlist');
+    return savedWishlist ? JSON.parse(savedWishlist) : [];
+  });
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    }
-    setWishlistCount(wishlist.length);
-  }, [wishlist, isAuthenticated]);
+    localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
+  }, [wishlistItems]);
 
-  const addToWishlist = async (product) => {
-    if (isAuthenticated) {
-      try {
-        await apiAddToWishlist(product.id, product.selectedVariation?.id);
-        const backendWishlist = await getWishlist();
-        setWishlist(backendWishlist.map(item => {
-          const product = item.Product;
-          let primaryImage = '';
-          if (product?.ProductImages && product.ProductImages.length > 0 && product.ProductImages[0].image_url) {
-            primaryImage = forceEnvImageBase(product.ProductImages[0].image_url);
-          } else if (product?.image) {
-            primaryImage = forceEnvImageBase(product.image);
-          } else {
-            primaryImage = '/assets/card1-left.webp';
-          }
-          const variation = item.Variation || product?.ProductVariations?.[0] || {};
-          return {
-            ...product,
-            id: product.id,
-            image: primaryImage,
-            price: variation.price || 0,
-            comparePrice: variation.comparePrice || 0,
-            addedAt: item.addedAt || new Date().toISOString(),
-            selectedVariation: variation,
-          };
-        }));
-        showAddToWishlistSuccessToast(product.name);
-        fbqTrack('AddToWishlist', {
-          content_ids: [product.id],
-          content_name: product.name,
-          content_type: 'product',
-          value: product.price,
-          currency: 'INR',
-        });
-      } catch (error) {
-        console.error('WishlistContext: error adding to wishlist', error);
-        showAddToWishlistErrorToast(error.message);
+  const addToWishlist = (product) => {
+    setWishlistItems(prev => {
+      if (!prev.some(item => item.id === product.id)) {
+        return [...prev, product];
       }
-    } else {
-      setWishlist(prevWishlist => {
-        const exists = prevWishlist.some(item => item.id === product.id);
-        if (!exists) {
-          let primaryImage = '';
-          if (product.selectedVariation?.images && product.selectedVariation.images.length > 0) {
-            primaryImage = product.selectedVariation.images[0].image_url;
-          } else if (product.variationImages && product.variationImages.length > 0) {
-            primaryImage = product.variationImages[0];
-          } else if (Array.isArray(product.images) && product.images.length > 0) {
-            primaryImage = product.images[0].image_url;
-          } else if (product.image) {
-            primaryImage = product.image;
-          }
-          
-          let images = [];
-          if (product.selectedVariation?.images && product.selectedVariation.images.length > 0) {
-            images = product.selectedVariation.images;
-          } else if (product.variationImages && product.variationImages.length > 0) {
-            images = product.variationImages.map(img => ({ image_url: img, is_primary: false }));
-            if(images.length > 0) images[0].is_primary = true;
-          } else if (Array.isArray(product.images) && product.images.length > 0) {
-            images = product.images;
-          } else if (product.image) {
-            images = [{ image_url: product.image, is_primary: true }];
-          } else if (product.ProductImages && product.ProductImages.length > 0) {
-            images = product.ProductImages;
-          }
-          
-          const newWishlistItem = {
-            ...product,
-            image: primaryImage,
-            images,
-            addedAt: new Date().toISOString(),
-            selectedVariation: product.selectedVariation,
-            selectedSize: product.selectedSize,
-            price: product.selectedVariation?.price || product.price,
-            comparePrice: product.selectedVariation?.comparePrice || product.comparePrice,
-          };
-          
-          return [...prevWishlist, newWishlistItem];
-        }
-        return prevWishlist;
-      });
-      showAddToWishlistSuccessToast(product.name);
-    }
+      return prev;
+    });
   };
 
-  const removeFromWishlist = async (productId) => {
-    const itemToRemove = wishlist.find(item => item.id === productId);
-    if (isAuthenticated) {
-      try {
-        await apiRemoveFromWishlist(productId);
-        setWishlist(prev => prev.filter(item => item.id !== productId));
-        showRemoveFromWishlistSuccessToast(itemToRemove?.name || 'Item');
-        if (itemToRemove) {
-          fbqTrack('RemoveFromWishlist', {
-            content_ids: [itemToRemove.id],
-            content_name: itemToRemove.name,
-            content_type: 'product',
-            value: itemToRemove.price,
-            currency: 'INR',
-          });
-        }
-      } catch (error) {
-        console.error('WishlistContext: error removing from wishlist', error);
-      }
-    } else {
-      setWishlist(prevWishlist => prevWishlist.filter(item => item.id !== productId));
-      showRemoveFromWishlistSuccessToast(itemToRemove?.name || 'Item');
-      if (itemToRemove) {
-        fbqTrack('RemoveFromWishlist', {
-          content_ids: [itemToRemove.id],
-          content_name: itemToRemove.name,
-          content_type: 'product',
-          value: itemToRemove.price,
-          currency: 'INR',
-        });
-      }
-    }
+  const removeFromWishlist = (productId) => {
+    setWishlistItems(prev => prev.filter(item => item.id !== productId));
   };
 
-  const clearWishlist = async () => {
-    if (isAuthenticated) {
-      try {
-        await apiClearWishlist();
-        setWishlist([]);
-        showClearWishlistSuccessToast();
-      } catch (error) {
-        console.error('WishlistContext: error clearing wishlist', error);
-      }
-    } else {
-      setWishlist([]);
-      localStorage.removeItem('wishlist');
-      showClearWishlistSuccessToast();
-    }
-  };
-
-  const isInWishlist = (productId) => {
-    return wishlist.some(item => item.id === productId);
+  const clearWishlist = () => {
+    setWishlistItems([]);
   };
 
   const value = {
-    wishlist,
-    wishlistCount,
+    wishlistItems,
     addToWishlist,
     removeFromWishlist,
-    isInWishlist,
-    clearWishlist,
-    setIsAuthenticated
+    clearWishlist
   };
 
   return (
@@ -245,6 +49,4 @@ export const WishlistProvider = ({ children }) => {
       {children}
     </WishlistContext.Provider>
   );
-};
-
-export { WishlistContext }; 
+}; 

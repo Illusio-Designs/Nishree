@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Remove local font loading and use Google Fonts instead */
+
+/* Import existing styles from App.css */
+.img-fluid {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.section {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+span {
+  font-family: 'Playfair Display', serif;
+}
+
+p,
+a {
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+h1 {
+  font-size: 50px;
+  padding: 20px 0;
+  margin-top: 0 !important;
+}
+
+span {
+  color: #b72d24;
+}
+
+.btn-red {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: #ffffff;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 50px;
+  font-size: 20px;
+}
+
+.btn-red:hover {
+  box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
+}
+
+.background {
+  background-image: url("../assets/—Pngtree—texture of recycled cardboard with_15735637 1.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.nishree {
+  background: #ffffff;
+}
+
+.whychooseus {
+  padding: 50px;
+}
+
+.features {
+  padding: 50px 50px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+.feature {
+  text-align: center;
+  align-items: center;
+}
+.feature-icon img {
+  width: 50px;
+  height: 50px;
+  padding-bottom: 20px;
+}
+.feature-icon.premium-icon img {
+  width: 41px !important;
+}
+.feature-text h4 {
+  padding-bottom: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.feature-text p {
+  font-size: 18px;
+  font-weight: 400;
+}
+.blog-section {
+  padding: 4rem 2rem;
+}
+.blog-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 20px;
+}
+.blog-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+.blog-card:hover {
+  transform: translateY(-5px);
+}
+.blog-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+.blog-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.blog-card h3 {
+  padding: 1rem;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.blog-card p {
+  padding: 0 1rem;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.read-more {
+  display: inline-block;
+  padding: 0.5rem 0rem;
+  margin: 1rem;
+  color: #ff0000;
+  text-decoration: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 400;
+  font-size: 16px;
+}
+
+.read-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

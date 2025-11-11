@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import InputField from './InputField';
 import Button from './Button';
 import { toast } from 'react-toastify';
-import '../../styles/common/Settings.css';
+import '../../Styles/common/Settings.css';
 
 const Settings = ({ type = 'profile' }) => {
     const { user, updateProfile, updatePassword } = useAuth();
@@ -169,4 +169,4 @@ const Settings = ({ type = 'profile' }) => {
     );
 };
 
-export default Settings; 
+export default Settings;

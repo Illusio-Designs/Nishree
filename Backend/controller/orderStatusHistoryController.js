@@ -1,51 +1,10 @@
-const { OrderStatusHistory } = require('../model/orderStatusHistoryModel.js');
-const { Order } = require('../model/orderModel.js');
-const { Op } = require('sequelize');
-const { sequelize } = require('../config/db.js');
-const { User } = require('../model/userModel.js');
-
-// Get all status history records (admin)
-module.exports.getAllOrderStatusHistory = async (req, res) => {
-    try {
-        const { page = 1, limit = 10 } = req.query;
-        const offset = (page - 1) * limit;
-
-        const history = await OrderStatusHistory.findAndCountAll({
-            include: [
-                {
-                    model: Order,
-                    attributes: ['order_number'],
-                },
-                {
-                    model: User,
-                    as: 'UpdatedBy',
-                    attributes: ['username']
-                }
-            ],
-            order: [['createdAt', 'DESC']],
-            limit: parseInt(limit),
-            offset: parseInt(offset)
-        });
-
-        const totalPages = Math.ceil(history.count / limit);
-        
-        res.json({
-            history: history.rows,
-            pagination: {
-                total: history.count,
-                page: parseInt(page),
-                limit: parseInt(limit),
-                totalPages
-            }
-        });
-    } catch (error) {
-        console.error('Error getting all order status history:', error);
-        res.status(500).json({ message: 'Failed to get order status history', error: error.message });
-    }
-};
+import { OrderStatusHistory } from '../model/orderStatusHistoryModel.js';
+import { Order } from '../model/orderModel.js';
+import { Op } from 'sequelize';
+import { sequelize } from '../config/db.js';
 
 // Get status history for an order
-module.exports.getOrderStatusHistory = async (req, res) => {
+export const getOrderStatusHistory = async (req, res) => {
     try {
         const orderId = req.params.orderId;
         const userId = req.user.id;
@@ -74,7 +33,7 @@ module.exports.getOrderStatusHistory = async (req, res) => {
 };
 
 // Add a new status entry (admin only)
-module.exports.addOrderStatusEntry = async (req, res) => {
+export const addOrderStatusEntry = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {

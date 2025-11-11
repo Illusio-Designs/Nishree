@@ -1,0 +1,76 @@
+.category-manager {
+  padding: 20px;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.category-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-submit-button {
+  background: linear-gradient(135deg, #DC2626, #991B1B) !important;
+  color: white !important;
+  padding: 0.75rem 1.5rem !important;
+}
+
+.modal-cancel-button {
+  background: #F3F4F6 !important;
+  color: #374151 !important;
+  padding: 0.75rem 1.5rem !important;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.parent-category {
+    display: block;
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 2px;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    text-transform: capitalize;
+}
+
+.status-badge.active {
+    background-color: #e6f4ea;
+    color: #1e7e34;
+}
+
+.status-badge.inactive {
+    background-color: #feeced;
+    color: #dc3545;
+}
+
+.category-thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.no-image {
+    color: #999;
+    font-size: 0.9em;
+    font-style: italic;
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import Select from "react-select";
-import "../../styles/common/DropdownSelect.css";
+import "../../Styles/common/DropdownSelect.css";
 
 const DropdownSelect = ({
   label,
@@ -81,4 +81,4 @@ const DropdownSelect = ({
   );
 };
 
-export default DropdownSelect; 
+export default DropdownSelect;

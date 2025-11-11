@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js';
 
-const OrderItem = sequelize.define('OrderItem', {
+export const OrderItem = sequelize.define('OrderItem', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -70,6 +70,4 @@ const OrderItem = sequelize.define('OrderItem', {
             fields: ['variation_id']
         }
     ]
-});
-
-module.exports = { OrderItem }; 
+}); 

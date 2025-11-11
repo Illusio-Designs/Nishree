@@ -1,8 +1,8 @@
-const { Attribute, AttributeValue } = require('../model/associations.js');
-const { sequelize } = require('../config/db.js');
+import { Attribute, AttributeValue } from '../model/associations.js';
+import { sequelize } from '../config/db.js';
 
 // Get all attributes with their values
-module.exports.getAllAttributes = async (req, res) => {
+export const getAllAttributes = async (req, res) => {
     try {
         const attributes = await Attribute.findAll({
             include: [{
@@ -25,7 +25,7 @@ module.exports.getAllAttributes = async (req, res) => {
 };
 
 // Create a new attribute
-module.exports.createAttribute = async (req, res) => {
+export const createAttribute = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -72,7 +72,7 @@ module.exports.createAttribute = async (req, res) => {
 };
 
 // Update an attribute
-module.exports.updateAttribute = async (req, res) => {
+export const updateAttribute = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -136,7 +136,7 @@ module.exports.updateAttribute = async (req, res) => {
 };
 
 // Delete an attribute
-module.exports.deleteAttribute = async (req, res) => {
+export const deleteAttribute = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -170,7 +170,7 @@ module.exports.deleteAttribute = async (req, res) => {
 };
 
 // Add values to an attribute
-module.exports.addAttributeValues = async (req, res) => {
+export const addAttributeValues = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -223,7 +223,7 @@ module.exports.addAttributeValues = async (req, res) => {
 };
 
 // Remove values from an attribute
-module.exports.removeAttributeValues = async (req, res) => {
+export const removeAttributeValues = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
@@ -264,30 +264,5 @@ module.exports.removeAttributeValues = async (req, res) => {
         await transaction.rollback();
         console.error('Error removing attribute values:', error);
         res.status(500).json({ message: 'Failed to remove attribute values', error: error.message });
-    }
-};
-
-// Get attribute by ID
-module.exports.getAttributeById = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        const attribute = await Attribute.findByPk(id, {
-            include: [{
-                model: AttributeValue,
-                where: { status: 'active' },
-                required: false
-            }],
-            where: { status: 'active' }
-        });
-
-        if (!attribute) {
-            return res.status(404).json({ message: 'Attribute not found' });
-        }
-
-        res.json(attribute);
-    } catch (error) {
-        console.error('Error fetching attribute:', error);
-        res.status(500).json({ message: 'Failed to fetch attribute', error: error.message });
     }
 }; 

@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const ProductVariation = sequelize.define('ProductVariation', {
+export const ProductVariation = sequelize.define('ProductVariation', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -17,8 +17,7 @@ const ProductVariation = sequelize.define('ProductVariation', {
     },
     sku: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: 'idx_sku'
+        allowNull: false
     },
     price: {
         type: DataTypes.DECIMAL(10, 2),
@@ -33,6 +32,23 @@ const ProductVariation = sequelize.define('ProductVariation', {
         allowNull: false,
         defaultValue: 0
     },
+    weight: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
+    weightUnit: {
+        type: DataTypes.ENUM('g', 'kg', 'lb', 'oz'),
+        allowNull: true
+    },
+    dimensions: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        comment: 'JSON object containing length, width, height'
+    },
+    dimensionUnit: {
+        type: DataTypes.ENUM('cm', 'm', 'in', 'ft'),
+        allowNull: true
+    },
     attributes: {
         type: DataTypes.JSON,
         allowNull: false,
@@ -45,12 +61,17 @@ const ProductVariation = sequelize.define('ProductVariation', {
 }, {
     tableName: 'product_variations',
     timestamps: true,
-    indexes: [
-        {
-            name: 'idx_product_id',
-            fields: ['productId']
-        }
-    ]
+    indexes: [] // Remove all indexes initially
 });
 
-module.exports = { ProductVariation }; 
+// Add indexes after model definition
+ProductVariation.addHook('afterSync', async () => {
+    try {
+        // Add unique constraint on SKU
+        await sequelize.query('ALTER TABLE product_variations ADD UNIQUE INDEX idx_sku (sku)');
+        // Add index on productId
+        await sequelize.query('ALTER TABLE product_variations ADD INDEX idx_product_id (productId)');
+    } catch (error) {
+        console.error('Error adding indexes:', error);
+    }
+}); 

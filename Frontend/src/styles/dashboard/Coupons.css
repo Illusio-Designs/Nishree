@@ -1,0 +1,206 @@
+.coupons-container {
+  padding: 20px;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.coupon-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-submit-button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-cancel-button {
+  padding: 8px 16px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.inactive {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Usage Modal Styles */
+.usage-details {
+  padding: 20px;
+}
+
+.usage-stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-item label {
+  font-size: 14px;
+  color: #666;
+}
+
+.stat-item span {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.usage-list {
+  margin-top: 20px;
+}
+
+.usage-list h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.usage-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.usage-table th,
+.usage-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.usage-table th {
+  font-weight: 600;
+  color: #666;
+  background-color: #f9f9f9;
+}
+
+.usage-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+.no-usage {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+  font-style: italic;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.common-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.common-table th,
+.common-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.common-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+}
+
+.common-table tr:hover {
+  background-color: #f9fafb;
+}
+
+.form-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.checkbox-label {
+  cursor: pointer;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.table-cell {
+  padding: 0.5rem;
+}
+
+.status-active {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.status-inactive {
+  color: #f44336;
+  font-weight: 500;
+}

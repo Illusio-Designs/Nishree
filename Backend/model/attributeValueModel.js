@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const AttributeValue = sequelize.define('AttributeValue', {
+export const AttributeValue = sequelize.define('AttributeValue', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -15,6 +15,14 @@ const AttributeValue = sequelize.define('AttributeValue', {
             key: 'id'
         }
     },
+	variationId: {
+		type: DataTypes.INTEGER,
+		allowNull: true,
+		references: {
+			model: 'product_variations',
+			key: 'id'
+		}
+	},
     value: {
         type: DataTypes.STRING,
         allowNull: false
@@ -34,10 +42,10 @@ const AttributeValue = sequelize.define('AttributeValue', {
     collate: 'utf8mb4_general_ci',
     indexes: [
         {
-            unique: true,
-            fields: ['attributeId', 'value']
+			unique: true,
+			fields: ['attributeId', 'variationId']
         }
     ]
 });
 
-module.exports = { AttributeValue }; 
+export default AttributeValue; // Use export default 

@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js';
 
-const CouponUsage = sequelize.define('CouponUsage', {
+export const CouponUsage = sequelize.define('CouponUsage', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -53,6 +53,4 @@ const CouponUsage = sequelize.define('CouponUsage', {
             fields: ['orderId']
         }
     ]
-});
-
-module.exports = { CouponUsage }; 
+}); 

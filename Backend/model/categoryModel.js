@@ -1,8 +1,8 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
-const slugify = require('slugify');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js';
+import slugify from 'slugify';
 
-const Category = sequelize.define('Category', {
+export const Category = sequelize.define('Category', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -18,6 +18,10 @@ const Category = sequelize.define('Category', {
     },
     description: {
         type: DataTypes.TEXT,
+        allowNull: true
+    },
+    parentId: {
+        type: DataTypes.INTEGER,
         allowNull: true
     },
     image: {
@@ -57,7 +61,5 @@ const Category = sequelize.define('Category', {
         }
     }
 });
-
-module.exports = { Category };
 
 // Note: Self-referential relationships are defined in associations.js

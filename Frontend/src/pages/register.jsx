@@ -1,98 +1,365 @@
-import { useState } from "react";
-import Footer from "../components/Footer";
+import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
-import { useRouter } from "next/router";
-import Link from "next/link";
-import { registerUser } from '@/services/publicindex';
+import Footer from "../components/Footer";
+import { Link, useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { FaEye, FaEyeSlash, FaLock, FaEnvelope, FaUser } from "react-icons/fa";
+import { createUseStyles } from "react-jss";
+import { registerUser } from "../services/publicindex";
 
-export default function Register() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+// React-JSS styles
+const useStyles = createUseStyles({
+  "@keyframes slideLeft": {
+    from: {
+      opacity: 0,
+      transform: "translateX(30px) scale(0.98)",
+    },
+    to: {
+      opacity: 1,
+      transform: "translateX(0px) scale(1)",
+    },
+  },
+  "@keyframes spin": {
+    to: {
+      transform: "rotate(360deg)",
+    },
+  },
+  loginContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f5f7fa",
+    padding: "3rem 1rem 1rem",
+  },
+  loginCard: {
+    animation: "$slideLeft ease-in 0.3s",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    borderRadius: "12px",
+    width: "100%",
+    padding: "2.5rem",
+    background: "#fff",
+    transition: "transform 0.3s ease",
+    "&:hover": {
+      transform: "translateY(-5px)",
+    },
+  },
+  loginSubtitle: {
+    color: "#64748b",
+    marginTop: "0.5rem",
+    fontSize: "0.95rem",
+  },
+  inputIconWrapper: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+  },
+  inputIcon: {
+    position: "absolute",
+    left: "12px",
+    color: "#94a3b8",
+    fontSize: "1rem",
+  },
+  authInput: {
+    width: "100%",
+    padding: "0.75rem 2.05rem !important",
+    marginBottom: "0rem",
+  },
+  inputError: {
+    borderColor: "#ef4444",
+  },
+  errorMessage: {
+    color: "#ef4444",
+    fontSize: "0.875rem",
+    marginTop: "0.5rem",
+    marginBottom: "0",
+  },
+  passwordInputWrapper: {
+    position: "relative",
+  },
+  passwordToggle: {
+    position: "absolute",
+    right: "10px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
+    color: "#94a3b8",
+    cursor: "pointer",
+    padding: "5px",
+    fontSize: "1rem",
+    transition: "color 0.2s",
+    "&:hover": {
+      color: "#3b82f6",
+    },
+  },
+  loginOptions: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    margin: "1.25rem 0",
+    "@media (max-width: 640px)": {
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: "1rem",
+    },
+  },
+  rememberMe: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  rememberCheckbox: {
+    width: "18px",
+    height: "18px",
+    accentColor: "#3b82f6",
+    cursor: "pointer",
+  },
+});
+
+const Register = () => {
+  const classes = useStyles();
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const [rememberMe, setRememberMe] = useState(false);
+  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
+  // Check for saved credentials on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setFormData((prev) => ({ ...prev, email: savedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Name validation
+    if (!formData.name) {
+      newErrors.name = "Username is required";
+    } else if (formData.name.length < 3) {
+      newErrors.name = "Username must be at least 3 characters";
+    }
+
+    // Email validation
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email address is invalid";
+    }
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    // Confirm Password validation
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (formData.confirmPassword !== formData.password) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     setIsLoading(true);
+
     try {
-      const userData = {
-        username: username.trim(),
-        email,
-        password,
-        role: 'consumer'
+      // Create registration data object with consumer role only
+      const registrationData = {
+        username: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: 'consumer' // Force role to be consumer
       };
-      const response = await registerUser(userData);
-      if (response.user && (response.user.role !== 'consumer' && response.user.role !== 'customer')) {
-        return;
-      }
-      router.push('/login');
+
+      // Call the register API
+      const response = await registerUser(registrationData);
+      
+      toast.success("Registration successful! Please login to continue.");
+      navigate("/login", { replace: true });
     } catch (err) {
-      // Error is handled by toast notification in AuthContext
+      toast.error(
+        err.message || "Registration failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: null,
+      });
     }
   };
 
   return (
     <>
       <Header />
-      <div className="auth-container">
-        <div className="auth-tabs">
-          <Link href="/login" className="inactive">Login</Link>
-          <span className="active">Register</span>
-        </div>
-        <p className="auth-info">If you have an account, login in with your user name or email address.</p>
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label>Username</label>
-          <input 
-            type="text" 
-            value={username} 
-            onChange={e => setUsername(e.target.value)} 
-            required 
-            disabled={isLoading}
-          />
-          <label>Email address</label>
-          <input 
-            type="email" 
-            value={email} 
-            onChange={e => setEmail(e.target.value)} 
-            required 
-            disabled={isLoading}
-          />
-          <label>Password</label>
-          <div className="password-wrapper">
-            <input 
-              type={showPassword ? "text" : "password"} 
-              value={password} 
-              onChange={e => setPassword(e.target.value)} 
-              required 
-              disabled={isLoading}
-            />
-            <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? (
-                <svg width="20" height="20" fill="none" stroke="#180D3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              ) : (
-                <svg width="20" height="20" fill="none" stroke="#180D3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <path d="M17.94 17.94A10.06 10.06 0 0 1 12 20c-5.52 0-10-8-10-8a17.7 17.7 0 0 1 3.07-4.11"/>
-                  <path d="M1 1l22 22"/>
-                  <path d="M9.53 9.53A3 3 0 0 0 12 15a3 3 0 0 0 2.47-5.47"/>
-                  <path d="M12 4a10.06 10.06 0 0 1 5.94 1.94"/>
-                  <path d="M22 12s-4.48 8-10 8a10.06 10.06 0 0 1-5.94-1.94"/>
-                </svg>
-              )}
-            </span>
+      <div className={`auth-container ${classes.loginContainer}`}>
+        <ToastContainer position="top-center" className="toast" />
+        <div className={`auth-card ${classes.loginCard}`}>
+          <div className={classes.loginHeader}>
+            <h1 className={`auth-title ${classes.loginTitle}`}> Register</h1>
           </div>
-          <button type="submit" className="auth-btn" disabled={isLoading}>
-            {isLoading ? 'Registering...' : 'Register'}
-          </button>
-        </form>
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className={`form-group ${classes.formGroup}`}>
+              <div className={classes.inputIconWrapper}>
+                <FaUser className={classes.inputIcon} />
+                <input
+                  name="name"
+                  type="name"
+                  required
+                  className={`auth-input ${classes.authInput} ${
+                    errors.email ? classes.inputError : ""
+                  }`}
+                  placeholder="Username"
+                  value={formData.name}
+                  onChange={handleChange}
+                  autoComplete="name"
+                />
+              </div>
+              {errors.name && (
+                <p className={classes.errorMessage}>{errors.name}</p>
+              )}
+            </div>
+
+            <div className={`form-group ${classes.formGroup}`}>
+              <div className={classes.inputIconWrapper}>
+                <FaEnvelope className={classes.inputIcon} />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  className={`auth-input ${classes.authInput} ${
+                    errors.email ? classes.inputError : ""
+                  }`}
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  autoComplete="email"
+                />
+              </div>
+              {errors.email && (
+                <p className={classes.errorMessage}>{errors.email}</p>
+              )}
+            </div>
+
+            <div className={`form-group ${classes.formGroup}`}>
+              <div
+                className={`${classes.inputIconWrapper} ${classes.passwordInputWrapper}`}
+              >
+                <FaLock className={classes.inputIcon} />
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className={`auth-input ${classes.authInput} ${
+                    errors.password ? classes.inputError : ""
+                  }`}
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className={classes.passwordToggle}
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className={classes.errorMessage}>{errors.password}</p>
+              )}
+            </div>
+
+            <div className={`form-group ${classes.formGroup}`}>
+              <div
+                className={`${classes.inputIconWrapper} ${classes.passwordInputWrapper}`}
+              >
+                <FaLock className={classes.inputIcon} />
+                <input
+                  name="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className={`auth-input ${classes.authInput} ${
+                    errors.confirmPassword ? classes.inputError : ""
+                  }`}
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className={classes.passwordToggle}
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className={classes.errorMessage}>{errors.confirmPassword}</p>
+              )}
+            </div>
+
+            <div className={`form-group ${classes.formGroup}`}>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`auth-button ${classes.loginButton}`}
+              >
+                {isLoading ? (
+                  <>
+                    <span className={classes.spinner}></span>
+                    <span>Registering...</span>
+                  </>
+                ) : (
+                  "Sign Up"
+                )}
+              </button>
+            </div>
+          </form>
+
+          <div className={`text-center ${classes.signupPrompt}`}>
+            <p>
+              Already have an account?{" "}
+              <Link to="/login" className={`auth-link ${classes.signupLink}`}>
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
       <Footer />
     </>
   );
-} 
+};
+
+export default Register;

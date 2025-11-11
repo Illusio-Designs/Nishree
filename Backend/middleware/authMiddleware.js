@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const { User } = require('../model/userModel.js');
+import jwt from 'jsonwebtoken';
+import { User } from '../model/userModel.js';
 
 // Authentication middleware
-module.exports.authenticate = async (req, res, next) => {
+export const authenticate = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -26,10 +26,10 @@ module.exports.authenticate = async (req, res, next) => {
 };
 
 // For backward compatibility
-module.exports.isAuthenticated = module.exports.authenticate;
+export const isAuthenticated = authenticate;
 
 // Authorization middleware
-module.exports.authorize = (roles) => {
+export const authorize = (roles) => {
     return (req, res, next) => {
         if (!req.user) {
             return res.status(401).json({ message: 'Authentication required' });
@@ -43,7 +43,7 @@ module.exports.authorize = (roles) => {
 };
 
 // Admin middleware
-module.exports.isAdmin = (req, res, next) => {
+export const isAdmin = (req, res, next) => {
     if (!req.user) {
         return res.status(401).json({ message: 'Authentication required' });
     }

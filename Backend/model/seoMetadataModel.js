@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/db.js');
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/db.js'; // Ensure to use .js extension
 
-const SeoMetadata = sequelize.define('SEOMetadata', {
+export const SeoMetadata = sequelize.define('SEOMetadata', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -51,6 +51,4 @@ const SeoMetadata = sequelize.define('SEOMetadata', {
             fields: ['slug']
         }
     ]
-});
-
-module.exports = { SeoMetadata }; 
+}); 

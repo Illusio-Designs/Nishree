@@ -4,7 +4,7 @@ import Pagination from "./Pagination";
 import SearchBar from "./SearchBar";
 import Filter from "./Filter";
 import ActionButton from "./ActionButton";
-import "../../styles/common/TableControls.css";
+import "../../Styles/common/TableControls.css";
 
 const TableWithControls = ({
   columns,
@@ -14,7 +14,6 @@ const TableWithControls = ({
   filters = [],
   actions = [],
   onRowClick,
-  className = '',
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,8 +52,6 @@ const TableWithControls = ({
     });
 
     setFilteredData(result);
-    // Reset to first page when filters change
-    setCurrentPage(1);
   }, [data, searchTerm, selectedFilters]);
 
   // Calculate pagination
@@ -74,7 +71,7 @@ const TableWithControls = ({
 
   const renderActions = (row) => {
     return (
-      <div className="action-buttons">
+      <div className="table-actions">
         {actions.map((action, index) => (
           <ActionButton
             key={index}
@@ -118,7 +115,7 @@ const TableWithControls = ({
   ];
 
   return (
-    <div className={`table-with-controls ${className}`}>
+    <div className="table-with-controls">
       <div className="table-controls">
         <div className="controls-left">
           <SearchBar
@@ -128,15 +125,11 @@ const TableWithControls = ({
           />
         </div>
         <div className="controls-right">
-          {filters.map((filter, index) => (
-            <Filter
-              key={index}
-              options={filter.options}
-              value={selectedFilters[filter.key] || filter.defaultValue}
-              onChange={(value) => handleFilterChange(filter.key, value)}
-              placeholder={filter.placeholder}
-            />
-          ))}
+          <Filter
+            filters={filters}
+            selectedFilters={selectedFilters}
+            onChange={handleFilterChange}
+          />
         </div>
       </div>
 
@@ -146,15 +139,13 @@ const TableWithControls = ({
         onRowClick={onRowClick}
       />
 
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };
 
-export default TableWithControls; 
+export default TableWithControls;

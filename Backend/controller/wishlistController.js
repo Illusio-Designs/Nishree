@@ -1,31 +1,13 @@
-const { Wishlist, Product, ProductImage, ProductVariation, Cart } = require('../model/associations.js');
+import { Wishlist, Product, ProductImage, Cart } from '../model/associations.js';
 
 // Add product to wishlist
-module.exports.addToWishlist = async (req, res) => {
-    console.log('addToWishlist called:', {
-        userId: req.user?.id,
-        productId: req.params.productId,
-        body: req.body
-    });
+export const addToWishlist = async (req, res) => {
     try {
-        const productId = req.params.productId;
+        const { productId } = req.body;
         const userId = req.user.id; // From auth middleware
 
         // Check if product exists
-        const product = await Product.findByPk(productId, {
-            include: [
-                {
-                    model: ProductImage,
-                    as: 'ProductImages',
-                    attributes: ['id', 'image_url', 'alt_text', 'is_primary']
-                },
-                {
-                    model: ProductVariation,
-                    as: 'ProductVariations',
-                    attributes: ['id', 'price', 'comparePrice', 'sku', 'stock', 'status']
-                }
-            ]
-        });
+        const product = await Product.findByPk(productId);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -51,30 +33,9 @@ module.exports.addToWishlist = async (req, res) => {
             addedAt: new Date()
         });
 
-        // Prepare images array for frontend
-        let images = [];
-        if (product.ProductImages && product.ProductImages.length > 0) {
-            images = product.ProductImages.map(img => ({
-                image_url: img.image_url,
-                is_primary: img.is_primary,
-                alt_text: img.alt_text,
-                id: img.id
-            }));
-        } else if (product.image) {
-            images = [{ image_url: product.image, is_primary: true }];
-        } else {
-            images = [{ image_url: '/assets/demo-product.jpg', is_primary: true }];
-        }
-
         res.status(201).json({
             message: 'Product added to wishlist',
-            wishlistItem: {
-                ...wishlistItem.get({ plain: true }),
-                Product: {
-                    ...product.get({ plain: true }),
-                    images
-                }
-            }
+            wishlistItem
         });
     } catch (error) {
         console.error('Error adding to wishlist:', error);
@@ -86,7 +47,7 @@ module.exports.addToWishlist = async (req, res) => {
 };
 
 // Get user's wishlist
-module.exports.getWishlist = async (req, res) => {
+export const getWishlist = async (req, res) => {
     try {
         const userId = req.user.id; // From auth middleware
 
@@ -99,68 +60,20 @@ module.exports.getWishlist = async (req, res) => {
                     include: [
                         {
                             model: ProductImage,
-                            as: 'ProductImages',
-                            attributes: ['id', 'image_url', 'alt_text', 'is_primary'],
+                            attributes: ['id', 'imageName', 'altText', 'isDefault'],
                             limit: 1,
-                            where: { is_primary: true },
-                            required: false
-                        },
-                        {
-                            model: ProductVariation,
-                            as: 'ProductVariations',
-                            attributes: ['id', 'price', 'comparePrice', 'sku', 'stock', 'status'],
+                            where: { isDefault: true },
                             required: false
                         }
                     ]
                 }
             ],
-            order: [['createdAt', 'DESC']]
-        });
-
-        // Map to always provide an image
-        const mappedWishlist = wishlistItems.map(item => {
-            const plainItem = item.get({ plain: true });
-            const product = plainItem.Product;
-            let image = null;
-            let images = [];
-            // 1. Try ProductImages
-            if (product?.ProductImages && product.ProductImages.length > 0) {
-                images = product.ProductImages.map(img => ({
-                    image_url: img.image_url,
-                    is_primary: img.is_primary,
-                    alt_text: img.alt_text,
-                    id: img.id
-                }));
-                image = product.ProductImages[0].image_url;
-            }
-            // 2. Fallback to product.image (if exists and not already set)
-            else if (product?.image) {
-                images = [{ image_url: product.image, is_primary: true }];
-                image = product.image;
-            }
-            // 3. Fallback to demo image
-            else {
-                images = [{ image_url: '/assets/demo-product.jpg', is_primary: true }];
-                image = '/assets/demo-product.jpg';
-            }
-            return {
-                ...plainItem,
-                Product: {
-                    ...product,
-                    image, // always set image
-                    images // new: always set images array
-                }
-            };
+            order: [['addedAt', 'DESC']]
         });
 
         res.status(200).json({
-            count: mappedWishlist.length,
-            wishlist: mappedWishlist
-        });
-
-        console.log('Wishlist Response Sent:', {
-            count: mappedWishlist.length,
-            wishlist: mappedWishlist
+            count: wishlistItems.length,
+            wishlist: wishlistItems
         });
     } catch (error) {
         console.error('Error fetching wishlist:', error);
@@ -172,7 +85,7 @@ module.exports.getWishlist = async (req, res) => {
 };
 
 // Check if a product is in the user's wishlist
-module.exports.checkWishlist = async (req, res) => {
+export const checkWishlist = async (req, res) => {
     try {
         const { productId } = req.params;
         const userId = req.user.id; // From auth middleware
@@ -198,7 +111,7 @@ module.exports.checkWishlist = async (req, res) => {
 };
 
 // Remove product from wishlist
-module.exports.removeFromWishlist = async (req, res) => {
+export const removeFromWishlist = async (req, res) => {
     try {
         const { productId } = req.params;
         const userId = req.user.id; // From auth middleware
@@ -231,7 +144,7 @@ module.exports.removeFromWishlist = async (req, res) => {
 };
 
 // Clear entire wishlist
-module.exports.clearWishlist = async (req, res) => {
+export const clearWishlist = async (req, res) => {
     try {
         const userId = req.user.id; // From auth middleware
 
@@ -252,7 +165,7 @@ module.exports.clearWishlist = async (req, res) => {
 };
 
 // Move product from wishlist to cart
-module.exports.moveToCart = async (req, res) => {
+export const moveToCart = async (req, res) => {
     try {
         const { productId } = req.params; // Assuming the product ID is passed as a URL parameter
         const userId = req.user.id; // Assuming user ID is available in the request

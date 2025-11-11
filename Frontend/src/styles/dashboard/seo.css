@@ -1,266 +1,43 @@
-/* --- Modern Search Bar Styles --- */
-.modern-searchbar-form {
-  margin: 0;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  width: auto;
-  min-width: 0;
+.seo-container {
+  padding: 20px;
 }
 
-.modern-searchbar-group {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  border-radius: 10px;
-  background: #fff;
-  border: 2px solid #180D3E;
-  transition: all 0.2s ease;
-}
-
-.modern-searchbar-input {
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 1rem;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border-radius: 2rem;
-  width: 100%;
-}
-
-.modern-searchbar-icon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #180D3E;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modern-searchbar-icon svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.seo-header-container {
+.header-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  gap: 1rem;
 }
 
-.seo-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.seo-table-container {
-  margin-top: 0.5rem;
-}
-
-.seo-loading {
-  text-align: center;
-  padding: 1rem 0;
-}
-
-.seo-empty-state {
-  text-align: center;
-  padding: 2rem 0;
-  color: #6b7280;
-}
-
-.seo-pagination-container {
-  margin-top: 1rem;
-}
-
-/* Form Styles */
-.seo-form {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  height: 100%;
-}
-
-.seo-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.seo-image-preview {
-  max-width: 100%;
-  margin-top: 0.5rem;
-  border-radius: 0.5rem;
-}
-
-/* Action Buttons */
-.seo-action-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .seo-header-container {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .seo-title {
-    font-size: 1.25rem;
-  }
-}
-
-.custom-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.custom-modal-container {
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(30,41,59,0.18);
-  width: 600px;
-  max-width: 95vw;
-  height: 80vh;
-  max-height: 95vh;
-  display: flex;
-  flex-direction: column;
+.truncate-text {
+  max-width: 250px;
+  white-space: nowrap;
   overflow: hidden;
-  position: relative;
+  text-overflow: ellipsis;
 }
-
-.custom-modal-header {
-  padding: 32px 32px 20px 32px;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #22223b;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.custom-modal-close {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: #888;
-  cursor: pointer;
-  margin-left: 16px;
-}
-
-.custom-modal-body {
-  padding: 24px 32px 0 32px;
-  flex: 1 1 auto;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  scrollbar-width: thin;
-  scrollbar-color: #e5e7eb #fff;
-  overflow-x: hidden;
-}
-.custom-modal-body::-webkit-scrollbar {
-  display: none;
-}
-.custom-modal-body {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.custom-modal-footer {
-  padding: 24px 32px 32px 32px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  background: #fff;
-  flex-shrink: 0;
-  margin-bottom: 80px;
-}
-
-@media (max-width: 700px) {
-  .custom-modal-container {
-    width: 98vw;
-    height: 95vh;
-    border-radius: 12px;
-    padding: 0;
-  }
-  .custom-modal-header,
-  .custom-modal-body,
-  .custom-modal-footer {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-}
-
-
-
-/* Table Styles */
-
-.common-table th,
-.common-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.common-table th {
-  background-color: #f9fafb;
-  font-weight: 600;
-  color: #374151;
-}
-
-.common-table tr:hover {
-  background-color: #f9fafb;
-}
-
-/* Ensure the actions column has proper width */
-.common-table th:last-child,
-.common-table td:last-child {
-  min-width: 100px;
-  text-align: center;
-}
-
-/* Add some spacing between action buttons */
 
 .seo-form {
   display: flex;
   flex-direction: column;
+  gap: 1rem;
 }
 
-.seo-form .input-field-container {
-  margin-bottom: 15px;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.seo-form .input-field-label {
-  display: block;
-  margin-bottom: 5px;
+.form-group label {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
 }
 
-.seo-form .input-field:focus {
-  outline: none;
-  border-color: #CE1E36;
-  box-shadow: 0 0 0 2px rgba(206, 30, 54, 0.1);
-}
 
-.seo-image-preview {
-  max-width: 200px;
-  max-height: 200px;
-  margin-top: 10px;
-  border-radius: 4px;
-  border: 1px solid #e5e7eb;
-} 
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}

@@ -1,4 +1,4 @@
-const PaymentService = {
+export const PaymentService = {
     confirmPayment: async (paymentIntentId) => {
         // Logic to confirm payment with the payment gateway
         // This is a placeholder; implement your actual payment confirmation logic here
@@ -8,5 +8,3 @@ const PaymentService = {
         };
     }
 };
-
-module.exports = { PaymentService };

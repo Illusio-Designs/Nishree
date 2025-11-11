@@ -1,12 +1,22 @@
-const express = require('express');
+import express from 'express';
+import {
+	createPolicy,
+	getPolicies,
+	getPublicPolicyByName,
+	getPolicyById,
+	updatePolicy,
+	deletePolicy
+} from '../controller/policyController.js';
+
 const router = express.Router();
-const policyController = require('../controller/policyController');
 
-router.post('/', policyController.createPolicy);
-router.get('/', policyController.getPolicies);
-router.get('/name/:name', policyController.getPublicPolicyByName);
-router.get('/:id', policyController.getPolicyById);
-router.put('/:id', policyController.updatePolicy);
-router.delete('/:id', policyController.deletePolicy);
+router.post('/', createPolicy);
+router.get('/', getPolicies);
+router.get('/name/:name', getPublicPolicyByName);
+router.get('/:id', getPolicyById);
+router.put('/:id', updatePolicy);
+router.delete('/:id', deletePolicy);
 
-module.exports = router; 
+export default router;
+
+

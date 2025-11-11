@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../styles/common/InputField.css";
+import "../../Styles/common/InputField.css";
 
 const InputField = ({ 
   label, 
@@ -11,8 +11,7 @@ const InputField = ({
   required = false,
   accept,
   className = "",
-  options = [],
-  name
+  options = []
 }) => {
   const [preview, setPreview] = useState(null);
 
@@ -38,31 +37,19 @@ const InputField = ({
           <div className="file-input-wrapper">
             <input
               type="file"
-              onChange={onChange}
+              onChange={handleFileChange}
               accept={accept}
               required={required}
               className="file-input"
-              name={name}
-              multiple
             />
             <div className="file-input-placeholder">
-              {Array.isArray(value) && value.length > 0
-                ? value.map((file, idx) => file.name || (file.url && file.url.split('/').pop()) || `Image ${idx + 1}`).join(', ')
-                : (value && value.name) || placeholder || "Choose a file"}
+              {value ? value.name : placeholder || "Choose a file"}
             </div>
             <button className="file-input-button">Browse</button>
           </div>
-          {Array.isArray(value) && value.length > 0 && (
-            <div className="file-preview-grid">
-              {value.map((file, idx) => (
-                <img
-                  key={idx}
-                  src={file instanceof File ? URL.createObjectURL(file) : (file.url || file)}
-                  alt={`Preview ${idx + 1}`}
-                  className="file-preview-image"
-                  style={{ height: '60px', width: '60px', objectFit: 'cover', marginRight: 8 }}
-                />
-              ))}
+          {preview && (
+            <div className="file-preview">
+              <img src={preview} alt="Preview" className="file-preview-image" />
             </div>
           )}
         </div>
@@ -79,7 +66,6 @@ const InputField = ({
           onChange={onChange}
           required={required}
           className="select-input"
-          name={name}
         >
           {options?.map((option) => (
             <option key={option.value} value={option.value}>
@@ -102,7 +88,6 @@ const InputField = ({
           required={required}
           className="textarea-input"
           rows={4}
-          name={name}
         />
       </div>
     );
@@ -118,10 +103,9 @@ const InputField = ({
         placeholder={placeholder}
         required={required}
         className="text-input"
-        name={name}
       />
     </div>
   );
 };
 
-export default InputField; 
+export default InputField;

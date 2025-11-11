@@ -1,5 +1,4 @@
 import React from 'react';
-import '../../styles/common/Filter.css';
 
 const Filter = ({ filters = [], selectedFilters = {}, onChange }) => {
   return (
@@ -24,4 +23,4 @@ const Filter = ({ filters = [], selectedFilters = {}, onChange }) => {
   );
 };
 
-export default Filter; 
+export default Filter;

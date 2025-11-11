@@ -1,5 +1,4 @@
-const express = require('express');
-const axios = require('axios');
+import axios from "axios";
 
 const GA_MEASUREMENT_ID = process.env.GA_MEASUREMENT_ID;  // Use environment variable
 const GA_API_SECRET = process.env.GA_API_SECRET;          // Use environment variable
@@ -35,17 +34,4 @@ async function sendPurchaseEvent(order) {
     }
 }
 
-const router = express.Router();
-
-// POST /api/google-analytics/send-event
-router.post('/send-event', async (req, res) => {
-    try {
-        await sendPurchaseEvent(req.body.order);
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-module.exports = router;
-module.exports.sendPurchaseEvent = sendPurchaseEvent;
+export default sendPurchaseEvent;

@@ -1,7 +1,11 @@
-const sharp = require('sharp');
-const fs = require('fs').promises;
-const fsSync = require('fs');
-const path = require('path');
+import sharp from 'sharp';
+import { promises as fs } from 'fs';
+import fsSync from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class ImageHandler {
     constructor(uploadDir) {
@@ -199,4 +203,4 @@ class ImageHandler {
     }
 }
 
-module.exports = ImageHandler; 
+export default ImageHandler; 
