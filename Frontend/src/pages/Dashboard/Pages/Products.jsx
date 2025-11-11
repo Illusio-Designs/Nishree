@@ -409,18 +409,18 @@ const Products = () => {
       header: "Image",
       render: (row) => {
         const imageUrl = row.ProductImages && row.ProductImages[0]?.image_url;
-        return (
-          <div className="product-image-cell">
-            {imageUrl ? (
-              <img
-                src={`${import.meta.env.VITE_API_URL}${imageUrl}`}
-                alt={row.name}
-                className="product-thumbnail"
-              />
-            ) : (
-              <div className="no-image">No image</div>
-            )}
-          </div>
+        return imageUrl ? (
+          <img
+            src={`${import.meta.env.VITE_API_URL}${imageUrl}`}
+            alt={row.name}
+            className="category-thumbnail"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'inline-block';
+            }}
+          />
+        ) : (
+          <span className="no-image">No image</span>
         );
       }
     },

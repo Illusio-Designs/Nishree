@@ -197,17 +197,36 @@ const Category = () => {
     {
       key: "image",
       header: "Image",
-      render: (row) => (
-        row.image ? (
-          <img 
-            src={`${import.meta.env.VITE_API_URL}/uploads/category/${row.image}`}
-            alt={row.name}
-            className="category-thumbnail"
-          />
-        ) : (
-          <span className="no-image">No image</span>
-        )
-      )
+      render: (row) => {
+        const imageUrl = row.image;
+        // Check if image already contains the full path
+        const imageSrc = imageUrl?.startsWith('/uploads/') 
+          ? `${import.meta.env.VITE_API_URL}${imageUrl}`
+          : `${import.meta.env.VITE_API_URL}/uploads/category/${imageUrl}`;
+        
+        return (
+          <div>
+            {imageUrl ? (
+              <>
+                <img
+                  src={imageSrc}
+                  alt={row.name}
+                  className="category-thumbnail"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    if (e.target.nextSibling) {
+                      e.target.nextSibling.style.display = 'inline-block';
+                    }
+                  }}
+                />
+                <span className="no-image" style={{ display: 'none' }}>No image</span>
+              </>
+            ) : (
+              <span className="no-image">No image</span>
+            )}
+          </div>
+        );
+      }
     },
     {
       key: "actions",
@@ -290,12 +309,18 @@ const Category = () => {
           />
           
           <div className="image-upload-section">
-            {modalMode === 'edit' && formData.image && (
+            {modalMode === 'edit' && formData.image && typeof formData.image === 'string' && (
               <div className="current-image">
                 <img 
-                  src={`${import.meta.env.VITE_API_URL}/uploads/category/${formData.image}`}
+                  src={formData.image?.startsWith('/uploads/') 
+                    ? `${import.meta.env.VITE_API_URL}${formData.image}`
+                    : `${import.meta.env.VITE_API_URL}/uploads/category/${formData.image}`}
                   alt="Current category"
                   className="preview-image"
+                  onError={(e) => {
+                    console.error('Preview image failed to load:', e.target.src);
+                    e.target.style.display = 'none';
+                  }}
                 />
               </div>
             )}

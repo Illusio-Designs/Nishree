@@ -167,16 +167,36 @@ const Slider = () => {
     {
       key: "image",
       header: "Image",
-      render: (row) =>
-        row.image ? (
-          <img
-            src={`${import.meta.env.VITE_API_URL}/uploads/slider/${row.image}`}
-            alt={row.title}
-            style={{ width: "100px", height: "auto", objectFit: "cover" }}
-          />
-        ) : (
-          <span className="no-image">No image</span>
-        ),
+      render: (row) => {
+        const imageUrl = row.image;
+        // Check if image already contains the full path
+        const imageSrc = imageUrl?.startsWith('/uploads/') 
+          ? `${import.meta.env.VITE_API_URL}${imageUrl}`
+          : `${import.meta.env.VITE_API_URL}/uploads/slider/${imageUrl}`;
+        
+        return (
+          <div>
+            {imageUrl ? (
+              <>
+                <img
+                  src={imageSrc}
+                  alt={row.title}
+                  className="category-thumbnail"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    if (e.target.nextSibling) {
+                      e.target.nextSibling.style.display = 'inline-block';
+                    }
+                  }}
+                />
+                <span className="no-image" style={{ display: 'none' }}>No image</span>
+              </>
+            ) : (
+              <span className="no-image">No image</span>
+            )}
+          </div>
+        );
+      }
     },
     {
       key: "actions",
@@ -275,12 +295,18 @@ const Slider = () => {
             ]}
           />
           <div className="image-upload-section">
-            {modalMode === "edit" && formData.image && (
+            {modalMode === "edit" && formData.image && typeof formData.image === 'string' && (
               <div className="current-image">
                 <img
-                  src={`${import.meta.env.VITE_API_URL}/uploads/slider/${formData.image}`}
+                  src={formData.image?.startsWith('/uploads/') 
+                    ? `${import.meta.env.VITE_API_URL}${formData.image}`
+                    : `${import.meta.env.VITE_API_URL}/uploads/slider/${formData.image}`}
                   alt="Current slider"
                   className="preview-image"
+                  onError={(e) => {
+                    console.error('Preview image failed to load:', e.target.src);
+                    e.target.style.display = 'none';
+                  }}
                 />
               </div>
             )}
