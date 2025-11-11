@@ -9,7 +9,7 @@ import { FaPlus } from "react-icons/fa";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from "react-icons/hi2";
 import { couponService } from "../../../services";
 import { toast } from "react-toastify";
-import "../../../Styles/dashboard/Coupons.css";
+import "../../../Styles/dashboard/Category.css";
 
 const Coupons = () => {
   const [coupons, setCoupons] = useState([]);
@@ -256,11 +256,11 @@ const Coupons = () => {
   );
 
   return (
-    <div className="coupons-container">
+    <div className="category-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Coupon Management</h2>
         <Button onClick={() => handleOpenModal("add")} className="add-button">
-          <FaPlus /> Create Coupon
+          <FaPlus /> Add Coupon
         </Button>
       </div>
 
@@ -275,7 +275,7 @@ const Coupons = () => {
         onClose={() => setIsModalOpen(false)}
         title={modalMode === "add" ? "Create Coupon" : "Edit Coupon"}
       >
-        <form onSubmit={handleSubmit} className="coupon-form">
+        <form onSubmit={handleSubmit} className="category-form">
           <InputField
             label="Coupon Code"
             value={formData.code}

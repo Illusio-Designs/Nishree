@@ -6,7 +6,7 @@ import ActionButton from '../../../components/common/ActionButton';
 import Button from '../../../components/common/Button';
 import { FaPlus } from 'react-icons/fa';
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from 'react-icons/hi2';
-import '../../../Styles/dashboard/OrderStatusHistory.css';
+import '../../../Styles/dashboard/Category.css';
 
 const OrderStatusHistory = () => {
   const [statusHistories, setStatusHistories] = useState([]);
@@ -115,6 +115,8 @@ const OrderStatusHistory = () => {
     });
   };
 
+  const formatINR = (amount) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount || 0);
+
   const columns = [
     { header: 'Order ID', accessor: 'orderId' },
     { header: 'Customer', accessor: 'customerName' },
@@ -163,14 +165,14 @@ const OrderStatusHistory = () => {
   ];
 
   return (
-    <div className="order-status-history-container">
+    <div className="category-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Order Status History</h2>
         <Button 
           className="add-button"
           onClick={() => handleOpenModal('add')}
         >
-          <FaPlus /> Add Status Update
+          <FaPlus /> Add Status
         </Button>
       </div>
 
@@ -226,7 +228,7 @@ const OrderStatusHistory = () => {
               </div>
               <div className="info-item">
                 <span className="info-label">Order Total:</span>
-                <span className="info-value">${selectedHistory?.orderTotal.toFixed(2)}</span>
+                <span className="info-value">{formatINR(selectedHistory?.orderTotal)}</span>
               </div>
             </div>
             
@@ -235,17 +237,18 @@ const OrderStatusHistory = () => {
               <p className="note-content">{selectedHistory?.note}</p>
             </div>
             
-            <div className="modal-footer">
+            <div className="modal-actions">
               <Button
                 onClick={() => setIsModalOpen(false)}
-                className="close-button"
+                className="modal-cancel-button"
+                variant="secondary"
               >
                 Close
               </Button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="status-form">
+          <form onSubmit={handleSubmit} className="category-form">
             <InputField
               label="Order ID"
               value={formData.orderId}
@@ -298,6 +301,7 @@ const OrderStatusHistory = () => {
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 className="modal-cancel-button"
+                variant="secondary"
               >
                 Cancel
               </Button>

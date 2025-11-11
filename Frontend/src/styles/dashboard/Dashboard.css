@@ -105,7 +105,6 @@
 
 .nav-item:hover {
   background-color: rgba(183, 45, 36, 0.2);
-  transform: translateX(5px);
 }
 
 .nav-item span {

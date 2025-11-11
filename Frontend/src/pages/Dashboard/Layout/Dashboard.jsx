@@ -27,6 +27,8 @@ import {
   HiOutlineChatBubbleLeftRight,
   HiOutlineHeart,
   HiOutlineGlobeAlt,
+  HiOutlineUserCircle,
+  HiOutlineDocumentText,
 } from "react-icons/hi2";
 import {
   IoGridOutline,
@@ -34,10 +36,12 @@ import {
   IoHeartOutline,
   IoLayersOutline,
   IoPricetagOutline,
+  IoCardOutline,
 } from "react-icons/io5";
 import Slider from "../Pages/Slider";
 import Products from "../Pages/Products";
 import Coupons from "../Pages/Coupons";
+import Policies from "../Pages/Policies";
 import Orders from "../Pages/Orders";
 import Reviews from "../Pages/Reviews";
 import OrderStatusHistory from "../Pages/OrderStatusHistory";
@@ -47,7 +51,6 @@ import Payments from "../Pages/Payments";
 import Users from "../Pages/Users";
 import SEO from "../Pages/SEO";
 import DashboardOverview from "../Pages/DashboardOverview";
-import Customers from "../Pages/Customers";
 import Category from "../Pages/Category";
 import ProfileSettings from "../../../components/common/Settings";
 import SystemSettings from "../Pages/Settings";
@@ -144,15 +147,6 @@ const Dashboard = () => {
             <span className={!isSidebarOpen ? "hidden" : ""}>Dashboard</span>
           </Link>
           <Link
-            to="/dashboard/customers"
-            className={`nav-item ${
-              location.pathname === "/dashboard/customers" ? "active" : ""
-            }`}
-          >
-            <HiOutlineUsers className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>Customers</span>
-          </Link>
-          <Link
             to="/dashboard/category"
             className={`nav-item ${
               location.pathname === "/dashboard/category" ? "active" : ""
@@ -179,7 +173,7 @@ const Dashboard = () => {
             <IoCartOutline className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Products</span>
           </Link>
-          {/* <Link
+          <Link
             to="/dashboard/orders"
             className={`nav-item ${
               location.pathname === "/dashboard/orders" ? "active" : ""
@@ -198,7 +192,7 @@ const Dashboard = () => {
           >
             <HiOutlineClipboardDocumentList className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Order Status</span>
-          </Link> */}
+          </Link>
           <Link
             to="/dashboard/coupons"
             className={`nav-item ${
@@ -209,6 +203,13 @@ const Dashboard = () => {
             <span className={!isSidebarOpen ? "hidden" : ""}>Coupons</span>
           </Link>
           <Link
+            to="/dashboard/policies"
+            className={`nav-item ${location.pathname === "/dashboard/policies" ? "active" : ""}`}
+          >
+            <HiOutlineDocumentText className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Policies</span>
+          </Link>
+          <Link
             to="/dashboard/reviews"
             className={`nav-item ${
               location.pathname === "/dashboard/reviews" ? "active" : ""
@@ -217,7 +218,7 @@ const Dashboard = () => {
             <HiOutlineStar className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Reviews</span>
           </Link>
-          {/* <Link
+          <Link
             to="/dashboard/shipping-fees"
             className={`nav-item ${
               location.pathname === "/dashboard/shipping-fees" ? "active" : ""
@@ -247,18 +248,9 @@ const Dashboard = () => {
               location.pathname === "/dashboard/payments" ? "active" : ""
             }`}
           >
-            <IoLayersOutline className="nav-icon" size={24} />
+            <IoCardOutline className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Payments</span>
           </Link>
-          <Link
-            to="/dashboard/users"
-            className={`nav-item ${
-              location.pathname === "/dashboard/users" ? "active" : ""
-            }`}
-          >
-            <HiOutlineUsers className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>Users</span>
-          </Link> */}
           <Link
             to="/dashboard/seo"
             className={`nav-item ${
@@ -267,6 +259,15 @@ const Dashboard = () => {
           >
             <HiOutlineGlobeAlt className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>SEO</span>
+          </Link>
+          <Link
+            to="/dashboard/users"
+            className={`nav-item ${
+              location.pathname === "/dashboard/users" ? "active" : ""
+            }`}
+          >
+            <HiOutlineUserCircle className="nav-icon" size={24} />
+            <span className={!isSidebarOpen ? "hidden" : ""}>Users</span>
           </Link>
         </nav>
       </div>
@@ -351,18 +352,18 @@ const Dashboard = () => {
           <div className="customers-page">
             <Routes>
               <Route index element={<DashboardOverview />} />
-              <Route path="customers" element={<Customers />} />
               <Route path="category" element={<Category />} />
               <Route path="slider" element={<Slider />} />
               <Route path="products" element={<Products />} />
-              {/* <Route path="orders" element={<Orders />} /> */}
-              {/* <Route path="order-status-history" element={<OrderStatusHistory />} /> */}
+              <Route path="orders" element={<Orders />} />
+              <Route path="order-status-history" element={<OrderStatusHistory />} />
               <Route path="coupons" element={<Coupons />} />
+              <Route path="policies" element={<Policies />} />
               <Route path="reviews" element={<Reviews />} />
-              {/* <Route path="shipping-fees" element={<ShippingFees />} />
+              <Route path="shipping-fees" element={<ShippingFees />} />
               <Route path="shipping-addresses" element={<ShippingAddresses />} />
               <Route path="payments" element={<Payments />} />
-              <Route path="users" element={<Users />} /> */}
+              <Route path="users" element={<Users />} />
               <Route path="seo" element={<SEO />} />
               {/* <Route path="settings" element={<SystemSettings />} />
               <Route path="profile-settings" element={<ProfileSettings />} /> */}

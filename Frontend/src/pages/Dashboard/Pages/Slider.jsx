@@ -220,7 +220,7 @@ const Slider = () => {
         onClose={() => setShowModal(false)}
         title={modalMode === "add" ? "Add New Slider" : "Edit Slider"}
       >
-        <form onSubmit={handleSubmit} className="slider-form">
+        <form onSubmit={handleSubmit} className="category-form">
           <InputField
             label="Title"
             value={formData.title}

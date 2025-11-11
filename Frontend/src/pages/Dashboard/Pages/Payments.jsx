@@ -5,7 +5,7 @@ import ActionButton from '../../../components/common/ActionButton';
 import Button from '../../../components/common/Button';
 import { paymentService } from '../../../services';
 import { toast } from 'react-toastify';
-import '../../../Styles/dashboard/Payments.css';
+import '../../../Styles/dashboard/Category.css';
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from 'react-icons/hi2';
 
 const Payments = () => {
@@ -84,9 +84,9 @@ const Payments = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(amount);
   };
 
@@ -146,15 +146,9 @@ const Payments = () => {
   ];
 
   return (
-    <div className="payments-container">
+    <div className="category-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Payment Management</h2>
-        <Button 
-          className="add-button"
-          onClick={fetchPayments}
-        >
-          Refresh Payments
-        </Button>
       </div>
 
       <TableWithControls
@@ -242,17 +236,18 @@ const Payments = () => {
               )}
             </div>
             
-            <div className="modal-footer">
+            <div className="modal-actions">
               <Button
                 onClick={() => setIsModalOpen(false)}
-                className="close-button"
+                className="modal-cancel-button"
+                variant="secondary"
               >
                 Close
               </Button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleStatusChange} className="status-form">
+          <form onSubmit={handleStatusChange} className="category-form">
             <div className="form-group">
               <label>Payment Status</label>
               <select 
@@ -274,12 +269,13 @@ const Payments = () => {
                 type="submit"
                 className="modal-submit-button"
               >
-                Update Status
+                Update
               </Button>
               <Button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 className="modal-cancel-button"
+                variant="secondary"
               >
                 Cancel
               </Button>

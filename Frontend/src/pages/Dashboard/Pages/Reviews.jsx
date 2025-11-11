@@ -5,7 +5,6 @@ import TableWithControls from "../../../components/common/TableWithControls";
 import ActionButton from "../../../components/common/ActionButton";
 import Button from "../../../components/common/Button";
 import Modal from "../../../components/common/Modal";
-import Filter from "../../../components/common/Filter";
 import { 
   HiOutlinePencil, 
   HiOutlineTrash, 
@@ -13,7 +12,7 @@ import {
   HiOutlineCheck, 
   HiOutlineXMark 
 } from "react-icons/hi2";
-import "../../../Styles/dashboard/Reviews.css";
+import "../../../Styles/dashboard/Category.css";
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -191,19 +190,9 @@ const Reviews = () => {
   };
 
   return (
-    <div className="reviews-container">
+    <div className="category-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Review Management</h2>
-        <Filter
-          options={[
-            { value: "all", label: "All Reviews" },
-            { value: "pending", label: "Pending" },
-            { value: "approved", label: "Approved" },
-            { value: "rejected", label: "Rejected" },
-          ]}
-          value={filterStatus}
-          onChange={setFilterStatus}
-        />
       </div>
 
       <TableWithControls
@@ -212,6 +201,18 @@ const Reviews = () => {
         searchPlaceholder="Search reviews..."
         searchFields={["productName", "customerName", "status"]}
         loading={loading}
+        filters={[
+          {
+            key: 'status',
+            label: 'Status',
+            options: [
+              { value: 'all', label: 'All Reviews' },
+              { value: 'pending', label: 'Pending' },
+              { value: 'approved', label: 'Approved' },
+              { value: 'rejected', label: 'Rejected' },
+            ]
+          }
+        ]}
       />
 
       <Modal
@@ -295,21 +296,22 @@ const Reviews = () => {
               </div>
             )}
 
-            <div className="modal-footer">
+            <div className="modal-actions">
               {modalMode === "edit" ? (
                 <>
-                  <Button onClick={handleSaveEdit} variant="primary">
-                    Save Changes
+                  <Button onClick={handleSaveEdit} className="modal-submit-button">
+                    Update
                   </Button>
                   <Button
                     onClick={() => setIsModalOpen(false)}
+                    className="modal-cancel-button"
                     variant="secondary"
                   >
                     Cancel
                   </Button>
                 </>
               ) : (
-                <Button onClick={() => setIsModalOpen(false)} variant="secondary">
+                <Button onClick={() => setIsModalOpen(false)} className="modal-cancel-button" variant="secondary">
                   Close
                 </Button>
               )}

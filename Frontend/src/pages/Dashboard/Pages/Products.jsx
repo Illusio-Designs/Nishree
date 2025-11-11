@@ -60,7 +60,18 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       const response = await productService.getAllProducts();
-      setProducts(response.products || []);
+      // Normalize different API response shapes
+      let list = [];
+      if (Array.isArray(response)) {
+        list = response;
+      } else if (Array.isArray(response?.products)) {
+        // Admin endpoint shape: { products: [...] }
+        list = response.products;
+      } else if (Array.isArray(response?.data?.products)) {
+        // Public endpoint shape: { success: true, data: { products: [...] } }
+        list = response.data.products;
+      }
+      setProducts(list);
     } catch (error) {
       toast.error("Failed to fetch products");
       console.error("Failed to fetch products:", error);
@@ -390,6 +401,8 @@ const Products = () => {
     fetchAttributes();
   }, [navigate]);
 
+  const formatINR = (amount) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+
   const columns = [
     {
       key: "images",
@@ -422,8 +435,8 @@ const Products = () => {
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
         return minPrice === maxPrice
-          ? `$${minPrice.toFixed(2)}`
-          : `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+          ? `${formatINR(minPrice)}`
+          : `${formatINR(minPrice)} - ${formatINR(maxPrice)}`;
       }
     },
     {
@@ -1015,9 +1028,9 @@ const Products = () => {
   );
 
   return (
-    <div className="products-manager">
+    <div className="category-manager">
       <div className="header-section">
-        <h2 className="dashboard-title">Products Manager</h2>
+        <h2 className="dashboard-title">Product Manager</h2>
         <Button onClick={() => handleOpenModal("add")} className="add-button">
           <FaPlus /> Add Product
         </Button>
@@ -1048,7 +1061,7 @@ const Products = () => {
         }}
         title={`${modalMode === "add" ? "Add New Product" : "Edit Product"} - Step ${currentStep} of 4`}
       >
-        <form onSubmit={handleSubmit} className="product-form">
+        <form onSubmit={handleSubmit} className="category-form">
           {renderStepContent()}
           
           <div className="modal-actions">

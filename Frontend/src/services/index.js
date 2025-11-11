@@ -377,8 +377,8 @@ export const categoryService = {
 
     getCategoryById: async (id) => {
         try {
-            const response = await api.get(`/api/categories/${id}`);
-            return response.data.category;
+            const response = await api.get(`/api/categories/admin/${id}`);
+            return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }
@@ -386,7 +386,7 @@ export const categoryService = {
 
     createCategory: async (categoryData) => {
         try {
-            const response = await api.post('/api/categories', categoryData);
+            const response = await api.post('/api/categories/admin', categoryData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -395,7 +395,7 @@ export const categoryService = {
 
     updateCategory: async (id, categoryData) => {
         try {
-            const response = await api.put(`/api/categories/${id}`, categoryData);
+            const response = await api.put(`/api/categories/admin/${id}`, categoryData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -404,7 +404,7 @@ export const categoryService = {
 
     deleteCategory: async (id) => {
         try {
-            const response = await api.delete(`/api/categories/${id}`);
+            const response = await api.delete(`/api/categories/admin/${id}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -475,7 +475,7 @@ export const productService = {
 
     getAllProducts: async () => {
         try {
-            const response = await api.get('/api/products');
+            const response = await api.get('/api/products/public');
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -484,7 +484,7 @@ export const productService = {
 
     getProduct: async (id) => {
         try {
-            const response = await api.get(`/api/products/${id}`);
+            const response = await api.get(`/api/products/public/${id}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -784,6 +784,54 @@ export const attributeService = {
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
+        }
+    }
+};
+
+// Policy Services
+export const policyService = {
+    getAllPolicies: async () => {
+        try {
+            const response = await api.get('/api/policies');
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getPolicyById: async (id) => {
+        try {
+            const response = await api.get(`/api/policies/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    createPolicy: async (policyData) => {
+        try {
+            const response = await api.post('/api/policies', policyData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    updatePolicy: async (id, policyData) => {
+        try {
+            const response = await api.put(`/api/policies/${id}`, policyData);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    deletePolicy: async (id) => {
+        try {
+            const response = await api.delete(`/api/policies/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
         }
     }
 };

@@ -7,7 +7,7 @@ import InputField from "../../../components/common/InputField";
 import { HiOutlinePencil } from "react-icons/hi2";
 import { toast } from "react-toastify";
 import { seoService } from "../../../services";
-import "../../../Styles/dashboard/Dashboard.css";
+import "../../../Styles/dashboard/Category.css";
 
 const SEO = () => {
   const [seoData, setSeoData] = useState([]);
@@ -193,7 +193,7 @@ const SEO = () => {
   };
 
   return (
-    <div className="seo-container">
+    <div className="category-manager">
       <div className="header-section">
         <h2 className="dashboard-title">SEO Management</h2>
       </div>
@@ -215,7 +215,7 @@ const SEO = () => {
         title="Edit SEO Data"
         style={{ maxWidth: "800px", width: "90%" }}
       >
-        <form onSubmit={handleSubmitEdit} className="seo-form">
+        <form onSubmit={handleSubmitEdit} className="category-form">
           <div className="form-group">
             <label>Page Name</label>
             <input
@@ -311,12 +311,13 @@ const SEO = () => {
               </div>
             </div>
           </div>
-          <div className="modal-footer">
-            <Button type="submit" variant="primary" disabled={loading}>
-              {loading ? "Saving..." : "Save Changes"}
+          <div className="modal-actions">
+            <Button type="submit" className="modal-submit-button" disabled={loading}>
+              {loading ? "Saving..." : "Update"}
             </Button>
             <Button
               type="button"
+              className="modal-cancel-button"
               variant="secondary"
               onClick={() => setIsEditModalOpen(false)}
               disabled={loading}

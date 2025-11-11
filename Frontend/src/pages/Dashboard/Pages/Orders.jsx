@@ -4,7 +4,8 @@ import Modal from '../../../components/common/Modal';
 import ActionButton from '../../../components/common/ActionButton';
 import Button from '../../../components/common/Button';
 import { orderService } from '../../../services';
-import '../../../Styles/dashboard/Orders.css';
+import { HiOutlineEye, HiOutlinePencil } from 'react-icons/hi2';
+import '../../../Styles/dashboard/Category.css';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -30,17 +31,17 @@ const Orders = () => {
       cell: (row) => (
         <div className="action-buttons">
           <ActionButton
+            icon={<HiOutlineEye size={20} />}
             onClick={() => handleViewDetails(row)}
             variant="view"
-          >
-            View
-          </ActionButton>
+            tooltip="View Details"
+          />
           <ActionButton
+            icon={<HiOutlinePencil size={20} />}
             onClick={() => handleUpdateStatus(row)}
             variant="edit"
-          >
-            Update Status
-          </ActionButton>
+            tooltip="Update Status"
+          />
         </div>
       ),
     },
@@ -77,9 +78,9 @@ const Orders = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(amount);
   };
 
@@ -92,15 +93,9 @@ const Orders = () => {
   };
 
   return (
-    <div className="orders-container">
+    <div className="category-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Order Management</h2>
-        <Button 
-          className="add-button"
-          onClick={fetchOrders}
-        >
-          Refresh Orders
-        </Button>
       </div>
 
       <TableWithControls
@@ -178,13 +173,14 @@ const Orders = () => {
               <p>{selectedOrder.shippingAddress?.country}</p>
             </div>
 
-            <div className="modal-footer">
-              <ActionButton
+            <div className="modal-actions">
+              <Button
                 onClick={() => setIsModalOpen(false)}
+                className="modal-cancel-button"
                 variant="secondary"
               >
                 Close
-              </ActionButton>
+              </Button>
             </div>
           </div>
         )}

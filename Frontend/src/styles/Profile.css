@@ -285,8 +285,7 @@
 /* Navigation */
 .profile-nav {
   margin-top: 20px;
-  display: flex
-;
+  display: flex;
   flex-direction: column;
   gap: 20px;
 }
@@ -295,7 +294,6 @@
   padding: 12px 20px;
   border: none;
   background: none;
-  width: 100%;
   text-align: left;
   cursor: pointer;
   transition: all 0.3s ease;

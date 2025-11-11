@@ -3,7 +3,7 @@ import TableWithControls from '../../../components/common/TableWithControls';
 import Modal from '../../../components/common/Modal';
 import ActionButton from '../../../components/common/ActionButton';
 import Button from '../../../components/common/Button';
-import Filter from '../../../components/common/Filter';
+import { HiOutlineEye, HiOutlineTrash } from 'react-icons/hi2';
 import '../../../Styles/dashboard/Reviews.css';
 
 const ReviewLikes = () => {
@@ -20,20 +20,20 @@ const ReviewLikes = () => {
     {
       header: 'Actions',
       accessor: 'actions',
-      cell: (row) => (
+      render: (row) => (
         <div className="action-buttons">
           <ActionButton
+            icon={<HiOutlineEye size={20} />}
             onClick={() => handleViewDetails(row)}
             variant="view"
-          >
-            View
-          </ActionButton>
+            tooltip="View"
+          />
           <ActionButton
+            icon={<HiOutlineTrash size={20} />}
             onClick={() => handleDelete(row.id)}
             variant="delete"
-          >
-            Delete
-          </ActionButton>
+            tooltip="Delete"
+          />
         </div>
       ),
     },
@@ -41,7 +41,7 @@ const ReviewLikes = () => {
 
   useEffect(() => {
     fetchLikes();
-  }, [filterStatus]);
+  }, []);
 
   const fetchLikes = async () => {
     try {
@@ -117,18 +117,9 @@ const ReviewLikes = () => {
   };
 
   return (
-    <div className="reviews-container">
+    <div className="reviews-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Review Likes</h2>
-        <Filter
-          options={[
-            { value: 'all', label: 'All Likes' },
-            { value: 'recent', label: 'Recent' },
-            { value: 'oldest', label: 'Oldest' }
-          ]}
-          value={filterStatus}
-          onChange={setFilterStatus}
-        />
       </div>
 
       <TableWithControls
@@ -136,6 +127,16 @@ const ReviewLikes = () => {
         columns={columns}
         searchPlaceholder="Search likes..."
         searchFields={['reviewTitle', 'productName', 'userName']}
+        filters={[
+          {
+            key: 'sort',
+            label: 'Sort',
+            options: [
+              { value: 'recent', label: 'Recent' },
+              { value: 'oldest', label: 'Oldest' }
+            ]
+          }
+        ]}
       />
 
       <Modal

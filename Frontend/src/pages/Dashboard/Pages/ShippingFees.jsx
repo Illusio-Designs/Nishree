@@ -6,7 +6,7 @@ import ActionButton from '../../../components/common/ActionButton';
 import Button from '../../../components/common/Button';
 import { shippingFeeService } from '../../../services';
 import { toast } from 'react-toastify';
-import '../../../Styles/dashboard/ShippingFees.css';
+import '../../../Styles/dashboard/Category.css';
 import { HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi2';
 import { FaPlus } from 'react-icons/fa';
 
@@ -98,9 +98,9 @@ const ShippingFees = () => {
   }, []);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(amount);
   };
 
@@ -148,14 +148,14 @@ const ShippingFees = () => {
   ];
 
   return (
-    <div className="shipping-fees-manager">
+    <div className="category-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Shipping Fee Management</h2>
         <Button 
           onClick={() => handleOpenModal('add')}
           className="add-button"
         >
-          <FaPlus /> Add Shipping Fee
+          <FaPlus /> Add Fee
         </Button>
       </div>
 
@@ -171,7 +171,7 @@ const ShippingFees = () => {
         onClose={() => setShowModal(false)}
         title={`${modalMode === 'add' ? 'Add' : 'Edit'} Shipping Fee`}
       >
-        <form onSubmit={handleSubmit} className="shipping-fee-form">
+        <form onSubmit={handleSubmit} className="category-form">
           <InputField
             label="Order Type"
             name="order_type"
@@ -206,11 +206,12 @@ const ShippingFees = () => {
           />
           <div className="modal-actions">
             <Button type="submit" className="modal-submit-button">
-              {modalMode === 'add' ? 'Add' : 'Update'} Shipping Fee
+              {modalMode === 'add' ? 'Create' : 'Update'}
             </Button>
             <Button 
               type="button" 
               className="modal-cancel-button"
+              variant="secondary"
               onClick={() => setShowModal(false)}
             >
               Cancel

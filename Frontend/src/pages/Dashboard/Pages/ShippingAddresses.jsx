@@ -6,7 +6,7 @@ import ActionButton from '../../../components/common/ActionButton';
 import Button from '../../../components/common/Button';
 import { shippingAddressService } from '../../../services';
 import { toast } from 'react-toastify';
-import '../../../Styles/dashboard/ShippingAddresses.css';
+import '../../../Styles/dashboard/Category.css';
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from 'react-icons/hi2';
 import { FaPlus } from 'react-icons/fa';
 
@@ -157,14 +157,14 @@ const ShippingAddresses = () => {
   ];
 
   return (
-    <div className="shipping-addresses-manager">
+    <div className="category-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Shipping Address Management</h2>
         <Button 
           onClick={() => handleOpenModal('add')}
           className="add-button"
         >
-          <FaPlus /> Add Shipping Address
+          <FaPlus /> Add Address
         </Button>
       </div>
 
@@ -190,7 +190,7 @@ const ShippingAddresses = () => {
         onClose={() => setShowModal(false)}
         title={modalMode === 'view' ? 'Address Details' : `${modalMode === 'add' ? 'Add' : 'Edit'} Shipping Address`}
       >
-        <form onSubmit={handleSubmit} className="shipping-address-form">
+        <form onSubmit={handleSubmit} className="category-form">
           <InputField
             label="Address"
             name="address"
@@ -199,42 +199,38 @@ const ShippingAddresses = () => {
             required
             disabled={modalMode === 'view'}
           />
-          <div className="form-row">
-            <InputField
-              label="City"
-              name="city"
-              value={formData.city}
-              onChange={(e) => setFormData({...formData, city: e.target.value})}
-              required
-              disabled={modalMode === 'view'}
-            />
-            <InputField
-              label="State/Province"
-              name="state"
-              value={formData.state}
-              onChange={(e) => setFormData({...formData, state: e.target.value})}
-              required
-              disabled={modalMode === 'view'}
-            />
-          </div>
-          <div className="form-row">
-            <InputField
-              label="Postal Code"
-              name="postal_code"
-              value={formData.postal_code}
-              onChange={(e) => setFormData({...formData, postal_code: e.target.value})}
-              required
-              disabled={modalMode === 'view'}
-            />
-            <InputField
-              label="Country"
-              name="country"
-              value={formData.country}
-              onChange={(e) => setFormData({...formData, country: e.target.value})}
-              required
-              disabled={modalMode === 'view'}
-            />
-          </div>
+          <InputField
+            label="City"
+            name="city"
+            value={formData.city}
+            onChange={(e) => setFormData({...formData, city: e.target.value})}
+            required
+            disabled={modalMode === 'view'}
+          />
+          <InputField
+            label="State/Province"
+            name="state"
+            value={formData.state}
+            onChange={(e) => setFormData({...formData, state: e.target.value})}
+            required
+            disabled={modalMode === 'view'}
+          />
+          <InputField
+            label="Postal Code"
+            name="postal_code"
+            value={formData.postal_code}
+            onChange={(e) => setFormData({...formData, postal_code: e.target.value})}
+            required
+            disabled={modalMode === 'view'}
+          />
+          <InputField
+            label="Country"
+            name="country"
+            value={formData.country}
+            onChange={(e) => setFormData({...formData, country: e.target.value})}
+            required
+            disabled={modalMode === 'view'}
+          />
           <InputField
             label="Phone Number"
             name="phone_number"
@@ -243,36 +239,41 @@ const ShippingAddresses = () => {
             required
             disabled={modalMode === 'view'}
           />
-          <div className="checkbox-field">
-            <input
-              type="checkbox"
-              id="is_default"
-              name="is_default"
-              checked={formData.is_default}
-              onChange={(e) => setFormData({...formData, is_default: e.target.checked})}
-              disabled={modalMode === 'view'}
-            />
-            <label htmlFor="is_default">Set as default address</label>
-          </div>
           {modalMode !== 'view' && (
-            <div className="modal-actions">
-              <Button type="submit" className="modal-submit-button">
-                {modalMode === 'add' ? 'Add' : 'Update'} Address
-              </Button>
-              <Button 
-                type="button" 
-                className="modal-cancel-button"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </Button>
-            </div>
+            <>
+              <div style={{ marginTop: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    id="is_default"
+                    name="is_default"
+                    checked={formData.is_default}
+                    onChange={(e) => setFormData({...formData, is_default: e.target.checked})}
+                  />
+                  <span>Set as default address</span>
+                </label>
+              </div>
+              <div className="modal-actions">
+                <Button type="submit" className="modal-submit-button">
+                  {modalMode === 'add' ? 'Create' : 'Update'}
+                </Button>
+                <Button 
+                  type="button" 
+                  className="modal-cancel-button"
+                  variant="secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </>
           )}
           {modalMode === 'view' && (
             <div className="modal-actions">
               <Button 
                 type="button" 
                 className="modal-cancel-button"
+                variant="secondary"
                 onClick={() => setShowModal(false)}
               >
                 Close
