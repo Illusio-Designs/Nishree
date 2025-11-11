@@ -156,6 +156,22 @@ function AuthProvider({ children }) {
     );
   }
 
+  const updateUserProfile = async (profileData) => {
+    try {
+      setLoading(true);
+      const response = await userService.updateUser(profileData);
+      if (response && response.user) {
+        setUser(response.user);
+        return response;
+      }
+    } catch (error) {
+      setError(error.message || "Profile update failed");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -164,6 +180,7 @@ function AuthProvider({ children }) {
     login: loginUser,
     logout: logoutUser,
     register: registerUser,
+    updateProfile: updateUserProfile,
   };
 
   return (

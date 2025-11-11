@@ -13,23 +13,19 @@ import profile from "../../../assets/img (1).png";
 import "../../../Styles/dashboard/Dashboard.css";
 import {
   HiOutlineHome,
-  HiOutlineUsers,
-  HiOutlineCog,
-  HiOutlineLockClosed,
   HiOutlineChevronLeft,
   HiOutlineArrowRightOnRectangle,
-  HiOutlineBell,
   HiOutlinePhoto,
   HiOutlineClipboardDocumentList,
   HiOutlineTicket,
   HiOutlineStar,
   HiOutlineTruck,
-  HiOutlineChatBubbleLeftRight,
-  HiOutlineHeart,
   HiOutlineGlobeAlt,
   HiOutlineUserCircle,
   HiOutlineDocumentText,
+  HiOutlineShoppingBag,
 } from "react-icons/hi2";
+import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import {
   IoGridOutline,
   IoCartOutline,
@@ -53,24 +49,33 @@ import SEO from "../Pages/SEO";
 import DashboardOverview from "../Pages/DashboardOverview";
 import Category from "../Pages/Category";
 import ProfileSettings from "../../../components/common/Settings";
-import SystemSettings from "../Pages/Settings";
 
 const Dashboard = () => {
   const { user, loading, logout } = useAuth(); // Add logout to destructuring
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Make sure this line is present
-  const dropdownRef = useRef(null); // Ref for dropdown
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const location = useLocation();
 
-  // Add handleLogout function
   const handleLogout = async () => {
     try {
       await logout();
       navigate("/admin/login", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
     }
   };
 
@@ -178,8 +183,9 @@ const Dashboard = () => {
             className={`nav-item ${
               location.pathname === "/dashboard/orders" ? "active" : ""
             }`}
+            title={!isSidebarOpen ? "Orders" : ""}
           >
-            <HiOutlineBell className="nav-icon" size={24} />
+            <HiOutlineShoppingBag className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>Orders</span>
           </Link>
           <Link
@@ -273,11 +279,10 @@ const Dashboard = () => {
       </div>
       <div className="main-content">
         <header className="dashboard-header">
-          <h2 className="text-xs">Welcome, {user?.displayName || "Admin"}</h2>
+          <h2 className="header-welcome">Welcome, {user?.displayName || "Admin"}</h2>
           <div className="header-actions">
-            <button className="notification-btn">
-              <span className="notification-count">3</span>
-              <HiOutlineBell size={20} />
+            <button className="fullscreen-btn" onClick={toggleFullscreen} title="Toggle Fullscreen">
+              {isFullscreen ? <MdFullscreenExit size={24} /> : <MdFullscreen size={24} />}
             </button>
             <div className="user-profile-dropdown" ref={dropdownRef}>
               <div
@@ -309,28 +314,12 @@ const Dashboard = () => {
                   </div>
                   <div className="dropdown-divider" />
                   <Link
-                    to="/dashboard/settings/profile"
+                    to="/dashboard/profile"
                     className="dropdown-item"
                     onClick={() => setIsDropdownOpen(false)}
                   >
-                    <HiOutlineCog className="item-icon" size={20} />
-                    Profile Settings
-                  </Link>
-                  <Link
-                    to="/dashboard/settings/security"
-                    className="dropdown-item"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    <HiOutlineLockClosed className="item-icon" size={20} />
-                    Security
-                  </Link>
-                  <Link
-                    to="/dashboard/settings"
-                    className="dropdown-item"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    <HiOutlineCog className="item-icon" size={20} />
-                    System Settings
+                    <HiOutlineUserCircle className="item-icon" size={20} />
+                    My Profile
                   </Link>
                   <div className="dropdown-divider" />
                   <button
@@ -365,25 +354,13 @@ const Dashboard = () => {
               <Route path="payments" element={<Payments />} />
               <Route path="users" element={<Users />} />
               <Route path="seo" element={<SEO />} />
-              {/* <Route path="settings" element={<SystemSettings />} />
-              <Route path="profile-settings" element={<ProfileSettings />} /> */}
+              <Route path="profile" element={<ProfileSettings type="profile" />} />
             </Routes>
           </div>
         </div>
-        <div className="dashboard-footer">
-          <div className="footer-content">
-            <p>© 2024 Admin Panel</p>
-          </div>
-          <div className="footer-actions">
-            <button className="support-btn">
-              <span className="support-icon">💬</span>
-              Support
-            </button>
-            <div className="version-info">
-              <span>v1.0.0</span>
-            </div>
-          </div>
-        </div>
+        <footer className="dashboard-footer">
+          <p>© 2024 Admin Panel. All rights reserved.</p>
+        </footer>
       </div>
     </div>
   );
