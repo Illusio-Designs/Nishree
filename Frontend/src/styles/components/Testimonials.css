@@ -1,15 +1,42 @@
 .testimonials {
   padding: 4rem 2rem;
+  overflow: hidden;
 }
 
 .testimonials-container {
   display: flex;
   justify-content: center;
   gap: 2rem;
-  flex-wrap: wrap;
   max-width: 1200px;
   margin: 0 auto;
   padding-top: 20px;
+}
+
+.testimonials-slider-wrapper {
+  overflow: hidden;
+  padding: 50px 0 20px;
+  margin: 0 auto;
+}
+
+.testimonials-slider {
+  display: flex;
+  gap: 2rem;
+  animation: testimonialScroll 40s linear infinite;
+  width: fit-content;
+}
+
+.testimonials-slider:hover {
+  animation-play-state: paused;
+}
+
+@keyframes testimonialScroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-33.333%);
+  }
 }
 
 .testimonial-card {
@@ -39,16 +66,45 @@
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
-.testimonials-container h3,  .testimonials-container span{
+.user-avatar-initials {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.verified-badge-testimonial {
+  display: inline-block;
+  background: #10b981;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.testimonials-container h3,
+.testimonials-container span {
   font-family: playfair display;
   font-size: 20px;
   margin: 0;
   font-weight: 700;
 }
 
-.testimonials-container span h2{
+.testimonials-container span h2 {
   padding-bottom: 20px;
 }
 
@@ -72,7 +128,8 @@ p.testimonial-text {
 }
 
 .star {
-  color: #FACC15; /* Gold star color */
+  color: #FACC15;
+  /* Gold star color */
 }
 
 
@@ -82,6 +139,19 @@ p.testimonial-text {
   }
 
   .testimonial-card {
-    min-width: 100%;
+    min-width: 280px;
+    max-width: 280px;
+  }
+
+  .testimonials {
+    padding: 3rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .testimonial-card {
+    min-width: 250px;
+    max-width: 250px;
+    padding: 1.2rem;
   }
 }
