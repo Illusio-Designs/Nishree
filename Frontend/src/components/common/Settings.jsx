@@ -108,7 +108,7 @@ const Settings = () => {
             }
             
             if (formData.phoneNumber && formData.phoneNumber !== user.phoneNumber && formData.phoneNumber !== user.phone) {
-                formDataToSend.append('phoneNumber', formData.phoneNumber);
+                formDataToSend.append('phone', formData.phoneNumber); // Backend expects 'phone', not 'phoneNumber'
             }
             
             // Add image file if selected
