@@ -30,8 +30,12 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const goToLogin = () => {
-    navigate('/login');
+  const goToProfile = () => {
+    if (user) {
+      navigate('/profile');
+    } else {
+      navigate('/login');
+    }
     setIsMenuOpen(false);
   };
 
@@ -69,7 +73,7 @@ const Header = () => {
           </div>
 
           <div className="icon">
-            <div className="user" onClick={goToLogin}>
+            <div className="user" onClick={goToProfile}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"

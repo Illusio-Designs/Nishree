@@ -60,7 +60,20 @@ function AuthProvider({ children }) {
       const response = await authService.login(credentials);
       if (response.token && response.user) {
         localStorage.setItem("token", response.token);
-        setUser(response.user);
+        
+        // Fetch complete user data with profile image
+        try {
+          const userData = await userService.getCurrentUser();
+          if (userData) {
+            setUser(userData);
+          } else {
+            setUser(response.user);
+          }
+        } catch (userError) {
+          console.warn("Could not fetch complete user data:", userError);
+          setUser(response.user);
+        }
+        
         return response;
       }
     } catch (error) {

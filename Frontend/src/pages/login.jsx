@@ -6,7 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from "react-icons/fa";
 import { createUseStyles } from "react-jss";
-import { loginUser } from "../services/publicindex";
+import { useAuth } from "../context/AuthContext";
 // React-JSS styles
 const useStyles = createUseStyles({
   "@keyframes slideLeft": {
@@ -125,6 +125,7 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   // Check for saved credentials on component mount
   useEffect(() => {
@@ -171,19 +172,21 @@ const Login = () => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      // Call the login API
-      const response = await loginUser(formData);
+      // Call the login function from AuthContext
+      const response = await login(formData);
       
       // Check if user is an admin
       if (response.user && response.user.role === 'admin') {
         toast.error("This login is for consumers only. Please use the admin login page.");
+        setIsLoading(false);
         return;
       }
       
-      // Store the token in localStorage
-      localStorage.setItem('token', response.token);
-      
       toast.success("Login successful!");
+      
+      // Wait a moment for AuthContext to fully update
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       navigate("/profile", { replace: true });
     } catch (err) {
       toast.error(
