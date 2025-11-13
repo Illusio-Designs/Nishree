@@ -38,11 +38,15 @@ const ProductCard = ({ product: propProduct }) => {
 
   // Get primary image or first image from ProductImages array
   const getProductImage = (product) => {
-    if (!product?.ProductImages?.length) return null;
+    if (!product?.ProductImages?.length) {
+      return null;
+    }
     
     // Try to find primary image first
     const primaryImage = product.ProductImages.find(img => img.is_primary);
-    if (primaryImage) return primaryImage.image_url;
+    if (primaryImage) {
+      return primaryImage.image_url;
+    }
     
     // If no primary image, return first image
     return product.ProductImages[0].image_url;
@@ -69,7 +73,7 @@ const ProductCard = ({ product: propProduct }) => {
   const isInWishlist = product ? wishlistItems.some(item => item.id === product.id) : false;
 
   const handleWishlistToggle = (e) => {
-    e.preventDefault();
+    e.stopPropagation();
     if (!product) return;
 
     if (isInWishlist) {
@@ -82,11 +86,44 @@ const ProductCard = ({ product: propProduct }) => {
   };
 
   const handleAddToCart = (e) => {
-    e.preventDefault();
+    e.stopPropagation();
     if (!product) return;
 
-    addToCart(product);
-    toast.success('Added to cart');
+    // Get the first variation for the product
+    const variation = product.ProductVariations?.[0];
+    if (!variation) {
+      toast.error('Product variation not available');
+      return;
+    }
+
+    // Get the image path - ensure we have a valid image
+    const imagePath = getProductImage(product);
+    
+    console.log('=== PRODUCT CARD - ADD TO CART ===');
+    console.log('Product:', product);
+    console.log('Variation:', variation);
+    console.log('Variation price:', variation.price, 'Type:', typeof variation.price);
+    console.log('Image path:', imagePath);
+    
+    const cartProduct = {
+      id: product.id,
+      name: product.name || 'Unknown Product',
+      price: Number(variation.price) || 0,
+      comparePrice: Number(variation.comparePrice) || Number(variation.price) || 0,
+      image: imagePath, // This is just the path, will be converted to full URL in display components
+      variation: {
+        id: variation.id,
+        weight: variation.weight || 0,
+        weightUnit: variation.weightUnit || 'g',
+        sku: variation.sku || ''
+      },
+      ProductImages: product.ProductImages || [],
+      ProductVariations: product.ProductVariations || []
+    };
+
+    console.log('Cart product being added:', cartProduct);
+    addToCart(cartProduct, 1);
+    toast.success(`${product.name} added to cart!`);
   };
 
   const handleImageError = () => {

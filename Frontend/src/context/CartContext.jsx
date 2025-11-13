@@ -21,28 +21,47 @@ export const CartProvider = ({ children }) => {
   }, [cartItems]);
 
   const addToCart = (product, quantity = 1) => {
+    console.log('=== ADD TO CART ===');
+    console.log('Product received:', product);
+    console.log('Product price:', product.price);
+    console.log('Product name:', product.name);
+    console.log('Product image:', product.image);
+    console.log('Product variation:', product.variation);
+    
     setCartItems(prev => {
-      const existingItem = prev.find(item => item.id === product.id);
+      // Create a unique key based on product id and variation id
+      const variationId = product.variation?.id;
+      const uniqueKey = variationId ? `${product.id}-${variationId}` : product.id;
+      
+      const existingItem = prev.find(item => {
+        const itemKey = item.variation?.id ? `${item.id}-${item.variation.id}` : item.id;
+        return itemKey === uniqueKey;
+      });
+      
       if (existingItem) {
-        return prev.map(item =>
-          item.id === product.id
+        return prev.map(item => {
+          const itemKey = item.variation?.id ? `${item.id}-${item.variation.id}` : item.id;
+          return itemKey === uniqueKey
             ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
+            : item;
+        });
       }
-      return [...prev, { ...product, quantity }];
+      
+      const newItem = { ...product, quantity, uniqueKey };
+      console.log('New cart item:', newItem);
+      return [...prev, newItem];
     });
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems(prev => prev.filter(item => item.id !== productId));
+  const removeFromCart = (uniqueKey) => {
+    setCartItems(prev => prev.filter(item => item.uniqueKey !== uniqueKey));
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (uniqueKey, quantity) => {
     if (quantity < 1) return;
     setCartItems(prev =>
       prev.map(item =>
-        item.id === productId ? { ...item, quantity } : item
+        item.uniqueKey === uniqueKey ? { ...item, quantity } : item
       )
     );
   };
@@ -53,8 +72,14 @@ export const CartProvider = ({ children }) => {
 
   const getCartTotal = () => {
     return cartItems.reduce((total, item) => {
-      return total + (item.price * item.quantity);
+      const price = Number(item.price) || 0;
+      const quantity = Number(item.quantity) || 0;
+      return total + (price * quantity);
     }, 0);
+  };
+
+  const getCartCount = () => {
+    return cartItems.reduce((count, item) => count + item.quantity, 0);
   };
 
   const value = {
@@ -63,7 +88,8 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
-    getCartTotal
+    getCartTotal,
+    getCartCount
   };
 
   return (

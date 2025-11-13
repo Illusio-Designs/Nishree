@@ -20,6 +20,7 @@ import { getPublicProductById, getPublicCoupons, getPublicProductReviews, create
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import Loader from "../components/Loader";
 
 // Base URL for API
@@ -35,22 +36,19 @@ const PLACEHOLDER_IMAGES = {
 const Productinner = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedVariation, setSelectedVariation] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [rating, setRating] = useState(0);
+  const [quantity, setQuantity] = useState(1);
   const [hoverRating, setHoverRating] = useState(0);
-  const [reviewMessage, setReviewMessage] = useState('');
   const [coupons, setCoupons] = useState([]);
-  const [selectedCoupon, setSelectedCoupon] = useState(null);
-  const [couponCode, setCouponCode] = useState('');
-  const [couponError, setCouponError] = useState('');
   const [discountAmount, setDiscountAmount] = useState(0);
   const [reviews, setReviews] = useState([]);
   const [reviewStats, setReviewStats] = useState(null);
-  const [reviewPage, setReviewPage] = useState(1);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
@@ -58,7 +56,6 @@ const Productinner = () => {
   const [reviewFiles, setReviewFiles] = useState([]);
   const [reviewName, setReviewName] = useState('');
   const [reviewEmail, setReviewEmail] = useState('');
-  const navigate = useNavigate();
 
   // Function to construct full image URL
   const getImageUrl = useCallback((imagePath) => {
@@ -209,30 +206,82 @@ const Productinner = () => {
     fetchCoupons();
   }, [fetchCoupons]);
 
-  // Calculate discount when coupon is selected
-  useEffect(() => {
-    if (selectedCoupon && selectedVariation) {
-      let discount = 0;
-      if (selectedCoupon.type === 'percentage') {
-        discount = (selectedVariation.price * selectedCoupon.value) / 100;
-        if (selectedCoupon.maxDiscount && discount > selectedCoupon.maxDiscount) {
-          discount = selectedCoupon.maxDiscount;
-        }
-      } else {
-        discount = selectedCoupon.value;
-      }
-      setDiscountAmount(discount);
-    } else {
-      setDiscountAmount(0);
+  // Quantity handlers
+  const handleQuantityChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      setQuantity(value);
     }
-  }, [selectedCoupon, selectedVariation]);
+  };
+
+  const incrementQuantity = () => {
+    setQuantity(prev => prev + 1);
+  };
+
+  const decrementQuantity = () => {
+    setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  };
+
+  // Add to cart handler
+  const handleAddToCart = () => {
+    if (!product || !selectedVariation) {
+      toast.error('Please select a product variation');
+      return;
+    }
+
+    const cartProduct = {
+      id: product.id,
+      name: product.name,
+      price: selectedVariation.price,
+      comparePrice: selectedVariation.comparePrice,
+      image: selectedImage?.image_url || product.ProductImages?.[0]?.image_url,
+      variation: {
+        id: selectedVariation.id,
+        weight: selectedVariation.weight,
+        weightUnit: selectedVariation.weightUnit,
+        sku: selectedVariation.sku
+      },
+      ProductImages: product.ProductImages,
+      ProductVariations: product.ProductVariations
+    };
+
+    addToCart(cartProduct, quantity);
+    toast.success(`${quantity} item(s) added to cart!`);
+  };
+
+  // Buy now handler
+  const handleBuyNow = () => {
+    if (!product || !selectedVariation) {
+      toast.error('Please select a product variation');
+      return;
+    }
+
+    const cartProduct = {
+      id: product.id,
+      name: product.name,
+      price: selectedVariation.price,
+      comparePrice: selectedVariation.comparePrice,
+      image: selectedImage?.image_url || product.ProductImages?.[0]?.image_url,
+      variation: {
+        id: selectedVariation.id,
+        weight: selectedVariation.weight,
+        weightUnit: selectedVariation.weightUnit,
+        sku: selectedVariation.sku
+      },
+      ProductImages: product.ProductImages,
+      ProductVariations: product.ProductVariations
+    };
+
+    addToCart(cartProduct, quantity);
+    navigate('/checkout');
+  };
 
   // Fetch reviews
   const fetchReviews = useCallback(async () => {
     try {
       setReviewLoading(true);
       const response = await getPublicProductReviews(id, {
-        page: reviewPage,
+        page: 1,
         limit: 5,
         sort: 'recent'
       });
@@ -244,7 +293,7 @@ const Productinner = () => {
     } finally {
       setReviewLoading(false);
     }
-  }, [id, reviewPage]);
+  }, [id]);
 
   useEffect(() => {
     fetchReviews();
@@ -470,18 +519,33 @@ const Productinner = () => {
 
             {selectedVariation && (
               <>
-                <p className="price">₹{selectedVariation.price - discountAmount}</p>
-                {discountAmount > 0 && (
-                  <p className="compare-price">
-                     ₹{selectedVariation.comparePrice}
-                  </p>
-                )}
+                <div className="price-section">
+                  <p className="price">₹{selectedVariation.price}</p>
+                  {selectedVariation.comparePrice && selectedVariation.comparePrice > selectedVariation.price && (
+                    <p className="compare-price">₹{selectedVariation.comparePrice}</p>
+                  )}
+                </div>
               </>
             )}
 
+            <div className="quantity-selector">
+              <label>Quantity:</label>
+              <div className="quantity-controls">
+                <button className="quantity-btn" onClick={decrementQuantity}>−</button>
+                <input 
+                  type="number" 
+                  className="quantity-input" 
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  min="1"
+                />
+                <button className="quantity-btn" onClick={incrementQuantity}>+</button>
+              </div>
+            </div>
+
             <div className="actions">
-              <button className="btn-red">Add to Cart</button>
-              <button className="buy-btn">Buy Now</button>
+              <button className="btn-red" onClick={handleAddToCart}>Add to Cart</button>
+              <button className="buy-btn" onClick={handleBuyNow}>Buy Now</button>
             </div>
 
             <div className="offers-section">

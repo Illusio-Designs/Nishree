@@ -39,6 +39,30 @@
   align-items: center;
   gap: 20px;
 }
+
+.cart {
+  position: relative;
+  cursor: pointer;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #dc2626;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.user {
+  cursor: pointer;
+}
 .nav {
   display: flex;
   gap: 50px;

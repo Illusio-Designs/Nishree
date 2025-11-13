@@ -3,41 +3,36 @@ import Header from "../components/Header";
 import ProductCard from "../components/Productcard";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
-import product from "../assets/4 (1) 2.webp";
-import "../Styles/CheckoutPage.css"; // Import external CSS
+import "../Styles/CheckoutPage.css";
+import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const CheckoutPage = () => {
-  const cartItems = [
-    {
-      id: 1,
-      name: "Signature Garam Masala",
-      size: "100 gm",
-      price: 250,
-      quantity: 1,
-      image: product,
-    },
-    {
-      id: 2,
-      name: "Signature Garam Masala",
-      size: "100 gm",
-      price: 250,
-      quantity: 1,
-      image: product,
-    },
-    {
-      id: 3,
-      name: "Signature Garam Masala",
-      size: "100 gm",
-      price: 250,
-      quantity: 1,
-      image: product,
-    },
-  ];
+  const { cartItems, updateQuantity, removeFromCart, getCartTotal } = useCart();
+  const navigate = useNavigate();
 
-  const total = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://placehold.co/100x100/e2e8f0/1e293b?text=Product';
+    if (imagePath.startsWith('http')) return imagePath;
+    const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+    return `${API_BASE_URL}/${cleanPath}`;
+  };
+
+  const handleQuantityChange = (uniqueKey, newQuantity) => {
+    if (newQuantity > 0) {
+      updateQuantity(uniqueKey, newQuantity);
+    }
+  };
+
+  const handleRemove = (uniqueKey) => {
+    removeFromCart(uniqueKey);
+  };
+
+  const subtotal = getCartTotal();
+  const deliveryFee = 50;
+  const total = subtotal + deliveryFee;
 
   return (
     <>
@@ -54,35 +49,69 @@ const CheckoutPage = () => {
           <div className="checkout">
             {/* Left - Cart Items */}
             <div>
-              {cartItems.map((item) => (
-                <div className="cart-item" key={item.id}>
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="cart-item-image"
-                  />
-                  <div className="cart-item-details">
-                    <p className="item-title">{item.name}</p>
-                    <p className="item-weight">{item.size}</p>
-                    <button className="remove-btn">REMOVE</button>
-                  </div>
-                  <div>
-                    <div className="cart-item-quantity">
-                      <button className="quantity-btn">−</button>
-                      <div className="quantity-value">
-                        {item.quantity}
-                        <button className="quantity-btn">+</button>
+              {cartItems.length === 0 ? (
+                <div className="empty-cart">
+                  <p>Your cart is empty</p>
+                  <button className="back-btn" onClick={() => navigate('/products')}>
+                    CONTINUE SHOPPING
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {cartItems.map((item) => (
+                    <div className="cart-item" key={item.uniqueKey}>
+                      <img
+                        src={getImageUrl(item.image)}
+                        alt={item.name}
+                        className="cart-item-image"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://placehold.co/100x100/e2e8f0/1e293b?text=Product';
+                        }}
+                      />
+                      <div className="cart-item-details">
+                        <p className="item-title">{item.name}</p>
+                        <p className="item-weight">
+                          {item.variation?.weight}{item.variation?.weightUnit}
+                        </p>
+                        <button 
+                          className="remove-btn"
+                          onClick={() => handleRemove(item.uniqueKey)}
+                        >
+                          REMOVE
+                        </button>
+                      </div>
+                      <div>
+                        <div className="cart-item-quantity">
+                          <button 
+                            className="quantity-btn"
+                            onClick={() => handleQuantityChange(item.uniqueKey, item.quantity - 1)}
+                          >
+                            −
+                          </button>
+                          <div className="quantity-value">{item.quantity}</div>
+                          <button 
+                            className="quantity-btn"
+                            onClick={() => handleQuantityChange(item.uniqueKey, item.quantity + 1)}
+                          >
+                            +
+                          </button>
+                        </div>
+                        <div className="cart-item-price">
+                          ₹{((Number(item.price) || 0) * (Number(item.quantity) || 1)).toFixed(2)}
+                        </div>
                       </div>
                     </div>
-                    <div className="cart-item-price">₹{item.price}</div>
+                  ))}
+                  <div className="subtotal">
+                    <p>Subtotal</p>
+                    <p>₹{subtotal}</p>
                   </div>
-                </div>
-              ))}
-              <div className="subtotal">
-                <p>Subtotal</p>
-                <p>₹{total}</p>
-              </div>
-              <button className="back-btn">BACK TO PURCHASE</button>
+                  <button className="back-btn" onClick={() => navigate('/products')}>
+                    BACK TO PURCHASE
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Right - Order Summary */}
@@ -91,11 +120,11 @@ const CheckoutPage = () => {
                 <div className="summary-title">Order summary</div>
                 <div className="summary-row">
                   <p>Subtotal</p>
-                  <p>₹{total}</p>
+                  <p>₹{subtotal}</p>
                 </div>
                 <div className="summary-row">
                   <p>Delivery</p>
-                  <p>₹250</p>
+                  <p>₹{deliveryFee}</p>
                 </div>
                 <div className="summary-row total">
                   <p>Total</p>
@@ -106,7 +135,12 @@ const CheckoutPage = () => {
                 <div className="shipping-info">
                   <p>Estimated shipping time: 2 days</p>
                 </div>
-                <button className="checkout-btn">CHECK OUT</button>
+                <button 
+                  className="checkout-btn"
+                  disabled={cartItems.length === 0}
+                >
+                  CHECK OUT
+                </button>
               </div>
               <div className="payment-types">
                 <div className="payment-title">Payment type</div>
