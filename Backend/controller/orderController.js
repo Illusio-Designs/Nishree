@@ -159,7 +159,10 @@ export const createOrder = async (req, res) => {
         // Fetch the created order with its items
         const createdOrder = await Order.findByPk(order.id, {
             include: [
-                { model: OrderItem, include: [Product] },
+                { 
+                    model: OrderItem, 
+                    include: [{ model: Product, as: 'Product' }] 
+                },
                 { model: User, attributes: ['id', 'username', 'email'] },
                 { model: OrderStatusHistory, order: [['updated_at', 'DESC']] }
             ]
@@ -200,7 +203,10 @@ export const getAllOrders = async (req, res) => {
             where: filter,
             include: [
                 { model: User, attributes: ['id', 'username', 'email'] },
-                { model: OrderItem, include: [Product] }
+                { 
+                    model: OrderItem, 
+                    include: [{ model: Product, as: 'Product' }] 
+                }
             ],
             order: [['createdAt', 'DESC']],
             limit: parseInt(limit),
@@ -240,7 +246,10 @@ export const getUserOrders = async (req, res) => {
         const orders = await Order.findAndCountAll({
             where: filter,
             include: [
-                { model: OrderItem, include: [Product] }
+                { 
+                    model: OrderItem, 
+                    include: [{ model: Product, as: 'Product' }] 
+                }
             ],
             order: [['createdAt', 'DESC']],
             limit: parseInt(limit),
@@ -350,7 +359,10 @@ export const updateOrderStatus = async (req, res) => {
         // Get updated order
         const updatedOrder = await Order.findByPk(orderId, {
             include: [
-                { model: OrderItem, include: [Product] },
+                { 
+                    model: OrderItem, 
+                    include: [{ model: Product, as: 'Product' }] 
+                },
                 { model: User, attributes: ['id', 'username', 'email'] },
                 { model: OrderStatusHistory, order: [['updated_at', 'DESC']] },
                 { model: Payment }

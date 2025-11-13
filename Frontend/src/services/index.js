@@ -316,16 +316,23 @@ export const userService = {
 
     updateProfile: async (profileData) => {
         try {
-            const response = await api.put('/api/users/profile', profileData);
+            const config = {};
+            // If profileData is FormData, set proper headers
+            if (profileData instanceof FormData) {
+                config.headers = {
+                    'Content-Type': 'multipart/form-data'
+                };
+            }
+            const response = await api.put('/api/users/update', profileData, config);
             return response.data;
         } catch (error) {
-            throw handleApiError(error);
+            throw error.response?.data || error.message;
         }
     },
 
     updateUser: async (userData) => {
         try {
-            const response = await api.put('/api/users/me', userData);
+            const response = await api.put('/api/users/update', userData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -539,6 +546,15 @@ export const orderService = {
     getAllOrders: async () => {
         try {
             const response = await api.get('/api/orders');
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    getMyOrders: async () => {
+        try {
+            const response = await api.get('/api/orders/my-orders');
             return response.data;
         } catch (error) {
             throw handleApiError(error);

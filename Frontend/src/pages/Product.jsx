@@ -6,11 +6,11 @@ import Newsletter from "../components/Newsletter";
 import Footer from '../components/Footer';
 import ProductCard from "../components/Productcard";
 import { getPublicCategoryById, getAllPublicProducts } from '../services/publicindex';
-import hero from "../assets/productbj.png";
-import vector2 from "../assets/Vector (18).png";
-import vector3 from "../assets/Vector (22).png";
-import vector4 from "../assets/Vector (23).png";
-import vector5 from "../assets/Vector (24).png";
+import hero from "../assets/productbj.webp";
+import vector2 from "../assets/Vector (18).webp";
+import vector3 from "../assets/Vector (22).webp";
+import vector4 from "../assets/Vector (23).webp";
+import vector5 from "../assets/Vector (24).webp";
 import "../Styles/Product.css"
 import Loader from "../components/Loader";
 

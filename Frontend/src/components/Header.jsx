@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import logo from "../assets/RTHSRT.png";
+import logo from "../assets/RTHSRT.webp";
 import "../Styles/components/Header.css";
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import CartPopup from "./CartPopup";

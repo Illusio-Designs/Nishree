@@ -22,7 +22,12 @@ const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/users'));
 // Helper function to add image URL to user response
 const addImageUrlToResponse = (userResponse) => {
     if (userResponse.profileImage) {
-        userResponse.profileImageUrl = `/uploads/users/${userResponse.profileImage}`;
+        // Check if profileImage already contains the full path
+        if (userResponse.profileImage.startsWith('/uploads/')) {
+            userResponse.profileImageUrl = userResponse.profileImage;
+        } else {
+            userResponse.profileImageUrl = `/uploads/users/${userResponse.profileImage}`;
+        }
     }
     return userResponse;
 };
@@ -245,7 +250,7 @@ export const getCurrentUser = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const updates = Object.keys(req.body);
-        const allowedUpdates = ['username', 'email'];
+        const allowedUpdates = ['username', 'email', 'phone'];
         const isValidOperation = updates.every(update => allowedUpdates.includes(update));
         
         if (!isValidOperation) {
@@ -266,7 +271,7 @@ export const updateUser = async (req, res) => {
         if (req.file) {
             try {
                 // Process the new image using image handler
-                const filename = await imageHandler.handleProfileImage(
+                const filename = await imageHandler.handleUserProfileImage(
                     user.profileImage,
                     req.file.path,
                     user.id

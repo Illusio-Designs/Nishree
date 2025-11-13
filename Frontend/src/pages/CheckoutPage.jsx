@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import ProductCard from "../components/Productcard";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
-import product from "../assets/4 (1) 2.png";
+import product from "../assets/4 (1) 2.webp";
 import "../Styles/CheckoutPage.css"; // Import external CSS
 
 const CheckoutPage = () => {

@@ -341,7 +341,6 @@
 .profile-trigger img {
   object-fit: cover;
   transition: border-color 0.2s ease;
-  height: 30px;
 }
 
 .profile-trigger:hover img {
@@ -505,4 +504,41 @@ button.dropdown-item {
     width: 100%;
     justify-content: center;
   }
+}
+
+
+/* Profile Avatar Initials */
+.profile-avatar-initials,
+.dropdown-avatar-initials {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #DC2626, #991B1B);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.dropdown-avatar-initials {
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+}
+
+.profile-avatar,
+.dropdown-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.dropdown-avatar {
+  width: 48px;
+  height: 48px;
 }

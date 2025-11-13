@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Newsletterimg from "../Assets/Newsletter.png";
+import Newsletterimg from "../assets/Newsletter.webp";
 import "../Styles/components/Newsletter.css";
 
 const Newsletter = () => {

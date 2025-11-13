@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "convert-images": "node scripts/convert-images.js",
+    "predev": "npm run convert-images",
     "dev": "vite",
+    "prebuild": "npm run convert-images",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -22,6 +25,7 @@
     "react-router-dom": "^7.4.1",
     "react-select": "^5.10.1",
     "react-toastify": "^11.0.5",
+    "sharp": "^0.33.5",
     "swiper": "^11.2.6"
   },
   "devDependencies": {

@@ -7,6 +7,7 @@ import About from "../pages/About";
 import Productinner from "../pages/Productinner";
 import CheckoutPage from "../pages/CheckoutPage";
 import Contact from "../pages/Contact";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Profile from "../pages/Profile";
@@ -44,6 +45,7 @@ const AppRoutes = () => {
       <Route path="/productinner/:id" element={<Productinner />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 

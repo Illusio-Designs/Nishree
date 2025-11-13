@@ -119,6 +119,24 @@ OrderItem.belongsTo(Order, {
     onDelete: 'CASCADE'
 });
 
+// OrderItem to Product Association
+OrderItem.belongsTo(Product, { 
+    foreignKey: 'product_id',
+    as: 'Product'
+});
+Product.hasMany(OrderItem, { 
+    foreignKey: 'product_id'
+});
+
+// OrderItem to ProductVariation Association
+OrderItem.belongsTo(ProductVariation, { 
+    foreignKey: 'variation_id',
+    as: 'Variation'
+});
+ProductVariation.hasMany(OrderItem, { 
+    foreignKey: 'variation_id'
+});
+
 Order.hasMany(OrderStatusHistory, { 
     foreignKey: 'orderId',
     onDelete: 'CASCADE'

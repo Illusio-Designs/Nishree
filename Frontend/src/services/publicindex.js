@@ -151,3 +151,14 @@ export const createPublicReview = async (reviewData) => {
         throw error.response?.data || error.message;
     }
 };
+
+// Get public page content (Privacy Policy, Terms, etc.)
+export const getPublicPageContent = async (pageName) => {
+    try {
+        // Fetch from policies endpoint
+        const response = await axios.get(`${API_URL}/api/policies`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+};

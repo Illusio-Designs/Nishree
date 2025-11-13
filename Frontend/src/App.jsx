@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
@@ -6,8 +6,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { WishlistProvider } from "./context/WishlistContext";
 import { CartProvider } from "./context/CartContext";
 import AppRoutes from "./routes/AppRoutes";
+import Loader from "./components/Loader";
 import "./App.css";
-import "./Styles/index.css"; // This will now work correctly
+import "./Styles/index.css";
 
 function App() {
   return (
@@ -15,7 +16,9 @@ function App() {
       <AuthProvider>
         <WishlistProvider>
           <CartProvider>
-            <AppRoutes />
+            <Suspense fallback={<Loader size="large" />}>
+              <AppRoutes />
+            </Suspense>
             <ToastContainer
               position="top-right"
               autoClose={3000}
@@ -23,9 +26,10 @@ function App() {
               newestOnTop
               closeOnClick
               rtl={false}
-              pauseOnFocusLoss
+              pauseOnFocusLoss={false}
               draggable
               pauseOnHover
+              limit={3}
             />
           </CartProvider>
         </WishlistProvider>

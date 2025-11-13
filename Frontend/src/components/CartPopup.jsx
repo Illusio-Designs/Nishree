@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "../Styles/components/CartPopup.css";
-import product from "../assets/4 (1) 2.png";
+import product from "../assets/4 (1) 2.webp";
 
 const CartPopup = ({ onClose }) => {
   const navigate = useNavigate(); // Initialize useNavigate

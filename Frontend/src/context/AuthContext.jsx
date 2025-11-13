@@ -10,56 +10,45 @@ function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   const checkUser = async () => {
-    console.log("=== Auth Check Started ===");
-    console.log("API URL:", import.meta.env.VITE_API_URL || 'http://localhost:5000');
-    
     try {
       const token = localStorage.getItem("token");
-      console.log("Token status:", token ? "Present" : "Missing");
       
       if (!token) {
-        console.log("No token - setting loading to false");
         setLoading(false);
         return;
       }
 
-      console.log("Fetching user data...");
       const userData = await userService.getCurrentUser();
-      console.log("User data received:", userData ? "Success" : "Failed");
       
       if (userData && userData.id) {
-        console.log("Setting user data:", userData);
         setUser(userData);
       } else {
-        console.log("Invalid user data - clearing token");
         localStorage.removeItem("token");
         setUser(null);
       }
     } catch (error) {
-      console.log("Auth check error:", {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data
-      });
+      // Silently handle errors - don't block the app
+      console.warn("Auth check failed (this is normal if backend is not running):", error.message);
       
-      // Only clear token if it's an authentication error
+      // Only clear token if it's an authentication error (401)
       if (error.response?.status === 401) {
         localStorage.removeItem("token");
         setUser(null);
       }
-      setError(error.message || "Authentication failed");
+      // Don't set error state - let the app continue
     } finally {
-      console.log("Setting loading to false");
       setLoading(false);
     }
   };
 
-  // Add a new effect to handle token changes
+  // Check authentication on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
+      // Check auth in background, but don't block the app
       checkUser();
     } else {
+      // No token - immediately set loading to false
       setLoading(false);
     }
   }, []);
@@ -114,61 +103,30 @@ function AuthProvider({ children }) {
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
-        <Loader size="large" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '1.2rem',
-        color: '#666'
-      }}>
-        <p>Error: {error}</p>
-        <button 
-          onClick={() => {
-            setError(null);
-            checkUser();
-          }}
-          style={{
-            padding: '8px 16px',
-            marginTop: '16px',
-            cursor: 'pointer'
-          }}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  // Don't block the app while checking auth
+  // Protected routes will handle their own loading states
 
   const updateUserProfile = async (profileData) => {
     try {
-      setLoading(true);
-      const response = await userService.updateUser(profileData);
-      if (response && response.user) {
-        setUser(response.user);
+      const response = await userService.updateProfile(profileData);
+      console.log('Update profile response:', response);
+      
+      // Immediately refresh user data after update
+      if (response) {
+        // Wait a moment for backend to process
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const updatedUser = await userService.getCurrentUser();
+        if (updatedUser) {
+          console.log('Updating user context with:', updatedUser);
+          setUser(updatedUser);
+        }
         return response;
       }
     } catch (error) {
+      console.error('Profile update error in context:', error);
       setError(error.message || "Profile update failed");
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 

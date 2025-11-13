@@ -8,8 +8,7 @@ import {
   Outlet,
 } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import img from "../../../assets/RTHSRT.png";
-import profile from "../../../assets/img (1).png";
+import img from "../../../assets/RTHSRT.webp";
 import "../../../Styles/dashboard/Dashboard.css";
 import {
   HiOutlineHome,
@@ -291,23 +290,45 @@ const Dashboard = () => {
                 aria-expanded={isDropdownOpen}
                 aria-haspopup="true"
               >
-                <img
-                  src={user?.photoURL || profile}
-                  alt="Profile"
-                  className="profile-avatar"
-                />
+                {user?.photoURL || user?.profileImage ? (
+                  <img
+                    src={user.photoURL || (user.profileImage?.startsWith('/uploads/') 
+                      ? `${import.meta.env.VITE_API_URL}${user.profileImage}` 
+                      : `${import.meta.env.VITE_API_URL}/uploads/users/${user.profileImage}`)}
+                    alt="Profile"
+                    className="profile-avatar"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className="profile-avatar-initials" style={{ display: (user?.photoURL || user?.profileImage) ? 'none' : 'flex' }}>
+                  {(user?.username || user?.displayName || user?.email || 'A').charAt(0).toUpperCase()}
+                </div>
               </div>
               {isDropdownOpen && (
                 <div className="dropdown-menu">
                   <div className="dropdown-header">
-                    <img
-                      src={user?.photoURL || profile}
-                      alt="Profile"
-                      className="dropdown-avatar"
-                    />
+                    {user?.photoURL || user?.profileImage ? (
+                      <img
+                        src={user.photoURL || (user.profileImage?.startsWith('/uploads/') 
+                          ? `${import.meta.env.VITE_API_URL}${user.profileImage}` 
+                          : `${import.meta.env.VITE_API_URL}/uploads/users/${user.profileImage}`)}
+                        alt="Profile"
+                        className="dropdown-avatar"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="dropdown-avatar-initials" style={{ display: (user?.photoURL || user?.profileImage) ? 'none' : 'flex' }}>
+                      {(user?.username || user?.displayName || user?.email || 'A').charAt(0).toUpperCase()}
+                    </div>
                     <div className="user-info">
                       <span className="user-name">
-                        {user?.displayName || "Admin"}
+                        {user?.displayName || user?.username || "Admin"}
                       </span>
                       <small className="user-email">{user?.email}</small>
                     </div>

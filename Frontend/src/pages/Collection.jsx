@@ -4,11 +4,11 @@ import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
-import hero from "../assets/collectionbg.png";
-import vector2 from "../assets/Vector (18).png";
-import vector3 from "../assets/Vector (22).png";
-import vector4 from "../assets/Vector (23).png";
-import vector5 from "../assets/Vector (24).png";
+import hero from "../assets/collectionbg.webp";
+import vector2 from "../assets/Vector (18).webp";
+import vector3 from "../assets/Vector (22).webp";
+import vector4 from "../assets/Vector (23).webp";
+import vector5 from "../assets/Vector (24).webp";
 import { getPublicCategories } from "../services/publicindex";
 import "../Styles/Collection.css";
 import Loader from "../components/Loader";
@@ -23,9 +23,23 @@ const Collection = () => {
     const fetchCategories = async () => {
       try {
         const data = await getPublicCategories();
-        setCategories(data);
+        console.log('Fetched categories:', data);
+        
+        // Handle different response formats
+        let categoriesData = [];
+        if (Array.isArray(data)) {
+          categoriesData = data;
+        } else if (data.categories && Array.isArray(data.categories)) {
+          categoriesData = data.categories;
+        } else if (data.data && Array.isArray(data.data)) {
+          categoriesData = data.data;
+        }
+        
+        console.log('Processed categories:', categoriesData);
+        setCategories(categoriesData);
         setLoading(false);
       } catch (err) {
+        console.error('Error fetching categories:', err);
         setError(err.message);
         setLoading(false);
       }
@@ -102,23 +116,46 @@ const Collection = () => {
               ) : error ? (
                 <div>Error: {error}</div>
               ) : (
-                categories.map((category) => (
-                  <div 
-                    className="blog-card" 
-                    key={category.id}
-                    onClick={() => handleCategoryClick(category.id)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <img
-                      src={category.image ? `${import.meta.env.VITE_API_URL}/uploads/categories/${category.image}` : hero}
-                      alt={category.name}
-                      className="blog-image"
-                    />
-                    <h3>{category.name}</h3>
-                    <hr className="hr" />
-                    <p>EXPLORE PRODUCTS</p>
-                  </div>
-                ))
+                categories.map((category) => {
+                  // Construct image URL
+                  let imageUrl = hero; // Default fallback
+                  
+                  if (category.image) {
+                    // If image is already a full URL
+                    if (category.image.startsWith('http')) {
+                      imageUrl = category.image;
+                    } else {
+                      // Remove leading slash if present
+                      const imagePath = category.image.replace(/^\//, '');
+                      imageUrl = `${import.meta.env.VITE_API_URL}/${imagePath}`;
+                    }
+                  }
+                  
+                  console.log('Category:', category.name, 'Image URL:', imageUrl);
+                  
+                  return (
+                    <div 
+                      className="blog-card" 
+                      key={category.id}
+                      onClick={() => handleCategoryClick(category.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={category.name}
+                        className="blog-image"
+                        onError={(e) => {
+                          console.error('Failed to load image:', imageUrl);
+                          e.target.onerror = null;
+                          e.target.src = hero;
+                        }}
+                      />
+                      <h3>{category.name}</h3>
+                      <hr className="hr" />
+                      <p>EXPLORE PRODUCTS</p>
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>

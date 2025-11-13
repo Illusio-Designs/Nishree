@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import Header from "../components/Header";
 import "../Styles/Home.css";
-import about from "../assets/img.png";
+import about from "../assets/img.webp";
 import ProductCard from "../components/Productcard";
-import vector1 from "../assets/Vector (17).png";
-import vector2 from "../assets/Vector (18).png";
-import vector3 from "../assets/Vector (19).png";
-import vector4 from "../assets/Vector (20).png";
-import vector5 from "../assets/Vector (21).png";
+import vector1 from "../assets/Vector (17).webp";
+import vector2 from "../assets/Vector (18).webp";
+import vector3 from "../assets/Vector (19).webp";
+import vector4 from "../assets/Vector (20).webp";
+import vector5 from "../assets/Vector (21).webp";
 import Testimonials from "../components/Testimonials";
 import BlogCard from "../components/BlogCard";
 import Newsletter from "../components/Newsletter";
@@ -33,13 +33,41 @@ const Home = () => {
         const data = await getPublicSliders();
         console.log('Fetched sliders data:', data);
         
-        const sliderData = Array.isArray(data) ? data : (data.sliders || []);
+        // Handle different response formats
+        let sliderData = [];
+        if (Array.isArray(data)) {
+          sliderData = data;
+        } else if (data.sliders && Array.isArray(data.sliders)) {
+          sliderData = data.sliders;
+        } else if (data.data && Array.isArray(data.data)) {
+          sliderData = data.data;
+        }
         
-        const slidersWithFullUrls = sliderData.map(slider => ({
-          ...slider,
-          image: slider.image.startsWith('http') ? slider.image : `${API_URL}/uploads/slider/${slider.image}`
-        }));
+        console.log('Processed slider data:', sliderData);
         
+        // Construct full image URLs
+        const slidersWithFullUrls = sliderData.map(slider => {
+          let imageUrl = slider.image || slider.image_url || '';
+          
+          // If image is already a full URL, use it
+          if (imageUrl.startsWith('http')) {
+            return { ...slider, image: imageUrl };
+          }
+          
+          // Remove leading slash if present
+          imageUrl = imageUrl.replace(/^\//, '');
+          
+          // Construct full URL
+          const fullUrl = `${API_URL}/${imageUrl}`;
+          console.log('Slider image URL:', fullUrl);
+          
+          return {
+            ...slider,
+            image: fullUrl
+          };
+        });
+        
+        console.log('Sliders with full URLs:', slidersWithFullUrls);
         setSliders(slidersWithFullUrls);
       } catch (err) {
         console.error('Error fetching sliders:', err);
@@ -161,19 +189,17 @@ const Home = () => {
               </div>
               <div className="rotating-slider__navigation">
                 <button
-                  className={`rotating-slider__prev ${currentIndex === 0 ? 'hidden' : ''}`}
+                  className="rotating-slider__prev"
                   onClick={handlePrev}
                   disabled={currentIndex === 0}
-                >
-                  ←
-                </button>
+                  aria-label="Previous slide"
+                />
                 <button
-                  className={`rotating-slider__next ${currentIndex === sliders.length - 1 ? 'hidden' : ''}`}
+                  className="rotating-slider__next"
                   onClick={handleNext}
                   disabled={currentIndex === sliders.length - 1}
-                >
-                  →
-                </button>
+                  aria-label="Next slide"
+                />
               </div>
             </div>
           </div>

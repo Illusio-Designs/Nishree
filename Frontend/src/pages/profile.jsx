@@ -1,188 +1,491 @@
-import React, { useState } from 'react';
-import { FaUser, FaEdit, FaBox, FaMapMarkerAlt } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { FaUser, FaEdit, FaBox, FaMapMarkerAlt, FaSignOutAlt, FaTrash, FaPlus } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 import Header from "../components/Header";
 import Footer from '../components/Footer';
+import Loader from '../components/Loader';
+import Modal from '../components/common/Modal';
+import Button from '../components/common/Button';
+import { orderService, shippingAddressService } from '../services';
 import "../Styles/Profile.css";
+import "../Styles/common/Form.css";
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [addresses, setAddresses] = useState([]);
+  const [editingAddress, setEditingAddress] = useState(null);
+  const [profileData, setProfileData] = useState({
+    username: '',
+    email: '',
+    phone: ''
+  });
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [modalImagePreview, setModalImagePreview] = useState(null);
+  
+  const { user, logout, updateProfile } = useAuth();
+  const navigate = useNavigate();
 
-  const user = {
-    name: 'Jyoti',
-    email: 'jyoti@gmail.com',
-    phone: '+91 7493658737',
+  useEffect(() => {
+    if (user) {
+      console.log('User data updated:', user);
+      setProfileData({
+        username: user.username || '',
+        email: user.email || '',
+        phone: user.phone || ''
+      });
+      // Set profile image if exists
+      if (user.profileImageUrl) {
+        // Add timestamp to prevent caching
+        const imageUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.profileImageUrl}?t=${Date.now()}`;
+        console.log('Setting profile image:', imageUrl);
+        setImagePreview(imageUrl);
+      } else {
+        console.log('No profile image URL found');
+        setImagePreview(null);
+      }
+    }
+  }, [user]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+      setProfileImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setModalImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const orders = [
-    {
-      id: '00000',
-      status: 'PENDING',
-      items: [
-        {
-          image: 'https://bootdey.com/img/Content/avatar/avatar6.png',
-          description: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolorem, facilis.',
-          quantity: '₹100 X 2',
-          amount: '₹200',
-          status: 'PENDING'
-        }
-      ],
-      totalPrice: '₹200',
-      totalPaid: '₹200',
-      timeline: [
-        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque Lorem ipsum dolor', date: '21 March, 2014' },
-        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque', date: '21 March, 2014' },
-        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque', date: '21 March, 2014' },
-        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque', date: '21 March, 2014' },
-        { status: 'PICKED', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque', date: '21 March, 2014' }
-      ]
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      fetchOrders();
+    } else if (activeTab === 'address') {
+      fetchAddresses();
     }
-  ];
+  }, [activeTab]);
 
-  const addresses = [
-    {
-      name: 'Home',
-      address: '123, Green Street, New York, USA',
-      phone: '+91 7493658737'
-    },
-    {
-      name: 'Office',
-      address: '456, Blue Avenue, Los Angeles, USA',
-      phone: '+91 7493658737'
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const response = await orderService.getMyOrders();
+      setOrders(response.orders || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      toast.error('Failed to load orders');
+      setOrders([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const handleAddAddress = (e) => {
+  const fetchAddresses = async () => {
+    setLoading(true);
+    try {
+      const addresses = await shippingAddressService.getUserShippingAddresses();
+      setAddresses(addresses || []);
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+      toast.error('Failed to load addresses');
+      setAddresses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      navigate('/');
+    } catch (error) {
+      toast.error('Logout failed');
+    }
+  };
+
+  const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    // Handle address addition logic here
-    setShowModal(false);
+    setLoading(true);
+    try {
+      // Create FormData if there's an image
+      let dataToSend;
+      if (profileImage) {
+        dataToSend = new FormData();
+        dataToSend.append('username', profileData.username);
+        dataToSend.append('email', profileData.email);
+        dataToSend.append('phone', profileData.phone);
+        dataToSend.append('profilePic', profileImage); // Backend expects 'profilePic'
+      } else {
+        dataToSend = profileData;
+      }
+      
+      console.log('Updating profile...');
+      await updateProfile(dataToSend);
+      
+      toast.success('Profile updated successfully');
+      setShowEditModal(false);
+      setProfileImage(null);
+      setModalImagePreview(null);
+      
+      // The AuthContext will automatically refresh the user data
+    } catch (error) {
+      console.error('Profile update error:', error);
+      toast.error(error.message || 'Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddAddress = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const formData = new FormData(e.target);
+      const rawData = Object.fromEntries(formData);
+      
+      // Map frontend field names to backend field names
+      const addressData = {
+        address: rawData.address,
+        city: rawData.city,
+        state: rawData.state,
+        postal_code: rawData.pincode,
+        country: rawData.country || 'India', // Default to India if not provided
+        phone_number: rawData.phone,
+        is_default: rawData.is_default === 'true' || false
+      };
+      
+      if (editingAddress) {
+        await shippingAddressService.updateShippingAddress(editingAddress.id, addressData);
+        toast.success('Address updated successfully');
+      } else {
+        await shippingAddressService.createShippingAddress(addressData);
+        toast.success('Address added successfully');
+      }
+      
+      setShowModal(false);
+      setEditingAddress(null);
+      fetchAddresses();
+    } catch (error) {
+      console.error('Error saving address:', error);
+      toast.error(error.message || 'Failed to save address');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId) => {
+    if (!window.confirm('Are you sure you want to delete this address?')) return;
+    
+    setLoading(true);
+    try {
+      await shippingAddressService.deleteShippingAddress(addressId);
+      toast.success('Address deleted successfully');
+      fetchAddresses();
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      toast.error(error.message || 'Failed to delete address');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="profile-container">
+    <>
       <Header />
-      <div className="main-body">
-        <div className="profile-cards">
-          <div className="profile-card-left">
-            <div className="profile-card">
-              <div className="card-body">
-                <div className="profile-header">
-                  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtbEsykx-0fhTred6UwHDYtMFd2UgTJCG4gaklT1dx4suRO4_n5LJr4Gg28kquSX5fpNo&usqp=CAU" 
-                       alt="Admin" 
-                       className="profile-image" />
-                  <h4 className="profile-name">{user.name}</h4>
+      <div className="background section">
+        <div className="profile-page">
+          <div className="profile-container">
+            {/* Sidebar */}
+            <div className="profile-sidebar">
+              <div className="profile-user-card">
+                <div className="user-avatar">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Profile" />
+                  ) : (
+                    <FaUser size={50} />
+                  )}
                 </div>
-                <div className="profile-nav">
-                  <button 
-                    className={`nav-item profile ${activeTab === 'profile' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('profile')}>
-                    <FaUser /> Profile Information
-                  </button>
-                  <button 
-                    className={`nav-item profile ${activeTab === 'orders' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('orders')}>
-                    <FaBox /> Orders
-                  </button>
-                  <button 
-                    className={`nav-item profile ${activeTab === 'address' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('address')}>
-                    <FaMapMarkerAlt /> Address Book
-                  </button>
-                  <button className="nav-item profile">Logout</button>
-                </div>
+                <h3>{user?.username || 'User'}</h3>
+                <p className="user-email">{user?.email}</p>
               </div>
+
+              <nav className="profile-nav">
+                <button 
+                  className={`profile-nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('profile')}>
+                  <FaUser /> <span>Profile Information</span>
+                </button>
+                <button 
+                  className={`profile-nav-item ${activeTab === 'orders' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('orders')}>
+                  <FaBox /> <span>My Orders</span>
+                </button>
+                <button 
+                  className={`profile-nav-item ${activeTab === 'address' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('address')}>
+                  <FaMapMarkerAlt /> <span>Address Book</span>
+                </button>
+                <button 
+                  className="profile-nav-item logout"
+                  onClick={handleLogout}>
+                  <FaSignOutAlt /> <span>Logout</span>
+                </button>
+              </nav>
             </div>
-          </div>
 
-          <div className="profile-card-right">
-            {activeTab === 'profile' && (
-              <div className="profile-card">
-                <div className="card-body">
-                  <div className="profile-info">
-                    <h5>Profile Information</h5>
-                    <p><strong>Name:</strong> {user.name}</p>
-                    <p><strong>Email Address:</strong> {user.email}</p>
-                    <p><strong>Contact:</strong> {user.phone}</p>
+            {/* Main Content */}
+            <div className="profile-content">
+              {activeTab === 'profile' && (
+                <div className="content-card">
+                  <div className="card-header">
+                    <h2>Profile Information</h2>
+                    <button className="btn-edit" onClick={() => setShowEditModal(true)}>
+                      <FaEdit /> Edit Profile
+                    </button>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'orders' && (
-              <div className="order-card">
-                {orders.map(order => (
-                  <div key={order.id}>
-                    <div className="card">
-                      <div className="card-body">
-                        <div className="order-header">
-                          <h5>ORDER# {order.id}</h5>
-                        </div>
-                        <div className="order-status">
-                          {[1, 2, 3, 4, 5].map((_, index) => (
-                            <div key={index} className={`status-item ${index === 0 ? 'active' : ''}`}>
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="50" height="50">
-                                {/* SVG path data */}
-                              </svg>
-                              <span>Pending</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                  <div className="profile-details">
+                    <div className="detail-row">
+                      <span className="detail-label">Full Name:</span>
+                      <span className="detail-value">{user?.username}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Email Address:</span>
+                      <span className="detail-value">{user?.email}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Phone Number:</span>
+                      <span className="detail-value">{user?.phone || 'Not provided'}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Member Since:</span>
+                      <span className="detail-value">
+                        {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === 'address' && (
-              <div className="card">
-                <div className="card-body">
-                  <h5>Address Book</h5>
-                  <button className="add-address-btn" onClick={() => setShowModal(true)}>
-                    Add Address
-                  </button>
-                  <div className="address-grid">
-                    {addresses.map((addr, index) => (
-                      <div key={index} className="address-card">
-                        <div className="address-type">{addr.name}</div>
-                        <div className="info-value">{addr.address}</div>
-                        <div className="address-actions">
-                          <button className="btn btn-outline">Edit</button>
-                          <button className="btn btn-primary">Delete</button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {activeTab === 'orders' && (
+                <div className="content-card">
+                  <div className="card-header">
+                    <h2>My Orders</h2>
+                  </div>
+                  {loading ? (
+                    <div className="loading-state">
+                      <Loader size="medium" />
+                      <p>Loading orders...</p>
+                    </div>
+                  ) : orders.length > 0 ? (
+                    <div className="orders-list">
+                      {orders.map(order => (
+                        <div key={order.id} className="order-item">
+                          <div className="order-header-row">
+                            <div>
+                              <h4>Order #{order.id}</h4>
+                              <p className="order-date">{new Date(order.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <span className={`order-status ${order.status?.toLowerCase()}`}>
+                              {order.status}
+                            </span>
+                          </div>
+                          <div className="order-details">
+                            <p><strong>Total:</strong> ₹{order.totalAmount}</p>
+                            <p><strong>Items:</strong> {order.items?.length || 0}</p>
+                          </div>
+                          <button className="btn-view-order">View Details</button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="empty-state">
+                      <FaBox size={60} color="#9CA3AF" />
+                      <h3>No Orders Yet</h3>
+                      <p>Start shopping to see your orders here</p>
+                      <button className="btn-red" onClick={() => navigate('/products')}>
+                        Browse Products
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'address' && (
+                <div className="content-card">
+                  <div className="card-header">
+                    <h2>Address Book</h2>
+                    <button className="btn-add" onClick={() => {
+                      setEditingAddress(null);
+                      setShowModal(true);
+                    }}>
+                      <FaPlus /> Add New Address
+                    </button>
+                  </div>
+                  {loading ? (
+                    <div className="loading-state">
+                      <Loader size="medium" />
+                      <p>Loading addresses...</p>
+                    </div>
+                  ) : addresses.length > 0 ? (
+                    <div className="address-grid">
+                      {addresses.map((addr) => (
+                        <div key={addr.id} className="address-card">
+                          <div className="address-header">
+                            <h4>
+                              {addr.is_default && <span className="default-badge">★ Default</span>}
+                              {!addr.is_default && 'Address'}
+                            </h4>
+                            <div className="address-actions">
+                              <button className="icon-btn" onClick={() => {
+                                setEditingAddress(addr);
+                                setShowModal(true);
+                              }}>
+                                <FaEdit />
+                              </button>
+                              <button className="icon-btn delete" onClick={() => handleDeleteAddress(addr.id)}>
+                                <FaTrash />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="address-body">
+                            <p>{addr.address}</p>
+                            <p>{addr.city}, {addr.state} - {addr.postal_code}</p>
+                            <p>{addr.country}</p>
+                            <p className="phone">Phone: {addr.phone_number}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="empty-state">
+                      <FaMapMarkerAlt size={60} color="#9CA3AF" />
+                      <h3>No Addresses Saved</h3>
+                      <p>Add an address for faster checkout</p>
+                      <button className="btn-red" onClick={() => setShowModal(true)}>
+                        Add Address
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="modal-close" onClick={() => setShowModal(false)}>&times;</span>
-            <h2 className="modal-title">Add Address</h2>
-            <form onSubmit={handleAddAddress}>
+      {/* Edit Profile Modal */}
+      <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Profile">
+        <form onSubmit={handleProfileUpdate}>
+              <div className="form-group">
+                <label className="form-label">Profile Picture</label>
+                <div className="image-upload-container">
+                  <div className="image-preview-large">
+                    {modalImagePreview || imagePreview ? (
+                      <img src={modalImagePreview || imagePreview} alt="Profile Preview" />
+                    ) : (
+                      <FaUser size={60} color="#ffffff" />
+                    )}
+                  </div>
+                  <div className="image-upload-actions">
+                    <label htmlFor="profile-image-upload" className="btn-upload">
+                      <FaEdit /> Choose Image
+                      <input
+                        type="file"
+                        id="profile-image-upload"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    {(modalImagePreview || profileImage) && (
+                      <button
+                        type="button"
+                        className="btn-remove"
+                        onClick={() => {
+                          setProfileImage(null);
+                          setModalImagePreview(null);
+                        }}
+                      >
+                        <FaTrash /> Remove
+                      </button>
+                    )}
+                    <p className="image-hint">Max size: 5MB. Formats: JPG, PNG, GIF</p>
+                  </div>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Full Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={profileData.username}
+                  onChange={(e) => setProfileData({...profileData, username: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone Number</label>
+                <input
+                  type="tel"
+                  className="form-control"
+                  value={profileData.phone}
+                  onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                />
+              </div>
+          <div className="modal-actions">
+            <Button type="submit" className="btn-red" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Changes'}
+            </Button>
+            <Button type="button" className="btn-outline" onClick={() => setShowEditModal(false)}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Add/Edit Address Modal */}
+      <Modal 
+        isOpen={showModal} 
+        onClose={() => {
+          setShowModal(false);
+          setEditingAddress(null);
+        }} 
+        title={editingAddress ? 'Edit Address' : 'Add New Address'}
+      >
+        <form onSubmit={handleAddAddress}>
               <div className="form-row">
                 <div className="form-col">
                   <div className="form-group">
-                    <label className="form-label" htmlFor="name">Name:</label>
-                    <input type="text" id="name" className="form-control" required />
+                    <label className="form-label" htmlFor="phone">Phone Number *</label>
+                    <input type="tel" name="phone" id="phone" className="form-control" defaultValue={editingAddress?.phone_number} required />
                   </div>
                 </div>
                 <div className="form-col">
                   <div className="form-group">
-                    <label className="form-label" htmlFor="mobile">Mobile No.:</label>
-                    <input type="tel" id="mobile" className="form-control" required pattern="[0-9]{10}" />
-                  </div>
-                </div>
-                <div className="form-col">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="pincode">Pin code:</label>
-                    <input type="text" id="pincode" className="form-control" required />
+                    <label className="form-label" htmlFor="pincode">Pin Code *</label>
+                    <input type="text" name="pincode" id="pincode" className="form-control" defaultValue={editingAddress?.postal_code} required />
                   </div>
                 </div>
               </div>
@@ -190,66 +493,61 @@ const ProfilePage = () => {
               <div className="form-row">
                 <div className="form-col">
                   <div className="form-group">
-                    <label className="form-label" htmlFor="locality">Locality:</label>
-                    <input type="text" id="locality" className="form-control" required />
+                    <label className="form-label" htmlFor="city">City *</label>
+                    <input type="text" name="city" id="city" className="form-control" defaultValue={editingAddress?.city} required />
                   </div>
                 </div>
                 <div className="form-col">
                   <div className="form-group">
-                    <label className="form-label" htmlFor="city">City/District/Town:</label>
-                    <input type="text" id="city" className="form-control" required />
+                    <label className="form-label" htmlFor="state">State *</label>
+                    <input type="text" name="state" id="state" className="form-control" defaultValue={editingAddress?.state} required />
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="address">Address *</label>
+                    <textarea name="address" id="address" className="form-control" rows="3" defaultValue={editingAddress?.address} required></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-col">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="country">Country *</label>
+                    <input type="text" name="country" id="country" className="form-control" defaultValue={editingAddress?.country || 'India'} required />
                   </div>
                 </div>
                 <div className="form-col">
                   <div className="form-group">
-                    <label className="form-label" htmlFor="state">State:</label>
-                    <select id="state" className="form-control" required>
-                      <option value="">Select a state</option>
-                      <option value="State 1">State 1</option>
-                      <option value="State 2">State 2</option>
-                      <option value="State 3">State 3</option>
+                    <label className="form-label" htmlFor="is_default">Set as Default</label>
+                    <select name="is_default" id="is_default" className="form-control" defaultValue={editingAddress?.is_default ? 'true' : 'false'}>
+                      <option value="false">No</option>
+                      <option value="true">Yes</option>
                     </select>
                   </div>
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-col">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="address">Address:</label>
-                    <textarea id="address" className="form-control" required></textarea>
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-col">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="landmark">Landmark (Optional):</label>
-                    <input type="text" id="landmark" className="form-control" />
-                  </div>
-                </div>
-                <div className="form-col">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="alternatePhone">Alternate Phone (Optional):</label>
-                    <input type="tel" id="alternatePhone" className="form-control" pattern="[0-9]{10}" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-col">
-                  <button type="submit" className="btn btn-primary">Save</button>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
-                </div>
-              </div>
-            </form>
+          <div className="modal-actions">
+            <Button type="submit" className="btn-red" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Address'}
+            </Button>
+            <Button type="button" className="btn-outline" onClick={() => {
+              setShowModal(false);
+              setEditingAddress(null);
+            }}>
+              Cancel
+            </Button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
 
       <Footer />
-    </div>
+    </>
   );
 };
 

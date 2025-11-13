@@ -1,8 +1,8 @@
 import React from "react";
 import "../Styles/components/Testimonials.css";
-import img1 from "../assets/img (1).png";
-import img2 from "../assets/img (2).png";
-import img3 from "../assets/img (3).png";
+import img1 from "../assets/img (1).webp";
+import img2 from "../assets/img (2).webp";
+import img3 from "../assets/img (3).webp";
 
 const StarIcon = () => (
   <svg

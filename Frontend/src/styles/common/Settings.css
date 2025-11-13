@@ -1,29 +1,43 @@
-.profile-content {
+.profile-card {
     background: white;
     border-radius: 12px;
     padding: 32px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
 }
 
-.profile-image-section {
+.profile-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 4px 0;
+}
+
+.profile-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.profile-image-container {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 30px;
-    padding: 20px;
-    background: #f9fafb;
-    border-radius: 12px;
+    gap: 32px;
 }
 
 .profile-image-preview {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
     overflow: hidden;
-    border: 4px solid #e5e7eb;
+    border: 3px solid #e5e7eb;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
 .profile-preview-img {
@@ -36,24 +50,37 @@
     width: 100%;
     height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #e5e7eb;
+    background: #f3f4f6;
     color: #9ca3af;
+    gap: 8px;
+}
+
+.profile-placeholder span {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.profile-upload-actions {
+    flex: 1;
 }
 
 .upload-image-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
+    padding: 12px 24px;
     background: linear-gradient(135deg, #DC2626, #991B1B);
     color: white;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 14px;
     transition: all 0.3s;
     border: none;
+    margin-bottom: 8px;
 }
 
 .upload-image-btn:hover {
@@ -61,3 +88,47 @@
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
+.upload-hint {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.profile-field {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.field-icon {
+    position: absolute;
+    left: 12px;
+    top: 38px;
+    color: #DC2626;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.field-icon.disabled {
+    color: #9ca3af;
+}
+
+.profile-field .input-field input {
+    padding-left: 44px;
+}
+
+@media (max-width: 640px) {
+    .profile-image-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .profile-card {
+        padding: 24px;
+    }
+    
+    .profile-content {
+        max-width: 100%;
+    }
+}

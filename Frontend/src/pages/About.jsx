@@ -4,17 +4,17 @@ import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
-import hero from "../assets/aboutbg.png";
-import about from "../assets/we.png";
-import vector2 from "../assets/Vector (22).png";
-import vector3 from "../assets/Vector (18).png";
-import vector4 from "../assets/Vector (24).png";
-import div1 from "../assets/div.png";
-import div2 from "../assets/div (1).png";
-import div3 from "../assets/div (2).png";
-import img1 from "../assets/img (1).png";
-import img2 from "../assets/img (3).png";
-import img3 from "../assets/men.png";
+import hero from "../assets/aboutbg.webp";
+import about from "../assets/we.webp";
+import vector2 from "../assets/Vector (22).webp";
+import vector3 from "../assets/Vector (18).webp";
+import vector4 from "../assets/Vector (24).webp";
+import div1 from "../assets/div.webp";
+import div2 from "../assets/div (1).webp";
+import div3 from "../assets/div (2).webp";
+import img1 from "../assets/img (1).webp";
+import img2 from "../assets/img (3).webp";
+import img3 from "../assets/men.webp";
 
 const About = () => {
   useEffect(() => {

@@ -33,7 +33,6 @@
 }
 
 .footer-links a {
-  font-family: Nunito Sans;
   display: block;
   color: #9CA3AF;
   text-decoration: none;
@@ -54,9 +53,40 @@
   gap: 10px;
   padding-bottom: 15px;
 }
+
+.footer-link {
+  color: #9CA3AF;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 400;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 .footer-social{
   display: flex;
   gap: 20px;
+}
+
+.social-link {
+  color: #9CA3AF;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-link:hover {
+  color: #ffffff;
+  transform: translateY(-3px);
+}
+
+.social-link svg {
+  transition: all 0.3s ease;
 }
 hr{
   color: #1F2937 !important;

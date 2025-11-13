@@ -4,8 +4,8 @@ import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
 import { getAllPublicProducts } from '../services/publicindex';
-import bg from "../assets/Vector 1.png";
-import placeholderImage from "../assets/placeholder-image.png";
+import bg from "../assets/Vector 1.webp";
+import placeholderImage from "../assets/placeholder-image.webp";
 import "../Styles/components/Productcard.css";
 
 const ProductCard = ({ product: propProduct }) => {
