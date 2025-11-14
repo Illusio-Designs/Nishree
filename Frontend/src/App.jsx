@@ -6,29 +6,41 @@ import "react-toastify/dist/ReactToastify.css";
 import { CartProvider } from "./context/CartContext";
 import AppRoutes from "./routes/AppRoutes";
 import Loader from "./components/Loader";
+import { useNotifications } from "./hooks/useNotifications.jsx";
 import "./App.css";
 import "./Styles/index.css";
+
+function AppContent() {
+  // Check for notifications when user visits
+  useNotifications();
+  
+  return (
+    <>
+      <Suspense fallback={<Loader size="large" />}>
+        <AppRoutes />
+      </Suspense>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        limit={3}
+      />
+    </>
+  );
+}
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <CartProvider>
-          <Suspense fallback={<Loader size="large" />}>
-            <AppRoutes />
-          </Suspense>
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss={false}
-            draggable
-            pauseOnHover
-            limit={3}
-          />
+          <AppContent />
         </CartProvider>
       </AuthProvider>
     </Router>

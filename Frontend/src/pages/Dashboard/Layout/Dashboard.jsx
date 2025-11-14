@@ -39,10 +39,8 @@ import Coupons from "../Pages/Coupons";
 import Policies from "../Pages/Policies";
 import Orders from "../Pages/Orders";
 import Reviews from "../Pages/Reviews";
-import OrderStatusHistory from "../Pages/OrderStatusHistory";
 import ShippingFees from "../Pages/ShippingFees";
 import ShippingAddresses from "../Pages/ShippingAddresses";
-import Payments from "../Pages/Payments";
 import Users from "../Pages/Users";
 import SEO from "../Pages/SEO";
 import DashboardOverview from "../Pages/DashboardOverview";
@@ -188,17 +186,6 @@ const Dashboard = () => {
             <span className={!isSidebarOpen ? "hidden" : ""}>Orders</span>
           </Link>
           <Link
-            to="/dashboard/order-status-history"
-            className={`nav-item ${
-              location.pathname === "/dashboard/order-status-history"
-                ? "active"
-                : ""
-            }`}
-          >
-            <HiOutlineClipboardDocumentList className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>Order Status</span>
-          </Link>
-          <Link
             to="/dashboard/coupons"
             className={`nav-item ${
               location.pathname === "/dashboard/coupons" ? "active" : ""
@@ -246,15 +233,6 @@ const Dashboard = () => {
             <span className={!isSidebarOpen ? "hidden" : ""}>
               Shipping Addresses
             </span>
-          </Link>
-          <Link
-            to="/dashboard/payments"
-            className={`nav-item ${
-              location.pathname === "/dashboard/payments" ? "active" : ""
-            }`}
-          >
-            <IoCardOutline className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>Payments</span>
           </Link>
           <Link
             to="/dashboard/seo"
@@ -366,13 +344,11 @@ const Dashboard = () => {
               <Route path="slider" element={<Slider />} />
               <Route path="products" element={<Products />} />
               <Route path="orders" element={<Orders />} />
-              <Route path="order-status-history" element={<OrderStatusHistory />} />
               <Route path="coupons" element={<Coupons />} />
               <Route path="policies" element={<Policies />} />
               <Route path="reviews" element={<Reviews />} />
               <Route path="shipping-fees" element={<ShippingFees />} />
               <Route path="shipping-addresses" element={<ShippingAddresses />} />
-              <Route path="payments" element={<Payments />} />
               <Route path="users" element={<Users />} />
               <Route path="seo" element={<SEO />} />
               <Route path="profile" element={<ProfileSettings type="profile" />} />

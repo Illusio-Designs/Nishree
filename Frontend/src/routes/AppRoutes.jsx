@@ -6,6 +6,7 @@ import Collection from "../pages/Collection";
 import About from "../pages/About";
 import Productinner from "../pages/Productinner";
 import CheckoutPage from "../pages/CheckoutPage";
+import OrderSuccess from "../pages/OrderSuccess";
 import Contact from "../pages/Contact";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import Login from "../pages/Login";
@@ -43,7 +44,16 @@ const AppRoutes = () => {
       <Route path="/collection" element={<Collection />} />
       <Route path="/about" element={<About />} />
       <Route path="/productinner/:id" element={<Productinner />} />
-      <Route path="/checkout" element={<CheckoutPage />} />
+      <Route path="/checkout" element={
+        <ProtectedRoute>
+          <CheckoutPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/order-success/:orderId" element={
+        <ProtectedRoute>
+          <OrderSuccess />
+        </ProtectedRoute>
+      } />
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/login" element={<Login />} />

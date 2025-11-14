@@ -19,6 +19,8 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [addresses, setAddresses] = useState([]);
@@ -298,23 +300,45 @@ const ProfilePage = () => {
                       <p>Loading orders...</p>
                     </div>
                   ) : orders.length > 0 ? (
-                    <div className="orders-list">
+                    <div className="orders-list-minimal">
                       {orders.map(order => (
-                        <div key={order.id} className="order-item">
-                          <div className="order-header-row">
+                        <div key={order.id} className="order-card-minimal">
+                          <div className="order-minimal-header">
                             <div>
-                              <h4>Order #{order.id}</h4>
-                              <p className="order-date">{new Date(order.createdAt).toLocaleDateString()}</p>
+                              <h4>Order #{order.order_number || order.id}</h4>
+                              <p className="order-date-minimal">
+                                {new Date(order.createdAt).toLocaleDateString('en-IN')}
+                              </p>
                             </div>
-                            <span className={`order-status ${order.status?.toLowerCase()}`}>
-                              {order.status}
+                            <span className={`status-badge ${order.payment_status?.toLowerCase()}`}>
+                              {order.payment_status}
                             </span>
                           </div>
-                          <div className="order-details">
-                            <p><strong>Total:</strong> ₹{order.totalAmount}</p>
-                            <p><strong>Items:</strong> {order.items?.length || 0}</p>
+                          <div className="order-minimal-body">
+                            <div className="order-info-row">
+                              <span>Total Amount:</span>
+                              <strong>₹{parseFloat(order.final_amount || 0).toFixed(2)}</strong>
+                            </div>
+                            <div className="order-info-row">
+                              <span>Items:</span>
+                              <span>{order.OrderItems?.length || 0} item(s)</span>
+                            </div>
+                            <div className="order-info-row">
+                              <span>Status:</span>
+                              <span className={`order-status-text ${order.status?.toLowerCase()}`}>
+                                {order.status}
+                              </span>
+                            </div>
                           </div>
-                          <button className="btn-view-order">View Details</button>
+                          <button 
+                            className="btn-view-details"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowOrderModal(true);
+                            }}
+                          >
+                            View Details
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -472,6 +496,87 @@ const ProfilePage = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Order Details Modal */}
+      <Modal
+        isOpen={showOrderModal}
+        onClose={() => {
+          setShowOrderModal(false);
+          setSelectedOrder(null);
+        }}
+        title={`Order #${selectedOrder?.order_number || selectedOrder?.id}`}
+      >
+        {selectedOrder && (
+          <div className="order-modal-content">
+            <div className="order-modal-header">
+              <div className="order-modal-info">
+                <p><strong>Order Date:</strong> {new Date(selectedOrder.createdAt).toLocaleDateString('en-IN', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}</p>
+                <p><strong>Payment Status:</strong> <span className={`payment-status ${selectedOrder.payment_status?.toLowerCase()}`}>{selectedOrder.payment_status}</span></p>
+                <p><strong>Order Status:</strong> <span className={`order-status ${selectedOrder.status?.toLowerCase()}`}>{selectedOrder.status}</span></p>
+              </div>
+            </div>
+
+            <div className="order-modal-products">
+              <h3>Order Items</h3>
+              {selectedOrder.OrderItems && selectedOrder.OrderItems.length > 0 ? (
+                <div className="order-products-list">
+                  {selectedOrder.OrderItems.map((item, index) => {
+                    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                    let imageUrl = 'https://placehold.co/120x120/e2e8f0/1e293b?text=Product';
+                    
+                    if (item.Product?.ProductImages?.[0]?.image_url) {
+                      const imgPath = item.Product.ProductImages[0].image_url;
+                      imageUrl = imgPath.startsWith('http') ? imgPath : `${API_URL}/${imgPath.replace(/^\//, '')}`;
+                    }
+                    
+                    return (
+                      <div key={index} className="order-product-item">
+                        <div className="product-image-container">
+                          <img 
+                            src={imageUrl}
+                            alt={item.Product?.name || 'Product'}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'https://placehold.co/120x120/e2e8f0/1e293b?text=Product';
+                            }}
+                          />
+                        </div>
+                        <div className="product-details-modal">
+                          <h4>{item.Product?.name || 'Product'}</h4>
+                          <p className="product-quantity">Quantity: {item.quantity}</p>
+                          <p className="product-price">₹{parseFloat(item.price || 0).toFixed(2)} each</p>
+                          <p className="product-subtotal">₹{parseFloat(item.subtotal || (item.price * item.quantity) || 0).toFixed(2)}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p>No items found</p>
+              )}
+            </div>
+
+            <div className="order-modal-summary">
+              <div className="summary-row">
+                <span>Subtotal:</span>
+                <span>₹{parseFloat(selectedOrder.total_amount || 0).toFixed(2)}</span>
+              </div>
+              <div className="summary-row">
+                <span>Shipping Fee:</span>
+                <span>₹{parseFloat(selectedOrder.shipping_fee || 0).toFixed(2)}</span>
+              </div>
+              <div className="summary-row total-row">
+                <strong>Total:</strong>
+                <strong>₹{parseFloat(selectedOrder.final_amount || 0).toFixed(2)}</strong>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* Add/Edit Address Modal */}

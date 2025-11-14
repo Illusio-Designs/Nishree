@@ -18,6 +18,7 @@ import attributeRoutes from './attributeRoutes.js';
 import reviewRoutes from './reviewRoutes.js';
 import cartRoutes from './cartRoutes.js';
 import policyRoutes from './policyRoutes.js';
+import notificationRoutes from './notificationRoutes.js';
 
 // Core Routes
 router.use('/users', userRoutes); // This now includes both auth and user routes
@@ -45,6 +46,10 @@ router.use('/cart', cartRoutes);
 
 // Policy routes
 router.use('/policies', policyRoutes);
+
+// Notification routes
+router.use('/notifications', notificationRoutes);
+
 // Health Check Route
 router.get('/health', (req, res) => {
     res.status(200).json({

@@ -765,3 +765,339 @@
     justify-content: center;
   }
 }
+
+/* Enhanced Order Styles */
+.profile-page .order-status-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.profile-page .payment-status {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.profile-page .payment-status.paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.profile-page .payment-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.profile-page .payment-status.failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.profile-page .order-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.profile-page .order-detail-row:last-child {
+  border-bottom: none;
+}
+
+.profile-page .order-detail-row.total {
+  font-size: 16px;
+  color: #1f2937;
+  padding-top: 12px;
+  margin-top: 8px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.profile-page .payment-type {
+  text-transform: capitalize;
+  color: #DC2626;
+  font-weight: 600;
+}
+
+.profile-page .order-items-preview {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.profile-page .order-items-preview h5 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.profile-page .order-item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.profile-page .order-item-row span:first-child {
+  flex: 1;
+  color: #374151;
+}
+
+.profile-page .order-item-row span:nth-child(2) {
+  color: #6b7280;
+  margin: 0 16px;
+}
+
+.profile-page .order-item-row span:last-child {
+  color: #DC2626;
+  font-weight: 600;
+}
+
+/* Minimal Order Design */
+.profile-page .orders-list-minimal {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.profile-page .order-card-minimal {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.profile-page .order-card-minimal:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #DC2626;
+}
+
+.profile-page .order-minimal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.profile-page .order-minimal-header h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.profile-page .order-date-minimal {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.profile-page .status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.profile-page .status-badge.paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.profile-page .status-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.profile-page .order-minimal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.profile-page .order-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #374151;
+}
+
+.profile-page .order-status-text {
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.profile-page .order-status-text.processing {
+  color: #2563eb;
+}
+
+.profile-page .order-status-text.delivered {
+  color: #059669;
+}
+
+.profile-page .order-status-text.cancelled {
+  color: #dc2626;
+}
+
+.profile-page .btn-view-details {
+  width: 100%;
+  padding: 10px;
+  background: #DC2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-page .btn-view-details:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+}
+
+/* Order Modal Styles */
+.order-modal-content {
+  max-height: 70vh;
+  overflow-y: auto;
+  max-width: 600px;
+  scrollbar-width: none;
+}
+
+.order-modal-content .order-modal-header {
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.order-modal-content .order-modal-info p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.order-modal-content .order-modal-products h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.order-modal-content .order-products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.order-modal-content .order-product-item {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 16px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.order-modal-content .product-image-container {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.order-modal-content .product-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.order-modal-content .product-details-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-modal-content .product-details-modal h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.order-modal-content .product-quantity {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.order-modal-content .product-price {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.order-modal-content .product-subtotal {
+  font-size: 18px;
+  color: #1f2937;
+  font-weight: 700;
+  margin: 4px 0 0 0;
+}
+
+.order-modal-content .order-modal-summary {
+  padding-top: 24px;
+  margin-top: 24px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.order-modal-content .summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  font-size: 16px;
+}
+
+.order-modal-content .summary-row span:first-child {
+  color: #DC2626;
+  font-weight: 600;
+}
+
+.order-modal-content .summary-row span:last-child {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.order-modal-content .summary-row.total-row {
+  font-size: 20px;
+  padding-top: 16px;
+  margin-top: 12px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.order-modal-content .summary-row.total-row strong {
+  font-weight: 700;
+}
+

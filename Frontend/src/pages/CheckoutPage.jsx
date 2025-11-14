@@ -1,17 +1,241 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Header from "../components/Header";
 import ProductCard from "../components/Productcard";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 import "../Styles/CheckoutPage.css";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
+import { getAllPublicProducts } from '../services/publicindex';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const CheckoutPage = () => {
-  const { cartItems, updateQuantity, removeFromCart, getCartTotal } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  
+  const [shippingFee, setShippingFee] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [bestSellers, setBestSellers] = useState([]);
+  const [showBestSellersArrows, setShowBestSellersArrows] = useState(false);
+  const bestSellersSliderRef = useRef(null);
+
+  useEffect(() => {
+    if (!user) {
+      toast.error('Please login to checkout');
+      navigate('/login');
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      // Don't redirect, just show empty cart message
+      return;
+    }
+
+    fetchShippingFee();
+    fetchAddresses();
+    fetchBestSellers();
+  }, [user, cartItems]);
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (bestSellersSliderRef.current) {
+        const hasOverflow = bestSellersSliderRef.current.scrollWidth > bestSellersSliderRef.current.clientWidth;
+        setShowBestSellersArrows(hasOverflow);
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [bestSellers]);
+
+  const fetchShippingFee = async () => {
+    try {
+      const response = await api.get('/api/shipping-fees');
+      const prepaidFee = response.data.find(fee => fee.orderType === 'prepaid');
+      if (prepaidFee) {
+        const totalFee = (prepaidFee.fee || 0) + (prepaidFee.weightBasedFee || 0) + (prepaidFee.locationBasedFee || 0);
+        setShippingFee(totalFee);
+      }
+    } catch (error) {
+      console.error('Error fetching shipping fee:', error);
+      setShippingFee(0); // Free shipping if error
+    }
+  };
+
+  const fetchAddresses = async () => {
+    try {
+      const response = await api.get('/api/shipping-addresses');
+      const addressList = response.data.shippingAddresses || [];
+      setAddresses(addressList);
+      
+      const defaultAddr = addressList.find(addr => addr.is_default);
+      if (defaultAddr) {
+        setSelectedAddress(defaultAddr.id);
+      } else if (addressList.length > 0) {
+        setSelectedAddress(addressList[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+    }
+  };
+
+  const fetchBestSellers = async () => {
+    try {
+      const allProductsResponse = await getAllPublicProducts({ limit: 50 });
+      if (allProductsResponse.success && allProductsResponse.data?.products) {
+        const productsWithReviews = allProductsResponse.data.products
+          .filter(p => p.review_count > 0)
+          .sort((a, b) => b.review_count - a.review_count)
+          .slice(0, 10);
+        
+        setBestSellers(productsWithReviews.length > 0 ? productsWithReviews : allProductsResponse.data.products.slice(0, 10));
+      }
+    } catch (error) {
+      console.error('Error fetching best sellers:', error);
+    }
+  };
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleCheckout = async () => {
+    if (!user) {
+      toast.error('Please login to checkout');
+      navigate('/login');
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+
+    if (!selectedAddress && addresses.length === 0) {
+      toast.error('Please add a shipping address in your profile');
+      navigate('/profile');
+      return;
+    }
+
+    if (!selectedAddress) {
+      toast.error('Please select a shipping address');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Load Razorpay script
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        toast.error('Failed to load payment gateway. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Prepare order items
+      const items = cartItems.map(item => ({
+        product_id: item.id,
+        variation_id: item.variation?.id || null,
+        quantity: item.quantity
+      }));
+
+      console.log('Order items being sent:', items);
+
+      // Calculate order total for payment
+      const orderTotal = subtotal + deliveryFee;
+
+      // DON'T create order yet - only create after successful payment
+      // For now, show a message that payment gateway is not configured
+      toast.info('Payment gateway is being configured. Order will be created after successful payment.');
+      setLoading(false);
+      return;
+
+      // TODO: Uncomment below when Razorpay is configured
+      /*
+      // Create Razorpay payment first
+      const paymentResponse = await api.post('/api/payments/create-razorpay-order', {
+        amount: orderTotal,
+        items: items,
+        shipping_address_id: selectedAddress
+      });
+
+      const { razorpay_order_id, amount, currency, key_id } = paymentResponse.data;
+
+      // Razorpay options
+      const options = {
+        key: key_id,
+        amount: amount,
+        currency: currency,
+        name: 'Nishree',
+        description: 'Order Payment',
+        order_id: razorpay_order_id,
+        handler: async function (response) {
+          try {
+            // Verify payment and CREATE order only after successful payment
+            const verifyResponse = await api.post('/api/payments/verify-razorpay-payment', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              amount: orderTotal,
+              items: items,
+              shipping_address_id: selectedAddress
+            });
+
+            if (verifyResponse.data.success) {
+              clearCart();
+              toast.success('Order placed successfully!');
+              navigate(`/order-success/${verifyResponse.data.order.id}`);
+            } else {
+              toast.error('Payment verification failed');
+            }
+          } catch (error) {
+            toast.error('Payment verification failed');
+            console.error('Payment verification error:', error);
+          }
+        },
+        prefill: {
+          name: user.username,
+          email: user.email,
+          contact: user.phone || ''
+        },
+        theme: {
+          color: '#dc2626'
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+            toast.info('Payment cancelled');
+          }
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+      setLoading(false);
+      */
+
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      toast.error(error.response?.data?.message || 'Failed to process checkout');
+      setLoading(false);
+    }
+  };
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://placehold.co/100x100/e2e8f0/1e293b?text=Product';
@@ -31,7 +255,7 @@ const CheckoutPage = () => {
   };
 
   const subtotal = getCartTotal();
-  const deliveryFee = 50;
+  const deliveryFee = shippingFee;
   const total = subtotal + deliveryFee;
 
   return (
@@ -47,8 +271,8 @@ const CheckoutPage = () => {
             <p className="section-title">3. REVIEW & PAYMENT</p>
           </div>
           <div className="checkout">
-            {/* Left - Cart Items */}
-            <div>
+            {/* Left - Cart Items & Address Selection */}
+            <div className="checkout-left-section">
               {cartItems.length === 0 ? (
                 <div className="empty-cart">
                   <p>Your cart is empty</p>
@@ -112,6 +336,50 @@ const CheckoutPage = () => {
                   </button>
                 </>
               )}
+
+              {/* Shipping Address Section */}
+              {cartItems.length > 0 && (
+                <div className="shipping-address-section">
+                  <h2 className="section-heading">Select Shipping Address</h2>
+                  
+                  {addresses.length > 0 ? (
+                    <div className="address-list">
+                      {addresses.map(address => (
+                        <div 
+                          key={address.id} 
+                          className={`address-card ${selectedAddress === address.id ? 'selected' : ''}`}
+                          onClick={() => setSelectedAddress(address.id)}
+                        >
+                          <input 
+                            type="radio" 
+                            name="address" 
+                            checked={selectedAddress === address.id}
+                            onChange={() => setSelectedAddress(address.id)}
+                          />
+                          <div className="address-details">
+                            <h4>Shipping Address</h4>
+                            <p>{address.address}</p>
+                            <p>{address.city}, {address.state} - {address.postal_code}</p>
+                            <p>{address.country}</p>
+                            <p>Phone: {address.phone_number}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-address">
+                      <p>No shipping address found. Please add one to continue.</p>
+                    </div>
+                  )}
+                  
+                  <button 
+                    className="add-address-btn"
+                    onClick={() => navigate('/profile')}
+                  >
+                    + Add New Address
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Right - Order Summary */}
@@ -133,13 +401,17 @@ const CheckoutPage = () => {
                   </p>
                 </div>
                 <div className="shipping-info">
-                  <p>Estimated shipping time: 2 days</p>
+                  <p>Estimated shipping time: 5-7 days</p>
+                  <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                    Payment: Prepaid (Online Payment Only)
+                  </p>
                 </div>
                 <button 
                   className="checkout-btn"
-                  disabled={cartItems.length === 0}
+                  disabled={cartItems.length === 0 || loading}
+                  onClick={handleCheckout}
                 >
-                  CHECK OUT
+                  {loading ? 'PROCESSING...' : 'CHECK OUT'}
                 </button>
               </div>
               <div className="payment-types">
@@ -248,14 +520,48 @@ const CheckoutPage = () => {
           </div>
         </div>
 
-        <div className="products">
-          <div className="products-heading">
-            <h1>
-              <span>Our</span> Best Seller
-            </h1>
+        {bestSellers.length > 0 && (
+          <div className="products">
+            <div className="products-heading">
+              <h1>
+                <span>Our</span> Best Seller
+              </h1>
+            </div>
+            <div className="product-slider-wrapper">
+              {showBestSellersArrows && (
+                <button 
+                  className="slider-arrow slider-arrow-left" 
+                  onClick={() => {
+                    if (bestSellersSliderRef.current) {
+                      bestSellersSliderRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <FaChevronLeft />
+                </button>
+              )}
+              <div className="product-slider" ref={bestSellersSliderRef}>
+                {bestSellers.map((product) => (
+                  <div key={product.id} className="product-slider-item">
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+              {showBestSellersArrows && (
+                <button 
+                  className="slider-arrow slider-arrow-right" 
+                  onClick={() => {
+                    if (bestSellersSliderRef.current) {
+                      bestSellersSliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <FaChevronRight />
+                </button>
+              )}
+            </div>
           </div>
-          <ProductCard />
-        </div>
+        )}
       </div>
       <Newsletter />
       <Footer />

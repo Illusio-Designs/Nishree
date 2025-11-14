@@ -3,12 +3,14 @@ import { OrderItem } from '../model/orderItemModel.js';
 import { OrderStatusHistory } from '../model/orderStatusHistoryModel.js';
 import { Product } from '../model/productModel.js';
 import { ProductVariation } from '../model/productVariationModel.js';
+import { ProductImage } from '../model/productImageModel.js';
 import { ShippingAddress } from '../model/shippingAddressModel.js';
 import { ShippingFee } from '../model/shippingFeeModel.js';
 import { Payment } from '../model/paymentModel.js';
 import { User } from '../model/userModel.js';
 import { Op } from 'sequelize';
 import { sequelize } from '../config/db.js';
+import { createNotification } from './notificationController.js';
 
 // Generate unique order number
 const generateOrderNumber = () => {
@@ -24,13 +26,13 @@ const generateOrderNumber = () => {
 const calculateShippingFee = async (paymentType) => {
     try {
         const orderType = paymentType === 'cod' ? 'cod' : 'prepaid';
-        const shippingFee = await ShippingFee.findOne({ where: { order_type: orderType } });
+        const shippingFee = await ShippingFee.findOne({ where: { orderType: orderType } });
         return shippingFee ? 
-            (shippingFee.fee + shippingFee.weight_based_fee + shippingFee.location_based_fee) : 
-            (orderType === 'cod' ? 5.99 : 0.00);
+            (parseFloat(shippingFee.fee) + parseFloat(shippingFee.weightBasedFee) + parseFloat(shippingFee.locationBasedFee)) : 
+            0.00; // Default to 0 for prepaid orders
     } catch (error) {
         console.error('Error calculating shipping fee:', error);
-        return orderType === 'cod' ? 5.99 : 0.00; // Default values if calculation fails
+        return 0.00; // Default to 0 if calculation fails
     }
 };
 
@@ -205,7 +207,19 @@ export const getAllOrders = async (req, res) => {
                 { model: User, attributes: ['id', 'username', 'email'] },
                 { 
                     model: OrderItem, 
-                    include: [{ model: Product, as: 'Product' }] 
+                    include: [
+                        { 
+                            model: Product, 
+                            as: 'Product',
+                            include: [
+                                { 
+                                    model: ProductImage, 
+                                    as: 'ProductImages',
+                                    limit: 1
+                                }
+                            ]
+                        }
+                    ] 
                 }
             ],
             order: [['createdAt', 'DESC']],
@@ -248,7 +262,19 @@ export const getUserOrders = async (req, res) => {
             include: [
                 { 
                     model: OrderItem, 
-                    include: [{ model: Product, as: 'Product' }] 
+                    include: [
+                        { 
+                            model: Product, 
+                            as: 'Product',
+                            include: [
+                                { 
+                                    model: ProductImage, 
+                                    as: 'ProductImages',
+                                    limit: 1
+                                }
+                            ]
+                        }
+                    ] 
                 }
             ],
             order: [['createdAt', 'DESC']],
@@ -368,6 +394,23 @@ export const updateOrderStatus = async (req, res) => {
                 { model: Payment }
             ]
         });
+        
+        // Create notification for user
+        const statusMessages = {
+            'pending': 'Your order is pending confirmation',
+            'processing': 'Your order is being processed',
+            'shipped': 'Your order has been shipped',
+            'delivered': 'Your order has been delivered',
+            'cancelled': 'Your order has been cancelled'
+        };
+        
+        await createNotification(
+            order.user_id,
+            order.id,
+            `order_${status}`,
+            `Order ${order.order_number} - ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+            statusMessages[status] || `Your order status has been updated to ${status}`
+        );
         
         res.json({
             message: 'Order status updated successfully',
