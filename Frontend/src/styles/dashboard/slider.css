@@ -76,7 +76,7 @@
     background-color: #fff;
 }
 
-.slider-arrow {
+.slider .slider-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);

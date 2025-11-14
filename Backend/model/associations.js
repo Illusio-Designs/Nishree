@@ -9,7 +9,6 @@ import { AttributeValue } from './attributeValueModel.js';
 import { ProductImage } from './productImageModel.js';
 import { ProductSEO } from './productSEOModel.js';
 import { Coupon } from './couponModel.js';
-import { Wishlist } from './wishlistModel.js';
 import { Cart } from './cartModel.js';
 import { CartItem } from './cartItemModel.js';
 import { Order } from './orderModel.js';
@@ -35,7 +34,6 @@ export {
     ProductImage,
     ProductSEO,
     Coupon,
-    Wishlist,
     Cart,
     CartItem,
     Order,
@@ -64,9 +62,6 @@ Order.belongsTo(User, {
 
 User.hasMany(Review, { foreignKey: 'userId' });
 Review.belongsTo(User, { foreignKey: 'userId' });
-
-User.hasMany(Wishlist, { foreignKey: 'userId' });
-Wishlist.belongsTo(User, { foreignKey: 'userId' });
 
 User.hasOne(Cart, { 
     foreignKey: 'user_id',

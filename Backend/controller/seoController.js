@@ -113,7 +113,7 @@ export const uploadImage = async (req, res) => {
 // Get SEO data for a specific page
 export const getSEOData = async (req, res) => {
     try {
-        const { page_name } = req.params;
+        const { page_name } = req.query;
         
         if (!page_name) {
             return res.status(400).json({ message: 'Page name is required' });
@@ -124,10 +124,16 @@ export const getSEOData = async (req, res) => {
         });
 
         if (!seoData) {
-            return res.status(404).json({ message: 'SEO data not found' });
+            return res.status(404).json({ 
+                message: 'SEO data not found',
+                seo: null 
+            });
         }
 
-        res.json(seoData);
+        res.json({ 
+            success: true,
+            seo: seoData 
+        });
     } catch (error) {
         console.error('Error getting SEO data:', error);
         res.status(500).json({ message: 'Failed to get SEO data', error: error.message });

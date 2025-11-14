@@ -13,11 +13,11 @@ const CartPopup = ({ onClose }) => {
     if (!imagePath) {
       return 'https://placehold.co/80x80/e2e8f0/1e293b?text=Product';
     }
-    
+
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
-    
+
     const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
     return `${API_BASE_URL}/${cleanPath}`;
   };
@@ -38,8 +38,6 @@ const CartPopup = ({ onClose }) => {
   };
 
   const subtotal = getCartTotal();
-  const deliveryFee = 50;
-  const total = subtotal + deliveryFee;
 
   console.log('=== CART POPUP ===');
   console.log('Cart items:', cartItems);
@@ -71,8 +69,8 @@ const CartPopup = ({ onClose }) => {
           <div className="cart-items-list">
             {cartItems.map((item) => (
               <div className="cart-item" key={item.uniqueKey}>
-                <img 
-                  src={getImageUrl(item.image)} 
+                <img
+                  src={getImageUrl(item.image)}
                   alt={item.name}
                   onError={(e) => {
                     e.target.onerror = null;
@@ -84,7 +82,7 @@ const CartPopup = ({ onClose }) => {
                   <p className="item-weight">
                     {item.variation?.weight || 0}{item.variation?.weightUnit || 'g'}
                   </p>
-                  <button 
+                  <button
                     className="remove-btn"
                     onClick={() => handleRemove(item.uniqueKey)}
                   >
@@ -93,14 +91,14 @@ const CartPopup = ({ onClose }) => {
                 </div>
                 <div>
                   <div className="cart-item-quantity">
-                    <button 
+                    <button
                       className="quantity-btn"
                       onClick={() => handleQuantityChange(item.uniqueKey, item.quantity - 1)}
                     >
                       −
                     </button>
                     <div className="quantity-value">{item.quantity}</div>
-                    <button 
+                    <button
                       className="quantity-btn"
                       onClick={() => handleQuantityChange(item.uniqueKey, item.quantity + 1)}
                     >
@@ -116,18 +114,10 @@ const CartPopup = ({ onClose }) => {
           </div>
 
           <div className="summary">
-            <div className="summary-row">
-              <p>Subtotal</p>
-              <p style={{ fontFamily: "Montserrat" }}>₹{subtotal.toFixed(2)}</p>
-            </div>
-            <div className="summary-row">
-              <p>Delivery</p>
-              <p style={{ fontFamily: "Montserrat" }}>₹{deliveryFee.toFixed(2)}</p>
-            </div>
             <div className="summary-row total">
-              <p>Total</p>
+              <p>Subtotal</p>
               <strong style={{ fontFamily: "Montserrat", fontSize: "20px" }}>
-                ₹{total.toFixed(2)}
+                ₹{subtotal.toFixed(2)}
               </strong>
             </div>
           </div>

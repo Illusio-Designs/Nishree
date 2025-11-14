@@ -54,8 +54,6 @@ const Productinner = () => {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [reviewFiles, setReviewFiles] = useState([]);
-  const [reviewName, setReviewName] = useState('');
-  const [reviewEmail, setReviewEmail] = useState('');
   const [activeTab, setActiveTab] = useState('about'); // 'about' or 'reviews'
   const [showReviewForm, setShowReviewForm] = useState(false);
 
@@ -379,101 +377,71 @@ const Productinner = () => {
     setSubmittingReview(true);
 
     try {
-        console.log('Starting review submission...');
-        console.log('Product object:', product);
-        console.log('Product ID from params:', id);
-        console.log('Product ID from object:', product?.id);
-        console.log('Review Rating:', reviewRating);
-        console.log('Review Text:', reviewText);
-        console.log('User:', user);
-        console.log('Review Name:', reviewName);
-        console.log('Review Email:', reviewEmail);
-        console.log('Review Files:', reviewFiles);
+        // Check if user is logged in
+        if (!user) {
+            toast.error('Please login to submit a review');
+            setSubmittingReview(false);
+            return;
+        }
 
         // Validate required fields
-        if (!product?.id) {
-            console.error('Product ID is missing');
+        if (!product?.id && !id) {
             toast.error('Product information is missing. Please refresh the page and try again.');
             setSubmittingReview(false);
             return;
         }
 
         if (!reviewRating || reviewRating < 1 || reviewRating > 5) {
-            console.error('Invalid rating');
             toast.error('Please provide a valid rating (1-5)');
             setSubmittingReview(false);
             return;
         }
 
         if (!reviewText?.trim()) {
-            console.error('Review text is missing');
             toast.error('Please provide your review text');
             setSubmittingReview(false);
             return;
         }
 
         const formData = new FormData();
-        // Use the ID from the URL params if product.id is not available
         const productId = product?.id || id;
-        console.log('Using product ID:', productId);
         
         formData.append('productId', productId);
         formData.append('rating', reviewRating);
         formData.append('comment', reviewText);
-        
-        // Use user data if logged in, otherwise use form data
-        if (user) {
-            console.log('Using logged-in user data');
-            formData.append('name', user.username);
-            formData.append('email', user.email);
-        } else {
-            console.log('Using guest user data');
-            if (!reviewName?.trim() || !reviewEmail?.trim()) {
-                console.error('Missing name or email for guest review');
-                toast.error('Please provide your name and email');
-                setSubmittingReview(false);
-                return;
-            }
-            formData.append('name', reviewName);
-            formData.append('email', reviewEmail);
-        }
+        formData.append('name', user.username);
+        formData.append('email', user.email);
 
         // Append files if any
         if (reviewFiles.length > 0) {
-            console.log('Appending review files:', reviewFiles.length);
             reviewFiles.forEach(file => {
                 formData.append('files', file);
             });
         }
 
-        // Log the final FormData contents
-        console.log('FormData contents:');
-        for (let pair of formData.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
-        }
-
-        console.log('Sending review submission request...');
         const response = await createPublicReview(formData);
-        console.log('Review submission response:', response);
         
         if (response.success) {
-            console.log('Review submitted successfully');
             toast.success('Review submitted successfully! It will be visible after approval.');
             setReviewRating(0);
             setReviewText('');
             setReviewFiles([]);
-            setReviewName('');
-            setReviewEmail('');
-            fetchReviews(); // Refresh reviews
+            setShowReviewForm(false);
+            fetchReviews();
+        } else {
+            toast.error(response.message || 'Failed to submit review');
         }
     } catch (error) {
         console.error('Error submitting review:', error);
-        console.error('Error details:', {
-            message: error.message,
-            response: error.response?.data,
-            status: error.response?.status
-        });
-        toast.error(error.response?.data?.message || 'Error submitting review');
+        
+        // Handle different error scenarios
+        if (error.response?.data?.message) {
+            toast.error(error.response.data.message);
+        } else if (error.message) {
+            toast.error(error.message);
+        } else {
+            toast.error('Failed to submit review. Please try again.');
+        }
     } finally {
         setSubmittingReview(false);
     }
@@ -743,12 +711,24 @@ const Productinner = () => {
               <div className="tab-panel reviews-panel">
                 <div className="reviews-header">
                   <h2>Customer Reviews</h2>
-                  <button 
-                    className="add-review-btn"
-                    onClick={() => setShowReviewForm(!showReviewForm)}
-                  >
-                    {showReviewForm ? 'Cancel' : 'Write a Review'}
-                  </button>
+                  {user ? (
+                    <button 
+                      className="add-review-btn"
+                      onClick={() => setShowReviewForm(!showReviewForm)}
+                    >
+                      {showReviewForm ? 'Cancel' : 'Write a Review'}
+                    </button>
+                  ) : (
+                    <button 
+                      className="add-review-btn"
+                      onClick={() => {
+                        toast.info('Please login to write a review');
+                        navigate('/login');
+                      }}
+                    >
+                      Login to Review
+                    </button>
+                  )}
                 </div>
 
                 {reviewStats && (
@@ -885,18 +865,6 @@ const Productinner = () => {
                             )}
                           </div>
                           <p className="review-text">{review.review}</p>
-                          {review.ReviewImages && review.ReviewImages.length > 0 && (
-                            <div className="review-images">
-                              {review.ReviewImages.map((image) => (
-                                <img 
-                                  key={image.id} 
-                                  src={getReviewImageUrl(image.file_name)} 
-                                  alt="Review" 
-                                  className="review-image"
-                                />
-                              ))}
-                            </div>
-                          )}
                           <p className="review-date">
                             {new Date(review.createdAt).toLocaleDateString()}
                           </p>

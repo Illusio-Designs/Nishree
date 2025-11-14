@@ -170,6 +170,7 @@ const Testimonials = () => {
                   </div>
                 </div>
                 <p className="testimonial-text">"{review.review}"</p>
+                
                 {review.verified_purchase && (
                   <span className="verified-badge-testimonial">✓ Verified Purchase</span>
                 )}

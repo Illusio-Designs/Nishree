@@ -6,8 +6,6 @@ import CartPopup from "./CartPopup";
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
-import { FaShoppingCart, FaHeart, FaUser, FaSearch } from 'react-icons/fa';
 
 const Header = () => {
   const location = useLocation();
@@ -19,7 +17,6 @@ const Header = () => {
 
   const { user, logout } = useAuth();
   const { cartItems } = useCart();
-  const { wishlistItems } = useWishlist();
 
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);

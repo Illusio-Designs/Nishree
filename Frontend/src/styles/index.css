@@ -21,15 +21,6 @@
   transform: translateY(0);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-span {
-  font-family: 'Playfair Display', serif;
-}
-
 p,
 a {
   font-family: 'Nunito Sans', sans-serif;

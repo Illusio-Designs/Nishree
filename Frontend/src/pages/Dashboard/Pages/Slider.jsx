@@ -79,14 +79,20 @@ const Slider = () => {
       formDataToSend.append('buttonText', formData.buttonText || '');
       formDataToSend.append('status', formData.status);
       
-      // Handle categoryId
-      if (formData.categoryId) {
+      // Handle categoryId - only append if it has a value
+      if (formData.categoryId && formData.categoryId !== '') {
         formDataToSend.append('categoryId', formData.categoryId);
       }
       
       // Handle image
       if (formData.image instanceof File) {
         formDataToSend.append('image', formData.image);
+      }
+      
+      // Debug log to verify data being sent
+      console.log('Form data being sent:');
+      for (let pair of formDataToSend.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
       }
       
       if (modalMode === 'add') {

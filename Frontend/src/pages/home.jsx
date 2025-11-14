@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
+import { Helmet } from "react-helmet-async";
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Header from "../components/Header";
 import "../Styles/Home.css";
 import about from "../assets/img.webp";
@@ -12,8 +14,9 @@ import Testimonials from "../components/Testimonials";
 import BlogCard from "../components/BlogCard";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
-import { getPublicSliders } from '../services/publicindex';
+import { getPublicSliders, getAllPublicProducts } from '../services/publicindex';
 import Loader from "../components/Loader";
+import { useSEO } from "../hooks/useSEO";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -22,14 +25,20 @@ const Home = () => {
   const [sliders, setSliders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [showProductsArrows, setShowProductsArrows] = useState(false);
   const backgroundRef = useRef(null);
   const wrapperRef = useRef(null);
   const titleRef = useRef(null);
+  const productsSliderRef = useRef(null);
+  const { seoData } = useSEO('home');
 
   useEffect(() => {
-    const fetchSliders = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
+        
+        // Fetch sliders
         const data = await getPublicSliders();
         console.log('Fetched sliders data:', data);
         
@@ -69,15 +78,22 @@ const Home = () => {
         
         console.log('Sliders with full URLs:', slidersWithFullUrls);
         setSliders(slidersWithFullUrls);
+        
+        // Fetch products (first 10)
+        const productsResponse = await getAllPublicProducts({ limit: 10 });
+        if (productsResponse.success && productsResponse.data?.products) {
+          setProducts(productsResponse.data.products);
+        }
+        
       } catch (err) {
-        console.error('Error fetching sliders:', err);
+        console.error('Error fetching data:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSliders();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -144,8 +160,29 @@ const Home = () => {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (productsSliderRef.current) {
+        const hasOverflow = productsSliderRef.current.scrollWidth > productsSliderRef.current.clientWidth;
+        setShowProductsArrows(hasOverflow);
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [products]);
+
   return (
     <>
+      <Helmet>
+        <title>{seoData?.metaTitle || 'Nishree - Premium Spices & Masalas'}</title>
+        <meta name="description" content={seoData?.metaDescription || 'Discover authentic Indian spices and masalas at Nishree. Premium quality products for your kitchen.'} />
+        {seoData?.metaKeywords && <meta name="keywords" content={seoData.metaKeywords} />}
+        {seoData?.ogTitle && <meta property="og:title" content={seoData.ogTitle} />}
+        {seoData?.ogDescription && <meta property="og:description" content={seoData.ogDescription} />}
+        {seoData?.ogImage && <meta property="og:image" content={seoData.ogImage} />}
+      </Helmet>
       <Header />
       <div className="hero-section section">
         {loading ? (
@@ -233,7 +270,39 @@ const Home = () => {
               <span>Our</span> products
             </h1>
           </div>
-          <ProductCard />
+          <div className="product-slider-wrapper">
+            {showProductsArrows && (
+              <button 
+                className="slider-arrow slider-arrow-left" 
+                onClick={() => {
+                  if (productsSliderRef.current) {
+                    productsSliderRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+                  }
+                }}
+              >
+                <FaChevronLeft />
+              </button>
+            )}
+            <div className="product-slider" ref={productsSliderRef}>
+              {products.map((product) => (
+                <div key={product.id} className="product-slider-item">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+            {showProductsArrows && (
+              <button 
+                className="slider-arrow slider-arrow-right" 
+                onClick={() => {
+                  if (productsSliderRef.current) {
+                    productsSliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+                  }
+                }}
+              >
+                <FaChevronRight />
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <div className="whychooseus section">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from "react-helmet-async";
 import { FaUser, FaEdit, FaBox, FaMapMarkerAlt, FaSignOutAlt, FaTrash, FaPlus } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,8 +12,10 @@ import Button from '../components/common/Button';
 import { orderService, shippingAddressService } from '../services';
 import "../Styles/Profile.css";
 import "../Styles/common/Form.css";
+import { useSEO } from "../hooks/useSEO";
 
 const ProfilePage = () => {
+  const { seoData } = useSEO('account');
   const [activeTab, setActiveTab] = useState('profile');
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -203,6 +206,12 @@ const ProfilePage = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{seoData?.meta_title || 'My Account - Nishree'}</title>
+        <meta name="description" content={seoData?.meta_description || 'Manage your account, orders, and addresses.'} />
+        {seoData?.meta_keywords && <meta name="keywords" content={seoData.meta_keywords} />}
+        {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
+      </Helmet>
       <Header />
       <div className="background section">
         <div className="profile-page">

@@ -281,65 +281,159 @@ export const getProduct = async (req, res) => {
 
 // Update product
 export const updateProduct = async (req, res) => {
+    const transaction = await sequelize.transaction();
+    
     try {
         const { id } = req.params;
-        const updateData = req.body;
+        const { name, description, status, categoryId, variations, seo, imagesToDelete } = req.body;
 
-        const product = await Product.findByPk(id);
+        console.log('Update Product Request:', { id, name, categoryId, variations, seo, imagesToDelete });
+
+        const product = await Product.findByPk(id, { transaction });
         if (!product) {
+            await transaction.rollback();
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Handle main image update
-        if (req.file) {
-            try {
-                updateData.image = await imageHandler.handleProductImage(
-                    product.image,
-                    req.file.path,
-                    product.id
-                );
-            } catch (error) {
-                console.error('Error handling product image update:', error);
-                return res.status(500).json({ 
-                    success: false,
-                    message: 'Failed to process image',
-                    error: error.message 
+        // Handle image deletion
+        if (imagesToDelete) {
+            const imageIds = typeof imagesToDelete === 'string' ? JSON.parse(imagesToDelete) : imagesToDelete;
+            
+            if (Array.isArray(imageIds) && imageIds.length > 0) {
+                // Get images to delete
+                const imagesToRemove = await ProductImage.findAll({
+                    where: { 
+                        id: imageIds,
+                        product_id: id 
+                    },
+                    transaction
+                });
+
+                // Delete image files
+                for (const image of imagesToRemove) {
+                    if (image.image_url) {
+                        await imageHandler.deleteImage(image.image_url);
+                    }
+                }
+
+                // Delete from database
+                await ProductImage.destroy({
+                    where: { 
+                        id: imageIds,
+                        product_id: id 
+                    },
+                    transaction
                 });
             }
         }
 
-        // Handle gallery images if provided
-        if (req.files && req.files.gallery) {
-            try {
-                const galleryImages = await Promise.all(
-                    req.files.gallery.map((file, index) => 
-                        imageHandler.handleProductGalleryImage(
-                            product.gallery?.[index],
-                            file.path,
-                            product.id,
-                            index
-                        )
-                    )
-                );
-                updateData.gallery = galleryImages;
-            } catch (error) {
-                console.error('Error handling product gallery update:', error);
-                return res.status(500).json({ 
-                    success: false,
-                    message: 'Failed to process gallery images',
-                    error: error.message 
-                });
+        // Update basic product info
+        await product.update({
+            name,
+            description,
+            status,
+            categoryId
+        }, { transaction });
+
+        // Handle variations
+        if (variations) {
+            const variationsData = typeof variations === 'string' ? JSON.parse(variations) : variations;
+            
+            // Delete existing variations
+            await ProductVariation.destroy({
+                where: { productId: id },
+                transaction
+            });
+
+            // Create new variations
+            for (const variation of variationsData) {
+                await ProductVariation.create({
+                    productId: id,
+                    sku: variation.sku,
+                    price: variation.price,
+                    comparePrice: variation.comparePrice,
+                    stock: variation.stock,
+                    weight: variation.weight,
+                    weightUnit: variation.weightUnit,
+                    dimensions: typeof variation.dimensions === 'string' ? variation.dimensions : JSON.stringify(variation.dimensions),
+                    dimensionUnit: variation.dimensionUnit,
+                    attributes: typeof variation.attributes === 'string' ? variation.attributes : JSON.stringify(variation.attributes)
+                }, { transaction });
             }
         }
 
-        await product.update(updateData);
+        // Handle SEO data
+        if (seo) {
+            const seoData = typeof seo === 'string' ? JSON.parse(seo) : seo;
+            
+            const existingSEO = await ProductSEO.findOne({
+                where: { product_id: id },
+                transaction
+            });
+
+            if (existingSEO) {
+                await existingSEO.update({
+                    metaTitle: seoData.metaTitle,
+                    metaDescription: seoData.metaDescription,
+                    metaKeywords: seoData.metaKeywords,
+                    ogTitle: seoData.ogTitle,
+                    ogDescription: seoData.ogDescription,
+                    ogImage: seoData.ogImage
+                }, { transaction });
+            } else {
+                await ProductSEO.create({
+                    product_id: id,
+                    metaTitle: seoData.metaTitle,
+                    metaDescription: seoData.metaDescription,
+                    metaKeywords: seoData.metaKeywords,
+                    ogTitle: seoData.ogTitle,
+                    ogDescription: seoData.ogDescription,
+                    ogImage: seoData.ogImage
+                }, { transaction });
+            }
+        }
+
+        // Handle images
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const result = await imageHandler.processImage(file.path, {
+                    width: 800,
+                    height: 800,
+                    quality: 85,
+                    format: 'webp',
+                    filename: `product-${id}-${Date.now()}`,
+                    type: 'product'
+                });
+
+                if (result.success) {
+                    await ProductImage.create({
+                        product_id: id,
+                        image_url: `/uploads/products/${result.filename}`,
+                        alt_text: name,
+                        is_primary: false
+                    }, { transaction });
+                }
+            }
+        }
+
+        await transaction.commit();
+
+        // Fetch updated product with all relations
+        const updatedProduct = await Product.findByPk(id, {
+            include: [
+                { model: ProductVariation, as: 'ProductVariations' },
+                { model: ProductImage, as: 'ProductImages' },
+                { model: ProductSEO, as: 'ProductSEO' }
+            ]
+        });
         
         res.json({ 
             success: true, 
             message: 'Product updated successfully', 
-            data: product 
+            data: updatedProduct 
         });
     } catch (error) {
+        await transaction.rollback();
         console.error('Error updating product:', error);
         res.status(500).json({ 
             success: false,

@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Helmet } from "react-helmet-async";
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
@@ -13,11 +15,15 @@ import vector4 from "../assets/Vector (23).webp";
 import vector5 from "../assets/Vector (24).webp";
 import "../Styles/Product.css"
 import Loader from "../components/Loader";
+import { useSEO } from "../hooks/useSEO";
 
 const Product = () => {
+  const { seoData } = useSEO('products');
   const [searchParams] = useSearchParams();
   const [category, setCategory] = useState(null);
   const [products, setProducts] = useState([]);
+  const [bestSellers, setBestSellers] = useState([]);
+  const [showBestSellersArrows, setShowBestSellersArrows] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
@@ -26,6 +32,7 @@ const Product = () => {
     total: 0
   });
   const categoryId = searchParams.get('category');
+  const bestSellersSliderRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,6 +66,19 @@ const Product = () => {
           throw new Error(response.message || 'Failed to fetch products');
         }
         
+        // Fetch best sellers (products with reviews, or first 3)
+        if (!categoryId) {
+          const allProductsResponse = await getAllPublicProducts({ limit: 50 });
+          if (allProductsResponse.success && allProductsResponse.data?.products) {
+            const productsWithReviews = allProductsResponse.data.products
+              .filter(p => p.review_count > 0)
+              .sort((a, b) => b.review_count - a.review_count)
+              .slice(0, 10);
+            
+            setBestSellers(productsWithReviews.length > 0 ? productsWithReviews : allProductsResponse.data.products.slice(0, 3));
+          }
+        }
+        
         setLoading(false);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -88,8 +108,27 @@ const Product = () => {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (bestSellersSliderRef.current) {
+        const hasOverflow = bestSellersSliderRef.current.scrollWidth > bestSellersSliderRef.current.clientWidth;
+        setShowBestSellersArrows(hasOverflow);
+      }
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [bestSellers]);
+
   return (
     <>
+      <Helmet>
+        <title>{seoData?.meta_title || 'Products - Nishree'}</title>
+        <meta name="description" content={seoData?.meta_description || 'Browse our collection of premium spices and masalas.'} />
+        {seoData?.meta_keywords && <meta name="keywords" content={seoData.meta_keywords} />}
+        {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
+      </Helmet>
       <Header />
       <div className="hero-section section">
         <div className="hero-img-section">
@@ -151,15 +190,45 @@ const Product = () => {
             <div className="no-products">No products found</div>
           )}
         </div>
-        {!category && (
+        {!category && bestSellers.length > 0 && (
           <div className="products">
             <div className="products-heading">
               <h1>
                 <span>Our</span> Best Seller 
               </h1>
             </div>
-            <div className="products-grid">
-              <ProductCard />
+            <div className="product-slider-wrapper">
+              {showBestSellersArrows && (
+                <button 
+                  className="slider-arrow slider-arrow-left" 
+                  onClick={() => {
+                    if (bestSellersSliderRef.current) {
+                      bestSellersSliderRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <FaChevronLeft />
+                </button>
+              )}
+              <div className="product-slider" ref={bestSellersSliderRef}>
+                {bestSellers.map((product) => (
+                  <div key={product.id} className="product-slider-item">
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+              {showBestSellersArrows && (
+                <button 
+                  className="slider-arrow slider-arrow-right" 
+                  onClick={() => {
+                    if (bestSellersSliderRef.current) {
+                      bestSellersSliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <FaChevronRight />
+                </button>
+              )}
             </div>
           </div>
         )}

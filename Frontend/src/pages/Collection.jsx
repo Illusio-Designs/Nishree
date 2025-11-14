@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
@@ -12,8 +13,10 @@ import vector5 from "../assets/Vector (24).webp";
 import { getPublicCategories } from "../services/publicindex";
 import "../Styles/Collection.css";
 import Loader from "../components/Loader";
+import { useSEO } from "../hooks/useSEO";
 
 const Collection = () => {
+  const { seoData } = useSEO('categories');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,8 +75,14 @@ const Collection = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{seoData?.meta_title || 'Categories - Nishree'}</title>
+        <meta name="description" content={seoData?.meta_description || 'Browse our spice categories and find your perfect blend.'} />
+        {seoData?.meta_keywords && <meta name="keywords" content={seoData.meta_keywords} />}
+        {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
+      </Helmet>
       <Header />
-      <div className="background section">
+      <div className="collection background section">
         <div className="hero-section">
           <div className="hero-img-section">
             <img src={hero} className="img-fluid" alt="hero-img" />

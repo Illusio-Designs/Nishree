@@ -162,3 +162,14 @@ export const getPublicPageContent = async (pageName) => {
         throw error.response?.data || error.message;
     }
 };
+
+// Get public SEO data for a page
+export const getPublicSEOData = async (pageName) => {
+    try {
+        const response = await axios.get(`${API_URL}/api/seo?page_name=${pageName}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching SEO data for ${pageName}:`, error);
+        return null; // Return null if SEO data not found
+    }
+};

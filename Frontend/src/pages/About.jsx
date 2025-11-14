@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import "../Styles/About.css";
 import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
@@ -15,8 +16,10 @@ import div3 from "../assets/div (2).webp";
 import img1 from "../assets/img (1).webp";
 import img2 from "../assets/img (3).webp";
 import img3 from "../assets/men.webp";
+import { useSEO } from "../hooks/useSEO";
 
 const About = () => {
+  const { seoData } = useSEO('about');
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
     const observer = new IntersectionObserver(
@@ -58,6 +61,12 @@ const About = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{seoData?.meta_title || 'About Us - Nishree'}</title>
+        <meta name="description" content={seoData?.meta_description || 'Learn about Nishree and our commitment to quality spices.'} />
+        {seoData?.meta_keywords && <meta name="keywords" content={seoData.meta_keywords} />}
+        {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
+      </Helmet>
       <Header />
       <div className="main-section section">
         <div className="hero-img-section">

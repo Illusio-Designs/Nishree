@@ -54,7 +54,8 @@ const Products = () => {
       og_image: ""
     },
     images: [],
-    badges: []
+    badges: [],
+    imagesToDelete: []
   });
 
   const fetchProducts = async () => {
@@ -207,6 +208,11 @@ const Products = () => {
         });
       }
 
+      // Add images to delete (for update mode)
+      if (modalMode === "edit" && formData.imagesToDelete && formData.imagesToDelete.length > 0) {
+        formDataToSend.append("imagesToDelete", JSON.stringify(formData.imagesToDelete));
+      }
+
       try {
         if (modalMode === "add") {
           const response = await productService.createProduct(formDataToSend);
@@ -280,7 +286,8 @@ const Products = () => {
           type: b.badgeType,
           color: b.colorCode,
           icon: b.iconName
-        })) || []
+        })) || [],
+        imagesToDelete: []
       });
     } else {
       setSelectedProduct(null);
@@ -311,7 +318,8 @@ const Products = () => {
           og_image: ""
         },
         images: [],
-        badges: []
+        badges: [],
+        imagesToDelete: []
       });
     }
     setShowModal(true);
@@ -893,7 +901,9 @@ const Products = () => {
             <h3>Product Images</h3>
             <div className="image-upload-section">
               <div className="image-upload-grid">
-                {selectedProduct?.ProductImages?.map((image, index) => (
+                {selectedProduct?.ProductImages?.filter(img => 
+                  !formData.imagesToDelete.includes(img.id)
+                ).map((image, index) => (
                   <div key={`existing-${index}`} className="image-preview-item">
                     <img
                       src={`${import.meta.env.VITE_API_URL}${image.image_url}`}
@@ -901,6 +911,18 @@ const Products = () => {
                     />
                     <div className="image-overlay">
                       <span className="image-label">Existing Image</span>
+                      <button
+                        type="button"
+                        className="remove-image-button"
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            imagesToDelete: [...formData.imagesToDelete, image.id]
+                          });
+                        }}
+                      >
+                        Remove
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -917,7 +939,11 @@ const Products = () => {
                         onClick={() => {
                           const newFiles = Array.from(formData.images).filter((_, i) => i !== index);
                           const dataTransfer = new DataTransfer();
-                          newFiles.forEach(file => dataTransfer.items.add(file));
+                          newFiles.forEach(file => {
+                            if (file instanceof File) {
+                              dataTransfer.items.add(file);
+                            }
+                          });
                           setFormData({ ...formData, images: dataTransfer.files });
                         }}
                       >

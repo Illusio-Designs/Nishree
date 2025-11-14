@@ -319,6 +319,7 @@
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .icon-box:hover {
@@ -725,6 +726,7 @@
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 .review-header {
@@ -781,33 +783,7 @@
   color: #333;
 }
 
-.review-images {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-  margin: 1rem 0;
-}
 
-.review-image-container {
-  position: relative;
-  padding-top: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.review-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.review-image:hover {
-  transform: scale(1.05);
-}
 
 .review-date {
   color: #6c757d;

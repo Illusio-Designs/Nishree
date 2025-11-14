@@ -2,10 +2,12 @@
   margin: 0;
   padding: 0;
 }
+
 .header {
   position: absolute;
   z-index: 1;
 }
+
 .back {
   padding: 40px 4px;
   height: auto;
@@ -17,6 +19,7 @@
   backdrop-filter: blur(25.200000762939453px);
   border-radius: 20px;
 }
+
 .header .container {
   display: flex;
   align-items: center;
@@ -28,12 +31,15 @@
   position: relative;
   border-radius: 20px;
 }
+
 .logo img {
   width: 70%;
 }
+
 .logo {
   width: 15%;
 }
+
 .icon {
   display: flex;
   align-items: center;
@@ -43,30 +49,78 @@
 .cart {
   position: relative;
   cursor: pointer;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart svg {
+  width: 24px;
+  height: 24px;
+  color: #000;
+  transition: color 0.2s ease;
+}
+
+.cart:hover {
+  transform: scale(1.1);
+}
+
+.cart:hover svg {
+  color: #dc2626;
 }
 
 .cart-badge {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: #dc2626;
+  top: -15px;
+  right: -10px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: white;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px;
+  border-radius: 50px;
   min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+  border: 2px solid white;
+  animation: badge-pop 0.3s ease;
+  z-index: 10;
+}
+
+@keyframes badge-pop {
+  0% {
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .user {
   cursor: pointer;
+  transition: transform 0.2s ease;
 }
+
+.user:hover {
+  transform: scale(1.1);
+}
+
 .nav {
   display: flex;
   gap: 50px;
 }
+
 .nav a {
   font-family: Inter;
   color: #000000;
@@ -74,6 +128,7 @@
   text-decoration: none;
   font-weight: 600;
 }
+
 .nav a:hover,
 .nav a.active {
   color: #b72d24;

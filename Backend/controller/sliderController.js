@@ -39,13 +39,25 @@ const formatSliderResponse = (slider) => {
 };
 
 // Create Slider
-// In createSlider function
 export const createSlider = async (req, res) => {
     try {
-        const { title, description, link, order } = req.body;
+        const { title, description, buttonText, categoryId, status, position } = req.body;
 
         if (!req.file) {
             return res.status(400).json({ message: 'Image is required' });
+        }
+
+        // Handle category ID
+        let categoryIdToUse = categoryId ? Number(categoryId) : null;
+        if (categoryIdToUse === "" || isNaN(categoryIdToUse)) {
+            categoryIdToUse = null;
+        }
+        
+        if (categoryIdToUse) {
+            const category = await Category.findByPk(categoryIdToUse);
+            if (!category) {
+                return res.status(400).json({ message: 'Category not found' });
+            }
         }
 
         // Process image
@@ -71,9 +83,11 @@ export const createSlider = async (req, res) => {
         const slider = await Slider.create({
             title,
             description,
+            buttonText,
             image,
-            link,
-            order: order || 0
+            categoryId: categoryIdToUse,
+            status: status || 'active',
+            position: position || 0
         });
 
         res.status(201).json({ 

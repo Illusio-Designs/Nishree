@@ -9,7 +9,6 @@ import productRoutes from './productRoutes.js';
 import orderRoutes from './orderRoutes.js';
 import sliderRoutes from './sliderRoutes.js';
 import couponRoutes from './couponRoutes.js';
-import wishlistRoutes from './wishlistRoutes.js';
 import shippingAddressRoutes from './shippingAddressRoutes.js';
 import paymentRoutes from './paymentRoutes.js';
 import shippingFeeRoutes from './shippingFeeRoutes.js';
@@ -29,7 +28,6 @@ router.use('/orders', orderRoutes);
 // Feature Routes
 router.use('/sliders', sliderRoutes);
 router.use('/coupons', couponRoutes);
-router.use('/wishlist', wishlistRoutes);
 router.use('/shipping-addresses', shippingAddressRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/shipping-fees', shippingFeeRoutes);

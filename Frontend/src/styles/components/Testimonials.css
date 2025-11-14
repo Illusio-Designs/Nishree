@@ -48,6 +48,7 @@
   min-width: 280px;
   max-width: 350px;
   transition: transform 0.3s ease;
+  cursor: pointer;
 }
 
 .testimonial-card:hover {

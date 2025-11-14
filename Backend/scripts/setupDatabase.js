@@ -130,7 +130,7 @@ export const setupDatabase = async () => {
 			'Review', 'ReviewImage', 'ProductImage', 'ProductSEO',
 			'ProductVariation', 'AttributeValue',
 			'Order', 'OrderItem', 'OrderStatusHistory',
-			'Payment', 'ShippingAddress', 'Cart', 'CartItem', 'Wishlist', 'Slider', 'Policy'
+			'Payment', 'ShippingAddress', 'Cart', 'CartItem', 'Slider', 'Policy'
 		];
         
 		for (const modelName of dependentTableNames) {
