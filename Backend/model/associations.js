@@ -21,7 +21,7 @@ import { Review } from './reviewModel.js';
 import { ReviewImage } from './reviewImageModel.js';
 import { SeoMetadata } from './seoMetadataModel.js';
 import { CouponUsage } from './couponUsageModel.js';
-import { Notification } from './notificationModel.js';
+// import { Notification } from './notificationModel.js';
 
 // Export all models
 export {
@@ -46,8 +46,8 @@ export {
     Review,
     ReviewImage,
     SeoMetadata,
-    CouponUsage,
-    Notification
+    CouponUsage
+    // Notification
 };
 
 // User Associations
@@ -197,21 +197,37 @@ CouponUsage.belongsTo(Coupon, { foreignKey: 'couponId' });
 User.hasMany(CouponUsage, { foreignKey: 'userId', as: 'CouponUsages' });
 CouponUsage.belongsTo(User, { foreignKey: 'userId' });
 
-// Notification Associations
-User.hasMany(Notification, { 
-    foreignKey: 'user_id',
-    onDelete: 'CASCADE'
-});
-Notification.belongsTo(User, { 
-    foreignKey: 'user_id',
-    onDelete: 'CASCADE'
-});
+// Notification Associations - Commented out temporarily
+// User.hasMany(Notification, { 
+//     foreignKey: {
+//         name: 'user_id',
+//         allowNull: false
+//     },
+//     onDelete: 'CASCADE',
+//     onUpdate: 'CASCADE'
+// });
+// Notification.belongsTo(User, { 
+//     foreignKey: {
+//         name: 'user_id',
+//         allowNull: false
+//     },
+//     onDelete: 'CASCADE',
+//     onUpdate: 'CASCADE'
+// });
 
-Order.hasMany(Notification, { 
-    foreignKey: 'order_id',
-    onDelete: 'CASCADE'
-});
-Notification.belongsTo(Order, { 
-    foreignKey: 'order_id',
-    onDelete: 'CASCADE'
-});
+// Order.hasMany(Notification, { 
+//     foreignKey: {
+//         name: 'order_id',
+//         allowNull: true
+//     },
+//     onDelete: 'SET NULL',
+//     onUpdate: 'CASCADE'
+// });
+// Notification.belongsTo(Order, { 
+//     foreignKey: {
+//         name: 'order_id',
+//         allowNull: true
+//     },
+//     onDelete: 'SET NULL',
+//     onUpdate: 'CASCADE'
+// });

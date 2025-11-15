@@ -10,7 +10,7 @@ import { Payment } from '../model/paymentModel.js';
 import { User } from '../model/userModel.js';
 import { Op } from 'sequelize';
 import { sequelize } from '../config/db.js';
-import { createNotification } from './notificationController.js';
+// import { createNotification } from './notificationController.js';
 
 // Generate unique order number
 const generateOrderNumber = () => {
@@ -395,22 +395,22 @@ export const updateOrderStatus = async (req, res) => {
             ]
         });
         
-        // Create notification for user
-        const statusMessages = {
-            'pending': 'Your order is pending confirmation',
-            'processing': 'Your order is being processed',
-            'shipped': 'Your order has been shipped',
-            'delivered': 'Your order has been delivered',
-            'cancelled': 'Your order has been cancelled'
-        };
+        // Create notification for user - Temporarily disabled
+        // const statusMessages = {
+        //     'pending': 'Your order is pending confirmation',
+        //     'processing': 'Your order is being processed',
+        //     'shipped': 'Your order has been shipped',
+        //     'delivered': 'Your order has been delivered',
+        //     'cancelled': 'Your order has been cancelled'
+        // };
         
-        await createNotification(
-            order.user_id,
-            order.id,
-            `order_${status}`,
-            `Order ${order.order_number} - ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-            statusMessages[status] || `Your order status has been updated to ${status}`
-        );
+        // await createNotification(
+        //     order.user_id,
+        //     order.id,
+        //     `order_${status}`,
+        //     `Order ${order.order_number} - ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+        //     statusMessages[status] || `Your order status has been updated to ${status}`
+        // );
         
         res.json({
             message: 'Order status updated successfully',

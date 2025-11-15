@@ -9,21 +9,11 @@ export const Notification = sequelize.define('Notification', {
     },
     user_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'users',
-            key: 'id'
-        },
-        onDelete: 'CASCADE'
+        allowNull: false
     },
     order_id: {
         type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'orders',
-            key: 'id'
-        },
-        onDelete: 'CASCADE'
+        allowNull: true
     },
     type: {
         type: DataTypes.ENUM('order_status', 'order_shipped', 'order_delivered', 'order_cancelled'),
@@ -44,5 +34,13 @@ export const Notification = sequelize.define('Notification', {
 }, {
     tableName: 'notifications',
     timestamps: true,
-    underscored: true
+    underscored: true,
+    indexes: [
+        {
+            fields: ['user_id']
+        },
+        {
+            fields: ['is_read']
+        }
+    ]
 });
