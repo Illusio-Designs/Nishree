@@ -443,33 +443,6 @@ form {
 
 /* Comprehensive Responsive Breakpoints */
 
-/* 2560px - Ultra Wide */
-@media (max-width: 2560px) {
-  .register-card {
-    max-width: 32rem;
-    padding: 3rem;
-  }
-  
-  .register-title {
-    font-size: 2.2rem;
-  }
-  
-  .register-subtitle {
-    font-size: 1rem;
-  }
-  
-  .register-input {
-    padding: 1rem 1.4rem;
-    font-size: 1rem;
-  }
-  
-  .register-button,
-  .google-signup-button {
-    padding: 1rem 1.4rem;
-    font-size: 1rem;
-  }
-}
-
 /* 1024px - Tablet Landscape */
 @media (max-width: 1024px) {
   .register-card {
@@ -553,11 +526,7 @@ form {
     padding: 0.9rem 1.1rem;
     font-size: 0.9rem;
   }
-  
-  .text-center {
-    margin-top: 1.3rem;
-    font-size: 0.9rem;
-  }
+
 }
 
 /* 426px - Mobile Large */
@@ -616,11 +585,6 @@ form {
     font-size: 0.85rem;
   }
   
-  .text-center {
-    margin-top: 1.2rem;
-    font-size: 0.85rem;
-  }
-  
   .google-icon {
     width: 1.3rem;
     height: 1.3rem;
@@ -663,11 +627,6 @@ form {
   
   .error-message {
     padding: 0.8rem 0.95rem;
-    font-size: 0.82rem;
-  }
-  
-  .text-center {
-    margin-top: 1.1rem;
     font-size: 0.82rem;
   }
 }
@@ -745,11 +704,6 @@ form {
     padding: 0.75rem 0.85rem;
     font-size: 0.78rem;
     border-radius: 0.65rem;
-  }
-  
-  .text-center {
-    margin-top: 1rem;
-    font-size: 0.78rem;
   }
   
   .google-icon {
