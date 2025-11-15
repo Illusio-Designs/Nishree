@@ -12,7 +12,8 @@
   padding: 40px 4px;
   height: auto;
   width: 85%;
-  margin: 20px 7.5%;
+  margin: 0 7.5%;
+  margin-top: 20px;
   position: absolute;
   border: 1px solid #f2f2f226;
   background: #f2f2f226;

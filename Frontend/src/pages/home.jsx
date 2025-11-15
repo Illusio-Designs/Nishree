@@ -16,6 +16,7 @@ import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
 import { getPublicSliders, getAllPublicProducts } from '../services/publicindex';
 import Loader from "../components/Loader";
+import CookingLoader from "../components/CookingLoader";
 import { useSEO } from "../hooks/useSEO";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -35,6 +36,7 @@ const Home = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const startTime = Date.now();
       try {
         setLoading(true);
         
@@ -89,7 +91,10 @@ const Home = () => {
         console.error('Error fetching data:', err);
         setError(err.message);
       } finally {
-        setLoading(false);
+        // Ensure loader shows for at least 3 seconds
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 3000 - elapsedTime);
+        setTimeout(() => setLoading(false), remainingTime);
       }
     };
 
@@ -177,6 +182,22 @@ const Home = () => {
     return () => window.removeEventListener('resize', checkOverflow);
   }, [products]);
 
+  if (loading) {
+    return (
+      <>
+        <Helmet>
+          <title>{seoData?.metaTitle || 'Nishree - Premium Spices & Masalas'}</title>
+          <meta name="description" content={seoData?.metaDescription || 'Discover authentic Indian spices and masalas at Nishree. Premium quality products for your kitchen.'} />
+          {seoData?.metaKeywords && <meta name="keywords" content={seoData.metaKeywords} />}
+          {seoData?.ogTitle && <meta property="og:title" content={seoData.ogTitle} />}
+          {seoData?.ogDescription && <meta property="og:description" content={seoData.ogDescription} />}
+          {seoData?.ogImage && <meta property="og:image" content={seoData.ogImage} />}
+        </Helmet>
+        <CookingLoader />
+      </>
+    );
+  }
+
   return (
     <>
       <Helmet>
@@ -189,12 +210,7 @@ const Home = () => {
       </Helmet>
       <Header />
       <div className="hero-section section">
-        {loading ? (
-          <div className="loading">
-            <Loader size="large" />
-            <p>Loading sliders...</p>
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="error">Error: {error}</div>
         ) : sliders.length > 0 ? (
           <div className="rotating-slider">

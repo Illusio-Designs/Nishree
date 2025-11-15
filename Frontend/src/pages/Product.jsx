@@ -15,6 +15,7 @@ import vector4 from "../assets/Vector (23).webp";
 import vector5 from "../assets/Vector (24).webp";
 import "../Styles/Product.css"
 import Loader from "../components/Loader";
+import CookingLoader from "../components/CookingLoader";
 import { useSEO } from "../hooks/useSEO";
 
 const Product = () => {
@@ -36,6 +37,7 @@ const Product = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const startTime = Date.now();
       setLoading(true);
       try {
         // Fetch category if categoryId is present
@@ -79,11 +81,17 @@ const Product = () => {
           }
         }
         
-        setLoading(false);
+        // Ensure loader shows for at least 3 seconds
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 3000 - elapsedTime);
+        setTimeout(() => setLoading(false), remainingTime);
       } catch (err) {
         console.error('Error fetching data:', err);
         setError(err.message);
-        setLoading(false);
+        // Ensure loader shows for at least 3 seconds even on error
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 3000 - elapsedTime);
+        setTimeout(() => setLoading(false), remainingTime);
       }
     };
 
@@ -121,6 +129,20 @@ const Product = () => {
     return () => window.removeEventListener('resize', checkOverflow);
   }, [bestSellers]);
 
+  if (loading) {
+    return (
+      <>
+        <Helmet>
+          <title>{seoData?.meta_title || 'Products - Nishree'}</title>
+          <meta name="description" content={seoData?.meta_description || 'Browse our collection of premium spices and masalas.'} />
+          {seoData?.meta_keywords && <meta name="keywords" content={seoData.meta_keywords} />}
+          {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
+        </Helmet>
+        <CookingLoader />
+      </>
+    );
+  }
+
   return (
     <>
       <Helmet>
@@ -151,12 +173,7 @@ const Product = () => {
               <span>{category ? category.name : 'Our'}</span> products
             </h1>
           </div>
-          {loading ? (
-            <div className="loading">
-              <Loader size="large" />
-              <p>Loading products...</p>
-            </div>
-          ) : error ? (
+          {error ? (
             <div className="error">Error: {error}</div>
           ) : products.length > 0 ? (
             <>

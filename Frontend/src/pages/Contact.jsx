@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { toast } from "react-toastify";
+import CookingLoader from "../components/CookingLoader";
 import "../Styles/Contact.css";
 import { useSEO } from "../hooks/useSEO";
 
@@ -14,6 +15,13 @@ const Contact = () => {
     message: ""
   });
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+
+  useEffect(() => {
+    // Show loader for at least 3 seconds
+    const timer = setTimeout(() => setPageLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
@@ -55,6 +63,20 @@ const Contact = () => {
       setLoading(false);
     }
   };
+
+  if (pageLoading) {
+    return (
+      <>
+        <Helmet>
+          <title>{seoData?.meta_title || 'Contact Us - Nishree'}</title>
+          <meta name="description" content={seoData?.meta_description || 'Get in touch with Nishree for any queries or support.'} />
+          {seoData?.meta_keywords && <meta name="keywords" content={seoData.meta_keywords} />}
+          {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
+        </Helmet>
+        <CookingLoader />
+      </>
+    );
+  }
 
   return (
     <>

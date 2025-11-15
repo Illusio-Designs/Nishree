@@ -16,10 +16,19 @@ import div3 from "../assets/div (2).webp";
 import img1 from "../assets/img (1).webp";
 import img2 from "../assets/img (3).webp";
 import img3 from "../assets/men.webp";
+import CookingLoader from "../components/CookingLoader";
 import { useSEO } from "../hooks/useSEO";
 
 const About = () => {
   const { seoData } = useSEO('about');
+  const [loading, setLoading] = React.useState(true);
+
+  useEffect(() => {
+    // Show loader for at least 3 seconds
+    const timer = setTimeout(() => setLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
     const observer = new IntersectionObserver(
@@ -58,6 +67,20 @@ const About = () => {
       text: 'A trusted name for authentic Indian flavors.',
     },
   ];
+
+  if (loading) {
+    return (
+      <>
+        <Helmet>
+          <title>{seoData?.meta_title || 'About Us - Nishree'}</title>
+          <meta name="description" content={seoData?.meta_description || 'Learn about Nishree and our commitment to quality spices.'} />
+          {seoData?.meta_keywords && <meta name="keywords" content={seoData.meta_keywords} />}
+          {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
+        </Helmet>
+        <CookingLoader />
+      </>
+    );
+  }
 
   return (
     <>

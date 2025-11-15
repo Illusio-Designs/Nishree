@@ -13,6 +13,7 @@ import vector5 from "../assets/Vector (24).webp";
 import { getPublicCategories } from "../services/publicindex";
 import "../Styles/Collection.css";
 import Loader from "../components/Loader";
+import CookingLoader from "../components/CookingLoader";
 import { useSEO } from "../hooks/useSEO";
 
 const Collection = () => {
@@ -24,6 +25,7 @@ const Collection = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
+      const startTime = Date.now();
       try {
         const data = await getPublicCategories();
         console.log('Fetched categories:', data);
@@ -40,11 +42,18 @@ const Collection = () => {
         
         console.log('Processed categories:', categoriesData);
         setCategories(categoriesData);
-        setLoading(false);
+        
+        // Ensure loader shows for at least 3 seconds
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 3000 - elapsedTime);
+        setTimeout(() => setLoading(false), remainingTime);
       } catch (err) {
         console.error('Error fetching categories:', err);
         setError(err.message);
-        setLoading(false);
+        // Ensure loader shows for at least 3 seconds even on error
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 3000 - elapsedTime);
+        setTimeout(() => setLoading(false), remainingTime);
       }
     };
 
@@ -72,6 +81,20 @@ const Collection = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  if (loading) {
+    return (
+      <>
+        <Helmet>
+          <title>{seoData?.meta_title || 'Categories - Nishree'}</title>
+          <meta name="description" content={seoData?.meta_description || 'Browse our spice categories and find your perfect blend.'} />
+          {seoData?.meta_keywords && <meta name="keywords" content={seoData.meta_keywords} />}
+          {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
+        </Helmet>
+        <CookingLoader />
+      </>
+    );
+  }
 
   return (
     <>
@@ -117,12 +140,7 @@ const Collection = () => {
               </svg>
             </div>
             <div className="blog-cards">
-              {loading ? (
-                <div className="loading">
-                  <Loader size="large" />
-                  <p>Loading categories...</p>
-                </div>
-              ) : error ? (
+              {error ? (
                 <div>Error: {error}</div>
               ) : (
                 categories.map((category) => {

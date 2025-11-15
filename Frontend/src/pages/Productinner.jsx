@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import Loader from "../components/Loader";
+import CookingLoader from "../components/CookingLoader";
 
 // Base URL for API
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -117,6 +118,7 @@ const Productinner = () => {
   }, []);
 
   const fetchProduct = useCallback(async () => {
+    const startTime = Date.now();
     try {
       console.log('Fetching product with ID:', id);
       const response = await getPublicProductById(id);
@@ -150,11 +152,17 @@ const Productinner = () => {
         console.warn('No product variations found');
       }
 
-      setLoading(false);
+      // Ensure loader shows for at least 3 seconds
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 3000 - elapsedTime);
+      setTimeout(() => setLoading(false), remainingTime);
     } catch (err) {
       console.error('Error fetching product:', err);
       setError(err.message);
-      setLoading(false);
+      // Ensure loader shows for at least 3 seconds even on error
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 3000 - elapsedTime);
+      setTimeout(() => setLoading(false), remainingTime);
     }
   }, [id, getImageUrl]);
 
@@ -449,12 +457,7 @@ const Productinner = () => {
   };
 
   if (loading || !imagesLoaded) {
-    return (
-      <div className="loading-container">
-        <Loader size="large" />
-        <p>Loading product details...</p>
-      </div>
-    );
+    return <CookingLoader />;
   }
 
   if (error) {

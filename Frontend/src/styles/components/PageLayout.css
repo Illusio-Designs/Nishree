@@ -1,0 +1,19 @@
+/* Remove default spacing for all pages */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.hero-section,
+.main-section,
+.collection,
+.contactpage {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Ensure sections start right below header */
+.section:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+}
