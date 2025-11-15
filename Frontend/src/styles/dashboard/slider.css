@@ -104,43 +104,9 @@
     right: 20px;
 }
 
-@media (max-width: 768px) {
-    .slider-container {
-        height: 300px;
-    }
 
-    .slide-title {
-        font-size: 1.8rem;
-    }
 
-    .slide-description {
-        font-size: 1rem;
-    }
 
-    .slider-arrow {
-        width: 30px;
-        height: 30px;
-    }
-}
-
-@media (max-width: 480px) {
-    .slider-container {
-        height: 200px;
-    }
-
-    .slide-title {
-        font-size: 1.4rem;
-    }
-
-    .slide-description {
-        font-size: 0.9rem;
-    }
-
-    .slider-arrow {
-        width: 25px;
-        height: 25px;
-    }
-}
 
 .slider-form {
     display: flex;

@@ -182,19 +182,5 @@
   border-top: 1px solid #ddd;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .grid-container {
-    grid-template-columns: 1fr;
-  }
 
-  .header-section {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-  }
 
-  .action-buttons {
-    flex-wrap: wrap;
-  }
-}

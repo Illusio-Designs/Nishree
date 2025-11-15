@@ -413,52 +413,7 @@
   object-fit: cover;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .header-section {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
 
-  .product-form {
-    padding: 16px;
-  }
-
-  .form-section {
-    padding: 16px;
-  }
-
-  .variation-header {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .image-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  }
-
-  .modal-actions {
-    flex-direction: column;
-  }
-
-  .modal-submit-button,
-  .modal-cancel-button,
-  .modal-prev-button,
-  .modal-next-button {
-    width: 100%;
-  }
-
-  .step-indicator {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-
-  .step:not(:last-child)::after {
-    display: none;
-  }
-}
 
 /* Company color variables */
 :root {
@@ -604,15 +559,7 @@
   background: #e9ecef;
 }
 
-/* Responsive for Product Modal */
-@media (max-width: 768px) {
-  .product-modal .modal-content,
-  .product-modal {
-    min-width: 0;
-    max-width: 98vw;
-    padding: 0;
-  }
-}
+
 
 /* Products Page Styles */
 .products-manager {
@@ -1102,10 +1049,6 @@
   margin-top: 8px;
 }
 
-@media (max-width: 768px) {
-  .image-upload-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 12px;
-  }
-}
+
+
 

@@ -513,31 +513,11 @@ button.dropdown-item {
 }
 
 /* Media Queries */
-@media (min-width: 768px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
-@media (min-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
 
-@media (max-width: 768px) {
-  .dashboard-footer {
-    padding: 0.75rem 1rem;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
 
-  .footer-actions {
-    margin-left: 0;
-    width: 100%;
-    justify-content: center;
-  }
-}
+
+
 
 
 /* Profile Avatar Initials */
@@ -575,3 +555,4 @@ button.dropdown-item {
   width: 48px;
   height: 48px;
 }
+

@@ -190,31 +190,7 @@
   color: #92400e;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .status-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
 
-  .status-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-actions {
-    flex-direction: column;
-  }
-
-  .modal-actions button {
-    width: 100%;
-  }
-}
 
 
 /* Shipment Details Modal */
@@ -281,3 +257,4 @@
 .tracking-link:hover {
   background: #b91c1c;
 }
+
