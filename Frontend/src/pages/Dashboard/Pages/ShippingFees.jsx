@@ -1,218 +1,177 @@
 import React, { useState, useEffect } from 'react';
-import TableWithControls from '../../../components/common/TableWithControls';
-import Modal from '../../../components/common/Modal';
-import InputField from '../../../components/common/InputField';
-import ActionButton from '../../../components/common/ActionButton';
-import Button from '../../../components/common/Button';
-import { shippingFeeService } from '../../../services';
 import { toast } from 'react-toastify';
-import '../../../Styles/dashboard/Category.css';
 import { HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi2';
 import { FaPlus } from 'react-icons/fa';
+import TableWithControls from '../../../components/common/TableWithControls';
+import Button from '../../../components/common/Button';
+import InputField from '../../../components/common/InputField';
+import Modal from '../../../components/common/Modal';
+import ActionButton from '../../../components/common/ActionButton';
+import { shippingFeeService } from '../../../services';
+import '../../../Styles/dashboard/Category.css';
 
 const ShippingFees = () => {
   const [shippingFees, setShippingFees] = useState([]);
-  const [selectedFee, setSelectedFee] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingFee, setEditingFee] = useState(null);
   const [modalMode, setModalMode] = useState('add');
   const [formData, setFormData] = useState({
     order_type: '',
-    fee: 0,
-    weight_based_fee: 0,
-    location_based_fee: 0
+    fee: ''
   });
+
+  const columns = [
+    { 
+      key: 'order_type',
+      header: 'Order Type',
+      render: (row) => row.order_type.toUpperCase()
+    },
+    { 
+      key: 'fee',
+      header: 'Fee Amount',
+      render: (row) => `₹${parseFloat(row.fee).toFixed(2)}`
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (row) => (
+        <div className="action-buttons">
+          <ActionButton
+            icon={<HiOutlinePencil size={20} />}
+            onClick={() => handleOpenModal('edit', row)}
+            variant="edit"
+            tooltip="Edit"
+          />
+          <ActionButton
+            icon={<HiOutlineTrash size={20} />}
+            onClick={() => handleDelete(row.id)}
+            variant="delete"
+            tooltip="Delete"
+          />
+        </div>
+      )
+    }
+  ];
+
+  useEffect(() => {
+    fetchShippingFees();
+  }, []);
 
   const fetchShippingFees = async () => {
     try {
-      const data = await shippingFeeService.getAllShippingFees();
-      setShippingFees(data);
+      const fees = await shippingFeeService.getAllShippingFees();
+      setShippingFees(fees || []);
     } catch (error) {
-      toast.error('Failed to fetch shipping fees');
-      console.error("Failed to fetch shipping fees:", error);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await shippingFeeService.deleteShippingFee(id);
-      toast.success('Shipping fee deleted successfully');
-      fetchShippingFees();
-    } catch (error) {
-      toast.error(error.message || 'Failed to delete shipping fee');
-      console.error("Failed to delete shipping fee:", error);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      // Validate form data
-      if (!formData.order_type || formData.fee === undefined) {
-        toast.error('Order type and fee are required');
-        return;
-      }
-
-      // Ensure numeric values
-      const feeData = {
-        order_type: formData.order_type,
-        fee: parseFloat(formData.fee),
-        weight_based_fee: parseFloat(formData.weight_based_fee || 0),
-        location_based_fee: parseFloat(formData.location_based_fee || 0)
-      };
-
-      await shippingFeeService.createOrUpdateShippingFee(feeData);
-      toast.success(`Shipping fee ${modalMode === 'add' ? 'created' : 'updated'} successfully`);
-      
-      setShowModal(false);
-      fetchShippingFees();
-    } catch (error) {
-      toast.error(error.message || `Failed to ${modalMode} shipping fee`);
-      console.error(`Failed to ${modalMode} shipping fee:`, error);
+      console.error('Error fetching shipping fees:', error);
+      toast.error('Failed to load shipping fees');
     }
   };
 
   const handleOpenModal = (mode, fee = null) => {
     setModalMode(mode);
     if (fee && mode === 'edit') {
-      setSelectedFee(fee);
+      setEditingFee(fee);
       setFormData({
-        order_type: fee.order_type || '',
-        fee: fee.fee || 0,
-        weight_based_fee: fee.weight_based_fee || 0,
-        location_based_fee: fee.location_based_fee || 0
+        order_type: fee.order_type,
+        fee: fee.fee
       });
     } else {
-      setSelectedFee(null);
-      setFormData({
-        order_type: '',
-        fee: 0,
-        weight_based_fee: 0,
-        location_based_fee: 0
-      });
+      setEditingFee(null);
+      setFormData({ order_type: '', fee: '' });
     }
-    setShowModal(true);
+    setIsModalOpen(true);
   };
 
-  useEffect(() => {
-    fetchShippingFees();
-  }, []);
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR'
-    }).format(amount);
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this shipping fee?')) {
+      try {
+        await shippingFeeService.deleteShippingFee(id);
+        toast.success('Shipping fee deleted successfully');
+        fetchShippingFees();
+      } catch (error) {
+        toast.error('Failed to delete shipping fee');
+      }
+    }
   };
 
-  const columns = [
-    { 
-      header: "Order Type", 
-      accessor: "order_type",
-      cell: (row) => row.order_type.toUpperCase()
-    },
-    { 
-      header: "Base Fee", 
-      accessor: "fee",
-      cell: (row) => formatCurrency(row.fee)
-    },
-    { 
-      header: "Weight-Based Fee", 
-      accessor: "weight_based_fee",
-      cell: (row) => formatCurrency(row.weight_based_fee)
-    },
-    { 
-      header: "Location-Based Fee", 
-      accessor: "location_based_fee",
-      cell: (row) => formatCurrency(row.location_based_fee)
-    },
-    {
-      header: "Actions",
-      accessor: "actions",
-      cell: (row) => (
-        <div className="action-buttons">
-          <ActionButton
-            icon={<HiOutlinePencil size={20} />}
-            onClick={() => handleOpenModal('edit', row)}
-            variant="edit"
-            tooltip="Edit Fee"
-          />
-          <ActionButton
-            icon={<HiOutlineTrash size={20} />}
-            onClick={() => handleDelete(row.id)}
-            variant="delete"
-            tooltip="Delete Fee"
-          />
-        </div>
-      ),
-    },
-  ];
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (modalMode === 'edit') {
+        await shippingFeeService.createOrUpdateShippingFee({
+          ...formData,
+          id: editingFee.id
+        });
+        toast.success('Shipping fee updated successfully');
+      } else {
+        await shippingFeeService.createOrUpdateShippingFee(formData);
+        toast.success('Shipping fee added successfully');
+      }
+      
+      setIsModalOpen(false);
+      fetchShippingFees();
+    } catch (error) {
+      toast.error(error.message || 'Failed to save shipping fee');
+    }
+  };
 
   return (
     <div className="category-manager">
       <div className="header-section">
-        <h2 className="dashboard-title">Shipping Fee Management</h2>
+        <h2 className="dashboard-title">Shipping Fees</h2>
         <Button 
           onClick={() => handleOpenModal('add')}
           className="add-button"
         >
-          <FaPlus /> Add Fee
+          <FaPlus /> Add Shipping Fee
         </Button>
       </div>
 
       <TableWithControls
-        data={shippingFees}
         columns={columns}
-        searchPlaceholder="Search shipping fees..."
+        data={shippingFees}
         searchFields={['order_type']}
       />
 
       <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title={`${modalMode === 'add' ? 'Add' : 'Edit'} Shipping Fee`}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={modalMode === 'add' ? 'Add New Shipping Fee' : 'Edit Shipping Fee'}
       >
         <form onSubmit={handleSubmit} className="category-form">
           <InputField
             label="Order Type"
-            name="order_type"
             value={formData.order_type}
-            onChange={(e) => setFormData({...formData, order_type: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, order_type: e.target.value.toLowerCase() })}
+            placeholder="e.g., cod, prepaid"
             required
           />
+
           <InputField
-            label="Base Fee"
-            name="fee"
+            label="Fee Amount (₹)"
             type="number"
             step="0.01"
+            min="0"
             value={formData.fee}
-            onChange={(e) => setFormData({...formData, fee: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, fee: e.target.value })}
+            placeholder="0.00"
             required
           />
-          <InputField
-            label="Weight-Based Fee"
-            name="weight_based_fee"
-            type="number"
-            step="0.01"
-            value={formData.weight_based_fee}
-            onChange={(e) => setFormData({...formData, weight_based_fee: e.target.value})}
-          />
-          <InputField
-            label="Location-Based Fee"
-            name="location_based_fee"
-            type="number"
-            step="0.01"
-            value={formData.location_based_fee}
-            onChange={(e) => setFormData({...formData, location_based_fee: e.target.value})}
-          />
+
           <div className="modal-actions">
-            <Button type="submit" className="modal-submit-button">
+            <Button
+              type="submit"
+              className="modal-submit-button"
+              disabled={!formData.order_type || !formData.fee}
+            >
               {modalMode === 'add' ? 'Create' : 'Update'}
             </Button>
-            <Button 
-              type="button" 
+            <Button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
               className="modal-cancel-button"
               variant="secondary"
-              onClick={() => setShowModal(false)}
             >
               Cancel
             </Button>

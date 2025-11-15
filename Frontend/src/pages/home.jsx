@@ -99,6 +99,10 @@ const Home = () => {
   useEffect(() => {
     if (sliders.length > 0) {
       updateSlider();
+      // Set initial background immediately when sliders load
+      if (currentIndex === 0 && backgroundRef.current) {
+        backgroundRef.current.style.backgroundImage = `url(${sliders[0].image})`;
+      }
     }
   }, [currentIndex, sliders]);
 
@@ -195,7 +199,11 @@ const Home = () => {
         ) : sliders.length > 0 ? (
           <div className="rotating-slider">
             <div className="rotating-slider__content">
-              <div className="rotating-slider__background" ref={backgroundRef} />
+              <div 
+                className="rotating-slider__background" 
+                ref={backgroundRef}
+                style={{ backgroundImage: sliders[currentIndex]?.image ? `url(${sliders[currentIndex].image})` : 'none' }}
+              />
               <div className="rotating-slider__wrapper" ref={wrapperRef}>
                 {sliders.map((slider, index) => (
                   <div

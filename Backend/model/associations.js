@@ -21,6 +21,7 @@ import { Review } from './reviewModel.js';
 import { ReviewImage } from './reviewImageModel.js';
 import { SeoMetadata } from './seoMetadataModel.js';
 import { CouponUsage } from './couponUsageModel.js';
+import { Shipment } from './shipmentModel.js';
 // import { Notification } from './notificationModel.js';
 
 // Export all models
@@ -46,7 +47,8 @@ export {
     Review,
     ReviewImage,
     SeoMetadata,
-    CouponUsage
+    CouponUsage,
+    Shipment
     // Notification
 };
 
@@ -196,6 +198,16 @@ CouponUsage.belongsTo(Coupon, { foreignKey: 'couponId' });
 
 User.hasMany(CouponUsage, { foreignKey: 'userId', as: 'CouponUsages' });
 CouponUsage.belongsTo(User, { foreignKey: 'userId' });
+
+// Shipment Associations
+Order.hasOne(Shipment, {
+    foreignKey: 'order_id',
+    onDelete: 'CASCADE'
+});
+Shipment.belongsTo(Order, {
+    foreignKey: 'order_id',
+    onDelete: 'CASCADE'
+});
 
 // Notification Associations - Commented out temporarily
 // User.hasMany(Notification, { 

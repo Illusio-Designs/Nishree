@@ -6,7 +6,8 @@ import {
     updateOrderStatus,
     cancelOrder,
     getUserOrders,
-    getOrderStats
+    getOrderStats,
+    syncOrdersWithShiprocket
 } from '../controller/orderController.js';
 import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
@@ -22,5 +23,6 @@ router.put('/:id/cancel', isAuthenticated, cancelOrder);
 router.get('/', isAuthenticated, authorize(['admin']), getAllOrders);
 router.put('/:id/status', isAuthenticated, authorize(['admin']), updateOrderStatus);
 router.get('/stats/overview', isAuthenticated, authorize(['admin']), getOrderStats);
+router.post('/sync-shiprocket', isAuthenticated, authorize(['admin']), syncOrdersWithShiprocket);
 
 export default router; 

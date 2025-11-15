@@ -377,13 +377,6 @@ const Productinner = () => {
     setSubmittingReview(true);
 
     try {
-        // Check if user is logged in
-        if (!user) {
-            toast.error('Please login to submit a review');
-            setSubmittingReview(false);
-            return;
-        }
-
         // Validate required fields
         if (!product?.id && !id) {
             toast.error('Product information is missing. Please refresh the page and try again.');
@@ -409,8 +402,16 @@ const Productinner = () => {
         formData.append('productId', productId);
         formData.append('rating', reviewRating);
         formData.append('comment', reviewText);
-        formData.append('name', user.username);
-        formData.append('email', user.email);
+        
+        // If user is logged in, use their info, otherwise submit as anonymous
+        if (user) {
+            formData.append('name', user.username);
+            formData.append('email', user.email);
+        } else {
+            // For guest users, submit as anonymous
+            formData.append('name', 'Anonymous');
+            formData.append('email', 'anonymous@guest.com');
+        }
 
         // Append files if any
         if (reviewFiles.length > 0) {
@@ -711,24 +712,12 @@ const Productinner = () => {
               <div className="tab-panel reviews-panel">
                 <div className="reviews-header">
                   <h2>Customer Reviews</h2>
-                  {user ? (
-                    <button 
-                      className="add-review-btn"
-                      onClick={() => setShowReviewForm(!showReviewForm)}
-                    >
-                      {showReviewForm ? 'Cancel' : 'Write a Review'}
-                    </button>
-                  ) : (
-                    <button 
-                      className="add-review-btn"
-                      onClick={() => {
-                        toast.info('Please login to write a review');
-                        navigate('/login');
-                      }}
-                    >
-                      Login to Review
-                    </button>
-                  )}
+                  <button 
+                    className="add-review-btn"
+                    onClick={() => setShowReviewForm(!showReviewForm)}
+                  >
+                    {showReviewForm ? 'Cancel' : 'Write a Review'}
+                  </button>
                 </div>
 
                 {reviewStats && (

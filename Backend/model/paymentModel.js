@@ -17,7 +17,7 @@ export const Payment = sequelize.define('Payment', {
     },
     user_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true, // Allow null for guest orders
         references: {
             model: 'users',
             key: 'id'

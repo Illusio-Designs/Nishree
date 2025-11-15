@@ -17,6 +17,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -166,11 +167,27 @@ const Orders = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+  const handleSyncOrders = async () => {
+    setSyncing(true);
+    try {
+      const response = await orderService.syncOrdersWithShiprocket();
+      toast.success(response.message || 'Orders synced successfully with Shiprocket');
+      fetchOrders();
+    } catch (error) {
+      console.error('Error syncing orders:', error);
+      toast.error(error.message || 'Failed to sync orders with Shiprocket');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
-    <div className="orders-page">
+    <div className="category-manager">
       <div className="header-section">
         <h2 className="dashboard-title">Order Management</h2>
-        <p className="dashboard-subtitle">Manage all paid orders and track their status</p>
+        <Button onClick={handleSyncOrders} disabled={syncing} className="add-button">
+          {syncing ? 'Syncing...' : 'Sync Orders'}
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -216,25 +233,21 @@ const Orders = () => {
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="table-section">
-        <TableWithControls
-          data={orders}
-          columns={columns}
-          searchPlaceholder="Search orders..."
-          searchFields={['order_number', 'User.username', 'status']}
-          filters={[
-            {
-              key: 'status',
-              label: 'Order Status',
-              options: orderStatuses.map(status => ({
-                value: status,
-                label: status.charAt(0).toUpperCase() + status.slice(1)
-              }))
-            }
-          ]}
-        />
-      </div>
+      <TableWithControls
+        columns={columns}
+        data={orders}
+        searchFields={['order_number', 'User.username', 'status']}
+        filters={[
+          {
+            key: 'status',
+            label: 'Order Status',
+            options: orderStatuses.map(status => ({
+              value: status,
+              label: status.charAt(0).toUpperCase() + status.slice(1)
+            }))
+          }
+        ]}
+      />
 
       {/* Order Details Modal */}
       <Modal

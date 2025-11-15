@@ -184,3 +184,63 @@
     font-size: 14px;
   }
 }
+
+
+/* Comprehensive Responsive Breakpoints */
+
+/* 2560px - Ultra Wide */
+@media (max-width: 2560px) {
+  .privacy-policy-container {
+    padding: 12% 12% 8%;
+    max-width: 1400px;
+  }
+}
+
+/* 1024px - Tablet Landscape */
+@media (max-width: 1024px) {
+  .privacy-policy-container {
+    padding: 12% 8% 6%;
+  }
+}
+
+/* 1000px */
+@media (max-width: 1000px) {
+  .privacy-policy-container {
+    padding: 13% 6% 6%;
+  }
+}
+
+/* 768px - Tablet Portrait */
+@media (max-width: 768px) {
+  .privacy-policy-container {
+    padding: 15% 5% 7%;
+  }
+}
+
+/* 426px - Mobile Large */
+@media (max-width: 426px) {
+  .privacy-policy-container {
+    padding: 18% 4% 8%;
+  }
+}
+
+/* 384px - Mobile Medium */
+@media (max-width: 384px) {
+  .privacy-policy-container {
+    padding: 20% 3% 8%;
+  }
+}
+
+/* 375px - Mobile Standard */
+@media (max-width: 375px) {
+  .privacy-policy-container {
+    padding: 22% 3% 9%;
+  }
+}
+
+/* 320px - Mobile Small */
+@media (max-width: 320px) {
+  .privacy-policy-container {
+    padding: 25% 2.5% 10%;
+  }
+}

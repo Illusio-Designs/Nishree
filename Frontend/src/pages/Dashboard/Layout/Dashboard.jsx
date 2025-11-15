@@ -8,6 +8,7 @@ import {
   Outlet,
 } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import { SearchProvider, useSearch } from "../../../context/SearchContext";
 import img from "../../../assets/RTHSRT.webp";
 import "../../../Styles/dashboard/Dashboard.css";
 import {
@@ -23,6 +24,7 @@ import {
   HiOutlineUserCircle,
   HiOutlineDocumentText,
   HiOutlineShoppingBag,
+  HiOutlineMagnifyingGlass,
 } from "react-icons/hi2";
 import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import {
@@ -40,15 +42,15 @@ import Policies from "../Pages/Policies";
 import Orders from "../Pages/Orders";
 import Reviews from "../Pages/Reviews";
 import ShippingFees from "../Pages/ShippingFees";
-import ShippingAddresses from "../Pages/ShippingAddresses";
 import Users from "../Pages/Users";
 import SEO from "../Pages/SEO";
 import DashboardOverview from "../Pages/DashboardOverview";
 import Category from "../Pages/Category";
 import ProfileSettings from "../../../components/common/Settings";
 
-const Dashboard = () => {
-  const { user, loading, logout } = useAuth(); // Add logout to destructuring
+const DashboardContent = () => {
+  const { user, loading, logout } = useAuth();
+  const { searchQuery, setSearchQuery } = useSearch();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -216,22 +218,9 @@ const Dashboard = () => {
               location.pathname === "/dashboard/shipping-fees" ? "active" : ""
             }`}
           >
-            <IoPricetagOutline className="nav-icon" size={24} />
-            <span className={!isSidebarOpen ? "hidden" : ""}>
-              Shipping Fees
-            </span>
-          </Link>
-          <Link
-            to="/dashboard/shipping-addresses"
-            className={`nav-item ${
-              location.pathname === "/dashboard/shipping-addresses"
-                ? "active"
-                : ""
-            }`}
-          >
             <HiOutlineTruck className="nav-icon" size={24} />
             <span className={!isSidebarOpen ? "hidden" : ""}>
-              Shipping Addresses
+              Shipping Fees
             </span>
           </Link>
           <Link
@@ -258,6 +247,16 @@ const Dashboard = () => {
         <header className="dashboard-header">
           <h2 className="header-welcome">Welcome, {user?.displayName || "Admin"}</h2>
           <div className="header-actions">
+            <div className="header-search">
+              <HiOutlineMagnifyingGlass size={20} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+            </div>
             <button className="fullscreen-btn" onClick={toggleFullscreen} title="Toggle Fullscreen">
               {isFullscreen ? <MdFullscreenExit size={24} /> : <MdFullscreen size={24} />}
             </button>
@@ -348,7 +347,6 @@ const Dashboard = () => {
               <Route path="policies" element={<Policies />} />
               <Route path="reviews" element={<Reviews />} />
               <Route path="shipping-fees" element={<ShippingFees />} />
-              <Route path="shipping-addresses" element={<ShippingAddresses />} />
               <Route path="users" element={<Users />} />
               <Route path="seo" element={<SEO />} />
               <Route path="profile" element={<ProfileSettings type="profile" />} />
@@ -360,6 +358,14 @@ const Dashboard = () => {
         </footer>
       </div>
     </div>
+  );
+};
+
+const Dashboard = () => {
+  return (
+    <SearchProvider>
+      <DashboardContent />
+    </SearchProvider>
   );
 };
 

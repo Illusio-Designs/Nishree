@@ -113,8 +113,8 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        // Calculate shipping fee
-        const shippingFee = await calculateShippingFee(payment_type);
+        // No shipping fee for prepaid orders
+        const shippingFee = payment_type === 'cod' ? await calculateShippingFee(payment_type) : 0;
         const finalAmount = totalAmount + shippingFee;
 
         // Create order
@@ -517,3 +517,136 @@ export const getOrderStats = async (req, res) => {
     }
 };
 
+
+// ==================== SHIPROCKET INTEGRATION ====================
+
+import axios from 'axios';
+import { Shipment } from '../model/shipmentModel.js';
+
+const SHIPROCKET_API = 'https://apiv2.shiprocket.in/v1/external';
+let shiprocketToken = null;
+let tokenExpiry = null;
+
+// Get Shiprocket token
+const getShiprocketToken = async () => {
+    try {
+        // Check if token exists and is not expired
+        if (shiprocketToken && tokenExpiry && new Date() < tokenExpiry) {
+            return shiprocketToken;
+        }
+
+        const email = process.env.SHIPROCKET_EMAIL;
+        const password = process.env.SHIPROCKET_PASSWORD;
+
+        if (!email || !password) {
+            throw new Error('Shiprocket credentials not configured');
+        }
+
+        const response = await axios.post(`${SHIPROCKET_API}/auth/login`, { email, password });
+        shiprocketToken = response.data.token;
+        tokenExpiry = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000); // 10 days
+
+        return shiprocketToken;
+    } catch (error) {
+        console.error('Shiprocket login error:', error.response?.data || error.message);
+        throw new Error('Failed to authenticate with Shiprocket');
+    }
+};
+
+// Sync orders with Shiprocket
+export const syncOrdersWithShiprocket = async (req, res) => {
+    try {
+        // Get all paid orders without shipments
+        const orders = await Order.findAll({
+            where: { payment_status: 'paid' },
+            include: [
+                { model: OrderItem, include: [{ model: Product, as: 'Product' }] },
+                { model: User },
+                { model: ShippingAddress },
+                { model: Shipment }
+            ]
+        });
+
+        const ordersToSync = orders.filter(order => !order.Shipment);
+
+        if (ordersToSync.length === 0) {
+            return res.json({
+                success: true,
+                message: 'All orders are already synced with Shiprocket',
+                synced: 0
+            });
+        }
+
+        const token = await getShiprocketToken();
+        let syncedCount = 0;
+        let failedCount = 0;
+        const errors = [];
+
+        for (const order of ordersToSync) {
+            try {
+                const shiprocketOrderData = {
+                    order_id: order.order_number,
+                    order_date: order.createdAt,
+                    pickup_location: "Primary",
+                    billing_customer_name: order.User?.username || 'Customer',
+                    billing_last_name: "",
+                    billing_address: order.ShippingAddress?.address || "",
+                    billing_city: order.ShippingAddress?.city || "",
+                    billing_pincode: order.ShippingAddress?.postal_code || "",
+                    billing_state: order.ShippingAddress?.state || "",
+                    billing_country: order.ShippingAddress?.country || "India",
+                    billing_email: order.User?.email || "",
+                    billing_phone: order.ShippingAddress?.phone_number || "",
+                    shipping_is_billing: true,
+                    order_items: order.OrderItems.map(item => ({
+                        name: item.Product?.name || 'Product',
+                        sku: item.Product?.id?.toString() || 'SKU',
+                        units: item.quantity,
+                        selling_price: parseFloat(item.price),
+                        discount: 0,
+                        tax: 0
+                    })),
+                    payment_method: order.payment_type === 'cod' ? 'COD' : 'Prepaid',
+                    sub_total: parseFloat(order.total_amount),
+                    length: 10,
+                    breadth: 10,
+                    height: 10,
+                    weight: 0.5
+                };
+
+                const response = await axios.post(
+                    `${SHIPROCKET_API}/orders/create/adhoc`,
+                    shiprocketOrderData,
+                    { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+                );
+
+                await Shipment.create({
+                    order_id: order.id,
+                    shiprocket_order_id: response.data.order_id,
+                    shipment_id: response.data.shipment_id,
+                    status: 'created'
+                });
+
+                syncedCount++;
+            } catch (error) {
+                console.error(`Failed to sync order ${order.order_number}:`, error.message);
+                failedCount++;
+                errors.push({ order_number: order.order_number, error: error.message });
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `Synced ${syncedCount} orders with Shiprocket`,
+            synced: syncedCount,
+            failed: failedCount,
+            errors: errors.length > 0 ? errors : undefined
+        });
+    } catch (error) {
+        console.error('Sync orders error:', error);
+        res.status(500).json({ 
+            success: false,
+            message: error.message || 'Failed to sync orders with Shiprocket' 
+        });
+    }
+};

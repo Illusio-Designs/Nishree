@@ -4,6 +4,7 @@ import Pagination from "./Pagination";
 import SearchBar from "./SearchBar";
 import Filter from "./Filter";
 import ActionButton from "./ActionButton";
+import { useSearch } from "../../context/SearchContext";
 import "../../Styles/common/TableControls.css";
 
 const TableWithControls = ({
@@ -14,11 +15,20 @@ const TableWithControls = ({
   filters = [],
   actions = [],
   onRowClick,
+  hideLocalSearch = true, // Hide local search by default, use global search
 }) => {
+  const { searchQuery } = useSearch();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({});
   const [filteredData, setFilteredData] = useState([]);
+  
+  // Use global search query
+  useEffect(() => {
+    if (hideLocalSearch) {
+      setSearchTerm(searchQuery);
+    }
+  }, [searchQuery, hideLocalSearch]);
 
   // Combined effect to handle data changes, filtering, and searching
   useEffect(() => {
@@ -116,22 +126,28 @@ const TableWithControls = ({
 
   return (
     <div className="table-with-controls">
-      <div className="table-controls">
-        <div className="controls-left">
-          <SearchBar
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search..."
-          />
+      {(!hideLocalSearch || filters.length > 0) && (
+        <div className="table-controls">
+          {!hideLocalSearch && (
+            <div className="controls-left">
+              <SearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Search..."
+              />
+            </div>
+          )}
+          {filters.length > 0 && (
+            <div className={hideLocalSearch ? "controls-full" : "controls-right"}>
+              <Filter
+                filters={filters}
+                selectedFilters={selectedFilters}
+                onChange={handleFilterChange}
+              />
+            </div>
+          )}
         </div>
-        <div className="controls-right">
-          <Filter
-            filters={filters}
-            selectedFilters={selectedFilters}
-            onChange={handleFilterChange}
-          />
-        </div>
-      </div>
+      )}
 
       <Table
         columns={enhancedColumns}

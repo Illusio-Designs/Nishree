@@ -21,7 +21,7 @@ export const OrderStatusHistory = sequelize.define('OrderStatusHistory', {
     },
     updated_by: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true, // Allow null for guest orders
         references: {
             model: 'users',
             key: 'id'

@@ -97,3 +97,219 @@
     border: 1px solid #e5e7eb;
     display: block;
 }
+
+/* Shipping Page Styles */
+.shiprocket-status-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.status-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.status-info h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.25rem;
+    color: #1f2937;
+}
+
+.status-info p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.status-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.status-badge-success {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #dcfce7;
+    color: #16a34a;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #16a34a;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4b5563;
+    font-size: 0.875rem;
+}
+
+.feature-icon {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+/* Shipment Details Modal */
+.shipment-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.detail-section {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+}
+
+.detail-section h4 {
+    margin: 0 0 1rem 0;
+    color: #1f2937;
+    font-size: 1rem;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.detail-value {
+    font-size: 0.875rem;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.tracking-link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #DC2626, #991B1B);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: transform 0.2s;
+}
+
+.tracking-link:hover {
+    transform: translateY(-2px);
+}
+
+.form-note {
+    padding: 0.75rem;
+    background: #f3f4f6;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.form-note a {
+    color: #DC2626;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.form-note a:hover {
+    text-decoration: underline;
+}
+
+.form-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+/* Status Badge Variants */
+.status-badge.pending {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.status-badge.processing {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.status-badge.shipped {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+.status-badge.delivered {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-badge.cancelled {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.status-badge.in-transit,
+.status-badge.In.Transit {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.status-badge.Delivered {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-badge.Pending {
+    background: #fef3c7;
+    color: #d97706;
+}

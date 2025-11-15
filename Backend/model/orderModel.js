@@ -9,13 +9,29 @@ export const Order = sequelize.define('Order', {
     },
     user_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true, // Allow null for guest orders
         references: {
             model: 'users',
             key: 'id'
         },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
+    },
+    is_guest: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    guest_email: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    guest_phone: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    guest_name: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     order_number: {
         type: DataTypes.STRING,

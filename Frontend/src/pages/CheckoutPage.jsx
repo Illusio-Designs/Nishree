@@ -9,7 +9,7 @@ import "../Styles/CheckoutPage.css";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import api, { guestService } from "../services";
 import { getAllPublicProducts } from '../services/publicindex';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -26,21 +26,35 @@ const CheckoutPage = () => {
   const [bestSellers, setBestSellers] = useState([]);
   const [showBestSellersArrows, setShowBestSellersArrows] = useState(false);
   const bestSellersSliderRef = useRef(null);
+  
+  // Guest checkout state
+  const [isGuest, setIsGuest] = useState(!user);
+  const [guestDetails, setGuestDetails] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    country: 'India'
+  });
 
   useEffect(() => {
-    if (!user) {
-      toast.error('Please login to checkout');
-      navigate('/login');
-      return;
-    }
-
     if (cartItems.length === 0) {
       // Don't redirect, just show empty cart message
       return;
     }
 
     fetchShippingFee();
-    fetchAddresses();
+    
+    if (user) {
+      setIsGuest(false);
+      fetchAddresses();
+    } else {
+      setIsGuest(true);
+    }
+    
     fetchBestSellers();
   }, [user, cartItems]);
 
@@ -58,17 +72,8 @@ const CheckoutPage = () => {
   }, [bestSellers]);
 
   const fetchShippingFee = async () => {
-    try {
-      const response = await api.get('/api/shipping-fees');
-      const prepaidFee = response.data.find(fee => fee.orderType === 'prepaid');
-      if (prepaidFee) {
-        const totalFee = (prepaidFee.fee || 0) + (prepaidFee.weightBasedFee || 0) + (prepaidFee.locationBasedFee || 0);
-        setShippingFee(totalFee);
-      }
-    } catch (error) {
-      console.error('Error fetching shipping fee:', error);
-      setShippingFee(0); // Free shipping if error
-    }
+    // No shipping fee for prepaid orders
+    setShippingFee(0);
   };
 
   const fetchAddresses = async () => {
@@ -115,39 +120,50 @@ const CheckoutPage = () => {
   };
 
   const handleCheckout = async () => {
-    if (!user) {
-      toast.error('Please login to checkout');
-      navigate('/login');
-      return;
-    }
-
     if (cartItems.length === 0) {
       toast.error('Your cart is empty');
       return;
     }
 
-    if (!selectedAddress && addresses.length === 0) {
-      toast.error('Please add a shipping address in your profile');
-      navigate('/profile');
-      return;
-    }
+    // Validate guest details if guest checkout
+    if (isGuest) {
+      if (!guestDetails.name || !guestDetails.email || !guestDetails.phone || 
+          !guestDetails.address || !guestDetails.city || !guestDetails.state || 
+          !guestDetails.postal_code) {
+        toast.error('Please fill in all shipping details');
+        return;
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(guestDetails.email)) {
+        toast.error('Please enter a valid email address');
+        return;
+      }
+      
+      // Validate phone format (basic validation)
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(guestDetails.phone)) {
+        toast.error('Please enter a valid 10-digit phone number');
+        return;
+      }
+    } else {
+      // Logged in user validation
+      if (!selectedAddress && addresses.length === 0) {
+        toast.error('Please add a shipping address in your profile');
+        navigate('/profile');
+        return;
+      }
 
-    if (!selectedAddress) {
-      toast.error('Please select a shipping address');
-      return;
+      if (!selectedAddress) {
+        toast.error('Please select a shipping address');
+        return;
+      }
     }
 
     setLoading(true);
 
     try {
-      // Load Razorpay script
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        toast.error('Failed to load payment gateway. Please try again.');
-        setLoading(false);
-        return;
-      }
-
       // Prepare order items
       const items = cartItems.map(item => ({
         product_id: item.id,
@@ -160,9 +176,8 @@ const CheckoutPage = () => {
       // Calculate order total for payment
       const orderTotal = subtotal + deliveryFee;
 
-      // DON'T create order yet - only create after successful payment
-      // For now, show a message that payment gateway is not configured
-      toast.info('Payment gateway is being configured. Order will be created after successful payment.');
+      // Show payment gateway message for both guest and logged-in users
+      toast.info('Payment gateway integration in progress. Order will be created after successful payment.');
       setLoading(false);
       return;
 
@@ -340,44 +355,144 @@ const CheckoutPage = () => {
               {/* Shipping Address Section */}
               {cartItems.length > 0 && (
                 <div className="shipping-address-section">
-                  <h2 className="section-heading">Select Shipping Address</h2>
-                  
-                  {addresses.length > 0 ? (
-                    <div className="address-list">
-                      {addresses.map(address => (
-                        <div 
-                          key={address.id} 
-                          className={`address-card ${selectedAddress === address.id ? 'selected' : ''}`}
-                          onClick={() => setSelectedAddress(address.id)}
-                        >
-                          <input 
-                            type="radio" 
-                            name="address" 
-                            checked={selectedAddress === address.id}
-                            onChange={() => setSelectedAddress(address.id)}
-                          />
-                          <div className="address-details">
-                            <h4>Shipping Address</h4>
-                            <p>{address.address}</p>
-                            <p>{address.city}, {address.state} - {address.postal_code}</p>
-                            <p>{address.country}</p>
-                            <p>Phone: {address.phone_number}</p>
+                  {!isGuest ? (
+                    <>
+                      <h2 className="section-heading">Select Shipping Address</h2>
+                      
+                      {addresses.length > 0 ? (
+                        <div className="address-list">
+                          {addresses.map(address => (
+                            <div 
+                              key={address.id} 
+                              className={`address-card ${selectedAddress === address.id ? 'selected' : ''}`}
+                              onClick={() => setSelectedAddress(address.id)}
+                            >
+                              <input 
+                                type="radio" 
+                                name="address" 
+                                checked={selectedAddress === address.id}
+                                onChange={() => setSelectedAddress(address.id)}
+                              />
+                              <div className="address-details">
+                                <h4>Shipping Address</h4>
+                                <p>{address.address}</p>
+                                <p>{address.city}, {address.state} - {address.postal_code}</p>
+                                <p>{address.country}</p>
+                                <p>Phone: {address.phone_number}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="no-address">
+                          <p>No shipping address found. Please add one to continue.</p>
+                        </div>
+                      )}
+                      
+                      <button 
+                        className="add-address-btn"
+                        onClick={() => navigate('/profile')}
+                      >
+                        + Add New Address
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="section-heading">Shipping Details</h2>
+                      <div className="guest-form">
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Full Name *</label>
+                            <input
+                              type="text"
+                              value={guestDetails.name}
+                              onChange={(e) => setGuestDetails({...guestDetails, name: e.target.value})}
+                              placeholder="Enter your full name"
+                              required
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label>Email *</label>
+                            <input
+                              type="email"
+                              value={guestDetails.email}
+                              onChange={(e) => setGuestDetails({...guestDetails, email: e.target.value})}
+                              placeholder="Enter your email"
+                              required
+                            />
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="no-address">
-                      <p>No shipping address found. Please add one to continue.</p>
-                    </div>
+                        <div className="form-group">
+                          <label>Phone Number *</label>
+                          <input
+                            type="tel"
+                            value={guestDetails.phone}
+                            onChange={(e) => setGuestDetails({...guestDetails, phone: e.target.value})}
+                            placeholder="Enter 10-digit phone number"
+                            maxLength="10"
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Address *</label>
+                          <input
+                            type="text"
+                            value={guestDetails.address}
+                            onChange={(e) => setGuestDetails({...guestDetails, address: e.target.value})}
+                            placeholder="Street address, apartment, suite, etc."
+                            required
+                          />
+                        </div>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>City *</label>
+                            <input
+                              type="text"
+                              value={guestDetails.city}
+                              onChange={(e) => setGuestDetails({...guestDetails, city: e.target.value})}
+                              placeholder="City"
+                              required
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label>State *</label>
+                            <input
+                              type="text"
+                              value={guestDetails.state}
+                              onChange={(e) => setGuestDetails({...guestDetails, state: e.target.value})}
+                              placeholder="State"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Postal Code *</label>
+                            <input
+                              type="text"
+                              value={guestDetails.postal_code}
+                              onChange={(e) => setGuestDetails({...guestDetails, postal_code: e.target.value})}
+                              placeholder="Postal Code"
+                              required
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label>Country *</label>
+                            <input
+                              type="text"
+                              value={guestDetails.country}
+                              onChange={(e) => setGuestDetails({...guestDetails, country: e.target.value})}
+                              placeholder="Country"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="guest-login-prompt">
+                          <p>Already have an account? <button onClick={() => navigate('/login')} className="login-link">Login here</button></p>
+                        </div>
+                      </div>
+                    </>
                   )}
-                  
-                  <button 
-                    className="add-address-btn"
-                    onClick={() => navigate('/profile')}
-                  >
-                    + Add New Address
-                  </button>
                 </div>
               )}
             </div>
@@ -390,10 +505,7 @@ const CheckoutPage = () => {
                   <p>Subtotal</p>
                   <p>₹{subtotal}</p>
                 </div>
-                <div className="summary-row">
-                  <p>Delivery</p>
-                  <p>₹{deliveryFee}</p>
-                </div>
+
                 <div className="summary-row total">
                   <p>Total</p>
                   <p>
@@ -401,7 +513,8 @@ const CheckoutPage = () => {
                   </p>
                 </div>
                 <div className="shipping-info">
-                  <p>Estimated shipping time: 5-7 days</p>
+                  <p>Free shipping on all prepaid orders</p>
+                  <p>Estimated delivery: 5-7 days</p>
                   <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
                     Payment: Prepaid (Online Payment Only)
                   </p>

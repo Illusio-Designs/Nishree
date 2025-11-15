@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaCheckCircle } from 'react-icons/fa';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import api from '../services/api';
+import api from '../services';
 import '../Styles/OrderSuccess.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -131,12 +131,25 @@ const OrderSuccess = () => {
           )}
 
           <div className="action-buttons">
-            <button className="btn-primary" onClick={() => navigate('/profile')}>
-              View Orders
-            </button>
-            <button className="btn-secondary" onClick={() => navigate('/products')}>
-              Continue Shopping
-            </button>
+            {order?.is_guest ? (
+              <>
+                <p className="guest-message">
+                  Order confirmation has been sent to {order?.guest_email}
+                </p>
+                <button className="btn-primary" onClick={() => navigate('/products')}>
+                  Continue Shopping
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="btn-primary" onClick={() => navigate('/profile')}>
+                  View Orders
+                </button>
+                <button className="btn-secondary" onClick={() => navigate('/products')}>
+                  Continue Shopping
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

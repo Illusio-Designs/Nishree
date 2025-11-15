@@ -9,19 +9,19 @@ import productRoutes from './productRoutes.js';
 import orderRoutes from './orderRoutes.js';
 import sliderRoutes from './sliderRoutes.js';
 import couponRoutes from './couponRoutes.js';
-import shippingAddressRoutes from './shippingAddressRoutes.js';
 import paymentRoutes from './paymentRoutes.js';
-import shippingFeeRoutes from './shippingFeeRoutes.js';
 import orderStatusHistoryRoutes from './orderStatusHistoryRoutes.js';
 import seoRoutes from './seoRoutes.js';
 import attributeRoutes from './attributeRoutes.js';
 import reviewRoutes from './reviewRoutes.js';
 import cartRoutes from './cartRoutes.js';
 import policyRoutes from './policyRoutes.js';
+import shippingRoutes from './shippingRoutes.js';
+import guestRoutes from './guestRoutes.js';
 // import notificationRoutes from './notificationRoutes.js';
 
 // Core Routes
-router.use('/users', userRoutes); // This now includes both auth and user routes
+router.use('/users', userRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/products', productRoutes);
 router.use('/orders', orderRoutes);
@@ -29,23 +29,19 @@ router.use('/orders', orderRoutes);
 // Feature Routes
 router.use('/sliders', sliderRoutes);
 router.use('/coupons', couponRoutes);
-router.use('/shipping-addresses', shippingAddressRoutes);
 router.use('/payments', paymentRoutes);
-router.use('/shipping-fees', shippingFeeRoutes);
 router.use('/order-status', orderStatusHistoryRoutes);
-router.use('/order-status-history', orderStatusHistoryRoutes); // alias for Crosscoin parity
 router.use('/seo', seoRoutes);
 router.use('/attributes', attributeRoutes);
-
-
-// Review routes
 router.use('/reviews', reviewRoutes);
-
-// Cart routes
 router.use('/cart', cartRoutes);
-
-// Policy routes
 router.use('/policies', policyRoutes);
+
+// Shipping routes (addresses + fees)
+router.use('/shipping', shippingRoutes);
+
+// Guest routes (no authentication required)
+router.use('/guest', guestRoutes);
 
 // Notification routes - Temporarily disabled
 // router.use('/notifications', notificationRoutes);

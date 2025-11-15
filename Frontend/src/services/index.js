@@ -81,7 +81,7 @@ const handleApiError = (error) => {
 export const shippingFeeService = {
     getAllShippingFees: async () => {
         try {
-            const response = await api.get('/api/shipping-fees');
+            const response = await api.get('/api/shipping/fees');
             return response.data.shippingFees;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -90,7 +90,7 @@ export const shippingFeeService = {
 
     getShippingFeeByType: async (type) => {
         try {
-            const response = await api.get(`/api/shipping-fees/${type}`);
+            const response = await api.get(`/api/shipping/fees/${type}`);
             return response.data.shippingFee;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -99,7 +99,7 @@ export const shippingFeeService = {
 
     createOrUpdateShippingFee: async (feeData) => {
         try {
-            const response = await api.post('/api/shipping-fees', feeData);
+            const response = await api.post('/api/shipping/fees', feeData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -108,7 +108,7 @@ export const shippingFeeService = {
 
     deleteShippingFee: async (id) => {
         try {
-            const response = await api.delete(`/api/shipping-fees/${id}`);
+            const response = await api.delete(`/api/shipping/fees/${id}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -120,7 +120,7 @@ export const shippingFeeService = {
 export const shippingAddressService = {
     getUserShippingAddresses: async () => {
         try {
-            const response = await api.get('/api/shipping-addresses');
+            const response = await api.get('/api/shipping/addresses');
             return response.data.shippingAddresses;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -129,7 +129,7 @@ export const shippingAddressService = {
 
     getShippingAddressById: async (id) => {
         try {
-            const response = await api.get(`/api/shipping-addresses/${id}`);
+            const response = await api.get(`/api/shipping/addresses/${id}`);
             return response.data.shippingAddress;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -138,7 +138,7 @@ export const shippingAddressService = {
 
     createShippingAddress: async (addressData) => {
         try {
-            const response = await api.post('/api/shipping-addresses', addressData);
+            const response = await api.post('/api/shipping/addresses', addressData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -147,7 +147,7 @@ export const shippingAddressService = {
 
     updateShippingAddress: async (id, addressData) => {
         try {
-            const response = await api.put(`/api/shipping-addresses/${id}`, addressData);
+            const response = await api.put(`/api/shipping/addresses/${id}`, addressData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -156,7 +156,7 @@ export const shippingAddressService = {
 
     deleteShippingAddress: async (id) => {
         try {
-            const response = await api.delete(`/api/shipping-addresses/${id}`);
+            const response = await api.delete(`/api/shipping/addresses/${id}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -265,6 +265,18 @@ export const authService = {
     logout: async () => {
         try {
             const response = await api.post('/api/users/logout');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+};
+
+// Guest Services
+export const guestService = {
+    createGuestOrder: async (orderData) => {
+        try {
+            const response = await api.post('/api/guest/checkout', orderData);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -582,6 +594,15 @@ export const orderService = {
     deleteOrder: async (id) => {
         try {
             const response = await api.delete(`/api/orders/${id}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    syncOrdersWithShiprocket: async () => {
+        try {
+            const response = await api.post('/api/orders/sync-shiprocket');
             return response.data;
         } catch (error) {
             throw handleApiError(error);
