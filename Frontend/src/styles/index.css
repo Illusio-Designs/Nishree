@@ -58,30 +58,37 @@ span {
   align-items: center;
   justify-content: space-around;
 }
+
 .feature {
   text-align: center;
   align-items: center;
 }
+
 .feature-icon img {
   width: 50px;
   height: 50px;
   padding-bottom: 20px;
 }
+
 .feature-icon.premium-icon img {
   width: 41px !important;
 }
+
 .feature-text h4 {
   padding-bottom: 10px;
   font-size: 20px;
   font-weight: 700;
 }
+
 .feature-text p {
   font-size: 18px;
   font-weight: 400;
 }
+
 .blog-section {
   padding: 4rem 2rem;
 }
+
 .blog-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -90,6 +97,7 @@ span {
   margin: 0 auto;
   padding-top: 20px;
 }
+
 .blog-card {
   background: white;
   border-radius: 10px;
@@ -97,19 +105,23 @@ span {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
 }
+
 .blog-card:hover {
   transform: translateY(-5px);
 }
+
 .blog-image {
   width: 100%;
   height: 200px;
   overflow: hidden;
 }
+
 .blog-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+
 .blog-card h3 {
   padding: 1rem;
   font-size: 20px;
@@ -268,6 +280,7 @@ span {
   .features {
     padding: 25px 15px 0;
     gap: 25px;
+    flex-direction: column;
   }
 
   .feature-icon img {
