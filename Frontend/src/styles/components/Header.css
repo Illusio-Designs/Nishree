@@ -4,8 +4,12 @@
 }
 
 .header {
-  position: absolute;
-  z-index: 1;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
 }
 
 .back {
@@ -14,11 +18,13 @@
   width: 85%;
   margin: 0 7.5%;
   margin-top: 20px;
-  position: absolute;
+  position: fixed;
+  top: 0;
   border: 1px solid #f2f2f226;
   background: #f2f2f226;
   backdrop-filter: blur(25.200000762939453px);
   border-radius: 20px;
+  pointer-events: none;
 }
 
 .header .container {
@@ -31,6 +37,7 @@
   background-color: #ffffff;
   position: relative;
   border-radius: 20px;
+  pointer-events: all;
 }
 
 .logo img {
