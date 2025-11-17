@@ -152,6 +152,23 @@ const Home = () => {
     }
   };
 
+  // Auto-play slider every 3 seconds
+  useEffect(() => {
+    if (sliders.length === 0) return;
+
+    const autoPlayInterval = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        if (prevIndex < sliders.length - 1) {
+          return prevIndex + 1;
+        } else {
+          return 0; // Loop back to first slide
+        }
+      });
+    }, 3000);
+
+    return () => clearInterval(autoPlayInterval);
+  }, [sliders.length]);
+
   useEffect(() => {
     const sections = document.querySelectorAll(".section");
     const observer = new IntersectionObserver(
@@ -218,6 +235,7 @@ const Home = () => {
               <div 
                 className="rotating-slider__background" 
                 ref={backgroundRef}
+                key={currentIndex}
                 style={{ backgroundImage: sliders[currentIndex]?.image ? `url(${sliders[currentIndex].image})` : 'none' }}
               />
               <div className="rotating-slider__wrapper" ref={wrapperRef}>
@@ -241,7 +259,7 @@ const Home = () => {
                 ))}
               </div>
               <div className="rotating-slider__list" ref={titleRef} />
-              <div className="slider-content">
+              <div className="slider-content" key={`content-${currentIndex}`}>
                 <h2>{sliders[currentIndex]?.title}</h2>
                 {sliders[currentIndex]?.description && <p>{sliders[currentIndex].description}</p>}
                 {sliders[currentIndex]?.buttonText && (
