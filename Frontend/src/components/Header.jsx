@@ -49,9 +49,9 @@ const Header = () => {
       <div className="header">
         <div className="back"></div>
         <div className="container">
-          <div className="logo">
+          <Link to="/" className="logo">
             <img src={logo} alt="logo" />
-          </div>
+          </Link>
 
           <div className={`nav ${isMenuOpen ? 'active' : ''}`}>
             <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')} onClick={() => setIsMenuOpen(false)}>Home</NavLink>
