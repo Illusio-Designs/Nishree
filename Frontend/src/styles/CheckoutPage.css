@@ -343,11 +343,6 @@
   display: none;
 }
 
-.product-slider-item {
-  flex: 0 0 auto;
-  width: 280px;
-}
-
 .slider-arrow {
   position: absolute;
   top: 50%;
