@@ -53,12 +53,6 @@ const Header = () => {
             <img src={logo} alt="logo" />
           </div>
 
-          <div className="burger-menu" onClick={toggleMenu}>
-            <div className={`bar ${isMenuOpen ? 'active' : ''}`}></div>
-            <div className={`bar ${isMenuOpen ? 'active' : ''}`}></div>
-            <div className={`bar ${isMenuOpen ? 'active' : ''}`}></div>
-          </div>
-
           <div className={`nav ${isMenuOpen ? 'active' : ''}`}>
             <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')} onClick={() => setIsMenuOpen(false)}>Home</NavLink>
             <NavLink to="/about" className={({ isActive }) => (isActive ? 'active' : '')} onClick={() => setIsMenuOpen(false)}>About us</NavLink>
@@ -100,6 +94,11 @@ const Header = () => {
               {cartItems.length > 0 && (
                 <span className="cart-badge">{cartItems.reduce((sum, item) => sum + item.quantity, 0)}</span>
               )}
+            </div>
+            <div className="burger-menu" onClick={toggleMenu}>
+              <div className={`bar ${isMenuOpen ? 'active' : ''}`}></div>
+              <div className={`bar ${isMenuOpen ? 'active' : ''}`}></div>
+              <div className={`bar ${isMenuOpen ? 'active' : ''}`}></div>
             </div>
           </div>
         </div>

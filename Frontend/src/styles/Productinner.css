@@ -589,7 +589,7 @@
   overflow: hidden;
 }
 
-.bar {
+.bar-container .bar {
   height: 100%;
   background: #ffc107;
   border-radius: 4px;
@@ -598,7 +598,7 @@
 
 
 
-.reviews-slider-wrapper {
+.rating-bar .reviews-slider-wrapper {
   overflow: hidden;
   margin-top: 40px;
   padding: 30px 0;
@@ -704,21 +704,6 @@
   align-items: center;
   gap: 1rem;
   margin: 0.5rem 0;
-}
-
-.bar-container {
-  flex: 1;
-  height: 8px;
-  background: #e9ecef;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.bar {
-  height: 100%;
-  background: #ffc107;
-  border-radius: 4px;
-  transition: width 0.3s ease;
 }
 
 .review-card {
