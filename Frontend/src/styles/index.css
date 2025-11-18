@@ -302,11 +302,6 @@ span {
     display: none;
   }
 
-  .blog-card {
-    flex: 0 0 auto;
-    width: calc(50% - 0.75rem);
-  }
-
   .blog-card h3 {
     font-size: 17px;
     padding: 0.8rem;
@@ -376,10 +371,6 @@ span {
 
   .blog-slider-wrapper {
     padding: 20px 30px 0;
-  }
-
-  .blog-card {
-    width: calc(100% - 1.5rem);
   }
 
   .blog-image {
@@ -453,10 +444,6 @@ span {
     padding: 20px 25px 0;
   }
 
-  .blog-card {
-    width: calc(100% - 1.5rem);
-  }
-
   .blog-image {
     height: 170px;
   }
@@ -521,10 +508,6 @@ span {
 
   .blog-slider-wrapper {
     padding: 20px 20px 0;
-  }
-
-  .blog-card {
-    width: calc(100% - 1.5rem);
   }
 
   .blog-image {
@@ -595,10 +578,6 @@ span {
 
   .blog-cards {
     gap: 1.2rem;
-  }
-
-  .blog-card {
-    width: calc(100% - 1.2rem);
   }
 
   .blog-image {
