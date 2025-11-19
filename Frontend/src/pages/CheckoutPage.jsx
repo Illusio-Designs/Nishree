@@ -47,14 +47,6 @@ const CheckoutPage = () => {
       const startTime = Date.now();
       setPageLoading(true);
       
-      if (cartItems.length === 0) {
-        // Ensure loader shows for at least 3 seconds even for empty cart
-        const elapsedTime = Date.now() - startTime;
-        const remainingTime = Math.max(0, 3000 - elapsedTime);
-        setTimeout(() => setPageLoading(false), remainingTime);
-        return;
-      }
-
       await fetchShippingFee();
       
       if (user) {
@@ -73,7 +65,7 @@ const CheckoutPage = () => {
     };
 
     initializePage();
-  }, [user, cartItems]);
+  }, [user]); // Removed cartItems dependency to prevent reload on quantity change
 
   useEffect(() => {
     const checkOverflow = () => {
@@ -299,16 +291,10 @@ const CheckoutPage = () => {
       <Header />
       <div className="background">
         <div className="checkout-page">
-          <div className="modes">
-            <p className="section-title active">1. MY BAG</p>
-            <p className="line"></p>
-            <p className="section-title">2. DELIVERY</p>
-            <p className="line"></p>
-            <p className="section-title">3. REVIEW & PAYMENT</p>
-          </div>
           <div className="checkout">
             {/* Left - Cart Items & Address Selection */}
             <div className="checkout-left-section">
+              <h2 className="checkout-section-title">My Bag</h2>
               {cartItems.length === 0 ? (
                 <div className="empty-cart">
                   <p>Your cart is empty</p>
@@ -318,7 +304,8 @@ const CheckoutPage = () => {
                 </div>
               ) : (
                 <>
-                  {cartItems.map((item) => (
+                  <div className="cart-items-container">
+                    {cartItems.map((item) => (
                     <div className="cart-item" key={item.uniqueKey}>
                       <img
                         src={getImageUrl(item.image)}
@@ -362,7 +349,8 @@ const CheckoutPage = () => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    ))}
+                  </div>
                   <div className="subtotal">
                     <p>Subtotal</p>
                     <p>₹{subtotal}</p>
@@ -376,10 +364,9 @@ const CheckoutPage = () => {
               {/* Shipping Address Section */}
               {cartItems.length > 0 && (
                 <div className="shipping-address-section">
+                  <h2 className="checkout-section-title">Shipping Address</h2>
                   {!isGuest ? (
                     <>
-                      <h2 className="section-heading">Select Shipping Address</h2>
-                      
                       {addresses.length > 0 ? (
                         <div className="address-list">
                           {addresses.map(address => (
@@ -419,7 +406,6 @@ const CheckoutPage = () => {
                     </>
                   ) : (
                     <>
-                      <h2 className="section-heading">Shipping Details</h2>
                       <div className="guest-form">
                         <div className="form-row">
                           <div className="form-group">
@@ -534,9 +520,7 @@ const CheckoutPage = () => {
                   </p>
                 </div>
                 <div className="shipping-info">
-                  <p>Free shipping on all prepaid orders</p>
-                  <p>Estimated delivery: 5-7 days</p>
-                  <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                  <p>
                     Payment: Prepaid (Online Payment Only)
                   </p>
                 </div>
