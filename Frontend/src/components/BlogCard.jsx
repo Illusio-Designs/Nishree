@@ -53,11 +53,11 @@ const BlogCard = () => {
   };
 
   return (
-    <div className="blog-section">
+    <div className="blog-section home-blog-section">
       <h1 className="text-center">
         Discover the <span>World of Spices</span>
       </h1>
-      <div className="blog-slider-wrapper">
+      <div className="blog-slider-wrapper home-blog-slider-wrapper">
         {showBlogArrows && (
           <button 
             className="blog-slider-arrow blog-slider-arrow-left" 
@@ -67,9 +67,9 @@ const BlogCard = () => {
             <FaChevronLeft />
           </button>
         )}
-        <div className="blog-cards" ref={blogSliderRef}>
+        <div className="blog-cards home-blog-cards" ref={blogSliderRef}>
           {blogPosts.map((post, index) => (
-            <div className="blog-card" key={index}>
+            <div className="blog-card home-blog-card" key={index}>
               <div className="blog-image">
                 <img src={post.image} alt={post.title} />
               </div>

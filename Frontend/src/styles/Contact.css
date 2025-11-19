@@ -44,6 +44,11 @@
   border-radius: 4px;
 }
 
+.contact-form textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
 .contact-form button {
   width: 100%;
   padding: 0.875rem 1.25rem;
@@ -94,27 +99,23 @@
 
 /* Comprehensive Responsive Breakpoints */
 
-/* 2560px - Ultra Wide */
-
-
-/* 1024px - Tablet Landscape */
-
-
-/* 1000px */
-
-
-/* 768px - Tablet Portrait */
-
-
-/* 426px - Mobile Large */
-
-
-/* 384px - Mobile Medium */
-
-
-/* 375px - Mobile Standard */
-
-
-/* 320px - Mobile Small */
-
-
+@media (max-width: 1024px) {
+  .contactpage {
+    padding: 15% 0 5% 0;
+}
+}
+@media (max-width: 768px) {
+  .contactpage {
+    padding: 17% 0 5% 0;
+}
+}
+@media (max-width: 426px) {
+  .contactpage {
+    padding: 30% 5% 10%;
+}
+}
+@media (max-width: 375px) {
+   .contactpage {
+    padding: 35% 8% 10%;
+}
+}
