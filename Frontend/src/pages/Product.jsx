@@ -152,6 +152,7 @@ const Product = () => {
         {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
       </Helmet>
       <Header />
+      <div className='collection'>
       <div className="hero-section section">
         <div className="hero-img-section">
           <img src={hero} className="img-fluid" alt="hero" />
@@ -164,6 +165,7 @@ const Product = () => {
             {category ? category.description : 'Explore premium products made with the finest ingredients for authentic flavor.'}
           </p>
         </div>
+      </div>
       </div>
       
       <div className="background section">

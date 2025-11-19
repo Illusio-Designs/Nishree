@@ -38,7 +38,7 @@ const Footer = () => {
                 >
                   <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6" />
                 </svg>
-                <p>123 Spice Market, Mumbai, India</p>
+                <p>Plot No. G-1379, GIDC Gate No. 3, Opp. JAYSHREE MACHINE TOOLS UNIT - 3, metoda, vajdi, Rajkot - 360021.(Guj.)</p>
               </div>
               <div className="footer-item">
                 <svg
@@ -54,8 +54,8 @@ const Footer = () => {
                     d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"
                   />
                 </svg>
-                <a href="tel:+911234567890" className="footer-link">
-                  +91 123 456 7890
+                <a href="tel:+918925555550" className="footer-link">
+                  +91 89255 55550
                 </a>
               </div>
               <div className="footer-item">
@@ -69,8 +69,8 @@ const Footer = () => {
                 >
                   <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z" />
                 </svg>
-                <a href="mailto:info@nishree.com" className="footer-link">
-                  info@nishree.com
+                <a href="mailto:govindafmp@gmail.com" className="footer-link">
+                  govindafmp@gmail.com
                 </a>
               </div>
               </div>
