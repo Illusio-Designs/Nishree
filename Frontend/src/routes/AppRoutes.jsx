@@ -8,7 +8,7 @@ import Productinner from "../pages/Productinner";
 import CheckoutPage from "../pages/CheckoutPage";
 import OrderSuccess from "../pages/OrderSuccess";
 import Contact from "../pages/Contact";
-import PrivacyPolicy from "../pages/PrivacyPolicy";
+import Policies from "../pages/Policies";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Profile from "../pages/Profile";
@@ -47,7 +47,8 @@ const AppRoutes = () => {
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/order-success/:orderId" element={<OrderSuccess />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/policies" element={<Policies />} />
+      <Route path="/privacy-policy" element={<Policies />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 

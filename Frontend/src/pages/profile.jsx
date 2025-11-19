@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import Header from "../components/Header";
 import Footer from '../components/Footer';
+import CookingLoader from '../components/CookingLoader';
 import Loader from '../components/Loader';
 import Modal from '../components/common/Modal';
 import Button from '../components/common/Button';
@@ -22,6 +23,7 @@ const ProfilePage = () => {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [orders, setOrders] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [editingAddress, setEditingAddress] = useState(null);
@@ -56,6 +58,10 @@ const ProfilePage = () => {
         setImagePreview(null);
       }
     }
+    
+    // Show loader for at least 3 seconds on initial load
+    const timer = setTimeout(() => setPageLoading(false), 3000);
+    return () => clearTimeout(timer);
   }, [user]);
 
   const handleImageChange = (e) => {
@@ -205,6 +211,20 @@ const ProfilePage = () => {
       setLoading(false);
     }
   };
+
+  if (pageLoading) {
+    return (
+      <>
+        <Helmet>
+          <title>{seoData?.meta_title || 'My Account - Nishree'}</title>
+          <meta name="description" content={seoData?.meta_description || 'Manage your account, orders, and addresses.'} />
+          {seoData?.meta_keywords && <meta name="keywords" content={seoData.meta_keywords} />}
+          {seoData?.canonical_url && <link rel="canonical" href={seoData.canonical_url} />}
+        </Helmet>
+        <CookingLoader />
+      </>
+    );
+  }
 
   return (
     <>

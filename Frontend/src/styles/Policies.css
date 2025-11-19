@@ -1,4 +1,4 @@
-.privacy-policy-page {
+.policies-page {
   padding: 10% 8% 5%;
   background-image: url("../assets/—Pngtree—texture of recycled cardboard with_15735637 1.webp");
   background-repeat: no-repeat;
@@ -6,10 +6,56 @@
   background-attachment: fixed;
 }
 
-.privacy-container h1 {
-  font-size: 48px;
-  margin-bottom: 30px;
+.policies-container h1 {
+  margin-bottom: 40px;
   color: #1f2937;
+}
+
+/* Policy Tabs */
+.policy-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+
+.policy-tab {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6b7280;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  position: relative;
+  bottom: -2px;
+}
+
+.policy-tab:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.policy-tab.active {
+  color: #dc2626;
+  border-bottom-color: #dc2626;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .policy-tabs {
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .policy-tab {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
 }
 
 .last-updated {
@@ -20,7 +66,7 @@
   font-style: italic;
 }
 
-.privacy-content {
+.policy-content {
   line-height: 1.8;
   color: #374151;
 }
@@ -165,30 +211,23 @@
   border: 2px dashed #d1d5db;
 }
 
-
-
-
-/* 2560px - Ultra Wide */
-
-
-/* 1024px - Tablet Landscape */
-
-
-/* 1000px */
-
-
-/* 768px - Tablet Portrait */
-
-
-/* 426px - Mobile Large */
-
-
-/* 384px - Mobile Medium */
-
-
-/* 375px - Mobile Standard */
-
-
-/* 320px - Mobile Small */
-
-
+@media (max-width: 1024px) {
+  .policies-page {
+    padding: 13% 8% 5%;
+}
+}
+@media (max-width: 768px) {
+  .policies-page {
+    padding: 17% 8% 5%;
+}
+}
+@media (max-width: 426px) {
+  .policies-page {
+    padding: 30% 5% 10%;
+}
+}
+@media (max-width: 375px) {
+   .policies-page {
+    padding: 35% 8% 10%;
+}
+}

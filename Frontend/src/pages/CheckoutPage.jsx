@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import ProductCard from "../components/Productcard";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";
+import CookingLoader from "../components/CookingLoader";
 import "../Styles/CheckoutPage.css";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -21,6 +22,7 @@ const CheckoutPage = () => {
   
   const [shippingFee, setShippingFee] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [bestSellers, setBestSellers] = useState([]);
@@ -41,21 +43,36 @@ const CheckoutPage = () => {
   });
 
   useEffect(() => {
-    if (cartItems.length === 0) {
-      // Don't redirect, just show empty cart message
-      return;
-    }
+    const initializePage = async () => {
+      const startTime = Date.now();
+      setPageLoading(true);
+      
+      if (cartItems.length === 0) {
+        // Ensure loader shows for at least 3 seconds even for empty cart
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 3000 - elapsedTime);
+        setTimeout(() => setPageLoading(false), remainingTime);
+        return;
+      }
 
-    fetchShippingFee();
-    
-    if (user) {
-      setIsGuest(false);
-      fetchAddresses();
-    } else {
-      setIsGuest(true);
-    }
-    
-    fetchBestSellers();
+      await fetchShippingFee();
+      
+      if (user) {
+        setIsGuest(false);
+        await fetchAddresses();
+      } else {
+        setIsGuest(true);
+      }
+      
+      await fetchBestSellers();
+      
+      // Ensure loader shows for at least 3 seconds
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 3000 - elapsedTime);
+      setTimeout(() => setPageLoading(false), remainingTime);
+    };
+
+    initializePage();
   }, [user, cartItems]);
 
   useEffect(() => {
@@ -272,6 +289,10 @@ const CheckoutPage = () => {
   const subtotal = getCartTotal();
   const deliveryFee = shippingFee;
   const total = subtotal + deliveryFee;
+
+  if (pageLoading) {
+    return <CookingLoader />;
+  }
 
   return (
     <>

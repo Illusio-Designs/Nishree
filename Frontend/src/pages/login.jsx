@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import CookingLoader from "../components/CookingLoader";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -162,6 +163,7 @@ const Login = () => {
 
     if (!validateForm()) return;
 
+    const startTime = Date.now();
     setIsLoading(true);
 
     try {
@@ -184,16 +186,20 @@ const Login = () => {
       
       toast.success("Login successful!");
       
-      // Wait a moment for AuthContext to fully update
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Ensure loader shows for at least 3 seconds
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 3000 - elapsedTime);
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
       
       navigate("/profile", { replace: true });
     } catch (err) {
       toast.error(
         err.message || "Login failed. Please check your credentials."
       );
-    } finally {
-      setIsLoading(false);
+      // Ensure loader shows for at least 3 seconds even on error
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 3000 - elapsedTime);
+      setTimeout(() => setIsLoading(false), remainingTime);
     }
   };
 
@@ -209,6 +215,10 @@ const Login = () => {
       });
     }
   };
+
+  if (isLoading) {
+    return <CookingLoader />;
+  }
 
   return (
     <>
