@@ -37,7 +37,7 @@ const CheckoutPage = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [discount, setDiscount] = useState(0);
   const [showCouponSuccess, setShowCouponSuccess] = useState(false);
-  const [isHoveringCoupons, setIsHoveringCoupons] = useState(false);
+  const [showCouponArrows, setShowCouponArrows] = useState(false);
   const couponsSliderRef = useRef(null);
 
   // Guest checkout state
@@ -89,29 +89,21 @@ const CheckoutPage = () => {
     console.log('🔵 Available Addresses:', addresses);
   }, [selectedAddress, addresses]);
 
-  // Auto-scroll coupons slider
+  // Check for overflow to show/hide arrows
   useEffect(() => {
-    if (!couponsSliderRef.current || isHoveringCoupons || coupons.length === 0) return;
-
-    const slider = couponsSliderRef.current;
-    let scrollInterval;
-
-    const startAutoScroll = () => {
-      scrollInterval = setInterval(() => {
-        if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth) {
-          slider.scrollLeft = 0;
-        } else {
-          slider.scrollLeft += 1;
-        }
-      }, 30);
+    const checkCouponOverflow = () => {
+      if (couponsSliderRef.current) {
+        const hasOverflow = couponsSliderRef.current.scrollWidth > couponsSliderRef.current.clientWidth;
+        setShowCouponArrows(hasOverflow);
+      }
     };
 
-    startAutoScroll();
+    // Check immediately and after a small delay to ensure DOM is rendered
+    checkCouponOverflow();
+    const timer = setTimeout(checkCouponOverflow, 100);
 
-    return () => {
-      if (scrollInterval) clearInterval(scrollInterval);
-    };
-  }, [coupons, isHoveringCoupons]);
+    return () => clearTimeout(timer);
+  }, [coupons]);
 
   useEffect(() => {
     const checkOverflow = () => {
@@ -119,12 +111,20 @@ const CheckoutPage = () => {
         const hasOverflow = bestSellersSliderRef.current.scrollWidth > bestSellersSliderRef.current.clientWidth;
         setShowBestSellersArrows(hasOverflow);
       }
+      if (couponsSliderRef.current) {
+        const hasOverflow = couponsSliderRef.current.scrollWidth > couponsSliderRef.current.clientWidth;
+        setShowCouponArrows(hasOverflow);
+      }
     };
 
-    checkOverflow();
+    // Small delay to ensure DOM is fully rendered
+    const timer = setTimeout(checkOverflow, 100);
     window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
-  }, [bestSellers]);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkOverflow);
+    };
+  }, [bestSellers, coupons]);
 
   const fetchShippingFee = async () => {
     // No shipping fee for prepaid orders
@@ -413,7 +413,8 @@ const CheckoutPage = () => {
   const displayItems = isBuyNow && buyNowItems.length > 0 ? buyNowItems : cartItems;
   const subtotal = isBuyNow && buyNowItems.length > 0 ? getBuyNowTotal() : getCartTotal();
   const deliveryFee = shippingFee;
-  const total = subtotal - discount + deliveryFee;
+  const discountAmount = Number(discount) || 0;
+  const total = subtotal - discountAmount + deliveryFee;
 
   // Debug logs
   console.log('🛒 isBuyNow:', isBuyNow);
@@ -714,40 +715,62 @@ const CheckoutPage = () => {
                 {coupons.length > 0 && !appliedCoupon && (
                   <div className="coupons-slider-section">
                     <h4 className="coupons-slider-title">Available Coupons</h4>
-                    <div 
-                      className="coupons-slider" 
-                      ref={couponsSliderRef}
-                      onMouseEnter={() => setIsHoveringCoupons(true)}
-                      onMouseLeave={() => setIsHoveringCoupons(false)}
-                      onTouchStart={() => setIsHoveringCoupons(true)}
-                      onTouchEnd={() => setIsHoveringCoupons(false)}
-                    >
-                      {coupons.map((coupon) => (
-                        <div 
-                          key={coupon.id} 
-                          className="coupon-card"
+                    <div className="coupons-slider-wrapper">
+                      {showCouponArrows && (
+                        <button
+                          className="coupon-slider-arrow coupon-slider-arrow-left"
                           onClick={() => {
-                            setCouponCode(coupon.code);
+                            if (couponsSliderRef.current) {
+                              couponsSliderRef.current.scrollBy({ left: -160, behavior: 'smooth' });
+                            }
                           }}
                         >
-                          <div className="coupon-card-header">
-                            <span className="coupon-code">{coupon.code}</span>
+                          <FaChevronLeft />
+                        </button>
+                      )}
+                      <div 
+                        className="coupons-slider" 
+                        ref={couponsSliderRef}
+                      >
+                        {coupons.map((coupon) => (
+                          <div 
+                            key={coupon.id} 
+                            className="coupon-card"
+                            onClick={() => {
+                              setCouponCode(coupon.code);
+                            }}
+                          >
+                            <div className="coupon-card-header">
+                              <span className="coupon-code">{coupon.code}</span>
+                            </div>
+                            <div className="coupon-card-body">
+                              <p className="coupon-value">
+                                {coupon.type === 'percentage' 
+                                  ? `${coupon.value}% OFF`
+                                  : `₹${coupon.value} OFF`}
+                              </p>
+                              {coupon.minPurchase && (
+                                <p className="coupon-min">Min: ₹{coupon.minPurchase}</p>
+                              )}
+                            </div>
+                            <div className="coupon-card-footer">
+                              <span className="coupon-tap">Tap to apply</span>
+                            </div>
                           </div>
-                          <div className="coupon-card-body">
-                            <p className="coupon-value">
-                              {coupon.type === 'percentage' 
-                                ? `${coupon.value}% OFF`
-                                : `₹${coupon.value} OFF`}
-                            </p>
-                            {coupon.minPurchase && (
-                              <p className="coupon-min">Min: ₹{coupon.minPurchase}</p>
-                            )}
-                          </div>
-                          <div className="coupon-card-footer">
-                            <span className="coupon-tap">Tap to apply</span>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                      {showCouponArrows && (
+                        <button
+                          className="coupon-slider-arrow coupon-slider-arrow-right"
+                          onClick={() => {
+                            if (couponsSliderRef.current) {
+                              couponsSliderRef.current.scrollBy({ left: 160, behavior: 'smooth' });
+                            }
+                          }}
+                        >
+                          <FaChevronRight />
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -780,10 +803,10 @@ const CheckoutPage = () => {
                   <p>₹{subtotal.toFixed(2)}</p>
                 </div>
 
-                {discount > 0 && (
+                {discountAmount > 0 && (
                   <div className="summary-row discount-row">
                     <p>Discount ({appliedCoupon?.code})</p>
-                    <p className="discount-amount">-₹{discount.toFixed(2)}</p>
+                    <p className="discount-amount">-₹{discountAmount.toFixed(2)}</p>
                   </div>
                 )}
 
@@ -811,7 +834,7 @@ const CheckoutPage = () => {
               {showCouponSuccess && (
                 <div className="coupon-success-popup">
                   <div className="success-icon">🎉</div>
-                  <h3>Yay! You saved ₹{discount.toFixed(2)}</h3>
+                  <h3>Yay! You saved ₹{discountAmount.toFixed(2)}</h3>
                   <p>Coupon "{appliedCoupon?.code}" applied successfully!</p>
                 </div>
               )}
