@@ -10,7 +10,7 @@ import "../Styles/CheckoutPage.css";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import api, { guestService } from "../services";
+import api, { guestService, shippingAddressService } from "../services";
 import { getAllPublicProducts } from '../services/publicindex';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -47,12 +47,16 @@ const CheckoutPage = () => {
       const startTime = Date.now();
       setPageLoading(true);
       
+      console.log('Initializing checkout page, user:', user);
+      
       await fetchShippingFee();
       
       if (user) {
+        console.log('User is logged in, fetching addresses...');
         setIsGuest(false);
         await fetchAddresses();
       } else {
+        console.log('User is guest');
         setIsGuest(true);
       }
       
@@ -87,18 +91,22 @@ const CheckoutPage = () => {
 
   const fetchAddresses = async () => {
     try {
-      const response = await api.get('/api/shipping-addresses');
-      const addressList = response.data.shippingAddresses || [];
-      setAddresses(addressList);
+      console.log('Fetching addresses for user...');
+      const addressList = await shippingAddressService.getUserShippingAddresses();
+      console.log('Address list:', addressList);
+      setAddresses(addressList || []);
       
-      const defaultAddr = addressList.find(addr => addr.is_default);
+      const defaultAddr = addressList?.find(addr => addr.is_default);
       if (defaultAddr) {
         setSelectedAddress(defaultAddr.id);
-      } else if (addressList.length > 0) {
+        console.log('Selected default address:', defaultAddr.id);
+      } else if (addressList && addressList.length > 0) {
         setSelectedAddress(addressList[0].id);
+        console.log('Selected first address:', addressList[0].id);
       }
     } catch (error) {
       console.error('Error fetching addresses:', error);
+      setAddresses([]);
     }
   };
 

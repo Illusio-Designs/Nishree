@@ -226,7 +226,6 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex: 1;
 }
 
 .buy-btn {
@@ -995,7 +994,6 @@
 
   .btn-red,
   .buy-btn {
-    width: 100%;
     padding: 10px 20px;
     font-size: 13px;
   }

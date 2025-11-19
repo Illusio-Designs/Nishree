@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Helmet } from "react-helmet-async";
 import { FaUser, FaEdit, FaBox, FaMapMarkerAlt, FaSignOutAlt, FaTrash, FaPlus } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -38,7 +38,20 @@ const ProfilePage = () => {
   
   const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
+  const hasLoadedRef = useRef(false);
 
+  // Initial page load - only once per session
+  useEffect(() => {
+    if (!hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      const timer = setTimeout(() => setPageLoading(false), 3000);
+      return () => clearTimeout(timer);
+    } else {
+      setPageLoading(false);
+    }
+  }, []);
+
+  // Update profile data when user changes
   useEffect(() => {
     if (user) {
       console.log('User data updated:', user);
@@ -58,10 +71,6 @@ const ProfilePage = () => {
         setImagePreview(null);
       }
     }
-    
-    // Show loader for at least 3 seconds on initial load
-    const timer = setTimeout(() => setPageLoading(false), 3000);
-    return () => clearTimeout(timer);
   }, [user]);
 
   const handleImageChange = (e) => {
