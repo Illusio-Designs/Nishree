@@ -238,7 +238,6 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex: 1;
 }
 
 .buy-btn:hover {

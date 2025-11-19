@@ -30,6 +30,62 @@
   gap: 20px;
 }
 
+/* Cart Items Section (for Buy Now mode) */
+.cart-items-section {
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.cart-items-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #282828;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-items-section .cart-items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cart-items-section .cart-item {
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+}
+
+.cart-items-section .cart-item:hover {
+  border-color: #B72D24;
+}
+
+.btn-add-to-buynow {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #B72D24 0%, #991B1B 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  margin-top: 8px;
+}
+
+.btn-add-to-buynow:hover {
+  background: linear-gradient(135deg, #991B1B 0%, #7f1d1d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(183, 45, 36, 0.3);
+}
+
+.btn-add-to-buynow:active {
+  transform: translateY(0);
+}
+
 .cart-items {
   grid-column: span 2;
 }
@@ -751,6 +807,44 @@
   .empty-cart p {
     font-size: 16px;
   }
+
+  .cart-items-title {
+    font-size: 18px;
+  }
+
+  .cart-items-section .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .cart-items-section .cart-item-image {
+    width: 100%;
+    height: 180px;
+  }
+
+  .cart-items-section .cart-item-details {
+    width: 100%;
+    padding: 0;
+  }
+
+  .cart-items-section .cart-item-quantity {
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .cart-items-section .cart-item-price {
+    width: 100%;
+    text-align: left;
+    font-size: 18px;
+    margin-top: 10px;
+  }
+
+  .btn-add-to-buynow {
+    width: 100%;
+  }
 }
 
 /* 375px - Mobile Standard */
@@ -790,6 +884,14 @@
 
   .product-slider-wrapper {
     padding: 0 25px;
+  }
+
+  .cart-items-title {
+    font-size: 16px;
+  }
+
+  .cart-items-section .cart-item-image {
+    height: 160px;
   }
 }
 
@@ -899,6 +1001,23 @@
   .slider-arrow svg {
     width: 12px;
     height: 12px;
+  }
+
+  .cart-items-title {
+    font-size: 15px;
+  }
+
+  .cart-items-section .cart-item {
+    padding: 12px;
+  }
+
+  .cart-items-section .cart-item-image {
+    height: 140px;
+  }
+
+  .btn-add-to-buynow {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
 

@@ -9,16 +9,18 @@ import CookingLoader from "../components/CookingLoader";
 import "../Styles/CheckoutPage.css";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api, { guestService, shippingAddressService } from "../services";
 import { getAllPublicProducts } from '../services/publicindex';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const CheckoutPage = () => {
-  const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart, buyNowItems, clearBuyNow, getBuyNowTotal, setBuyNow, updateBuyNowQuantity, removeBuyNowItem } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isBuyNow = searchParams.get('buyNow') === 'true';
   
   const [shippingFee, setShippingFee] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -71,6 +73,12 @@ const CheckoutPage = () => {
     initializePage();
   }, [user]); // Removed cartItems dependency to prevent reload on quantity change
 
+  // Debug: Log when selectedAddress changes
+  useEffect(() => {
+    console.log('🔵 Selected Address State Changed:', selectedAddress);
+    console.log('🔵 Available Addresses:', addresses);
+  }, [selectedAddress, addresses]);
+
   useEffect(() => {
     const checkOverflow = () => {
       if (bestSellersSliderRef.current) {
@@ -93,19 +101,26 @@ const CheckoutPage = () => {
     try {
       console.log('Fetching addresses for user...');
       const addressList = await shippingAddressService.getUserShippingAddresses();
-      console.log('Address list:', addressList);
+      console.log('Address list received:', addressList);
+      console.log('Number of addresses:', addressList?.length);
+      
       setAddresses(addressList || []);
       
+      // Find default address
       const defaultAddr = addressList?.find(addr => addr.is_default);
+      console.log('Default address found:', defaultAddr);
+      
       if (defaultAddr) {
         setSelectedAddress(defaultAddr.id);
-        console.log('Selected default address:', defaultAddr.id);
+        console.log('✅ Selected default address ID:', defaultAddr.id);
       } else if (addressList && addressList.length > 0) {
         setSelectedAddress(addressList[0].id);
-        console.log('Selected first address:', addressList[0].id);
+        console.log('✅ Selected first address ID:', addressList[0].id);
+      } else {
+        console.log('⚠️ No addresses available');
       }
     } catch (error) {
-      console.error('Error fetching addresses:', error);
+      console.error('❌ Error fetching addresses:', error);
       setAddresses([]);
     }
   };
@@ -278,17 +293,40 @@ const CheckoutPage = () => {
 
   const handleQuantityChange = (uniqueKey, newQuantity) => {
     if (newQuantity > 0) {
+      if (isBuyNow) {
+        updateBuyNowQuantity(uniqueKey, newQuantity);
+      } else {
+        updateQuantity(uniqueKey, newQuantity);
+      }
+    }
+  };
+
+  const handleCartQuantityChange = (uniqueKey, newQuantity) => {
+    if (newQuantity > 0) {
       updateQuantity(uniqueKey, newQuantity);
     }
   };
 
   const handleRemove = (uniqueKey) => {
-    removeFromCart(uniqueKey);
+    if (isBuyNow) {
+      removeBuyNowItem(uniqueKey);
+    } else {
+      removeFromCart(uniqueKey);
+    }
   };
 
-  const subtotal = getCartTotal();
+  // Determine which items to display
+  const displayItems = isBuyNow && buyNowItems.length > 0 ? buyNowItems : cartItems;
+  const subtotal = isBuyNow && buyNowItems.length > 0 ? getBuyNowTotal() : getCartTotal();
   const deliveryFee = shippingFee;
   const total = subtotal + deliveryFee;
+
+  // Debug logs
+  console.log('🛒 isBuyNow:', isBuyNow);
+  console.log('🛒 buyNowItems:', buyNowItems);
+  console.log('🛒 buyNowItems.length:', buyNowItems.length);
+  console.log('🛒 displayItems:', displayItems);
+  console.log('🛒 cartItems:', cartItems);
 
   if (pageLoading) {
     return <CookingLoader />;
@@ -302,8 +340,8 @@ const CheckoutPage = () => {
           <div className="checkout">
             {/* Left - Cart Items & Address Selection */}
             <div className="checkout-left-section">
-              <h2 className="checkout-section-title">My Bag</h2>
-              {cartItems.length === 0 ? (
+              <h2 className="checkout-section-title">{isBuyNow ? 'Buy Now' : 'My Bag'}</h2>
+              {displayItems.length === 0 ? (
                 <div className="empty-cart">
                   <p>Your cart is empty</p>
                   <button className="back-btn" onClick={() => navigate('/products')}>
@@ -313,7 +351,7 @@ const CheckoutPage = () => {
               ) : (
                 <>
                   <div className="cart-items-container">
-                    {cartItems.map((item) => (
+                    {displayItems.map((item) => (
                     <div className="cart-item" key={item.uniqueKey}>
                       <img
                         src={getImageUrl(item.image)}
@@ -359,10 +397,71 @@ const CheckoutPage = () => {
                     </div>
                     ))}
                   </div>
+                  
                   <div className="subtotal">
                     <p>Subtotal</p>
                     <p>₹{subtotal}</p>
                   </div>
+                  
+                  {isBuyNow && cartItems.length > 0 && (
+                    <div className="cart-items-section">
+                      <h3 className="cart-items-title">Your Cart Items ({cartItems.length})</h3>
+                      <div className="cart-items-container">
+                        {cartItems.map((item) => (
+                          <div className="cart-item" key={item.uniqueKey}>
+                            <img
+                              src={getImageUrl(item.image)}
+                              alt={item.name}
+                              className="cart-item-image"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://placehold.co/100x100/e2e8f0/1e293b?text=Product';
+                              }}
+                            />
+                            <div className="cart-item-details">
+                              <p className="item-title">{item.name}</p>
+                              <p className="item-weight">
+                                {item.variation?.weight}{item.variation?.weightUnit}
+                              </p>
+                              <button 
+                                className="btn-add-to-buynow"
+                                onClick={() => {
+                                  // Add to Buy Now
+                                  setBuyNow(item, item.quantity);
+                                  // Remove from cart
+                                  removeFromCart(item.uniqueKey);
+                                  toast.success('Item added to Buy Now and removed from cart!');
+                                }}
+                              >
+                                Add to Buy Now
+                              </button>
+                            </div>
+                            <div>
+                              <div className="cart-item-quantity">
+                                <button 
+                                  className="quantity-btn"
+                                  onClick={() => handleCartQuantityChange(item.uniqueKey, item.quantity - 1)}
+                                >
+                                  −
+                                </button>
+                                <div className="quantity-value">{item.quantity}</div>
+                                <button 
+                                  className="quantity-btn"
+                                  onClick={() => handleCartQuantityChange(item.uniqueKey, item.quantity + 1)}
+                                >
+                                  +
+                                </button>
+                              </div>
+                              <div className="cart-item-price">
+                                ₹{((Number(item.price) || 0) * (Number(item.quantity) || 1)).toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
                   <button className="back-btn" onClick={() => navigate('/products')}>
                     BACK TO PURCHASE
                   </button>
@@ -370,7 +469,7 @@ const CheckoutPage = () => {
               )}
 
               {/* Shipping Address Section */}
-              {cartItems.length > 0 && (
+              {displayItems.length > 0 && (
                 <div className="shipping-address-section">
                   <h2 className="checkout-section-title">Shipping Address</h2>
                   {!isGuest ? (

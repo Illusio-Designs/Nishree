@@ -37,7 +37,7 @@ const PLACEHOLDER_IMAGES = {
 const Productinner = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const { addToCart } = useCart();
+  const { addToCart, setBuyNow } = useCart();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -337,7 +337,7 @@ const Productinner = () => {
       return;
     }
 
-    const cartProduct = {
+    const buyNowProduct = {
       id: product.id,
       name: product.name,
       price: selectedVariation.price,
@@ -353,8 +353,8 @@ const Productinner = () => {
       ProductVariations: product.ProductVariations
     };
 
-    addToCart(cartProduct, quantity);
-    navigate('/checkout');
+    setBuyNow(buyNowProduct, quantity);
+    navigate('/checkout?buyNow=true');
   };
 
   // Fetch reviews

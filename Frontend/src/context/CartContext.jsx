@@ -16,6 +16,11 @@ export const CartProvider = ({ children }) => {
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
+  const [buyNowItems, setBuyNowItems] = useState(() => {
+    const savedBuyNow = sessionStorage.getItem('buyNowItems');
+    return savedBuyNow ? JSON.parse(savedBuyNow) : [];
+  });
+
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
@@ -82,6 +87,69 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((count, item) => count + item.quantity, 0);
   };
 
+  const setBuyNow = (product, quantity = 1) => {
+    setBuyNowItems(prev => {
+      // Create a unique key based on product id and variation id
+      const variationId = product.variation?.id;
+      const uniqueKey = variationId ? `${product.id}-${variationId}` : product.id;
+      
+      const existingItem = prev.find(item => {
+        const itemKey = item.variation?.id ? `${item.id}-${item.variation.id}` : item.id;
+        return itemKey === uniqueKey;
+      });
+      
+      if (existingItem) {
+        // Update quantity if item already exists
+        const updated = prev.map(item => {
+          const itemKey = item.variation?.id ? `${item.id}-${item.variation.id}` : item.id;
+          return itemKey === uniqueKey
+            ? { ...item, quantity: item.quantity + quantity }
+            : item;
+        });
+        sessionStorage.setItem('buyNowItems', JSON.stringify(updated));
+        return updated;
+      }
+      
+      // Add new item
+      const newItem = { ...product, quantity, uniqueKey };
+      const updated = [...prev, newItem];
+      sessionStorage.setItem('buyNowItems', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const clearBuyNow = () => {
+    setBuyNowItems([]);
+    sessionStorage.removeItem('buyNowItems');
+  };
+
+  const getBuyNowTotal = () => {
+    return buyNowItems.reduce((total, item) => {
+      const price = Number(item.price) || 0;
+      const quantity = Number(item.quantity) || 1;
+      return total + (price * quantity);
+    }, 0);
+  };
+
+  const updateBuyNowQuantity = (uniqueKey, quantity) => {
+    if (quantity < 1) return;
+    setBuyNowItems(prev => {
+      const updated = prev.map(item =>
+        item.uniqueKey === uniqueKey ? { ...item, quantity } : item
+      );
+      sessionStorage.setItem('buyNowItems', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const removeBuyNowItem = (uniqueKey) => {
+    setBuyNowItems(prev => {
+      const updated = prev.filter(item => item.uniqueKey !== uniqueKey);
+      sessionStorage.setItem('buyNowItems', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const value = {
     cartItems,
     addToCart,
@@ -89,7 +157,13 @@ export const CartProvider = ({ children }) => {
     updateQuantity,
     clearCart,
     getCartTotal,
-    getCartCount
+    getCartCount,
+    buyNowItems,
+    setBuyNow,
+    clearBuyNow,
+    getBuyNowTotal,
+    updateBuyNowQuantity,
+    removeBuyNowItem
   };
 
   return (
