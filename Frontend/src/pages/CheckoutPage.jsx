@@ -11,7 +11,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api, { guestService, shippingAddressService } from "../services";
-import { getAllPublicProducts } from '../services/publicindex';
+import { getAllPublicProducts, getPublicCoupons } from '../services/publicindex';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -21,7 +21,7 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isBuyNow = searchParams.get('buyNow') === 'true';
-  
+
   const [shippingFee, setShippingFee] = useState(0);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
@@ -30,7 +30,16 @@ const CheckoutPage = () => {
   const [bestSellers, setBestSellers] = useState([]);
   const [showBestSellersArrows, setShowBestSellersArrows] = useState(false);
   const bestSellersSliderRef = useRef(null);
-  
+
+  // Coupon states
+  const [coupons, setCoupons] = useState([]);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [discount, setDiscount] = useState(0);
+  const [showCouponSuccess, setShowCouponSuccess] = useState(false);
+  const [isHoveringCoupons, setIsHoveringCoupons] = useState(false);
+  const couponsSliderRef = useRef(null);
+
   // Guest checkout state
   const [isGuest, setIsGuest] = useState(!user);
   const [guestDetails, setGuestDetails] = useState({
@@ -48,11 +57,11 @@ const CheckoutPage = () => {
     const initializePage = async () => {
       const startTime = Date.now();
       setPageLoading(true);
-      
+
       console.log('Initializing checkout page, user:', user);
-      
+
       await fetchShippingFee();
-      
+
       if (user) {
         console.log('User is logged in, fetching addresses...');
         setIsGuest(false);
@@ -61,9 +70,10 @@ const CheckoutPage = () => {
         console.log('User is guest');
         setIsGuest(true);
       }
-      
+
       await fetchBestSellers();
-      
+      await fetchCoupons();
+
       // Ensure loader shows for at least 3 seconds
       const elapsedTime = Date.now() - startTime;
       const remainingTime = Math.max(0, 3000 - elapsedTime);
@@ -78,6 +88,30 @@ const CheckoutPage = () => {
     console.log('🔵 Selected Address State Changed:', selectedAddress);
     console.log('🔵 Available Addresses:', addresses);
   }, [selectedAddress, addresses]);
+
+  // Auto-scroll coupons slider
+  useEffect(() => {
+    if (!couponsSliderRef.current || isHoveringCoupons || coupons.length === 0) return;
+
+    const slider = couponsSliderRef.current;
+    let scrollInterval;
+
+    const startAutoScroll = () => {
+      scrollInterval = setInterval(() => {
+        if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth) {
+          slider.scrollLeft = 0;
+        } else {
+          slider.scrollLeft += 1;
+        }
+      }, 30);
+    };
+
+    startAutoScroll();
+
+    return () => {
+      if (scrollInterval) clearInterval(scrollInterval);
+    };
+  }, [coupons, isHoveringCoupons]);
 
   useEffect(() => {
     const checkOverflow = () => {
@@ -103,13 +137,13 @@ const CheckoutPage = () => {
       const addressList = await shippingAddressService.getUserShippingAddresses();
       console.log('Address list received:', addressList);
       console.log('Number of addresses:', addressList?.length);
-      
+
       setAddresses(addressList || []);
-      
+
       // Find default address
       const defaultAddr = addressList?.find(addr => addr.is_default);
       console.log('Default address found:', defaultAddr);
-      
+
       if (defaultAddr) {
         setSelectedAddress(defaultAddr.id);
         console.log('✅ Selected default address ID:', defaultAddr.id);
@@ -133,12 +167,72 @@ const CheckoutPage = () => {
           .filter(p => p.review_count > 0)
           .sort((a, b) => b.review_count - a.review_count)
           .slice(0, 10);
-        
+
         setBestSellers(productsWithReviews.length > 0 ? productsWithReviews : allProductsResponse.data.products.slice(0, 10));
       }
     } catch (error) {
       console.error('Error fetching best sellers:', error);
     }
+  };
+
+  const fetchCoupons = async () => {
+    try {
+      const response = await getPublicCoupons();
+      setCoupons(response.coupons || []);
+    } catch (error) {
+      console.error('Error fetching coupons:', error);
+    }
+  };
+
+  const applyCoupon = () => {
+    if (!couponCode.trim()) {
+      toast.error('Please enter a coupon code');
+      return;
+    }
+
+    const coupon = coupons.find(c => c.code.toUpperCase() === couponCode.toUpperCase());
+
+    if (!coupon) {
+      toast.error('Invalid coupon code');
+      return;
+    }
+
+    // Check if coupon is expired
+    if (new Date(coupon.endDate) < new Date()) {
+      toast.error('This coupon has expired');
+      return;
+    }
+
+    // Check minimum purchase
+    if (coupon.minPurchase && subtotal < coupon.minPurchase) {
+      toast.error(`Minimum purchase of ₹${coupon.minPurchase} required`);
+      return;
+    }
+
+    // Calculate discount
+    let discountAmount = 0;
+    if (coupon.type === 'percentage') {
+      discountAmount = (subtotal * coupon.value) / 100;
+      if (coupon.maxDiscount) {
+        discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+      }
+    } else {
+      discountAmount = coupon.value;
+    }
+
+    setAppliedCoupon(coupon);
+    setDiscount(discountAmount);
+    setShowCouponSuccess(true);
+
+    // Hide success popup after 3 seconds
+    setTimeout(() => setShowCouponSuccess(false), 3000);
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setDiscount(0);
+    setCouponCode('');
+    toast.info('Coupon removed');
   };
 
   const loadRazorpayScript = () => {
@@ -159,20 +253,20 @@ const CheckoutPage = () => {
 
     // Validate guest details if guest checkout
     if (isGuest) {
-      if (!guestDetails.name || !guestDetails.email || !guestDetails.phone || 
-          !guestDetails.address || !guestDetails.city || !guestDetails.state || 
-          !guestDetails.postal_code) {
+      if (!guestDetails.name || !guestDetails.email || !guestDetails.phone ||
+        !guestDetails.address || !guestDetails.city || !guestDetails.state ||
+        !guestDetails.postal_code) {
         toast.error('Please fill in all shipping details');
         return;
       }
-      
+
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(guestDetails.email)) {
         toast.error('Please enter a valid email address');
         return;
       }
-      
+
       // Validate phone format (basic validation)
       const phoneRegex = /^[0-9]{10}$/;
       if (!phoneRegex.test(guestDetails.phone)) {
@@ -319,7 +413,7 @@ const CheckoutPage = () => {
   const displayItems = isBuyNow && buyNowItems.length > 0 ? buyNowItems : cartItems;
   const subtotal = isBuyNow && buyNowItems.length > 0 ? getBuyNowTotal() : getCartTotal();
   const deliveryFee = shippingFee;
-  const total = subtotal + deliveryFee;
+  const total = subtotal - discount + deliveryFee;
 
   // Debug logs
   console.log('🛒 isBuyNow:', isBuyNow);
@@ -352,57 +446,57 @@ const CheckoutPage = () => {
                 <>
                   <div className="cart-items-container">
                     {displayItems.map((item) => (
-                    <div className="cart-item" key={item.uniqueKey}>
-                      <img
-                        src={getImageUrl(item.image)}
-                        alt={item.name}
-                        className="cart-item-image"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://placehold.co/100x100/e2e8f0/1e293b?text=Product';
-                        }}
-                      />
-                      <div className="cart-item-details">
-                        <p className="item-title">{item.name}</p>
-                        <p className="item-weight">
-                          {item.variation?.weight}{item.variation?.weightUnit}
-                        </p>
-                        <button 
-                          className="remove-btn"
-                          onClick={() => handleRemove(item.uniqueKey)}
-                        >
-                          REMOVE
-                        </button>
-                      </div>
-                      <div>
-                        <div className="cart-item-quantity">
-                          <button 
-                            className="quantity-btn"
-                            onClick={() => handleQuantityChange(item.uniqueKey, item.quantity - 1)}
+                      <div className="cart-item" key={item.uniqueKey}>
+                        <img
+                          src={getImageUrl(item.image)}
+                          alt={item.name}
+                          className="cart-item-image"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://placehold.co/100x100/e2e8f0/1e293b?text=Product';
+                          }}
+                        />
+                        <div className="cart-item-details">
+                          <p className="item-title">{item.name}</p>
+                          <p className="item-weight">
+                            {item.variation?.weight}{item.variation?.weightUnit}
+                          </p>
+                          <button
+                            className="remove-btn"
+                            onClick={() => handleRemove(item.uniqueKey)}
                           >
-                            −
-                          </button>
-                          <div className="quantity-value">{item.quantity}</div>
-                          <button 
-                            className="quantity-btn"
-                            onClick={() => handleQuantityChange(item.uniqueKey, item.quantity + 1)}
-                          >
-                            +
+                            REMOVE
                           </button>
                         </div>
-                        <div className="cart-item-price">
-                          ₹{((Number(item.price) || 0) * (Number(item.quantity) || 1)).toFixed(2)}
+                        <div>
+                          <div className="cart-item-quantity">
+                            <button
+                              className="quantity-btn"
+                              onClick={() => handleQuantityChange(item.uniqueKey, item.quantity - 1)}
+                            >
+                              −
+                            </button>
+                            <div className="quantity-value">{item.quantity}</div>
+                            <button
+                              className="quantity-btn"
+                              onClick={() => handleQuantityChange(item.uniqueKey, item.quantity + 1)}
+                            >
+                              +
+                            </button>
+                          </div>
+                          <div className="cart-item-price">
+                            ₹{((Number(item.price) || 0) * (Number(item.quantity) || 1)).toFixed(2)}
+                          </div>
                         </div>
                       </div>
-                    </div>
                     ))}
                   </div>
-                  
+
                   <div className="subtotal">
                     <p>Subtotal</p>
                     <p>₹{subtotal}</p>
                   </div>
-                  
+
                   {isBuyNow && cartItems.length > 0 && (
                     <div className="cart-items-section">
                       <h3 className="cart-items-title">Your Cart Items ({cartItems.length})</h3>
@@ -423,7 +517,7 @@ const CheckoutPage = () => {
                               <p className="item-weight">
                                 {item.variation?.weight}{item.variation?.weightUnit}
                               </p>
-                              <button 
+                              <button
                                 className="btn-add-to-buynow"
                                 onClick={() => {
                                   // Add to Buy Now
@@ -438,14 +532,14 @@ const CheckoutPage = () => {
                             </div>
                             <div>
                               <div className="cart-item-quantity">
-                                <button 
+                                <button
                                   className="quantity-btn"
                                   onClick={() => handleCartQuantityChange(item.uniqueKey, item.quantity - 1)}
                                 >
                                   −
                                 </button>
                                 <div className="quantity-value">{item.quantity}</div>
-                                <button 
+                                <button
                                   className="quantity-btn"
                                   onClick={() => handleCartQuantityChange(item.uniqueKey, item.quantity + 1)}
                                 >
@@ -461,7 +555,7 @@ const CheckoutPage = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   <button className="back-btn" onClick={() => navigate('/products')}>
                     BACK TO PURCHASE
                   </button>
@@ -477,14 +571,14 @@ const CheckoutPage = () => {
                       {addresses.length > 0 ? (
                         <div className="address-list">
                           {addresses.map(address => (
-                            <div 
-                              key={address.id} 
+                            <div
+                              key={address.id}
                               className={`address-card ${selectedAddress === address.id ? 'selected' : ''}`}
                               onClick={() => setSelectedAddress(address.id)}
                             >
-                              <input 
-                                type="radio" 
-                                name="address" 
+                              <input
+                                type="radio"
+                                name="address"
                                 checked={selectedAddress === address.id}
                                 onChange={() => setSelectedAddress(address.id)}
                               />
@@ -503,8 +597,8 @@ const CheckoutPage = () => {
                           <p>No shipping address found. Please add one to continue.</p>
                         </div>
                       )}
-                      
-                      <button 
+
+                      <button
                         className="add-address-btn"
                         onClick={() => navigate('/profile')}
                       >
@@ -520,7 +614,7 @@ const CheckoutPage = () => {
                             <input
                               type="text"
                               value={guestDetails.name}
-                              onChange={(e) => setGuestDetails({...guestDetails, name: e.target.value})}
+                              onChange={(e) => setGuestDetails({ ...guestDetails, name: e.target.value })}
                               placeholder="Enter your full name"
                               required
                             />
@@ -530,7 +624,7 @@ const CheckoutPage = () => {
                             <input
                               type="email"
                               value={guestDetails.email}
-                              onChange={(e) => setGuestDetails({...guestDetails, email: e.target.value})}
+                              onChange={(e) => setGuestDetails({ ...guestDetails, email: e.target.value })}
                               placeholder="Enter your email"
                               required
                             />
@@ -541,7 +635,7 @@ const CheckoutPage = () => {
                           <input
                             type="tel"
                             value={guestDetails.phone}
-                            onChange={(e) => setGuestDetails({...guestDetails, phone: e.target.value})}
+                            onChange={(e) => setGuestDetails({ ...guestDetails, phone: e.target.value })}
                             placeholder="Enter 10-digit phone number"
                             maxLength="10"
                             required
@@ -552,7 +646,7 @@ const CheckoutPage = () => {
                           <input
                             type="text"
                             value={guestDetails.address}
-                            onChange={(e) => setGuestDetails({...guestDetails, address: e.target.value})}
+                            onChange={(e) => setGuestDetails({ ...guestDetails, address: e.target.value })}
                             placeholder="Street address, apartment, suite, etc."
                             required
                           />
@@ -563,7 +657,7 @@ const CheckoutPage = () => {
                             <input
                               type="text"
                               value={guestDetails.city}
-                              onChange={(e) => setGuestDetails({...guestDetails, city: e.target.value})}
+                              onChange={(e) => setGuestDetails({ ...guestDetails, city: e.target.value })}
                               placeholder="City"
                               required
                             />
@@ -573,7 +667,7 @@ const CheckoutPage = () => {
                             <input
                               type="text"
                               value={guestDetails.state}
-                              onChange={(e) => setGuestDetails({...guestDetails, state: e.target.value})}
+                              onChange={(e) => setGuestDetails({ ...guestDetails, state: e.target.value })}
                               placeholder="State"
                               required
                             />
@@ -585,7 +679,7 @@ const CheckoutPage = () => {
                             <input
                               type="text"
                               value={guestDetails.postal_code}
-                              onChange={(e) => setGuestDetails({...guestDetails, postal_code: e.target.value})}
+                              onChange={(e) => setGuestDetails({ ...guestDetails, postal_code: e.target.value })}
                               placeholder="Postal Code"
                               required
                             />
@@ -595,7 +689,7 @@ const CheckoutPage = () => {
                             <input
                               type="text"
                               value={guestDetails.country}
-                              onChange={(e) => setGuestDetails({...guestDetails, country: e.target.value})}
+                              onChange={(e) => setGuestDetails({ ...guestDetails, country: e.target.value })}
                               placeholder="Country"
                               required
                             />
@@ -615,15 +709,88 @@ const CheckoutPage = () => {
             <div className="order-summary">
               <div className="summary-box">
                 <div className="summary-title">Order summary</div>
+
+                {/* Available Coupons Slider */}
+                {coupons.length > 0 && !appliedCoupon && (
+                  <div className="coupons-slider-section">
+                    <h4 className="coupons-slider-title">Available Coupons</h4>
+                    <div 
+                      className="coupons-slider" 
+                      ref={couponsSliderRef}
+                      onMouseEnter={() => setIsHoveringCoupons(true)}
+                      onMouseLeave={() => setIsHoveringCoupons(false)}
+                      onTouchStart={() => setIsHoveringCoupons(true)}
+                      onTouchEnd={() => setIsHoveringCoupons(false)}
+                    >
+                      {coupons.map((coupon) => (
+                        <div 
+                          key={coupon.id} 
+                          className="coupon-card"
+                          onClick={() => {
+                            setCouponCode(coupon.code);
+                          }}
+                        >
+                          <div className="coupon-card-header">
+                            <span className="coupon-code">{coupon.code}</span>
+                          </div>
+                          <div className="coupon-card-body">
+                            <p className="coupon-value">
+                              {coupon.type === 'percentage' 
+                                ? `${coupon.value}% OFF`
+                                : `₹${coupon.value} OFF`}
+                            </p>
+                            {coupon.minPurchase && (
+                              <p className="coupon-min">Min: ₹{coupon.minPurchase}</p>
+                            )}
+                          </div>
+                          <div className="coupon-card-footer">
+                            <span className="coupon-tap">Tap to apply</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Coupon Section */}
+                <div className="coupon-section">
+                  {!appliedCoupon ? (
+                    <div className="coupon-input-group">
+                      <input
+                        type="text"
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="coupon-input"
+                      />
+                      <button onClick={applyCoupon} className="apply-coupon-btn">
+                        Apply
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="applied-coupon">
+                      <span className="coupon-badge">{appliedCoupon.code}</span>
+                      <button onClick={removeCoupon} className="remove-coupon-btn">×</button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="summary-row">
                   <p>Subtotal</p>
-                  <p>₹{subtotal}</p>
+                  <p>₹{subtotal.toFixed(2)}</p>
                 </div>
+
+                {discount > 0 && (
+                  <div className="summary-row discount-row">
+                    <p>Discount ({appliedCoupon?.code})</p>
+                    <p className="discount-amount">-₹{discount.toFixed(2)}</p>
+                  </div>
+                )}
 
                 <div className="summary-row total">
                   <p>Total</p>
                   <p>
-                    <strong>₹{total}</strong>
+                    <strong>₹{total.toFixed(2)}</strong>
                   </p>
                 </div>
                 <div className="shipping-info">
@@ -631,14 +798,23 @@ const CheckoutPage = () => {
                     Payment: Prepaid (Online Payment Only)
                   </p>
                 </div>
-                <button 
+                <button
                   className="checkout-btn"
-                  disabled={cartItems.length === 0 || loading}
+                  disabled={displayItems.length === 0 || loading}
                   onClick={handleCheckout}
                 >
                   {loading ? 'PROCESSING...' : 'CHECK OUT'}
                 </button>
               </div>
+
+              {/* Coupon Success Popup */}
+              {showCouponSuccess && (
+                <div className="coupon-success-popup">
+                  <div className="success-icon">🎉</div>
+                  <h3>Yay! You saved ₹{discount.toFixed(2)}</h3>
+                  <p>Coupon "{appliedCoupon?.code}" applied successfully!</p>
+                </div>
+              )}
               <div className="payment-types">
                 <div className="payment-title">Payment type</div>
                 <div className="payment-icons">
@@ -754,8 +930,8 @@ const CheckoutPage = () => {
             </div>
             <div className="product-slider-wrapper">
               {showBestSellersArrows && (
-                <button 
-                  className="slider-arrow slider-arrow-left" 
+                <button
+                  className="slider-arrow slider-arrow-left"
                   onClick={() => {
                     if (bestSellersSliderRef.current) {
                       bestSellersSliderRef.current.scrollBy({ left: -320, behavior: 'smooth' });
@@ -773,8 +949,8 @@ const CheckoutPage = () => {
                 ))}
               </div>
               {showBestSellersArrows && (
-                <button 
-                  className="slider-arrow slider-arrow-right" 
+                <button
+                  className="slider-arrow slider-arrow-right"
                   onClick={() => {
                     if (bestSellersSliderRef.current) {
                       bestSellersSliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });

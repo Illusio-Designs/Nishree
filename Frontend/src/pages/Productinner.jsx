@@ -16,7 +16,7 @@ import div5 from "../assets/div (8).webp";
 import div6 from "../assets/div (9).webp";
 import div7 from "../assets/div (10).webp";
 import div8 from "../assets/div (11).webp";
-import { getPublicProductById, getPublicCoupons, getPublicProductReviews, createPublicReview } from "../services/publicindex";
+import { getPublicProductById, getPublicProductReviews, createPublicReview } from "../services/publicindex";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
@@ -46,8 +46,6 @@ const Productinner = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [hoverRating, setHoverRating] = useState(0);
-  const [coupons, setCoupons] = useState([]);
-  const [discountAmount, setDiscountAmount] = useState(0);
   const [reviews, setReviews] = useState([]);
   const [reviewStats, setReviewStats] = useState(null);
   const [reviewLoading, setReviewLoading] = useState(false);
@@ -241,19 +239,7 @@ const Productinner = () => {
     }
   }, [product, getImageUrl]);
 
-  // Fetch coupons
-  const fetchCoupons = useCallback(async () => {
-    try {
-      const response = await getPublicCoupons();
-      setCoupons(response.coupons || []);
-    } catch (error) {
-      console.error('Error fetching coupons:', error);
-    }
-  }, []);
 
-  useEffect(() => {
-    fetchCoupons();
-  }, [fetchCoupons]);
 
   // Quantity handlers with validation
   const handleQuantityChange = (e) => {
@@ -604,45 +590,6 @@ const Productinner = () => {
                 <button className="btn-red" onClick={handleAddToCart}>Add to Cart</button>
                 <button className="buy-btn" onClick={handleBuyNow}>Buy Now</button>
               </div>
-
-            <div className="offers-section">
-              <h3><img src={offer} alt="offer" height="20px"/> Available Coupons</h3>
-              <div className="offer-list">
-                {coupons.length > 0 ? (
-                  coupons.map((coupon) => (
-                    <div key={coupon.id} className="offer-box" onClick={(e) => {
-                      navigator.clipboard.writeText(coupon.code);
-                      const tooltip = document.createElement('div');
-                      tooltip.className = 'tooltip';
-                      tooltip.textContent = 'Copied!';
-                      tooltip.style.left = `${e.clientX}px`;
-                      tooltip.style.top = `${e.clientY}px`;
-                      document.body.appendChild(tooltip);
-                      setTimeout(() => {
-                        document.body.removeChild(tooltip);
-                      }, 2000);
-                    }}>
-                      <div className="coupon-header">
-                        <h4>{coupon.code}</h4>
-                      </div>
-                      <p>
-                        {coupon.type === 'percentage' 
-                          ? `${coupon.value}% off`
-                          : `₹${coupon.value} off`}
-                        {coupon.minPurchase && ` on orders above ₹${coupon.minPurchase}`}
-                      </p>
-                      <p className="validity">
-                        Valid till: {new Date(coupon.endDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="no-coupons">
-                    <p>No active coupons available at the moment</p>
-                  </div>
-                )}
-              </div>
-            </div>
 
             <div className="icons-section">
               <div className="icon-box">
