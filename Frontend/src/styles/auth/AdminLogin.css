@@ -5,7 +5,7 @@
 }
 
 .auth-container {
-    height: 100vh;
+    padding: 11% 5% 5% !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -301,28 +301,17 @@
 }
 
 
+@media (max-width: 768px) {
+ .auth-container {
+    padding: 17% 5% 5% !important;
+}
+}
 
-/* 2560px - Ultra Wide */
+@media (max-width: 426px) {
+ .auth-container {
+    padding: 25% 5% 5% !important;
+}
+}
 
-
-/* 1024px - Tablet Landscape */
-
-
-/* 1000px */
-
-
-/* 768px - Tablet Portrait */
-
-
-/* 426px - Mobile Large */
-
-
-/* 384px - Mobile Medium */
-
-
-/* 375px - Mobile Standard */
-
-
-/* 320px - Mobile Small */
 
 
