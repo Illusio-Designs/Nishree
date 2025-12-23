@@ -10,6 +10,8 @@ export default defineConfig({
     open: true
   },
   build: {
+    // Vercel project is configured to expect "build/" output
+    outDir: 'build',
     rollupOptions: {
       output: {
         manualChunks: {
