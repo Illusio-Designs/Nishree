@@ -4,7 +4,7 @@ import Modal from '../../../components/common/Modal';
 import ActionButton from '../../../components/common/ActionButton';
 import Button from '../../../components/common/Button';
 import { HiOutlineEye, HiOutlineTrash } from 'react-icons/hi2';
-import '../../../Styles/dashboard/Reviews.css';
+import '../../../styles/dashboard/reviews.css';
 
 const ReviewLikes = () => {
   const [likes, setLikes] = useState([]);

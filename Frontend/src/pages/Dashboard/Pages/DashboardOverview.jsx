@@ -15,7 +15,7 @@ import {
   HiOutlineClipboardDocumentCheck,
   HiOutlineExclamationTriangle
 } from 'react-icons/hi2';
-import '../.././../Styles/dashboard/DashboardOverview.css';
+import '../../../styles/dashboard/DashboardOverview.css';
 
 const DashboardOverview = () => {
   const [stats, setStats] = useState({

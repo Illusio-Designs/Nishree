@@ -8,7 +8,7 @@ import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi2";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { policyService } from "../../../services";
-import "../../../Styles/dashboard/Category.css";
+import "../../../styles/dashboard/Category.css";
 
 const Policies = () => {
 	const [policies, setPolicies] = useState([]);

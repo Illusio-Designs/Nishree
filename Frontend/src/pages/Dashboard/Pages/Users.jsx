@@ -6,7 +6,7 @@ import Button from '../../../components/common/Button';
 import InputField from '../../../components/common/InputField';
 import { HiOutlineEye, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi2';
 import { FaPlus } from 'react-icons/fa';
-import '../../../Styles/dashboard/Category.css';
+import '../../../styles/dashboard/Category.css';
 
 const Users = () => {
   const [users, setUsers] = useState([]);

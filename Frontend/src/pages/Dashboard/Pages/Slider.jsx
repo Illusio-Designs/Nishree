@@ -6,7 +6,7 @@ import InputField from "../../../components/common/InputField";
 import ActionButton from "../../../components/common/ActionButton";
 import Button from "../../../components/common/Button";
 import Modal from "../../../components/common/Modal";
-import "../../../Styles/dashboard/Slider.css";
+import "../../../styles/dashboard/slider.css";
 import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi2";
 import { FaPlus } from "react-icons/fa";
 

@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 import Newsletter from "../components/Newsletter";
 import { getPublicPageContent } from "../services/publicindex";
 import CookingLoader from "../components/CookingLoader";
-import "../Styles/Policies.css";
+import "../styles/Policies.css";
 
 const Policies = () => {
   const [policies, setPolicies] = useState([]);

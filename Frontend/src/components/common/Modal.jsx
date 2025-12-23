@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from './Button';
 import { IoClose } from 'react-icons/io5';
-import '../../Styles/common/Modal.css';
+import '../../styles/common/Modal.css';
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;

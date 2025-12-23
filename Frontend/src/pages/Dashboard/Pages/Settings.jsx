@@ -5,7 +5,7 @@ import ActionButton from '../../../components/common/ActionButton';
 import Button from '../../../components/common/Button';
 import { settingsService } from '../../../services';
 import { toast } from 'react-toastify';
-import '../../../Styles/dashboard/Settings.css';
+import '../../../styles/dashboard/Settings.css';
 import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus } from 'react-icons/hi2';
 
 const Settings = () => {

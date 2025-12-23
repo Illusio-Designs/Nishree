@@ -10,7 +10,7 @@ import {
 import { useAuth } from "../../../context/AuthContext";
 import { SearchProvider, useSearch } from "../../../context/SearchContext";
 import img from "../../../assets/RTHSRT.webp";
-import "../../../Styles/dashboard/Dashboard.css";
+import "../../../styles/dashboard/Dashboard.css";
 import {
   HiOutlineHome,
   HiOutlineChevronLeft,

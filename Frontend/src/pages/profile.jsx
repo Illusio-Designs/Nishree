@@ -11,8 +11,8 @@ import Loader from '../components/Loader';
 import Modal from '../components/common/Modal';
 import Button from '../components/common/Button';
 import { orderService, shippingAddressService } from '../services';
-import "../Styles/Profile.css";
-import "../Styles/common/Form.css";
+import "../styles/Profile.css";
+import "../styles/common/Form.css";
 import { useSEO } from "../hooks/useSEO";
 
 const ProfilePage = () => {

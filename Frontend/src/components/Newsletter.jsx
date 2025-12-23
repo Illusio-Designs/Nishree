@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Newsletterimg from "../assets/Newsletter.webp";
-import "../Styles/components/Newsletter.css";
+import "../styles/components/Newsletter.css";
 
 const Newsletter = () => {
   const [formData, setFormData] = useState({

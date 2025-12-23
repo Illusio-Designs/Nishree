@@ -7,7 +7,7 @@ import InputField from "../../../components/common/InputField";
 import { HiOutlinePencil } from "react-icons/hi2";
 import { toast } from "react-toastify";
 import { seoService } from "../../../services";
-import "../../../Styles/dashboard/Category.css";
+import "../../../styles/dashboard/Category.css";
 
 const SEO = () => {
   const [seoData, setSeoData] = useState([]);

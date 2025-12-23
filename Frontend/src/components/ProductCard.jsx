@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
 import { getAllPublicProducts } from '../services/publicindex';
 import placeholderImage from "../assets/placeholder-image.webp";
-import "../Styles/components/Productcard.css";
+import "../styles/components/Productcard.css";
 
 const ProductCard = ({ product: propProduct }) => {
   const navigate = useNavigate();

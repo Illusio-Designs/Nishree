@@ -8,7 +8,7 @@ import InputField from '../../../components/common/InputField';
 import Modal from '../../../components/common/Modal';
 import ActionButton from '../../../components/common/ActionButton';
 import { shippingFeeService } from '../../../services';
-import '../../../Styles/dashboard/Category.css';
+import '../../../styles/dashboard/Category.css';
 
 const ShippingFees = () => {
   const [shippingFees, setShippingFees] = useState([]);

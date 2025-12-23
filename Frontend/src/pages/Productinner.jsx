@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Header from "../components/Header";
-import "../Styles/Productinner.css";
+import "../styles/Productinner.css";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from "../components/Footer";

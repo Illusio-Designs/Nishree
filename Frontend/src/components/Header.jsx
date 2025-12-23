@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import logo from "../assets/RTHSRT.webp";
-import "../Styles/components/Header.css";
+import "../styles/components/Header.css";
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import CartPopup from "./CartPopup";
 import { Link } from 'react-router-dom';

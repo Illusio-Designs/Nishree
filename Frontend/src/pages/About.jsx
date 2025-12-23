@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import "../Styles/About.css";
+import "../styles/About.css";
 import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";

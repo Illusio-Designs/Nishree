@@ -9,7 +9,7 @@ import { FaPlus } from "react-icons/fa";
 import { HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from "react-icons/hi2";
 import { couponService } from "../../../services";
 import { toast } from "react-toastify";
-import "../../../Styles/dashboard/Category.css";
+import "../../../styles/dashboard/Category.css";
 
 const Coupons = () => {
   const [coupons, setCoupons] = useState([]);

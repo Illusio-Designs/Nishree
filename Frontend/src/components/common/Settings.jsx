@@ -5,8 +5,8 @@ import InputField from './InputField';
 import Button from './Button';
 import { toast } from 'react-toastify';
 import { HiOutlineCamera, HiOutlineUser, HiOutlineEnvelope, HiOutlinePhone } from 'react-icons/hi2';
-import '../../Styles/dashboard/Category.css';
-import '../../Styles/common/Settings.css';
+import '../../styles/dashboard/Category.css';
+import '../../styles/common/Settings.css';
 
 const Settings = () => {
     const { user, updateProfile } = useAuth();

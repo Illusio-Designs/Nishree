@@ -8,7 +8,7 @@ import {
   HiOutlineCheck, 
   HiOutlineXMark 
 } from "react-icons/hi2";
-import "../../../Styles/dashboard/Category.css";
+import "../../../styles/dashboard/Category.css";
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);

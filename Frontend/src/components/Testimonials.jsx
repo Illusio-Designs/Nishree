@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../Styles/components/Testimonials.css";
+import "../styles/components/Testimonials.css";
 import { getPublicProductReviews } from "../services/publicindex";
 
 const StarIcon = ({ filled }) => (

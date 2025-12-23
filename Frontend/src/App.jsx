@@ -8,7 +8,7 @@ import AppRoutes from "./routes/AppRoutes";
 import Loader from "./components/Loader";
 import { useNotifications } from "./hooks/useNotifications.jsx";
 import "./App.css";
-import "./Styles/index.css";
+import "./styles/index.css";
 
 function AppContent() {
   // Check for notifications when user visits

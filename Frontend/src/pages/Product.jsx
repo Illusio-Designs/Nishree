@@ -6,14 +6,14 @@ import Header from "../components/Header";
 import Testimonials from "../components/Testimonials";
 import Newsletter from "../components/Newsletter";
 import Footer from '../components/Footer';
-import ProductCard from "../components/Productcard";
+import ProductCard from "../components/ProductCard";
 import { getPublicCategoryById, getAllPublicProducts } from '../services/publicindex';
 import hero from "../assets/productbj.webp";
 import vector2 from "../assets/Vector (18).webp";
 import vector3 from "../assets/Vector (22).webp";
 import vector4 from "../assets/Vector (23).webp";
 import vector5 from "../assets/Vector (24).webp";
-import "../Styles/Product.css"
+import "../styles/Product.css";
 import Loader from "../components/Loader";
 import CookingLoader from "../components/CookingLoader";
 import { useSEO } from "../hooks/useSEO";

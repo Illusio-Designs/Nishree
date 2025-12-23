@@ -4,7 +4,7 @@ import { FaCheckCircle } from 'react-icons/fa';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import api from '../services';
-import '../Styles/OrderSuccess.css';
+import '../styles/OrderSuccess.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 

@@ -11,7 +11,7 @@ import vector3 from "../assets/Vector (22).webp";
 import vector4 from "../assets/Vector (23).webp";
 import vector5 from "../assets/Vector (24).webp";
 import { getPublicCategories } from "../services/publicindex";
-import "../Styles/Collection.css";
+import "../styles/Collection.css";
 import Loader from "../components/Loader";
 import CookingLoader from "../components/CookingLoader";
 import { useSEO } from "../hooks/useSEO";

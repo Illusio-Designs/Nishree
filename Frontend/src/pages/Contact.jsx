@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { toast } from "react-toastify";
 import CookingLoader from "../components/CookingLoader";
-import "../Styles/Contact.css";
+import "../styles/Contact.css";
 import { useSEO } from "../hooks/useSEO";
 
 const Contact = () => {

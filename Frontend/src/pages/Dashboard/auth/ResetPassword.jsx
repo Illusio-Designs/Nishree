@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast, ToastContainer } from "react-toastify";
 import { authService } from '../../../services';
-import '../../../Styles/auth/ResetPassword.css';
+import '../../../styles/auth/ResetPassword.css';
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();

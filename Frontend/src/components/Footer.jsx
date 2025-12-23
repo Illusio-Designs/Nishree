@@ -1,6 +1,6 @@
 import React from "react";
 import logo from "../assets/RTHSRT.webp";
-import "../Styles/components/Footer.css";
+import "../styles/components/Footer.css";
 
 const Footer = () => {
   return (

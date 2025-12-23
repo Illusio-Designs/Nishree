@@ -8,7 +8,7 @@ import {
   HiOutlineCog,
 } from "react-icons/hi2";
 import { FaUserCircle } from "react-icons/fa";
-import "../Styles/components/Header.css";
+import "../../styles/components/Header.css";
 
 const Header = () => {
   const { user, logout } = useAuth();

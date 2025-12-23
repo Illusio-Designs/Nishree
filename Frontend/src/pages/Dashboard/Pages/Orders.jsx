@@ -7,8 +7,8 @@ import Button from '../../../components/common/Button';
 import { orderService } from '../../../services';
 import { HiOutlineEye, HiOutlinePencil } from 'react-icons/hi2';
 import { FaShoppingCart, FaMoneyBillWave, FaClock, FaCheckCircle } from 'react-icons/fa';
-import '../../../Styles/dashboard/Category.css';
-import '../../../Styles/dashboard/Orders.css';
+import '../../../styles/dashboard/Category.css';
+import '../../../styles/dashboard/orders.css';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);

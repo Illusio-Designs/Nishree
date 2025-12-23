@@ -5,7 +5,7 @@ import SearchBar from "./SearchBar";
 import Filter from "./Filter";
 import ActionButton from "./ActionButton";
 import { useSearch } from "../../context/SearchContext";
-import "../../Styles/common/TableControls.css";
+import "../../styles/common/TableControls.css";
 
 const TableWithControls = ({
   columns,
