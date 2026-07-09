@@ -27,6 +27,19 @@ export const ProductVariation = sequelize.define('ProductVariation', {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true
     },
+    // ---- B2B wholesale pricing ----
+    // Base wholesale price for B2B orders. Falls back to `price` (retail) when null.
+    wholesalePrice: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
+    // Quantity-break tiers, e.g. [{ "minQty": 10, "price": 90 }, { "minQty": 50, "price": 80 }].
+    // The highest matching minQty tier wins; resolved in utils b2bPrice logic.
+    priceTiers: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        comment: 'Array of { minQty, price } wholesale quantity-break tiers'
+    },
     stock: {
         type: DataTypes.INTEGER,
         allowNull: false,

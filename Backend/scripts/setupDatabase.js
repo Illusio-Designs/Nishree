@@ -130,7 +130,14 @@ export const setupDatabase = async () => {
 			'Review', 'ReviewImage', 'ProductImage', 'ProductSEO',
 			'ProductVariation', 'AttributeValue',
 			'Order', 'OrderItem', 'OrderStatusHistory',
-			'Payment', 'ShippingAddress', 'Cart', 'CartItem', 'Slider', 'Policy'
+			'Payment', 'ShippingAddress', 'Cart', 'CartItem', 'Slider', 'Policy',
+			// ---- B2B management tables (created in dependency order) ----
+			'Zone', 'Event', 'Offer',
+			'Distributor', 'Salesman', 'Party',
+			'DistributorState', 'DistributorZone',
+			'SalesmanState', 'SalesmanZone',
+			'SalesmanCheckin', 'SalesmanTarget', 'SalesmanExpense',
+			'AuditLog'
 		];
         
 		for (const modelName of dependentTableNames) {

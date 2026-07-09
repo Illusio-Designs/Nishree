@@ -13,7 +13,9 @@ const UPLOAD_DIRS = {
     users: path.join(__dirname, '../uploads/users'),
     seo: path.join(__dirname, '../uploads/seo'),
     slider: path.join(__dirname, '../uploads/slider'),
-    reviews: path.join(__dirname, '../uploads/reviews')
+    reviews: path.join(__dirname, '../uploads/reviews'),
+    salesmen: path.join(__dirname, '../uploads/salesmen'),
+    expenses: path.join(__dirname, '../uploads/expenses')
 };
 
 // Create directories if they don't exist
@@ -39,8 +41,12 @@ const storage = multer.diskStorage({
             uploadDir = UPLOAD_DIRS.seo;
         } else if (req.originalUrl.includes('/slider')) {
             uploadDir = UPLOAD_DIRS.slider;
+        } else if (req.originalUrl.includes('/salesman-expenses')) {
+            uploadDir = UPLOAD_DIRS.expenses;
+        } else if (req.originalUrl.includes('/salesmen')) {
+            uploadDir = UPLOAD_DIRS.salesmen;
         }
-        
+
         cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
@@ -53,11 +59,15 @@ const storage = multer.diskStorage({
 
 // File filter function
 const fileFilter = (req, file, cb) => {
-    // Accept images and videos
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+    // Accept images and videos, plus PDFs (used for salesman KYC docs & receipts)
+    if (
+        file.mimetype.startsWith('image/') ||
+        file.mimetype.startsWith('video/') ||
+        file.mimetype === 'application/pdf'
+    ) {
         cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only images and videos are allowed.'), false);
+        cb(new Error('Invalid file type. Only images, videos and PDFs are allowed.'), false);
     }
 };
 

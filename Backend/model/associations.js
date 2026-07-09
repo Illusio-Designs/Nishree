@@ -22,6 +22,21 @@ import { ReviewImage } from './reviewImageModel.js';
 import { SeoMetadata } from './seoMetadataModel.js';
 import { CouponUsage } from './couponUsageModel.js';
 import { Shipment } from './shipmentModel.js';
+// B2B management models
+import { Zone } from './zoneModel.js';
+import { Party } from './partyModel.js';
+import { Distributor } from './distributorModel.js';
+import { DistributorState } from './distributorStateModel.js';
+import { DistributorZone } from './distributorZoneModel.js';
+import { Salesman } from './salesmanModel.js';
+import { SalesmanState } from './salesmanStateModel.js';
+import { SalesmanZone } from './salesmanZoneModel.js';
+import { SalesmanCheckin } from './salesmanCheckinModel.js';
+import { SalesmanTarget } from './salesmanTargetModel.js';
+import { SalesmanExpense } from './salesmanExpenseModel.js';
+import { Offer } from './offerModel.js';
+import { Event } from './eventModel.js';
+import { AuditLog } from './auditLogModel.js';
 // import { Notification } from './notificationModel.js';
 
 // Export all models
@@ -48,7 +63,22 @@ export {
     ReviewImage,
     SeoMetadata,
     CouponUsage,
-    Shipment
+    Shipment,
+    // B2B management
+    Zone,
+    Party,
+    Distributor,
+    DistributorState,
+    DistributorZone,
+    Salesman,
+    SalesmanState,
+    SalesmanZone,
+    SalesmanCheckin,
+    SalesmanTarget,
+    SalesmanExpense,
+    Offer,
+    Event,
+    AuditLog
     // Notification
 };
 
@@ -208,6 +238,74 @@ Shipment.belongsTo(Order, {
     foreignKey: 'order_id',
     onDelete: 'CASCADE'
 });
+
+// ---------------------------------------------------------------------------
+// B2B Management Associations
+// ---------------------------------------------------------------------------
+
+// Optional login accounts for B2B end-user roles.
+User.hasOne(Party, { foreignKey: 'user_id' });
+Party.belongsTo(User, { foreignKey: 'user_id' });
+
+User.hasOne(Distributor, { foreignKey: 'user_id' });
+Distributor.belongsTo(User, { foreignKey: 'user_id' });
+
+User.hasOne(Salesman, { foreignKey: 'user_id' });
+Salesman.belongsTo(User, { foreignKey: 'user_id' });
+
+// A party may be routed through a distributor and belongs to a zone.
+Distributor.hasMany(Party, { foreignKey: 'distributor_id', as: 'Parties' });
+Party.belongsTo(Distributor, { foreignKey: 'distributor_id' });
+
+Zone.hasMany(Party, { foreignKey: 'zone_id' });
+Party.belongsTo(Zone, { foreignKey: 'zone_id' });
+
+// Distributor territory (states + zones).
+Distributor.hasMany(DistributorState, { foreignKey: 'distributor_id', as: 'States', onDelete: 'CASCADE' });
+DistributorState.belongsTo(Distributor, { foreignKey: 'distributor_id' });
+
+Distributor.hasMany(DistributorZone, { foreignKey: 'distributor_id', as: 'Zones', onDelete: 'CASCADE' });
+DistributorZone.belongsTo(Distributor, { foreignKey: 'distributor_id' });
+Zone.hasMany(DistributorZone, { foreignKey: 'zone_id' });
+DistributorZone.belongsTo(Zone, { foreignKey: 'zone_id' });
+
+// Salesman territory (states + zones).
+Salesman.hasMany(SalesmanState, { foreignKey: 'salesman_id', as: 'States', onDelete: 'CASCADE' });
+SalesmanState.belongsTo(Salesman, { foreignKey: 'salesman_id' });
+
+Salesman.hasMany(SalesmanZone, { foreignKey: 'salesman_id', as: 'Zones', onDelete: 'CASCADE' });
+SalesmanZone.belongsTo(Salesman, { foreignKey: 'salesman_id' });
+Zone.hasMany(SalesmanZone, { foreignKey: 'zone_id' });
+SalesmanZone.belongsTo(Zone, { foreignKey: 'zone_id' });
+
+// Salesman activity.
+Salesman.hasMany(SalesmanCheckin, { foreignKey: 'salesman_id', as: 'Checkins', onDelete: 'CASCADE' });
+SalesmanCheckin.belongsTo(Salesman, { foreignKey: 'salesman_id' });
+Party.hasMany(SalesmanCheckin, { foreignKey: 'party_id' });
+SalesmanCheckin.belongsTo(Party, { foreignKey: 'party_id' });
+
+Salesman.hasMany(SalesmanTarget, { foreignKey: 'salesman_id', as: 'Targets', onDelete: 'CASCADE' });
+SalesmanTarget.belongsTo(Salesman, { foreignKey: 'salesman_id' });
+
+Salesman.hasMany(SalesmanExpense, { foreignKey: 'salesman_id', as: 'Expenses', onDelete: 'CASCADE' });
+SalesmanExpense.belongsTo(Salesman, { foreignKey: 'salesman_id' });
+
+// B2B orders reuse the unified Order table (channel = 'b2b').
+Party.hasMany(Order, { foreignKey: 'party_id' });
+Order.belongsTo(Party, { foreignKey: 'party_id' });
+
+Distributor.hasMany(Order, { foreignKey: 'distributor_id' });
+Order.belongsTo(Distributor, { foreignKey: 'distributor_id' });
+
+Salesman.hasMany(Order, { foreignKey: 'salesman_id' });
+Order.belongsTo(Salesman, { foreignKey: 'salesman_id' });
+
+Event.hasMany(Order, { foreignKey: 'event_id' });
+Order.belongsTo(Event, { foreignKey: 'event_id' });
+
+// Audit trail actor.
+User.hasMany(AuditLog, { foreignKey: 'user_id' });
+AuditLog.belongsTo(User, { foreignKey: 'user_id' });
 
 // Notification Associations - Commented out temporarily
 // User.hasMany(Notification, { 

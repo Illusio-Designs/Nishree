@@ -18,6 +18,19 @@ import cartRoutes from './cartRoutes.js';
 import policyRoutes from './policyRoutes.js';
 import shippingRoutes from './shippingRoutes.js';
 import guestRoutes from './guestRoutes.js';
+// B2B management routes
+import zoneRoutes from './zoneRoutes.js';
+import partyRoutes from './partyRoutes.js';
+import distributorRoutes from './distributorRoutes.js';
+import salesmanRoutes from './salesmanRoutes.js';
+import salesmanCheckinRoutes from './salesmanCheckinRoutes.js';
+import salesmanTargetRoutes from './salesmanTargetRoutes.js';
+import salesmanExpenseRoutes from './salesmanExpenseRoutes.js';
+import offerRoutes from './offerRoutes.js';
+import eventRoutes from './eventRoutes.js';
+import b2bOrderRoutes from './b2bOrderRoutes.js';
+import b2bAnalyticsRoutes from './b2bAnalyticsRoutes.js';
+import auditLogRoutes from './auditLogRoutes.js';
 // import notificationRoutes from './notificationRoutes.js';
 
 // Core Routes
@@ -42,6 +55,20 @@ router.use('/shipping', shippingRoutes);
 
 // Guest routes (no authentication required)
 router.use('/guest', guestRoutes);
+
+// ---- B2B Management (unified with D2C) ----
+router.use('/zones', zoneRoutes);
+router.use('/parties', partyRoutes);
+router.use('/distributors', distributorRoutes);
+router.use('/salesmen', salesmanRoutes);
+router.use('/salesman-checkins', salesmanCheckinRoutes);
+router.use('/salesman-targets', salesmanTargetRoutes);
+router.use('/salesman-expenses', salesmanExpenseRoutes);
+router.use('/offers', offerRoutes);
+router.use('/events', eventRoutes);
+router.use('/b2b-orders', b2bOrderRoutes);
+router.use('/b2b-analytics', b2bAnalyticsRoutes);
+router.use('/audit-logs', auditLogRoutes);
 
 // Notification routes - Temporarily disabled
 // router.use('/notifications', notificationRoutes);
