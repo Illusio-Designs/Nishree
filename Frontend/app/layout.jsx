@@ -3,8 +3,7 @@ import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { CartProvider } from '@/lib/cart-context';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import StoreChrome from '@/components/layout/StoreChrome';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -26,11 +25,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={inter.variable}>
       <body>
         <CartProvider>
-          <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <StoreChrome>{children}</StoreChrome>
           <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar theme="light" />
         </CartProvider>
       </body>
