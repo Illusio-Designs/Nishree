@@ -83,4 +83,24 @@ export const register = async (payload) => {
   return data;
 };
 
+/* ------------------------------- Checkout ------------------------------- */
+
+// Create a shipping address for the logged-in user; returns the created record.
+export const createShippingAddress = async (payload) => {
+  const { data } = await api.post('/api/shipping/addresses', payload);
+  return data?.data || data?.address || data;
+};
+
+// Place an order. `items` = [{ product_id, variation_id, quantity }].
+export const createOrder = async (payload) => {
+  const { data } = await api.post('/api/orders', payload);
+  return data?.order || data?.data || data;
+};
+
+// The logged-in user's own orders.
+export const getMyOrders = async () => {
+  const { data } = await api.get('/api/orders/my-orders');
+  return data?.data || data?.orders || data || [];
+};
+
 export default api;

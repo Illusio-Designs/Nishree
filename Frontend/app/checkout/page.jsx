@@ -12,6 +12,8 @@ import Card from '@/components/ui/Card';
 import EmptyState from '@/components/ui/EmptyState';
 import { useCart } from '@/lib/cart-context';
 import { formatPrice } from '@/lib/format';
+import { isLoggedIn } from '@/lib/auth';
+import { createShippingAddress, createOrder } from '@/lib/api';
 
 const PAYMENTS = [
   { value: 'cod', label: 'Cash on Delivery' },
@@ -27,23 +29,55 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [payment, setPayment] = useState('cod');
   const [placing, setPlacing] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', city: '', pincode: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '' });
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const shipping = subtotal >= SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FEE;
   const total = subtotal + shipping;
 
-  const placeOrder = (e) => {
+  const placeOrder = async (e) => {
     e.preventDefault();
+
+    // Placing a real order requires a signed-in account (the API scopes the
+    // shipping address + order to the user). Send guests to login and back.
+    if (!isLoggedIn()) {
+      toast.info('Please sign in to complete your order.');
+      router.push('/login?redirect=/checkout');
+      return;
+    }
+
     setPlacing(true);
-    // Front-end confirmation flow. Wiring to /api/orders (address + payment) is a
-    // follow-up once the address book / payment gateway are connected.
-    setTimeout(() => {
-      const orderNo = `ORD-${Date.now().toString().slice(-8)}`;
+    try {
+      // 1) Save the shipping address for this order.
+      const address = await createShippingAddress({
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        postal_code: form.pincode,
+        country: 'India',
+        phone_number: form.phone,
+      });
+
+      // 2) Place the order against the cart contents.
+      const order = await createOrder({
+        shipping_address_id: address.id,
+        payment_type: payment,
+        notes: '',
+        items: items.map((i) => ({
+          product_id: i.id,
+          variation_id: i.variationId || null,
+          quantity: i.qty,
+        })),
+      });
+
       clear();
       toast.success('Order placed successfully!');
-      router.push(`/order-success?order=${orderNo}`);
-    }, 700);
+      router.push(`/order-success?order=${order?.order_number || order?.id || ''}`);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Could not place your order. Please try again.');
+    } finally {
+      setPlacing(false);
+    }
   };
 
   if (items.length === 0) {
@@ -72,6 +106,7 @@ export default function CheckoutPage() {
                 <Input label="Email" name="email" type="email" icon={Mail01Icon} value={form.email} onChange={onChange} containerClassName="sm:col-span-2" required />
                 <Input label="Address" name="address" icon={Location01Icon} value={form.address} onChange={onChange} containerClassName="sm:col-span-2" required />
                 <Input label="City" name="city" value={form.city} onChange={onChange} required />
+                <Input label="State" name="state" value={form.state} onChange={onChange} required />
                 <Input label="Pincode" name="pincode" value={form.pincode} onChange={onChange} required />
               </div>
             </Card>
