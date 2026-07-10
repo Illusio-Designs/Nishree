@@ -1,4 +1,9 @@
 import axios from 'axios';
+import { MOCK_CATEGORIES, MOCK_PRODUCTS, findMockProduct, filterMockProducts } from '@/lib/mock-data';
+
+// When true, fall back to the demo spice catalogue if the backend has no data or
+// is unreachable. Set NEXT_PUBLIC_DISABLE_DEMO=true to always show live data only.
+const DEMO_FALLBACK = process.env.NEXT_PUBLIC_DISABLE_DEMO !== 'true';
 
 // Base URL of the Express backend. Public endpoints live under /api/.../public.
 export const API_URL =
@@ -21,15 +26,20 @@ api.interceptors.request.use((config) => {
 // Turn a stored image path into an absolute URL against the backend.
 export const mediaUrl = (path) => {
   if (!path) return '';
-  if (/^https?:\/\//i.test(path)) return path;
+  // Pass through absolute URLs and inline data URIs (used by demo mock images).
+  if (/^https?:\/\//i.test(path) || path.startsWith('data:')) return path;
   return `${API_URL}${path.startsWith('/') ? '' : '/'}${path}`;
 };
 
 /* ----------------------------- Public catalogue ----------------------------- */
 
 export const getCategories = async () => {
-  const { data } = await api.get('/api/categories/public/categories');
-  return data?.data || data?.categories || data || [];
+  try {
+    const { data } = await api.get('/api/categories/public/categories');
+    const list = data?.data || data?.categories || data || [];
+    if (Array.isArray(list) && list.length) return list;
+  } catch { /* fall through to demo */ }
+  return DEMO_FALLBACK ? MOCK_CATEGORIES : [];
 };
 
 export const getCategory = async (id) => {
@@ -43,14 +53,22 @@ export const getSliders = async () => {
 };
 
 export const getProducts = async (params = {}) => {
-  const qs = new URLSearchParams(params).toString();
-  const { data } = await api.get(`/api/products/public${qs ? `?${qs}` : ''}`);
-  return data?.data || data?.products || data || [];
+  try {
+    const qs = new URLSearchParams(params).toString();
+    const { data } = await api.get(`/api/products/public${qs ? `?${qs}` : ''}`);
+    const list = data?.data || data?.products || data || [];
+    if (Array.isArray(list) && list.length) return list;
+  } catch { /* fall through to demo */ }
+  return DEMO_FALLBACK ? filterMockProducts(params) : [];
 };
 
 export const getProduct = async (id) => {
-  const { data } = await api.get(`/api/products/public/${id}`);
-  return data?.data || data?.product || data;
+  try {
+    const { data } = await api.get(`/api/products/public/${id}`);
+    const product = data?.data || data?.product || data;
+    if (product && (product.id || product.name)) return product;
+  } catch { /* fall through to demo */ }
+  return DEMO_FALLBACK ? findMockProduct(id) : null;
 };
 
 export const getCoupons = async () => {

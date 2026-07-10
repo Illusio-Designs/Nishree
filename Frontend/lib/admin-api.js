@@ -1,4 +1,4 @@
-import api from '@/lib/api';
+import api, { getProducts, getCategories } from '@/lib/api';
 
 // Thin admin API layer. Each resource exposes list/create/update/remove where the
 // backend supports it. Multipart resources (products, categories) send FormData.
@@ -30,8 +30,13 @@ export const adminUpdateOrderStatus = async (id, status) => {
 
 /* ------------------------------ Categories ------------------------------ */
 export const adminListCategories = async () => {
-  const { data } = await api.get('/api/categories/admin/all');
-  return unwrap(data, ['categories']) || [];
+  try {
+    const { data } = await api.get('/api/categories/admin/all');
+    const list = unwrap(data, ['categories']);
+    if (Array.isArray(list) && list.length) return list;
+  } catch { /* fall through */ }
+  // Demo fallback (public categories / mock) so the page is testable offline.
+  return getCategories();
 };
 export const adminCreateCategory = async (payload) => {
   const { data } = await api.post('/api/categories/admin', toFormData(payload), formHeaders);
@@ -45,8 +50,8 @@ export const adminDeleteCategory = async (id) => (await api.delete(`/api/categor
 
 /* ------------------------------- Products ------------------------------- */
 export const adminListProducts = async () => {
-  const { data } = await api.get('/api/products/public?limit=200');
-  return unwrap(data, ['products']) || [];
+  // getProducts already falls back to the demo catalogue when the API is empty.
+  return getProducts({ limit: 200 });
 };
 export const adminCreateProduct = async (payload) => {
   const { data } = await api.post('/api/products', toFormData(payload), formHeaders);
