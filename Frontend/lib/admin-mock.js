@@ -65,6 +65,35 @@ export const BLOGS = MOCK_RECIPES.map((r) => ({
   excerpt: r.excerpt, content: r.content, author: r.author, read_time: r.read_time,
 }));
 
+// Build a demo journey detail (route breadcrumbs + timeline) for the View modal.
+const BASE = { lat: 23.0225, lng: 72.5714 }; // Ahmedabad
+export const journeyDetail = (id) => {
+  const journey = JOURNEYS.find((j) => String(j.id) === String(id)) || JOURNEYS[0];
+  const steps = 14;
+  const points = Array.from({ length: steps }, (_, i) => ({
+    latitude: BASE.lat + i * 0.0045 + (i % 2 ? 0.0018 : -0.0016),
+    longitude: BASE.lng + i * 0.0052 + (i % 3 ? 0.0012 : -0.0011),
+    event_type: i === 0 ? 'start' : i === steps - 1 ? 'end' : 'track',
+  }));
+  const timeline = {
+    checkins: [
+      { id: 1, created_at: journey.start_time, reason: 'Sales visit', distance_m: 45, Party: { shop_name: 'Krishna Kirana Store', latitude: BASE.lat + 0.021, longitude: BASE.lng + 0.026 } },
+      { id: 2, created_at: journey.start_time, reason: 'Follow-up', distance_m: 80, Party: { shop_name: 'Spice Bazaar', latitude: BASE.lat + 0.045, longitude: BASE.lng + 0.05 } },
+    ],
+    orders: [
+      { id: 9008, order_number: 'B2B-20260115-1170', order_type: 'visit_order', party: 'Spice Bazaar', latitude: BASE.lat + 0.045, longitude: BASE.lng + 0.05, qty: 24, amount: 3120, created_at: journey.start_time },
+    ],
+  };
+  const summary = {
+    total_distance_m: journey.total_distance_m,
+    total_distance_km: Math.round((journey.total_distance_m / 1000) * 100) / 100,
+    points: points.length,
+    checkins: timeline.checkins.length,
+    orders: timeline.orders.length,
+  };
+  return { journey, points, timeline, summary };
+};
+
 export const ENQUIRIES = [
   { id: 1, business_name: 'Annapurna Restaurant', contact_person: 'Neha Rao', phone: '9825055555', city: 'Vadodara', state: 'Gujarat', product_interest: 'Garam Masala, Turmeric', quantity_estimate: '50 kg / month', status: 'new', created_at: d('18') },
   { id: 2, business_name: 'Hotel Riverside', contact_person: 'Imran Shaikh', phone: '9825099999', city: 'Ahmedabad', state: 'Gujarat', product_interest: 'Whole spices bulk', quantity_estimate: '120 kg / month', status: 'contacted', created_at: d('16') },

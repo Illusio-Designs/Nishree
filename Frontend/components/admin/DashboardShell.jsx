@@ -132,18 +132,13 @@ export default function DashboardShell({ children }) {
                 onClick={() => setOpen(false)}
                 title={mini ? label : undefined}
                 className={cn(
-                  'group relative flex items-center rounded-xl text-sm font-medium transition-colors',
+                  'flex items-center rounded-xl text-sm font-medium transition-colors',
                   mini ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2.5',
                   isActive(href) ? 'bg-brand-50 text-brand-700' : 'text-body hover:bg-surface-soft',
                 )}
               >
                 <Icon size={19} strokeWidth={2} />
                 {!mini && label}
-                {mini && (
-                  <span className="pointer-events-none absolute left-full z-50 ml-2 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-pop transition-opacity duration-150 group-hover:opacity-100">
-                    {label}
-                  </span>
-                )}
               </Link>
             ))}
           </div>
@@ -164,7 +159,7 @@ export default function DashboardShell({ children }) {
   );
 
   return (
-    <div className="min-h-screen bg-surface-soft">
+    <div className="min-h-screen overflow-x-hidden bg-surface-soft">
       {/* Desktop sidebar */}
       <aside className={cn('fixed inset-y-0 left-0 z-40 hidden border-r border-line bg-white transition-[width] duration-200 lg:block', collapsed ? 'w-20' : 'w-64')}>
         {renderSidebar(collapsed)}
@@ -207,7 +202,7 @@ export default function DashboardShell({ children }) {
           </div>
         </header>
 
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="min-w-0 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

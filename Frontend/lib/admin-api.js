@@ -107,6 +107,13 @@ export const adminListJourneys = async (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return listOrDemo(async () => (await api.get(`/api/salesman-journeys${qs ? `?${qs}` : ''}`)).data, demo.JOURNEYS);
 };
+export const adminGetJourney = async (id) => {
+  try {
+    const { data } = await api.get(`/api/salesman-journeys/${id}`);
+    if (data && (data.journey || data.points)) return data;
+  } catch { /* fall through */ }
+  return DEMO_FALLBACK ? demo.journeyDetail(id) : null;
+};
 
 export const adminListZones = async () => (await api.get('/api/zones')).data || [];
 export const adminCreateZone = async (p) => (await api.post('/api/zones', p)).data;

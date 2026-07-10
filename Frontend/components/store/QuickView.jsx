@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { Cancel01Icon, ShoppingCart01Icon, ArrowRight01Icon } from 'hugeicons-react';
@@ -43,20 +44,20 @@ export default function QuickView({ product, open, onClose }) {
     toast.success('Added to cart');
   };
 
-  return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-4">
+  const modal = (
+    <div className="fixed inset-0 z-[90] flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div className="absolute inset-0 bg-ink/40" onClick={onClose} />
       <div className="relative grid max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-t-3xl bg-white shadow-pop sm:rounded-3xl md:grid-cols-2">
         <button onClick={onClose} aria-label="Close" className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft hover:text-brand-600 cursor-pointer">
           <Cancel01Icon size={20} strokeWidth={2} />
         </button>
 
-        <div className="relative aspect-square bg-surface-soft md:aspect-auto">
+        <div className="relative aspect-square w-full overflow-hidden bg-surface-soft md:aspect-auto md:min-h-[420px]">
           {img ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={img} alt={product.name} className="h-full w-full object-cover" />
+            <img src={img} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
           ) : null}
-          {off > 0 && <span className="absolute left-3 top-3"><Badge tone="brand">{off}% OFF</Badge></span>}
+          {off > 0 && <span className="absolute left-3 top-3 z-10"><Badge tone="brand">{off}% OFF</Badge></span>}
         </div>
 
         <div className="flex flex-col gap-3 overflow-y-auto p-6">
@@ -98,4 +99,7 @@ export default function QuickView({ product, open, onClose }) {
       </div>
     </div>
   );
+
+  // Portal to <body> so the fixed overlay isn't trapped by the card's transform.
+  return typeof document !== 'undefined' ? createPortal(modal, document.body) : null;
 }

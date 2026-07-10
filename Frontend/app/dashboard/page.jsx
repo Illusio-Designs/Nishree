@@ -50,8 +50,8 @@ export default function DashboardOverview() {
 
   if (!data) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-white" />)}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 9 }).map((_, i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-white" />)}
       </div>
     );
   }
@@ -81,18 +81,17 @@ export default function DashboardOverview() {
         <p className="text-body">Key metrics across your D2C store and B2B operations.</p>
       </div>
 
-      {/* KPI grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* KPI grid — 3 cards per row */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard icon={MoneyBag02Icon} label="Total revenue" value={formatPrice(revenue)} hint={`${valid.length} orders`} tone="success" />
         <StatCard icon={ShoppingBag02Icon} label="Orders" value={orders.length} hint={`${pending} in progress`} />
         <StatCard icon={ChartLineData01Icon} label="Avg. order value" value={formatPrice(aov)} tone="ink" />
-        <StatCard icon={Clock01Icon} label="Pending fulfilment" value={pending} tone="warning" />
         <StatCard icon={DeliveryTruck01Icon} label="B2B revenue" value={formatPrice(b2bRev)} hint={`${b2b.length} wholesale orders`} tone="success" />
+        <StatCard icon={Clock01Icon} label="Pending fulfilment" value={pending} tone="warning" />
+        <StatCard icon={Mail01Icon} label="New wholesale leads" value={newLeads} hint={`${enquiries.length} total`} tone="warning" />
         <StatCard icon={PackageIcon} label="Products" value={products.length} tone="ink" />
         <StatCard icon={UserGroupIcon} label="Customers" value={users.length} />
         <StatCard icon={Store01Icon} label="B2B parties" value={parties.length} tone="ink" />
-        <StatCard icon={UserMultiple02Icon} label="Salesmen" value={salesmen.length} />
-        <StatCard icon={Mail01Icon} label="New wholesale leads" value={newLeads} hint={`${enquiries.length} total`} tone="warning" />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
