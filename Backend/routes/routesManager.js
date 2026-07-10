@@ -34,6 +34,7 @@ import b2bAnalyticsRoutes from './b2bAnalyticsRoutes.js';
 import auditLogRoutes from './auditLogRoutes.js';
 import blogRoutes from './blogRoutes.js';
 import wholesaleRoutes from './wholesaleRoutes.js';
+import salesmanRouteRoutes from './salesmanRouteRoutes.js';
 // import notificationRoutes from './notificationRoutes.js';
 
 // Core Routes
@@ -68,6 +69,7 @@ router.use('/salesman-checkins', salesmanCheckinRoutes);
 router.use('/salesman-targets', salesmanTargetRoutes);
 router.use('/salesman-expenses', salesmanExpenseRoutes);
 router.use('/salesman-journeys', salesmanJourneyRoutes);
+router.use('/salesman-routes', salesmanRouteRoutes);
 router.use('/offers', offerRoutes);
 router.use('/events', eventRoutes);
 router.use('/b2b-orders', b2bOrderRoutes);

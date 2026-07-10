@@ -39,6 +39,7 @@ import { Event } from './eventModel.js';
 import { AuditLog } from './auditLogModel.js';
 import { SalesmanJourney } from './salesmanJourneyModel.js';
 import { SalesmanJourneyPoint } from './salesmanJourneyPointModel.js';
+import { SalesmanRouteStop } from './salesmanRouteStopModel.js';
 // import { Notification } from './notificationModel.js';
 
 // Export all models
@@ -82,7 +83,8 @@ export {
     Event,
     AuditLog,
     SalesmanJourney,
-    SalesmanJourneyPoint
+    SalesmanJourneyPoint,
+    SalesmanRouteStop
     // Notification
 };
 
@@ -315,6 +317,12 @@ SalesmanJourney.hasMany(SalesmanJourneyPoint, { foreignKey: 'journey_id', as: 'P
 SalesmanJourneyPoint.belongsTo(SalesmanJourney, { foreignKey: 'journey_id' });
 Salesman.hasMany(SalesmanJourneyPoint, { foreignKey: 'salesman_id', onDelete: 'CASCADE' });
 SalesmanJourneyPoint.belongsTo(Salesman, { foreignKey: 'salesman_id' });
+
+// Salesman daily route stops (zone-based beat plan).
+Salesman.hasMany(SalesmanRouteStop, { foreignKey: 'salesman_id', as: 'RouteStops', onDelete: 'CASCADE' });
+SalesmanRouteStop.belongsTo(Salesman, { foreignKey: 'salesman_id' });
+Party.hasMany(SalesmanRouteStop, { foreignKey: 'party_id', onDelete: 'CASCADE' });
+SalesmanRouteStop.belongsTo(Party, { foreignKey: 'party_id' });
 
 // Audit trail actor.
 User.hasMany(AuditLog, { foreignKey: 'user_id' });

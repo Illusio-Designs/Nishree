@@ -25,6 +25,7 @@ import { Offer } from '../model/offerModel.js';
 import { Event } from '../model/eventModel.js';
 import { Blog } from '../model/blogModel.js';
 import { WholesaleEnquiry } from '../model/wholesaleEnquiryModel.js';
+import { SalesmanZone } from '../model/salesmanZoneModel.js';
 
 // Small inline SVG image so seeded products have a picture out of the box.
 const img = (glyph, from, to, label) => {
@@ -151,10 +152,12 @@ async function seed() {
     defaults: { shop_name: 'Spice Bazaar', contact_person: 'Meena Joshi', phone: '9825033333', address: 'Ring Road', city: 'Surat', state: 'Gujarat', pincode: '395002', zone_id: zoneW.id, status: 'active' },
   });
 
-  await Salesman.findOrCreate({
+  const [salesman] = await Salesman.findOrCreate({
     where: { name: 'Suresh Field Rep' },
     defaults: { name: 'Suresh Field Rep', phone: '9825044444', email: 'suresh@example.com', city: 'Ahmedabad', state: 'Gujarat', pincode: '380015', status: 'active' },
   });
+  // Assign the salesman to a zone so their daily route auto-generates from its parties.
+  await SalesmanZone.findOrCreate({ where: { salesman_id: salesman.id, zone_id: zoneW.id }, defaults: { salesman_id: salesman.id, zone_id: zoneW.id } });
 
   await Offer.findOrCreate({
     where: { name: 'Bulk Wholesale 12%' },
