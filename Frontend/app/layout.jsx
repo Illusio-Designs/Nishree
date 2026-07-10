@@ -26,7 +26,16 @@ export default function RootLayout({ children }) {
       <body>
         <CartProvider>
           <StoreChrome>{children}</StoreChrome>
-          <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar theme="light" />
+          <ToastContainer
+            position="bottom-right"
+            autoClose={3000}
+            newestOnTop
+            closeOnClick
+            theme="light"
+            className="nishree-toast-container"
+            toastClassName="nishree-toast"
+            progressClassName="nishree-toast-progress"
+          />
         </CartProvider>
       </body>
     </html>

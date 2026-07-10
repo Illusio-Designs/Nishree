@@ -21,6 +21,8 @@ import {
   DiscountTag02Icon,
   BookOpen01Icon,
   Mail01Icon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
 } from 'hugeicons-react';
 import Logo from '@/components/ui/Logo';
 import Spinner from '@/components/ui/Spinner';
@@ -60,12 +62,15 @@ const NAV = [
   },
 ];
 
+const STORAGE_KEY = 'nishree_sidebar_collapsed';
+
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [allowed, setAllowed] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);        // mobile drawer
+  const [collapsed, setCollapsed] = useState(false); // desktop collapse
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -73,13 +78,20 @@ export default function DashboardShell({ children }) {
       router.replace('/login?redirect=/dashboard');
       return;
     }
+    setUser(getUser());
     const u = getUser();
-    setUser(u);
-    // Managers + admin may use the dashboard; the API still enforces per-route scope.
     const role = u?.role || '';
-    setAllowed(role === 'admin' || role.endsWith('_manager') || ['sales_manager', 'distributor_manager'].includes(role) || role === 'admin');
+    setAllowed(role === 'admin' || role.endsWith('_manager'));
+    setCollapsed(localStorage.getItem(STORAGE_KEY) === 'true');
     setReady(true);
   }, [router]);
+
+  const toggleCollapse = () => {
+    setCollapsed((c) => {
+      localStorage.setItem(STORAGE_KEY, String(!c));
+      return !c;
+    });
+  };
 
   const onLogout = () => {
     clearSession();
@@ -102,27 +114,36 @@ export default function DashboardShell({ children }) {
 
   const isActive = (href) => (href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href));
 
-  const Sidebar = (
+  // `mini` renders the collapsed icon-only sidebar with hover tooltips.
+  const renderSidebar = (mini) => (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center border-b border-line px-5">
-        <Logo />
+      <div className={cn('flex h-16 items-center border-b border-line', mini ? 'justify-center px-2' : 'px-5')}>
+        <Logo compact={mini} />
       </div>
       <nav className="flex-1 overflow-y-auto p-3">
         {NAV.map((group) => (
           <div key={group.section} className="mb-4">
-            <p className="px-3 pb-1 text-xs font-bold uppercase tracking-wide text-muted">{group.section}</p>
+            {!mini && <p className="px-3 pb-1 text-xs font-bold uppercase tracking-wide text-muted">{group.section}</p>}
+            {mini && <div className="mx-2 mb-2 border-t border-line" />}
             {group.items.map(({ label, href, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setOpen(false)}
+                title={mini ? label : undefined}
                 className={cn(
-                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                  'group relative flex items-center rounded-xl text-sm font-medium transition-colors',
+                  mini ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2.5',
                   isActive(href) ? 'bg-brand-50 text-brand-700' : 'text-body hover:bg-surface-soft',
                 )}
               >
                 <Icon size={19} strokeWidth={2} />
-                {label}
+                {!mini && label}
+                {mini && (
+                  <span className="pointer-events-none absolute left-full z-50 ml-2 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-pop transition-opacity duration-150 group-hover:opacity-100">
+                    {label}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
@@ -130,10 +151,14 @@ export default function DashboardShell({ children }) {
       </nav>
       <button
         onClick={onLogout}
-        className="m-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-danger transition-colors hover:bg-red-50 cursor-pointer"
+        title={mini ? 'Sign out' : undefined}
+        className={cn(
+          'm-3 flex items-center rounded-xl py-2.5 text-sm font-medium text-danger transition-colors hover:bg-red-50 cursor-pointer',
+          mini ? 'justify-center' : 'gap-3 px-3',
+        )}
       >
         <Logout01Icon size={19} strokeWidth={2} />
-        Sign out
+        {!mini && 'Sign out'}
       </button>
     </div>
   );
@@ -141,22 +166,33 @@ export default function DashboardShell({ children }) {
   return (
     <div className="min-h-screen bg-surface-soft">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-line bg-white lg:block">{Sidebar}</aside>
+      <aside className={cn('fixed inset-y-0 left-0 z-40 hidden border-r border-line bg-white transition-[width] duration-200 lg:block', collapsed ? 'w-20' : 'w-64')}>
+        {renderSidebar(collapsed)}
+      </aside>
 
       {/* Mobile sidebar */}
       {open && (
         <div className="fixed inset-0 z-[70] lg:hidden">
           <div className="absolute inset-0 bg-ink/40" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-64 bg-white shadow-pop">{Sidebar}</aside>
+          <aside className="absolute inset-y-0 left-0 w-64 bg-white shadow-pop">{renderSidebar(false)}</aside>
         </div>
       )}
 
-      <div className="lg:pl-64">
+      <div className={cn('transition-[padding] duration-200', collapsed ? 'lg:pl-20' : 'lg:pl-64')}>
         {/* Topbar */}
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-line bg-white/95 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-white/95 px-4 backdrop-blur sm:px-6">
           <button onClick={() => setOpen(true)} aria-label="Menu" className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-surface-soft lg:hidden cursor-pointer">
             <Menu01Icon size={22} strokeWidth={2} />
           </button>
+          {/* Desktop collapse toggle */}
+          <button
+            onClick={toggleCollapse}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="hidden h-10 w-10 items-center justify-center rounded-full text-body hover:bg-surface-soft lg:flex cursor-pointer"
+          >
+            {collapsed ? <ArrowRight01Icon size={20} strokeWidth={2} /> : <ArrowLeft01Icon size={20} strokeWidth={2} />}
+          </button>
+
           <div className="ml-auto flex items-center gap-3">
             <Link href="/" className="text-sm font-medium text-body hover:text-brand-600">View store</Link>
             <div className="flex items-center gap-2">

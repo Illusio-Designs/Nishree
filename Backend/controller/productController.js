@@ -137,6 +137,8 @@ export const createProduct = async (req, res) => {
                     sku: uniqueSku,
                     price: Number(variation.price),
                     comparePrice: variation.comparePrice ? Number(variation.comparePrice) : null,
+                    wholesalePrice: variation.wholesalePrice ? Number(variation.wholesalePrice) : null,
+                    priceTiers: variation.priceTiers || null,
                     stock: Number(variation.stock || 0),
                     weight: variation.weight ? Number(variation.weight) : null,
                     weightUnit: variation.weightUnit || 'g',
@@ -347,17 +349,20 @@ export const updateProduct = async (req, res) => {
 
             // Create new variations
             for (const variation of variationsData) {
+                const uniqueSku = variation.sku || `SKU-${id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
                 await ProductVariation.create({
                     productId: id,
-                    sku: variation.sku,
+                    sku: uniqueSku,
                     price: variation.price,
-                    comparePrice: variation.comparePrice,
-                    stock: variation.stock,
-                    weight: variation.weight,
-                    weightUnit: variation.weightUnit,
-                    dimensions: typeof variation.dimensions === 'string' ? variation.dimensions : JSON.stringify(variation.dimensions),
-                    dimensionUnit: variation.dimensionUnit,
-                    attributes: typeof variation.attributes === 'string' ? variation.attributes : JSON.stringify(variation.attributes)
+                    comparePrice: variation.comparePrice ?? null,
+                    wholesalePrice: variation.wholesalePrice ?? null,
+                    priceTiers: variation.priceTiers ?? null,
+                    stock: variation.stock ?? 0,
+                    weight: variation.weight ?? null,
+                    weightUnit: variation.weightUnit || 'g',
+                    dimensions: variation.dimensions ? (typeof variation.dimensions === 'string' ? variation.dimensions : JSON.stringify(variation.dimensions)) : null,
+                    dimensionUnit: variation.dimensionUnit || 'cm',
+                    attributes: typeof variation.attributes === 'string' ? variation.attributes : JSON.stringify(variation.attributes || {})
                 }, { transaction });
             }
         }

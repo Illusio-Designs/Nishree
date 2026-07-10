@@ -9,6 +9,7 @@ import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
 import DataTable from '@/components/admin/DataTable';
 import Modal from '@/components/admin/Modal';
+import VariationsEditor from '@/components/admin/VariationsEditor';
 
 // Config-driven CRUD page. Supply list/create/update/remove + columns + fields and
 // this renders the toolbar, table, and modal form. Omit create/update/remove to
@@ -60,7 +61,9 @@ export default function ResourceManager({
   const openCreate = () => {
     setEditing(null);
     const init = {};
-    fields.forEach((f) => { init[f.name] = f.type === 'checkbox' ? false : ''; });
+    fields.forEach((f) => {
+      init[f.name] = f.type === 'checkbox' ? false : f.type === 'variations' ? [{}] : '';
+    });
     setValues(init);
     setOpen(true);
   };
@@ -152,7 +155,7 @@ export default function ResourceManager({
         >
           <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {fields.map((f) => (
-              <div key={f.name} className={f.colSpan === 2 || f.type === 'textarea' ? 'sm:col-span-2' : ''}>
+              <div key={f.name} className={f.colSpan === 2 || f.type === 'textarea' || f.type === 'variations' ? 'sm:col-span-2' : ''}>
                 <FormField field={f} value={values[f.name]} onChange={(v) => setField(f.name, v)} />
               </div>
             ))}
@@ -166,6 +169,9 @@ export default function ResourceManager({
 function FormField({ field, value, onChange }) {
   const { type = 'text', label, name, options = [], placeholder, required } = field;
 
+  if (type === 'variations') {
+    return <VariationsEditor value={value} onChange={onChange} />;
+  }
   if (type === 'textarea') {
     return <Textarea label={label} name={name} value={value ?? ''} onChange={(e) => onChange(e.target.value)} required={required} />;
   }

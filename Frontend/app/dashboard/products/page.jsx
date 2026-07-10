@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { mediaUrl } from '@/lib/api';
-import { firstImage, productPricing, formatPrice } from '@/lib/format';
+import { firstImage, productPricing, formatPrice, variationLabel } from '@/lib/format';
 import StatusPill from '@/components/admin/StatusPill';
 import ResourceManager from '@/components/admin/ResourceManager';
 import {
@@ -48,7 +48,8 @@ export default function ProductsPage() {
             </div>
           ),
         },
-        { key: 'price', label: 'Price', render: (p) => formatPrice(productPricing(p).price) },
+        { key: 'price', label: 'From', render: (p) => formatPrice(productPricing(p).price) },
+        { key: 'packs', label: 'Pack sizes', render: (p) => (p.ProductVariations || p.variations || []).length || 1 },
         { key: 'category', label: 'Category', render: (p) => p.category?.name || p.Category?.name || '—' },
         { key: 'status', label: 'Status', render: (p) => <StatusPill status={p.status} /> },
       ]}
@@ -60,36 +61,46 @@ export default function ProductsPage() {
           { value: 'inactive', label: 'Inactive' },
           { value: 'draft', label: 'Draft' },
         ] },
-        { name: 'sku', label: 'SKU' },
-        { name: 'price', label: 'Price', type: 'number', required: true },
-        { name: 'comparePrice', label: 'Compare-at price', type: 'number' },
-        { name: 'stock', label: 'Stock', type: 'number' },
         { name: 'description', label: 'Description', type: 'textarea' },
+        { name: 'variations', label: 'Pack sizes', type: 'variations' },
         { name: 'images', label: 'Image', type: 'image', colSpan: 2 },
       ]}
-      toFormValues={(p) => {
-        const v = (p.ProductVariations || p.variations || [])[0] || {};
-        return {
-          name: p.name, categoryId: String(p.categoryId || p.category?.id || ''), status: p.status || 'active',
-          sku: v.sku || '', price: v.price || '', comparePrice: v.comparePrice || '', stock: v.stock ?? '',
-          description: p.description || '', images: firstImage(p),
-        };
-      }}
+      toFormValues={(p) => ({
+        name: p.name,
+        categoryId: String(p.categoryId || p.category?.id || ''),
+        status: p.status || 'active',
+        description: p.description || '',
+        images: firstImage(p),
+        variations: (p.ProductVariations || p.variations || []).map((vr) => {
+          let attrs = vr.attributes;
+          if (typeof attrs === 'string') { try { attrs = JSON.parse(attrs); } catch { attrs = {}; } }
+          return {
+            id: vr.id,
+            weight: attrs?.weight || variationLabel(vr),
+            price: vr.price ?? '',
+            comparePrice: vr.comparePrice ?? '',
+            wholesalePrice: vr.wholesalePrice ?? '',
+            stock: vr.stock ?? '',
+            sku: vr.sku || '',
+          };
+        }),
+      })}
       toPayload={(v) => ({
         name: v.name,
         description: v.description,
         categoryId: v.categoryId,
         status: v.status || 'active',
         images: v.images instanceof File ? v.images : undefined,
-        variations: [
-          {
-            sku: v.sku || `SKU-${v.name?.slice(0, 4).toUpperCase()}-${Math.floor(Math.random() * 9000 + 1000)}`,
-            price: Number(v.price) || 0,
-            comparePrice: v.comparePrice ? Number(v.comparePrice) : null,
-            stock: Number(v.stock) || 0,
-            attributes: { title: 'Default' },
-          },
-        ],
+        variations: (Array.isArray(v.variations) ? v.variations : [])
+          .filter((r) => r && r.price !== '' && r.price != null)
+          .map((r) => ({
+            sku: r.sku || undefined,
+            price: Number(r.price) || 0,
+            comparePrice: r.comparePrice !== '' && r.comparePrice != null ? Number(r.comparePrice) : null,
+            wholesalePrice: r.wholesalePrice !== '' && r.wholesalePrice != null ? Number(r.wholesalePrice) : null,
+            stock: Number(r.stock) || 0,
+            attributes: { weight: r.weight || 'Default' },
+          })),
       })}
     />
   );

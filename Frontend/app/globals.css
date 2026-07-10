@@ -93,3 +93,50 @@ h1, h2, h3, h4, h5, h6 {
 /* Line clamp helpers */
 .clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 .clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ------------------------------------------------------------------ *
+ * Toasts — branded Nishree look (react-toastify override)
+ * Rounded card, coloured accent bar per type, brand progress.
+ * ------------------------------------------------------------------ */
+.nishree-toast-container { padding: 12px; }
+
+.nishree-toast {
+  position: relative;
+  border-radius: 16px !important;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pop);
+  padding: 14px 16px 14px 18px;
+  overflow: hidden;
+  font-family: var(--font-sans);
+}
+/* left accent bar */
+.nishree-toast::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  border-radius: 16px 0 0 16px;
+  background: var(--color-brand-600);
+}
+.nishree-toast.Toastify__toast--success::before { background: var(--color-success); }
+.nishree-toast.Toastify__toast--error::before { background: var(--color-danger); }
+.nishree-toast.Toastify__toast--warning::before { background: var(--color-warning); }
+.nishree-toast.Toastify__toast--info::before { background: var(--color-brand-600); }
+
+.nishree-toast .Toastify__toast-body {
+  color: var(--color-ink);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0;
+}
+.nishree-toast .Toastify__toast-icon { width: 22px; margin-inline-end: 12px; }
+
+.nishree-toast-progress {
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-700)) !important;
+}
+.nishree-toast.Toastify__toast--success .nishree-toast-progress { background: var(--color-success) !important; }
+.nishree-toast.Toastify__toast--error .nishree-toast-progress { background: var(--color-danger) !important; }
+
+.nishree-toast .Toastify__close-button { color: var(--color-muted); align-self: center; }
