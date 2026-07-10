@@ -79,7 +79,7 @@ export default function ProductsBrowser() {
             onClick={() => setCategory('')}
             className={`block w-full rounded-lg px-3 py-2 text-left text-sm transition-colors cursor-pointer ${!category ? 'bg-brand-50 font-semibold text-brand-700' : 'text-body hover:bg-surface-soft'}`}
           >
-            All Products
+            All Spices
           </button>
           {categories.map((c) => (
             <button
@@ -104,7 +104,7 @@ export default function ProductsBrowser() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products..."
+            placeholder="Search spices..."
             className="h-11 w-full rounded-full border border-line bg-white pl-4 pr-11 text-sm text-ink placeholder:text-muted focus-ring"
           />
           <button type="submit" aria-label="Search" className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full brand-gradient text-white cursor-pointer">
@@ -145,7 +145,7 @@ export default function ProductsBrowser() {
               </div>
             </>
           ) : (
-            <EmptyState title="No products found" message="Try a different search or category." action={<Button href="/products">Reset</Button>} />
+            <EmptyState title="No spices found" message="Try a different search or category." action={<Button href="/products">Reset</Button>} />
           )}
         </div>
       </div>

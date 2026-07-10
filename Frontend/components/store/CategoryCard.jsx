@@ -22,7 +22,7 @@ export default function CategoryCard({ category }) {
             loading="lazy"
           />
         ) : (
-          <span className="text-2xl">🛒</span>
+          <span className="text-2xl">🌶️</span>
         )}
       </div>
       <h3 className="text-sm font-semibold text-ink group-hover:text-brand-600 transition-colors">

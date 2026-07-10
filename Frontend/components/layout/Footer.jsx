@@ -50,8 +50,8 @@ export default function Footer() {
         <div className="col-span-2 sm:col-span-3 lg:col-span-2">
           <Logo />
           <p className="mt-4 max-w-sm text-sm text-body">
-            Fresh groceries and everyday essentials at unbeatable prices, delivered
-            to your doorstep.
+            Authentic, freshly-ground spices and masalas at honest prices,
+            delivered to your doorstep.
           </p>
           <ul className="mt-5 space-y-2 text-sm text-body">
             <li className="flex items-center gap-2">

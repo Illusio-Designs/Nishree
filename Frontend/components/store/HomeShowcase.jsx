@@ -37,7 +37,7 @@ export default function HomeShowcase() {
     <>
       {/* Shop by Category */}
       <Container className="py-12">
-        <SectionHeading title="Shop by Category" center />
+        <SectionHeading title="Shop by Spice Category" subtitle="Whole spices, ground masalas and signature blends." center />
         {loading ? (
           <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -51,13 +51,13 @@ export default function HomeShowcase() {
             ))}
           </div>
         ) : (
-          <p className="text-center text-muted">Categories will appear here soon.</p>
+          <p className="text-center text-muted">Our spice collection is coming soon.</p>
         )}
       </Container>
 
       {/* Best Deals */}
       <Container className="py-8">
-        <SectionHeading title="Best Deals for You" actionLabel="View All Deals" actionHref="/products?deals=1" />
+        <SectionHeading title="Bestselling Spices" actionLabel="View All Deals" actionHref="/products?deals=1" />
         {loading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -71,7 +71,7 @@ export default function HomeShowcase() {
             ))}
           </div>
         ) : (
-          <p className="text-center text-muted">Fresh deals are on the way.</p>
+          <p className="text-center text-muted">Fresh spice deals are on the way.</p>
         )}
       </Container>
     </>

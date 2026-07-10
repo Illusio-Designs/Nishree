@@ -36,7 +36,7 @@ export default function ContactPage() {
     <>
       <PageHeader
         title="Get in touch"
-        subtitle="Questions, feedback, or a bulk order? We'd love to hear from you."
+        subtitle="Questions, recipe help, or a wholesale spice order? We'd love to hear from you."
         crumbs={[{ label: 'Contact' }]}
       />
 

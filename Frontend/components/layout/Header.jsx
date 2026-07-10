@@ -80,7 +80,7 @@ export default function Header() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search for products..."
+              placeholder="Search spices..."
               className="h-11 w-full rounded-full border border-line bg-surface-soft pl-4 pr-11 text-sm text-ink placeholder:text-muted focus-ring"
             />
             <button
@@ -114,7 +114,7 @@ export default function Header() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search for products..."
+                placeholder="Search spices..."
                 className="h-11 w-full rounded-full border border-line bg-surface-soft pl-4 pr-11 text-sm text-ink placeholder:text-muted focus-ring"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted">

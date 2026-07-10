@@ -18,7 +18,7 @@ export default function CartDrawer({ open, onClose }) {
         <EmptyState
           icon={ShoppingCart01Icon}
           title="Your cart is empty"
-          message="Browse our fresh picks and add something you love."
+          message="Browse our spices and add something you love."
           action={<Button href="/products" onClick={onClose}>Shop Now</Button>}
         />
       ) : (

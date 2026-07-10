@@ -13,15 +13,15 @@ import Button from '@/components/ui/Button';
 export const metadata = { title: 'About Us' };
 
 const VALUES = [
-  { icon: Plant01Icon, title: 'Fresh & Natural', text: 'Hand-picked produce and quality-checked essentials, every single day.' },
-  { icon: Tag01Icon, title: 'Fair Prices', text: 'Wholesale-backed pricing so you always pay less for more.' },
-  { icon: DeliveryTruck01Icon, title: 'Fast Delivery', text: 'Reliable doorstep delivery that keeps your kitchen stocked.' },
-  { icon: CustomerSupportIcon, title: 'Real Support', text: 'A friendly team ready to help whenever you need us.' },
+  { icon: Plant01Icon, title: 'Pure & Natural', text: 'No fillers, no additives — just clean, single-origin spices and honest blends.' },
+  { icon: Tag01Icon, title: 'Fair Prices', text: 'Sourced direct from growers so you pay for the spice, not the middlemen.' },
+  { icon: DeliveryTruck01Icon, title: 'Freshly Ground', text: 'Ground in small batches and sealed for aroma, then shipped fast to your door.' },
+  { icon: CustomerSupportIcon, title: 'Real Support', text: 'A friendly team ready to help with recipes, bulk orders and anything else.' },
 ];
 
 const STATS = [
-  { value: '50k+', label: 'Happy customers' },
-  { value: '2k+', label: 'Products' },
+  { value: '50k+', label: 'Happy kitchens' },
+  { value: '120+', label: 'Spices & blends' },
   { value: '99%', label: 'On-time delivery' },
   { value: '4.8★', label: 'Average rating' },
 ];
@@ -31,7 +31,7 @@ export default function AboutPage() {
     <>
       <PageHeader
         title="About Nishree"
-        subtitle="We're on a mission to make fresh, quality groceries affordable and effortless for every home."
+        subtitle="We're on a mission to bring pure, freshly-ground spices from the farm to every kitchen — affordably."
         crumbs={[{ label: 'About Us' }]}
       />
 
@@ -41,16 +41,16 @@ export default function AboutPage() {
             <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
               <Award01Icon size={15} strokeWidth={2} /> Our Story
             </span>
-            <h2 className="mt-4 text-3xl font-bold text-ink">Groceries, reimagined for everyday life</h2>
+            <h2 className="mt-4 text-3xl font-bold text-ink">Spices, the way they're meant to taste</h2>
             <p className="mt-4 text-body">
-              Nishree started with a simple idea: everyone deserves access to fresh,
-              high-quality groceries without the premium price tag. From farm-fresh
-              produce to daily essentials, we bring it all together in one place —
-              delivered fast and priced fairly.
+              Nishree started with a simple idea: everyone deserves access to pure,
+              aromatic spices without the premium price tag. We source whole spices
+              directly from growers, grind them in small batches, and seal in the
+              aroma — so every pinch tastes the way it should.
             </p>
             <p className="mt-3 text-body">
-              Today we serve homes and businesses alike, blending a delightful
-              shopping experience with dependable service you can count on.
+              Today we serve home cooks and businesses alike, pairing authentic
+              flavour with dependable service you can count on.
             </p>
             <div className="mt-6 flex gap-3">
               <Button href="/products">Start Shopping</Button>
@@ -93,8 +93,8 @@ export default function AboutPage() {
           <UserGroupIcon size={36} strokeWidth={2} />
           <h2 className="text-2xl font-bold sm:text-3xl">Join the Nishree family</h2>
           <p className="max-w-xl text-white/85">
-            Create an account today and unlock members-only deals, faster checkout,
-            and exclusive offers.
+            Create an account today and unlock members-only spice deals, faster
+            checkout, and exclusive offers.
           </p>
           <Button href="/register" variant="secondary" size="lg">Create Account</Button>
         </div>

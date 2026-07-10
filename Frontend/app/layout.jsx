@@ -13,11 +13,11 @@ const inter = Inter({
 
 export const metadata = {
   title: {
-    default: 'Nishree — Fresh Groceries, Delivered',
+    default: 'Nishree — Pure Spices, Freshly Delivered',
     template: '%s · Nishree',
   },
   description:
-    'Shop fresh groceries and everyday essentials at unbeatable prices, delivered to your doorstep.',
+    'Shop authentic, freshly-ground spices, masalas and whole spices at honest prices, delivered to your doorstep.',
 };
 
 export default function RootLayout({ children }) {

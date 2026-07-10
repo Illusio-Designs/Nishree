@@ -34,7 +34,7 @@ export default function RegisterPage() {
   return (
     <AuthShell
       title="Create your account"
-      subtitle="Join Nishree for fresh deals and fast delivery."
+      subtitle="Join Nishree for fresh spice deals and fast delivery."
       footer={
         <>
           Already have an account?{' '}
