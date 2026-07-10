@@ -8,9 +8,10 @@ import Footer from '@/components/layout/Footer';
 // render their own admin shell, so skip the store chrome there.
 export default function StoreChrome({ children }) {
   const pathname = usePathname();
-  const isDashboard = pathname?.startsWith('/dashboard');
+  // Admin dashboard and the partner portal render their own shells.
+  const ownShell = pathname?.startsWith('/dashboard') || pathname?.startsWith('/portal');
 
-  if (isDashboard) return children;
+  if (ownShell) return children;
 
   return (
     <div className="flex min-h-screen flex-col">
