@@ -1,44 +1,24 @@
 {
-  "name": "nishree",
+  "name": "nishree-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "convert-images": "node scripts/convert-images.js",
-    "predev": "npm run convert-images",
-    "dev": "vite",
-    "prebuild": "npm run convert-images",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "@lottiefiles/dotlottie-react": "^0.13.5",
-    "@react-oauth/google": "^0.12.1",
-    "antd": "^5.25.0",
     "axios": "^1.8.4",
-    "gsap": "^3.13.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-helmet-async": "^2.0.5",
-    "react-icons": "^4.12.0",
-    "react-jss": "^10.10.0",
-    "react-router-dom": "^7.4.1",
-    "react-select": "^5.10.1",
-    "react-toastify": "^11.0.5",
-    "sharp": "^0.33.5",
-    "swiper": "^11.2.6"
+    "hugeicons-react": "^0.4.0",
+    "next": "^15.5.20",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@types/react": "^18.3.24",
-    "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react": "^4.3.4",
-    "eslint": "^9.21.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^15.15.0",
-    "terser": "^5.44.1",
-    "vite": "^6.2.0"
+    "@tailwindcss/postcss": "^4.3.2",
+    "tailwindcss": "^4.3.2"
   }
 }

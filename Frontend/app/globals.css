@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Nishree design tokens
+ * Brand = Nishree red (#B72D24 primary), carried through as a scale.
+ * Layout/spacing follows the modern grocery reference; colours are ours.
+ * ------------------------------------------------------------------ */
+@theme {
+  /* Brand red scale */
+  --color-brand-50: #fdf3f2;
+  --color-brand-100: #fbe4e2;
+  --color-brand-200: #f6c9c5;
+  --color-brand-300: #eda39c;
+  --color-brand-400: #e17a70;
+  --color-brand-500: #d15448;
+  --color-brand-600: #b72d24; /* primary */
+  --color-brand-700: #991b1b;
+  --color-brand-800: #7f1a17;
+  --color-brand-900: #6b1a18;
+
+  /* Neutral / surface */
+  --color-ink: #282828;        /* headings */
+  --color-body: #5b6472;       /* paragraph text */
+  --color-muted: #9ca3af;      /* secondary text */
+  --color-line: #e5e7eb;       /* borders */
+  --color-surface: #ffffff;
+  --color-surface-soft: #f8f9fa;
+  --color-surface-tint: #fdf3f2; /* soft brand wash */
+
+  /* Semantic */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
+
+  /* Radii — soft, rounded look */
+  --radius-xs: 0.375rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.75rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 6px 24px -12px rgba(20, 24, 31, 0.18);
+  --shadow-soft: 0 2px 10px -4px rgba(20, 24, 31, 0.12);
+  --shadow-pop: 0 18px 48px -20px rgba(20, 24, 31, 0.28);
+
+  /* Fonts (wired via next/font in layout) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ------------------------------------------------------------------ *
+ * Base
+ * ------------------------------------------------------------------ */
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-ink);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Utility: consistent focus ring in brand */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-brand-100), 0 0 0 1px var(--color-brand-600);
+}
+
+/* Hide scrollbar for horizontal scrollers (category rail, etc.) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Subtle brand gradient used by the hero + CTAs */
+.brand-gradient {
+  background-image: linear-gradient(135deg, var(--color-brand-600) 0%, var(--color-brand-700) 100%);
+}
+
+/* Line clamp helpers */
+.clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
