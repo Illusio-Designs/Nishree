@@ -53,10 +53,18 @@ export default function LoginPage() {
       subtitle="Welcome back — let's get you shopping."
       footer={
         <>
-          New to Nishree?{' '}
-          <Link href="/register" className="font-semibold text-brand-600 hover:text-brand-700">
-            Create an account
-          </Link>
+          <p>
+            New to Nishree?{' '}
+            <Link href="/register" className="font-semibold text-brand-600 hover:text-brand-700">
+              Create an account
+            </Link>
+          </p>
+          <p className="mt-2 text-xs">
+            Salesman, party or distributor?{' '}
+            <Link href="/login/business" className="font-semibold text-brand-600 hover:text-brand-700">
+              Login with OTP
+            </Link>
+          </p>
         </>
       }
     >

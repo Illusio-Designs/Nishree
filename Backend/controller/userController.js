@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import axios from 'axios';
 import passport from 'passport';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -93,6 +94,70 @@ export const login = async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Login failed', error: error.message });
+    }
+};
+
+// **OTP Login (MSG91)** — for B2B users (party / distributor / salesman).
+// Consumers keep email/password/Google login. Flow: the browser MSG91 widget
+// returns an access-token after OTP entry; we verify it with MSG91 to get the
+// phone, find the matching user, and issue a JWT. A demo path (no MSG91 configured)
+// accepts { phone } directly so the portals are testable without live OTP.
+export const otpLogin = async (req, res) => {
+    try {
+        const { accessToken, phone: bodyPhone, role } = req.body;
+        let phone = bodyPhone;
+
+        // Verify the MSG91 widget access-token when credentials are configured.
+        if (accessToken && process.env.MSG91_AUTH_KEY) {
+            try {
+                const { data } = await axios.post(
+                    'https://control.msg91.com/api/v5/widget/verifyAccessToken',
+                    { authkey: process.env.MSG91_AUTH_KEY, 'access-token': accessToken },
+                    { headers: { 'Content-Type': 'application/json' }, timeout: 8000 }
+                );
+                phone = data?.mobile || data?.data?.mobile || phone;
+            } catch (err) {
+                console.error('MSG91 verify failed:', err.message);
+                return res.status(401).json({ message: 'OTP verification failed' });
+            }
+        }
+
+        if (!phone) return res.status(400).json({ message: 'Phone (or a verified access token) is required' });
+
+        let user = await User.findOne({ where: { phone } });
+
+        // No account yet: provision a B2B user (demo/dev), or reject in live OTP mode.
+        if (!user) {
+            const liveOtp = !!process.env.MSG91_AUTH_KEY;
+            if (liveOtp && process.env.NODE_ENV === 'production') {
+                return res.status(404).json({ message: 'No account is registered for this number. Please contact the Nishree team.' });
+            }
+            const b2bRole = ['party', 'distributor', 'salesman'].includes(role) ? role : 'party';
+            user = await User.create({
+                username: `${b2bRole.charAt(0).toUpperCase() + b2bRole.slice(1)} User`,
+                email: `b2b_${phone}@nishree.local`,
+                phone,
+                role: b2bRole
+            });
+        }
+
+        // OTP login is for B2B; a consumer account should use email/Google login.
+        if (user.role === 'consumer') {
+            return res.status(403).json({ message: 'This number is registered as a shopper. Please sign in with email.' });
+        }
+
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+        const userResponse = user.toJSON();
+        delete userResponse.password;
+
+        res.json({ message: 'OTP login successful', token, user: userResponse });
+    } catch (error) {
+        console.error('OTP login error:', error);
+        res.status(500).json({ message: 'OTP login failed', error: error.message });
     }
 };
 
