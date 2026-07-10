@@ -27,3 +27,17 @@ export const clearSession = () => {
 };
 
 export const isLoggedIn = () => !!getToken();
+
+// Demo sign-in — creates a local session without any backend, so the dashboard
+// and account pages are testable before the API/seed exist. `demo: true` marks it.
+export const demoLogin = (role = 'admin') => {
+  const user = {
+    id: 0,
+    username: role === 'admin' ? 'Demo Admin' : 'Demo User',
+    email: 'demo@nishree.com',
+    role,
+    demo: true,
+  };
+  saveSession({ token: 'demo-token', user });
+  return user;
+};

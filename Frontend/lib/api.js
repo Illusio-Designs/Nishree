@@ -3,7 +3,7 @@ import { MOCK_CATEGORIES, MOCK_PRODUCTS, findMockProduct, filterMockProducts } f
 
 // When true, fall back to the demo spice catalogue if the backend has no data or
 // is unreachable. Set NEXT_PUBLIC_DISABLE_DEMO=true to always show live data only.
-const DEMO_FALLBACK = process.env.NEXT_PUBLIC_DISABLE_DEMO !== 'true';
+export const DEMO_FALLBACK = process.env.NEXT_PUBLIC_DISABLE_DEMO !== 'true';
 
 // Base URL of the Express backend. Public endpoints live under /api/.../public.
 export const API_URL =

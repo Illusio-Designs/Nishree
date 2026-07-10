@@ -158,18 +158,18 @@ export default function ProductDetail({ id }) {
               <p className="mt-5 leading-relaxed text-body">{product.description}</p>
             )}
 
-            {/* Variations */}
+            {/* Variations (pack size) */}
             {variations.length > 1 && (
               <div className="mt-6">
-                <p className="mb-2 text-sm font-semibold text-ink">Options</p>
+                <p className="mb-2 text-sm font-semibold text-ink">Pack size</p>
                 <div className="flex flex-wrap gap-2">
                   {variations.map((v, i) => (
                     <button
                       key={v.id || i}
                       onClick={() => setVariationIdx(i)}
-                      className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${i === variationIdx ? 'border-brand-600 bg-brand-50 text-brand-700' : 'border-line text-body hover:border-brand-300'}`}
+                      className={`rounded-full border px-4 py-2 text-sm font-semibold uppercase transition-colors cursor-pointer ${i === variationIdx ? 'border-brand-600 bg-brand-600 text-white' : 'border-line text-body hover:border-brand-300'}`}
                     >
-                      {v.sku || v.name || Object.values(v.attributes || {}).join(' / ') || `Variant ${i + 1}`}
+                      {variationLabel(v)}
                     </button>
                   ))}
                 </div>

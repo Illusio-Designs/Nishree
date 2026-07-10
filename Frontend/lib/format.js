@@ -32,6 +32,26 @@ export const firstImage = (entity) => {
   return '';
 };
 
+// Human label for a variation (e.g. its weight/size), tolerant of JSON-string
+// attributes and falling back to the SKU suffix.
+export const variationLabel = (v) => {
+  if (!v) return '';
+  let attrs = v.attributes;
+  if (typeof attrs === 'string') {
+    try { attrs = JSON.parse(attrs); } catch { attrs = null; }
+  }
+  if (attrs && typeof attrs === 'object') {
+    const val = attrs.weight || attrs.size || attrs.pack || attrs.title || Object.values(attrs)[0];
+    if (val && String(val).toLowerCase() !== 'default') return String(val);
+  }
+  if (v.sku) {
+    const parts = String(v.sku).split('-');
+    const last = parts[parts.length - 1];
+    if (last && /\d/.test(last)) return last.toLowerCase();
+  }
+  return v.name || 'Default';
+};
+
 // A product's selling price + compare-at, tolerant of variation shapes.
 export const productPricing = (product) => {
   if (!product) return { price: 0, compareAt: null };
