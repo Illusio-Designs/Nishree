@@ -106,6 +106,36 @@ The field‑verification core (`utils/geo.js`):
 
 ---
 
+## 5a. Salesman Day Journey (geo route tracking) — add-on
+
+On top of check-ins (which prove presence *at a party*), a **day journey** traces
+the salesman's **whole day of movement** as a GPS route.
+
+- **Header** (`SalesmanJourney`) — one row per day: start/end time & coordinates,
+  total distance travelled, optional odometer readings.
+- **Breadcrumbs** (`SalesmanJourneyPoint`) — GPS pings logged through the day.
+  Each point stores accuracy/speed/battery and its distance from the previous
+  point; `event_type` (`start`/`track`/`checkin`/`order`/`end`) annotates the
+  route. Points can be posted one at a time or **batched** (`points: [...]`) for
+  offline sync.
+
+Total route distance is accumulated server-side (Haversine between consecutive
+points). The journey detail merges that day's check-ins and visit orders into a
+**timeline**, so the full day plots on one map.
+
+**Endpoints** (`/api/salesman-journeys`):
+
+| Method & path | Purpose |
+|---------------|---------|
+| `POST /start` | Start (or resume) today's journey |
+| `POST /track` | Append breadcrumb(s) — single or batch |
+| `POST /end` | End the active journey |
+| `GET /active` | Current active journey + points so far |
+| `GET /` | List journeys (self, or all for managers; `?date=`, `?status=`, `?salesman_id=`) |
+| `GET /:id` | Journey route + day timeline (check-ins + orders) + summary |
+
+---
+
 ## 6. API surface (all under `/api`)
 
 | Path | Purpose |
@@ -117,6 +147,7 @@ The field‑verification core (`utils/geo.js`):
 | `/salesman-checkins` | Record / list field visits (geofenced) |
 | `/salesman-targets` | Sales target CRUD |
 | `/salesman-expenses` | Log / review field expenses |
+| `/salesman-journeys` | Day journey geo tracking (start/track/end, route + timeline) |
 | `/offers` | B2B offer CRUD, `/active` |
 | `/events` | Event CRUD, `/:id/orders` |
 | `/b2b-orders` | Create wholesale orders, `/my`, management list |

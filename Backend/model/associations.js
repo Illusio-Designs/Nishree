@@ -37,6 +37,8 @@ import { SalesmanExpense } from './salesmanExpenseModel.js';
 import { Offer } from './offerModel.js';
 import { Event } from './eventModel.js';
 import { AuditLog } from './auditLogModel.js';
+import { SalesmanJourney } from './salesmanJourneyModel.js';
+import { SalesmanJourneyPoint } from './salesmanJourneyPointModel.js';
 // import { Notification } from './notificationModel.js';
 
 // Export all models
@@ -78,7 +80,9 @@ export {
     SalesmanExpense,
     Offer,
     Event,
-    AuditLog
+    AuditLog,
+    SalesmanJourney,
+    SalesmanJourneyPoint
     // Notification
 };
 
@@ -302,6 +306,15 @@ Order.belongsTo(Salesman, { foreignKey: 'salesman_id' });
 
 Event.hasMany(Order, { foreignKey: 'event_id' });
 Order.belongsTo(Event, { foreignKey: 'event_id' });
+
+// Salesman day journey (geo route tracking).
+Salesman.hasMany(SalesmanJourney, { foreignKey: 'salesman_id', as: 'Journeys', onDelete: 'CASCADE' });
+SalesmanJourney.belongsTo(Salesman, { foreignKey: 'salesman_id' });
+
+SalesmanJourney.hasMany(SalesmanJourneyPoint, { foreignKey: 'journey_id', as: 'Points', onDelete: 'CASCADE' });
+SalesmanJourneyPoint.belongsTo(SalesmanJourney, { foreignKey: 'journey_id' });
+Salesman.hasMany(SalesmanJourneyPoint, { foreignKey: 'salesman_id', onDelete: 'CASCADE' });
+SalesmanJourneyPoint.belongsTo(Salesman, { foreignKey: 'salesman_id' });
 
 // Audit trail actor.
 User.hasMany(AuditLog, { foreignKey: 'user_id' });

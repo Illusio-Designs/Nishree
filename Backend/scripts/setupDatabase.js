@@ -137,6 +137,7 @@ export const setupDatabase = async () => {
 			'DistributorState', 'DistributorZone',
 			'SalesmanState', 'SalesmanZone',
 			'SalesmanCheckin', 'SalesmanTarget', 'SalesmanExpense',
+			'SalesmanJourney', 'SalesmanJourneyPoint',
 			'AuditLog'
 		];
         
