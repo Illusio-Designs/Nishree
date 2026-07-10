@@ -8,7 +8,7 @@ import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Select from '@/components/ui/Select';
 import DataTable from '@/components/admin/DataTable';
-import Modal from '@/components/admin/Modal';
+import Drawer from '@/components/ui/Drawer';
 import VariationsEditor from '@/components/admin/VariationsEditor';
 
 // Config-driven CRUD page. Supply list/create/update/remove + columns + fields and
@@ -140,11 +140,12 @@ export default function ResourceManager({
         onDelete={deleteItem ? onDelete : undefined}
       />
 
-      {/* Form modal */}
+      {/* Form aside panel (drawer) */}
       {(createItem || updateItem) && (
-        <Modal
+        <Drawer
           open={open}
           onClose={() => setOpen(false)}
+          widthClass="max-w-xl"
           title={editing ? `Edit ${title.replace(/s$/, '')}` : `New ${title.replace(/s$/, '')}`}
           footer={
             <div className="flex justify-end gap-2">
@@ -153,14 +154,14 @@ export default function ResourceManager({
             </div>
           }
         >
-          <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
             {fields.map((f) => (
               <div key={f.name} className={f.colSpan === 2 || f.type === 'textarea' || f.type === 'variations' ? 'sm:col-span-2' : ''}>
                 <FormField field={f} value={values[f.name]} onChange={(v) => setField(f.name, v)} />
               </div>
             ))}
           </form>
-        </Modal>
+        </Drawer>
       )}
     </div>
   );

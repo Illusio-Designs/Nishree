@@ -6,7 +6,7 @@ import { cn } from '@/lib/format';
 
 // Slide-in panel used for the cart and mobile navigation. Portal-free: rendered
 // as a fixed overlay. `side` controls which edge it slides from.
-export default function Drawer({ open, onClose, title, side = 'right', children, widthClass = 'max-w-sm' }) {
+export default function Drawer({ open, onClose, title, side = 'right', children, footer, widthClass = 'max-w-sm' }) {
   useEffect(() => {
     if (open) document.body.style.overflow = 'hidden';
     else document.body.style.overflow = '';
@@ -46,6 +46,7 @@ export default function Drawer({ open, onClose, title, side = 'right', children,
           </button>
         </header>
         <div className="flex-1 overflow-y-auto">{children}</div>
+        {footer && <footer className="border-t border-line px-5 py-4">{footer}</footer>}
       </aside>
     </div>
   );

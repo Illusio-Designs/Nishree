@@ -22,7 +22,7 @@ export default function Hero() {
       <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand-100 blur-3xl opacity-60" />
       <Container className="relative grid items-center gap-10 py-12 lg:grid-cols-2 lg:py-16">
         <div>
-          <Badge tone="soft" icon={Award01Icon} className="mb-5">
+          <Badge tone="soft" icon={Award01Icon} className="mb-5 animate-fade-up">
             PURE SPICES, FRESHLY PACKED
           </Badge>
           <h1 className="text-4xl font-extrabold leading-[1.1] text-ink sm:text-5xl lg:text-6xl">
@@ -66,10 +66,10 @@ export default function Hero() {
               <p className="mt-1 text-xl font-semibold tracking-wide">UP TO OFF</p>
               <p className="mt-4 text-sm text-white/80">On your first spice order</p>
             </div>
-            <span className="absolute right-6 top-6 flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-2xl backdrop-blur">
+            <span className="animate-floaty absolute right-6 top-6 flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-2xl backdrop-blur">
               🌶️
             </span>
-            <span className="absolute bottom-6 left-6 flex h-14 w-14 items-center justify-center rounded-full bg-white/15 text-2xl backdrop-blur">
+            <span className="animate-floaty absolute bottom-6 left-6 flex h-14 w-14 items-center justify-center rounded-full bg-white/15 text-2xl backdrop-blur" style={{ animationDelay: '1.5s' }}>
               🧂
             </span>
           </div>

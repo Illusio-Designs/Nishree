@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Download04Icon } from 'hugeicons-react';
 import DataTable from '@/components/admin/DataTable';
 import StatusPill from '@/components/admin/StatusPill';
 import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import { formatPrice } from '@/lib/format';
 import { adminListB2BOrders } from '@/lib/admin-api';
+import { downloadOrderPdf } from '@/lib/orderPdf';
 
 export default function B2BOrdersPage() {
   const [rows, setRows] = useState([]);
@@ -28,6 +31,11 @@ export default function B2BOrdersPage() {
         loading={loading}
         emptyTitle="No B2B orders yet"
         rows={rows}
+        actions={(o) => (
+          <Button size="sm" variant="secondary" icon={Download04Icon} onClick={() => downloadOrderPdf(o)}>
+            PDF
+          </Button>
+        )}
         columns={[
           { key: 'order_number', label: 'Order', render: (o) => <span className="font-semibold text-ink">{o.order_number || `#${o.id}`}</span> },
           { key: 'order_type', label: 'Type', render: (o) => <Badge tone="soft">{(o.order_type || '').replace(/_/g, ' ')}</Badge> },
