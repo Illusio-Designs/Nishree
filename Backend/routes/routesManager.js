@@ -32,6 +32,8 @@ import eventRoutes from './eventRoutes.js';
 import b2bOrderRoutes from './b2bOrderRoutes.js';
 import b2bAnalyticsRoutes from './b2bAnalyticsRoutes.js';
 import auditLogRoutes from './auditLogRoutes.js';
+import blogRoutes from './blogRoutes.js';
+import wholesaleRoutes from './wholesaleRoutes.js';
 // import notificationRoutes from './notificationRoutes.js';
 
 // Core Routes
@@ -71,6 +73,10 @@ router.use('/events', eventRoutes);
 router.use('/b2b-orders', b2bOrderRoutes);
 router.use('/b2b-analytics', b2bAnalyticsRoutes);
 router.use('/audit-logs', auditLogRoutes);
+
+// Content + wholesale
+router.use('/blogs', blogRoutes);
+router.use('/wholesale-enquiries', wholesaleRoutes);
 
 // Notification routes - Temporarily disabled
 // router.use('/notifications', notificationRoutes);

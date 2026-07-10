@@ -15,7 +15,8 @@ const UPLOAD_DIRS = {
     slider: path.join(__dirname, '../uploads/slider'),
     reviews: path.join(__dirname, '../uploads/reviews'),
     salesmen: path.join(__dirname, '../uploads/salesmen'),
-    expenses: path.join(__dirname, '../uploads/expenses')
+    expenses: path.join(__dirname, '../uploads/expenses'),
+    blogs: path.join(__dirname, '../uploads/blogs')
 };
 
 // Create directories if they don't exist
@@ -45,6 +46,8 @@ const storage = multer.diskStorage({
             uploadDir = UPLOAD_DIRS.expenses;
         } else if (req.originalUrl.includes('/salesmen')) {
             uploadDir = UPLOAD_DIRS.salesmen;
+        } else if (req.originalUrl.includes('/blogs')) {
+            uploadDir = UPLOAD_DIRS.blogs;
         }
 
         cb(null, uploadDir);

@@ -23,6 +23,8 @@ import { Distributor } from '../model/distributorModel.js';
 import { Salesman } from '../model/salesmanModel.js';
 import { Offer } from '../model/offerModel.js';
 import { Event } from '../model/eventModel.js';
+import { Blog } from '../model/blogModel.js';
+import { WholesaleEnquiry } from '../model/wholesaleEnquiryModel.js';
 
 // Small inline SVG image so seeded products have a picture out of the box.
 const img = (glyph, from, to, label) => {
@@ -162,6 +164,25 @@ async function seed() {
   await Event.findOrCreate({
     where: { name: 'Ahmedabad Spice Expo 2026' },
     defaults: { name: 'Ahmedabad Spice Expo 2026', location: 'Ahmedabad', start_date: plusDays(20), end_date: plusDays(22), status: 'upcoming', description: 'Annual spice trade exhibition.' },
+  });
+
+  console.log('Seeding recipes / blog…');
+  const RECIPES = [
+    { title: 'Classic Chicken Curry', type: 'recipe', category: 'Recipes', read_time: '30 min', excerpt: 'A rich, home-style chicken curry built on freshly-ground garam masala.', content: '<p>Marinate, sauté onions, add spices and simmer to perfection.</p>' },
+    { title: 'Everyday Dal Tadka', type: 'recipe', category: 'Recipes', read_time: '25 min', excerpt: 'Comforting yellow dal finished with a cumin-and-chilli tempering.', content: '<p>Boil dal, prepare a ghee tadka with cumin and dried chilli, combine.</p>' },
+    { title: 'How to Store Spices for Maximum Freshness', type: 'article', category: 'Tips', read_time: '4 min', excerpt: 'Simple habits that keep your spices aromatic for months.', content: '<p>Keep spices airtight, away from heat and light, and buy whole where you can.</p>' },
+  ];
+  for (const r of RECIPES) {
+    await Blog.findOrCreate({
+      where: { slug: slugify(r.title, { lower: true, strict: true }) },
+      defaults: { ...r, slug: slugify(r.title, { lower: true, strict: true }), author: 'Nishree Kitchen', status: 'published', published_at: now },
+    });
+  }
+
+  console.log('Seeding a sample wholesale enquiry…');
+  await WholesaleEnquiry.findOrCreate({
+    where: { business_name: 'Annapurna Restaurant' },
+    defaults: { business_name: 'Annapurna Restaurant', contact_person: 'Neha Rao', phone: '9825055555', email: 'annapurna@example.com', city: 'Vadodara', state: 'Gujarat', product_interest: 'Garam Masala, Turmeric', quantity_estimate: '50 kg / month', message: 'Looking for monthly bulk supply for our kitchen.', status: 'new' },
   });
 
   console.log('\n✅ Seed complete.');
