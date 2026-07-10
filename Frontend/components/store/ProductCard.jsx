@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { Add01Icon, FavouriteIcon } from 'hugeicons-react';
+import { Add01Icon, FavouriteIcon, ViewIcon } from 'hugeicons-react';
 import Card from '@/components/ui/Card';
+import QuickView from '@/components/store/QuickView';
 import Badge from '@/components/ui/Badge';
 import PriceTag from '@/components/ui/PriceTag';
 import Rating from '@/components/ui/Rating';
@@ -20,6 +21,7 @@ export default function ProductCard({ product }) {
   const hasVariants = variations.length > 1;
 
   const [idx, setIdx] = useState(0);
+  const [quickOpen, setQuickOpen] = useState(false);
   const active = variations[idx] || null;
 
   const fallback = productPricing(product);
@@ -65,14 +67,24 @@ export default function ProductCard({ product }) {
               <Badge tone="brand">{off}% OFF</Badge>
             </span>
           )}
-          <button
-            type="button"
-            aria-label="Add to wishlist"
-            onClick={(e) => e.preventDefault()}
-            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-ink opacity-0 shadow-soft transition-opacity duration-200 hover:text-brand-600 group-hover:opacity-100 cursor-pointer"
-          >
-            <FavouriteIcon size={16} strokeWidth={2} />
-          </button>
+          <div className="absolute right-3 top-3 flex flex-col gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <button
+              type="button"
+              aria-label="Quick view"
+              onClick={(e) => { e.preventDefault(); setQuickOpen(true); }}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft hover:text-brand-600 cursor-pointer"
+            >
+              <ViewIcon size={16} strokeWidth={2} />
+            </button>
+            <button
+              type="button"
+              aria-label="Add to wishlist"
+              onClick={(e) => e.preventDefault()}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft hover:text-brand-600 cursor-pointer"
+            >
+              <FavouriteIcon size={16} strokeWidth={2} />
+            </button>
+          </div>
           {/* Floating add-to-cart (adds the selected variation) */}
           <button
             type="button"
@@ -124,6 +136,8 @@ export default function ProductCard({ product }) {
           </div>
         )}
       </div>
+
+      <QuickView product={product} open={quickOpen} onClose={() => setQuickOpen(false)} />
     </Card>
   );
 }

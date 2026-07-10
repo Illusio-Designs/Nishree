@@ -14,15 +14,16 @@ const COLS = [
   {
     title: 'Shop',
     links: [
-      { label: 'All Products', href: '/products' },
+      { label: 'All Spices', href: '/products' },
       { label: 'Deals', href: '/products?deals=1' },
-      { label: 'Collections', href: '/products' },
+      { label: 'Wholesale', href: '/wholesale' },
     ],
   },
   {
     title: 'Company',
     links: [
       { label: 'About Us', href: '/about' },
+      { label: 'Recipes', href: '/recipes' },
       { label: 'Contact', href: '/contact' },
       { label: 'Policies', href: '/policies' },
     ],

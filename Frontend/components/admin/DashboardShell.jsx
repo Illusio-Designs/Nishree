@@ -19,6 +19,8 @@ import {
   Route02Icon,
   Calendar03Icon,
   DiscountTag02Icon,
+  BookOpen01Icon,
+  Mail01Icon,
 } from 'hugeicons-react';
 import Logo from '@/components/ui/Logo';
 import Spinner from '@/components/ui/Spinner';
@@ -38,6 +40,12 @@ const NAV = [
     ],
   },
   {
+    section: 'Content',
+    items: [
+      { label: 'Recipes & Blog', href: '/dashboard/blog', icon: BookOpen01Icon },
+    ],
+  },
+  {
     section: 'B2B',
     items: [
       { label: 'Parties', href: '/dashboard/parties', icon: Store01Icon },
@@ -45,6 +53,7 @@ const NAV = [
       { label: 'Salesmen', href: '/dashboard/salesmen', icon: UserMultiple02Icon },
       { label: 'Journeys', href: '/dashboard/journeys', icon: Route02Icon },
       { label: 'B2B Orders', href: '/dashboard/b2b-orders', icon: DeliveryTruck01Icon },
+      { label: 'Wholesale Leads', href: '/dashboard/wholesale', icon: Mail01Icon },
       { label: 'Offers', href: '/dashboard/offers', icon: Tag01Icon },
       { label: 'Events', href: '/dashboard/events', icon: Calendar03Icon },
     ],

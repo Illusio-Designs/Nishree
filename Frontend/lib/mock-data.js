@@ -77,6 +77,40 @@ export const MOCK_PRODUCTS = RAW.map(
   },
 );
 
+// Demo recipes / blog posts.
+const recipe = (id, title, slug, type, category, readTime, excerpt, glyph, from, to) => ({
+  id,
+  title,
+  slug,
+  type,
+  category,
+  read_time: readTime,
+  excerpt,
+  author: 'Nishree Kitchen',
+  status: 'published',
+  published_at: '2026-01-15',
+  image: spiceImage(glyph, from, to, category),
+  content:
+    `<p>${excerpt}</p><h3>Ingredients</h3><ul><li>Fresh Nishree spices</li><li>Everyday pantry staples</li></ul>` +
+    `<h3>Method</h3><p>Bloom the spices in hot oil, build the base, and simmer until the flavours come together. ` +
+    `Finish with a final pinch of freshly-ground masala for aroma.</p>`,
+});
+
+export const MOCK_RECIPES = [
+  recipe('r1', 'Classic Chicken Curry', 'classic-chicken-curry', 'recipe', 'Recipes', '30 min', 'A rich, home-style chicken curry built on freshly-ground garam masala.', '🍛', '#c2410c', '#7c2d12'),
+  recipe('r2', 'Everyday Dal Tadka', 'everyday-dal-tadka', 'recipe', 'Recipes', '25 min', 'Comforting yellow dal finished with a cumin-and-chilli tempering.', '🥘', '#ca8a04', '#854d0e'),
+  recipe('r3', 'Paneer Butter Masala', 'paneer-butter-masala', 'recipe', 'Recipes', '35 min', 'Creamy, mildly spiced paneer in a tomato-butter gravy.', '🧈', '#dc2626', '#7f1a17'),
+  recipe('r4', 'How to Store Spices for Freshness', 'store-spices-freshness', 'article', 'Tips', '4 min', 'Simple habits that keep your spices aromatic for months.', '📦', '#b45309', '#78350f'),
+  recipe('r5', 'Whole vs Ground: When to Use Which', 'whole-vs-ground-spices', 'article', 'Tips', '5 min', 'Get more flavour by choosing the right form for each dish.', '🫙', '#a16207', '#713f12'),
+  recipe('r6', 'Masala Chai from Scratch', 'masala-chai-from-scratch', 'recipe', 'Recipes', '15 min', 'A fragrant chai blend with cardamom, ginger and cinnamon.', '☕', '#78350f', '#451a03'),
+];
+
+export const findMockRecipe = (slug) =>
+  MOCK_RECIPES.find((r) => r.slug === slug || String(r.id) === String(slug)) || null;
+
+export const filterMockRecipes = ({ type } = {}) =>
+  type ? MOCK_RECIPES.filter((r) => r.type === type) : MOCK_RECIPES;
+
 export const findMockProduct = (idOrSlug) =>
   MOCK_PRODUCTS.find((x) => String(x.id) === String(idOrSlug) || x.slug === idOrSlug) || null;
 

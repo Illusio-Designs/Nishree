@@ -1,5 +1,12 @@
 import axios from 'axios';
-import { MOCK_CATEGORIES, MOCK_PRODUCTS, findMockProduct, filterMockProducts } from '@/lib/mock-data';
+import {
+  MOCK_CATEGORIES,
+  MOCK_PRODUCTS,
+  findMockProduct,
+  filterMockProducts,
+  filterMockRecipes,
+  findMockRecipe,
+} from '@/lib/mock-data';
 
 // When true, fall back to the demo spice catalogue if the backend has no data or
 // is unreachable. Set NEXT_PUBLIC_DISABLE_DEMO=true to always show live data only.
@@ -87,6 +94,32 @@ export const getReviews = async (productId, params = {}) => {
 export const getPolicies = async () => {
   const { data } = await api.get('/api/policies');
   return data?.data || data?.policies || data || [];
+};
+
+/* ------------------------- Recipes / Blog + Wholesale ------------------------- */
+
+export const getBlogs = async (params = {}) => {
+  try {
+    const qs = new URLSearchParams(params).toString();
+    const { data } = await api.get(`/api/blogs/public${qs ? `?${qs}` : ''}`);
+    const list = data?.data || data?.blogs || data || [];
+    if (Array.isArray(list) && list.length) return list;
+  } catch { /* fall through */ }
+  return DEMO_FALLBACK ? filterMockRecipes(params) : [];
+};
+
+export const getBlog = async (slug) => {
+  try {
+    const { data } = await api.get(`/api/blogs/public/${slug}`);
+    const blog = data?.data || data?.blog || data;
+    if (blog && (blog.id || blog.title)) return blog;
+  } catch { /* fall through */ }
+  return DEMO_FALLBACK ? findMockRecipe(slug) : null;
+};
+
+export const submitWholesaleEnquiry = async (payload) => {
+  const { data } = await api.post('/api/wholesale-enquiries/public', payload);
+  return data;
 };
 
 /* -------------------------------- Auth -------------------------------- */

@@ -119,6 +119,17 @@ export const adminListB2BOrders = async (params = {}) => {
   return (await api.get(`/api/b2b-orders${qs ? `?${qs}` : ''}`)).data || [];
 };
 
+/* -------------------------- Blog / Recipes -------------------------- */
+export const adminListBlogs = async () => (await api.get('/api/blogs')).data || [];
+export const adminCreateBlog = async (p) => (await api.post('/api/blogs', toFormData(p), formHeaders)).data;
+export const adminUpdateBlog = async (id, p) => (await api.put(`/api/blogs/${id}`, toFormData(p), formHeaders)).data;
+export const adminDeleteBlog = async (id) => (await api.delete(`/api/blogs/${id}`)).data;
+
+/* ------------------------ Wholesale enquiries ----------------------- */
+export const adminListEnquiries = async () => (await api.get('/api/wholesale-enquiries')).data || [];
+export const adminSetEnquiryStatus = async (id, status) => (await api.patch(`/api/wholesale-enquiries/${id}/status`, { status })).data;
+export const adminDeleteEnquiry = async (id) => (await api.delete(`/api/wholesale-enquiries/${id}`)).data;
+
 /* -------------------------------- helpers ------------------------------- */
 const formHeaders = { headers: { 'Content-Type': 'multipart/form-data' } };
 

@@ -19,9 +19,10 @@ import { cn } from '@/lib/format';
 
 const NAV = [
   { label: 'Home', href: '/' },
-  { label: 'Categories', href: '/products' },
-  { label: 'Deals', href: '/products?deals=1' },
-  { label: 'About Us', href: '/about' },
+  { label: 'Shop', href: '/products' },
+  { label: 'Recipes', href: '/recipes' },
+  { label: 'Wholesale', href: '/wholesale' },
+  { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ];
 
