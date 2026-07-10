@@ -1,5 +1,7 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 import { CartProvider } from '@/lib/cart-context';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -29,6 +31,7 @@ export default function RootLayout({ children }) {
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar theme="light" />
         </CartProvider>
       </body>
     </html>
