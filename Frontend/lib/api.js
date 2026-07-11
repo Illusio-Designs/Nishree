@@ -148,6 +148,13 @@ export const createOrder = async (payload) => {
   return data?.order || data?.data || data;
 };
 
+// Place an order without an account (guest checkout). `payload` carries the
+// guest_name/email/phone, an inline shipping_address, items and payment_type.
+export const createGuestOrder = async (payload) => {
+  const { data } = await api.post('/api/guest/checkout', payload);
+  return data?.order || data?.data || data;
+};
+
 // The logged-in user's own orders.
 export const getMyOrders = async () => {
   const { data } = await api.get('/api/orders/my-orders');

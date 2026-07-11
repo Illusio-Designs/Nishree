@@ -14,7 +14,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { useCart } from '@/lib/cart-context';
 import { formatPrice } from '@/lib/format';
 import { isLoggedIn } from '@/lib/auth';
-import { createShippingAddress, createOrder } from '@/lib/api';
+import { createShippingAddress, createOrder, createGuestOrder } from '@/lib/api';
 
 const PAYMENTS = [
   { value: 'cod', label: 'Cash on Delivery' },
@@ -38,38 +38,50 @@ export default function CheckoutPage() {
 
   const placeOrder = async (e) => {
     e.preventDefault();
-
-    // Placing a real order requires a signed-in account (the API scopes the
-    // shipping address + order to the user). Send guests to login and back.
-    if (!isLoggedIn()) {
-      toast.info('Please sign in to complete your order.');
-      router.push('/login?redirect=/checkout');
-      return;
-    }
-
     setPlacing(true);
-    try {
-      // 1) Save the shipping address for this order.
-      const address = await createShippingAddress({
-        address: form.address,
-        city: form.city,
-        state: form.state,
-        postal_code: form.pincode,
-        country: 'India',
-        phone_number: form.phone,
-      });
 
-      // 2) Place the order against the cart contents.
-      const order = await createOrder({
-        shipping_address_id: address.id,
-        payment_type: payment,
-        notes: '',
-        items: items.map((i) => ({
-          product_id: i.id,
-          variation_id: i.variationId || null,
-          quantity: i.qty,
-        })),
-      });
+    const orderItems = items.map((i) => ({
+      product_id: i.id,
+      variation_id: i.variationId || null,
+      quantity: i.qty,
+    }));
+
+    try {
+      let order;
+      if (isLoggedIn()) {
+        // Signed-in flow: save an address on the account, then place the order.
+        const address = await createShippingAddress({
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          postal_code: form.pincode,
+          country: form.country || 'India',
+          phone_number: form.phone,
+        });
+        order = await createOrder({
+          shipping_address_id: address.id,
+          payment_type: payment,
+          notes: '',
+          items: orderItems,
+        });
+      } else {
+        // Guest checkout — no account required.
+        order = await createGuestOrder({
+          guest_name: form.name,
+          guest_email: form.email,
+          guest_phone: form.phone,
+          shipping_address: {
+            address: form.address,
+            city: form.city,
+            state: form.state,
+            postal_code: form.pincode,
+            country: form.country || 'India',
+          },
+          items: orderItems,
+          payment_type: payment,
+          notes: '',
+        });
+      }
 
       clear();
       toast.success('Order placed successfully!');

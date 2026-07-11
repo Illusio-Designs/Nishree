@@ -1,12 +1,18 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Cancel01Icon } from 'hugeicons-react';
 import { cn } from '@/lib/format';
 
-// Slide-in panel used for the cart and mobile navigation. Portal-free: rendered
-// as a fixed overlay. `side` controls which edge it slides from.
+// Slide-in panel used for the cart, mobile navigation and admin forms. Rendered
+// through a portal to <body> so its `fixed` overlay always fills the viewport —
+// an ancestor with a transform / backdrop-filter (e.g. the sticky header that
+// hosts the cart) would otherwise become the containing block and trap it.
 export default function Drawer({ open, onClose, title, side = 'right', children, footer, widthClass = 'max-w-sm' }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     if (open) document.body.style.overflow = 'hidden';
     else document.body.style.overflow = '';
@@ -15,7 +21,9 @@ export default function Drawer({ open, onClose, title, side = 'right', children,
     };
   }, [open]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       className={cn('fixed inset-0 z-[60] transition-opacity duration-300', open ? 'opacity-100' : 'pointer-events-none opacity-0')}
       aria-hidden={!open}
@@ -48,6 +56,7 @@ export default function Drawer({ open, onClose, title, side = 'right', children,
         <div className="flex-1 overflow-y-auto">{children}</div>
         {footer && <footer className="border-t border-line px-5 py-4">{footer}</footer>}
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 }
