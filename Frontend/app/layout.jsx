@@ -11,13 +11,53 @@ const inter = Inter({
   display: 'swap',
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nishree.com';
+
 export const metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: 'Nishree — Pure Spices, Freshly Delivered',
+    default: 'Nishree — Pure Indian Spices, Freshly Delivered',
     template: '%s · Nishree',
   },
   description:
-    'Shop authentic, freshly-ground spices, masalas and whole spices at honest prices, delivered to your doorstep.',
+    'Nishree brings you authentic, freshly-ground Indian spices, masalas and whole spices at honest prices — for homes, retailers and distributors. Flavours of India, delivered to your door.',
+  applicationName: 'Nishree',
+  keywords: [
+    'Nishree', 'Indian spices', 'masala', 'garam masala', 'whole spices', 'ground spices',
+    'turmeric', 'chilli powder', 'buy spices online', 'wholesale spices', 'spice distributor',
+    'authentic spices', 'flavours of India',
+  ],
+  authors: [{ name: 'Nishree' }],
+  creator: 'Nishree',
+  publisher: 'Nishree',
+  category: 'food',
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    siteName: 'Nishree',
+    title: 'Nishree — Pure Indian Spices, Freshly Delivered',
+    description:
+      'Authentic, freshly-ground Indian spices and masalas at honest prices — retail and wholesale. Flavours of India, delivered to your door.',
+    url: '/',
+    locale: 'en_IN',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nishree — Pure Indian Spices, Freshly Delivered',
+    description: 'Authentic Indian spices and masalas — retail and wholesale. Flavours of India.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+  },
+  formatDetection: { telephone: true, address: true, email: true },
+};
+
+export const viewport = {
+  themeColor: '#b72d24',
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }) {
