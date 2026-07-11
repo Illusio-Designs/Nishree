@@ -9,6 +9,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import LocationSelect from '@/components/ui/LocationSelect';
 import EmptyState from '@/components/ui/EmptyState';
 import { useCart } from '@/lib/cart-context';
 import { formatPrice } from '@/lib/format';
@@ -29,7 +30,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [payment, setPayment] = useState('cod');
   const [placing, setPlacing] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', country: 'India', city: '', state: '', pincode: '' });
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const shipping = subtotal >= SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FEE;
@@ -105,8 +106,9 @@ export default function CheckoutPage() {
                 <Input label="Phone" name="phone" icon={Call02Icon} value={form.phone} onChange={onChange} required />
                 <Input label="Email" name="email" type="email" icon={Mail01Icon} value={form.email} onChange={onChange} containerClassName="sm:col-span-2" required />
                 <Input label="Address" name="address" icon={Location01Icon} value={form.address} onChange={onChange} containerClassName="sm:col-span-2" required />
-                <Input label="City" name="city" value={form.city} onChange={onChange} required />
-                <Input label="State" name="state" value={form.state} onChange={onChange} required />
+                <div className="sm:col-span-2">
+                  <LocationSelect value={{ country: form.country, state: form.state, city: form.city }} onChange={(v) => setForm((f) => ({ ...f, ...v }))} required />
+                </div>
                 <Input label="Pincode" name="pincode" value={form.pincode} onChange={onChange} required />
               </div>
             </Card>

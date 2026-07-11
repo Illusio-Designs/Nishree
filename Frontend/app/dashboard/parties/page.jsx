@@ -35,15 +35,21 @@ export default function PartiesPage() {
         { name: 'email', label: 'Email', type: 'email' },
         { name: 'gst_number', label: 'GST number' },
         { name: 'address', label: 'Address', type: 'textarea' },
-        { name: 'city', label: 'City' },
-        { name: 'state', label: 'State' },
+        { name: 'location', label: 'Location', type: 'location' },
         { name: 'pincode', label: 'Pincode' },
+        { name: 'zone_id', label: 'Zone', type: 'zone' },
         { name: 'credit_limit', label: 'Credit limit', type: 'number' },
         { name: 'status', label: 'Status', type: 'select', options: [
           { value: 'active', label: 'Active' },
           { value: 'inactive', label: 'Inactive' },
         ] },
       ]}
+      toFormValues={(p) => ({
+        shop_name: p.shop_name, trade_name: p.trade_name || '', contact_person: p.contact_person || '',
+        phone: p.phone || '', email: p.email || '', gst_number: p.gst_number || '', address: p.address || '',
+        country: p.country || 'India', state: p.state || '', city: p.city || '', pincode: p.pincode || '',
+        zone_id: p.zone_id || '', credit_limit: p.credit_limit || '', status: p.status || 'active',
+      })}
     />
   );
 }

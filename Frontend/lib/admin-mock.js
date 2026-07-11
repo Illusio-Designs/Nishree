@@ -94,6 +94,24 @@ export const journeyDetail = (id) => {
   return { journey, points, timeline, summary };
 };
 
+// A demo daily route for a salesman: an ordered list of party stops (their beat).
+export const salesmanRoute = (id) => {
+  const stops = [
+    { id: 101, sequence: 1, status: 'visited', route_date: '2026-01-18', visited_at: d('18'), Party: { id: 1, shop_name: 'Krishna Kirana Store', address: 'Relief Road', city: 'Ahmedabad', phone: '9825022222' } },
+    { id: 102, sequence: 2, status: 'visited', route_date: '2026-01-18', visited_at: d('18'), Party: { id: 2, shop_name: 'Spice Bazaar', address: 'Ring Road', city: 'Surat', phone: '9825033333' } },
+    { id: 103, sequence: 3, status: 'pending', route_date: '2026-01-18', visited_at: null, Party: { id: 4, shop_name: 'Annapurna Traders', address: 'Station Road', city: 'Ahmedabad', phone: '9825044455' } },
+    { id: 104, sequence: 4, status: 'pending', route_date: '2026-01-18', visited_at: null, Party: { id: 5, shop_name: 'Maa Bhagwati Store', address: 'Market Yard', city: 'Ahmedabad', phone: '9825066677' } },
+    { id: 105, sequence: 5, status: 'skipped', route_date: '2026-01-18', visited_at: null, skip_reason: 'Shop closed', Party: { id: 6, shop_name: 'Gupta General Store', address: 'Gandhi Chowk', city: 'Rajkot', phone: '9825066666' } },
+  ];
+  const summary = {
+    total: stops.length,
+    visited: stops.filter((s) => s.status === 'visited').length,
+    skipped: stops.filter((s) => s.status === 'skipped').length,
+    pending: stops.filter((s) => s.status === 'pending').length,
+  };
+  return { date: '2026-01-18', salesman_id: id, zone_ids: [1], summary, stops };
+};
+
 export const ENQUIRIES = [
   { id: 1, business_name: 'Annapurna Restaurant', contact_person: 'Neha Rao', phone: '9825055555', city: 'Vadodara', state: 'Gujarat', product_interest: 'Garam Masala, Turmeric', quantity_estimate: '50 kg / month', status: 'new', created_at: d('18') },
   { id: 2, business_name: 'Hotel Riverside', contact_person: 'Imran Shaikh', phone: '9825099999', city: 'Ahmedabad', state: 'Gujarat', product_interest: 'Whole spices bulk', quantity_estimate: '120 kg / month', status: 'contacted', created_at: d('16') },

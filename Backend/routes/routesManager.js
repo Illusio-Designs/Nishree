@@ -35,6 +35,7 @@ import auditLogRoutes from './auditLogRoutes.js';
 import blogRoutes from './blogRoutes.js';
 import wholesaleRoutes from './wholesaleRoutes.js';
 import salesmanRouteRoutes from './salesmanRouteRoutes.js';
+import geoRoutes from './geoRoutes.js';
 // import notificationRoutes from './notificationRoutes.js';
 
 // Core Routes
@@ -70,6 +71,7 @@ router.use('/salesman-targets', salesmanTargetRoutes);
 router.use('/salesman-expenses', salesmanExpenseRoutes);
 router.use('/salesman-journeys', salesmanJourneyRoutes);
 router.use('/salesman-routes', salesmanRouteRoutes);
+router.use('/geo', geoRoutes);
 router.use('/offers', offerRoutes);
 router.use('/events', eventRoutes);
 router.use('/b2b-orders', b2bOrderRoutes);

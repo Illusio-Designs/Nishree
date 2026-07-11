@@ -61,6 +61,11 @@ export const Party = sequelize.define('Party', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    country: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'India'
+    },
     pincode: {
         type: DataTypes.STRING(10),
         allowNull: true

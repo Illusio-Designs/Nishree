@@ -40,6 +40,11 @@ export const Salesman = sequelize.define('Salesman', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    country: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'India'
+    },
     pincode: {
         type: DataTypes.STRING(10),
         allowNull: true

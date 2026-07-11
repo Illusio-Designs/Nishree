@@ -50,6 +50,11 @@ export const Distributor = sequelize.define('Distributor', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    country: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'India'
+    },
     pincode: {
         type: DataTypes.STRING(10),
         allowNull: true

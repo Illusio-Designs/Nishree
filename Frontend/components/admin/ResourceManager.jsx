@@ -10,6 +10,8 @@ import Select from '@/components/ui/Select';
 import DataTable from '@/components/admin/DataTable';
 import Drawer from '@/components/ui/Drawer';
 import VariationsEditor from '@/components/admin/VariationsEditor';
+import LocationSelect from '@/components/ui/LocationSelect';
+import ZoneSelect from '@/components/ui/ZoneSelect';
 
 // Config-driven CRUD page. Supply list/create/update/remove + columns + fields and
 // this renders the toolbar, table, and modal form. Omit create/update/remove to
@@ -155,11 +157,23 @@ export default function ResourceManager({
           }
         >
           <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
-            {fields.map((f) => (
-              <div key={f.name} className={f.colSpan === 2 || f.type === 'textarea' || f.type === 'variations' ? 'sm:col-span-2' : ''}>
-                <FormField field={f} value={values[f.name]} onChange={(v) => setField(f.name, v)} />
-              </div>
-            ))}
+            {fields.map((f) => {
+              const wide = f.colSpan === 2 || f.type === 'textarea' || f.type === 'variations' || f.type === 'location';
+              return (
+                <div key={f.name} className={wide ? 'sm:col-span-2' : ''}>
+                  {f.type === 'location' ? (
+                    <LocationSelect
+                      value={{ country: values.country, state: values.state, city: values.city }}
+                      onChange={(v) => setValues((prev) => ({ ...prev, ...v }))}
+                    />
+                  ) : f.type === 'zone' ? (
+                    <ZoneSelect value={values[f.name]} label={f.label} onChange={(v) => setField(f.name, v)} />
+                  ) : (
+                    <FormField field={f} value={values[f.name]} onChange={(v) => setField(f.name, v)} />
+                  )}
+                </div>
+              );
+            })}
           </form>
         </Drawer>
       )}

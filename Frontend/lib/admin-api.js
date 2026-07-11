@@ -100,8 +100,20 @@ export const adminDeleteDistributor = async (id) => (await api.delete(`/api/dist
 
 export const adminListSalesmen = async () =>
   listOrDemo(async () => (await api.get('/api/salesmen')).data, demo.SALESMEN);
+export const adminCreateSalesman = async (p) => (await api.post('/api/salesmen', p)).data;
+export const adminUpdateSalesman = async (id, p) => (await api.put(`/api/salesmen/${id}`, p)).data;
 export const adminSetSalesmanStatus = async (id, status) => (await api.patch(`/api/salesmen/${id}/status`, { status })).data;
 export const adminDeleteSalesman = async (id) => (await api.delete(`/api/salesmen/${id}`)).data;
+
+// Build (or fetch) a salesman's zone-based daily route. Managers pass salesman_id.
+export const adminGetSalesmanRoute = async (id, date) => {
+  const qs = new URLSearchParams({ salesman_id: id, ...(date ? { date } : {}) }).toString();
+  try {
+    const { data } = await api.get(`/api/salesman-routes/my?${qs}`);
+    if (data && Array.isArray(data.stops)) return data;
+  } catch { /* fall through */ }
+  return DEMO_FALLBACK ? demo.salesmanRoute(id) : { stops: [], summary: {} };
+};
 
 export const adminListJourneys = async (params = {}) => {
   const qs = new URLSearchParams(params).toString();
