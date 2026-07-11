@@ -1,8 +1,39 @@
 import { Party } from '../model/partyModel.js';
 import { Distributor } from '../model/distributorModel.js';
 import { Zone } from '../model/zoneModel.js';
+import { Salesman } from '../model/salesmanModel.js';
+import { SalesmanZone } from '../model/salesmanZoneModel.js';
+import { SalesmanRouteStop } from '../model/salesmanRouteStopModel.js';
 import { geocodeAddress } from '../utils/geocode.js';
 import { writeAudit } from '../utils/audit.js';
+
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
+// When a salesman registers a new shop while on their beat, fold it straight
+// into today's route: stamp who added it, default it to the rep's own zone (so
+// it also appears on future auto-built routes), and drop an ad-hoc stop for
+// today so the rep can check in and take the first order right away.
+const attachFieldParty = async (party, salesman) => {
+    const patch = { added_by_salesman_id: salesman.id };
+    if (!party.zone_id) {
+        const firstZone = await SalesmanZone.findOne({ where: { salesman_id: salesman.id } });
+        if (firstZone) patch.zone_id = firstZone.zone_id;
+    }
+    await party.update(patch);
+
+    const date = todayStr();
+    const last = await SalesmanRouteStop.findOne({
+        where: { salesman_id: salesman.id, route_date: date },
+        order: [['sequence', 'DESC']]
+    });
+    await SalesmanRouteStop.findOrCreate({
+        where: { salesman_id: salesman.id, party_id: party.id, route_date: date },
+        defaults: {
+            salesman_id: salesman.id, party_id: party.id, route_date: date,
+            sequence: (last?.sequence || 0) + 1, status: 'pending', ad_hoc: true
+        }
+    });
+};
 
 const includeRefs = [
     { model: Distributor, attributes: ['id', 'name', 'company_name'] },
@@ -61,6 +92,13 @@ export const createParty = async (req, res) => {
         }
 
         const party = await Party.create(payload);
+
+        // A rep adding a shop from the field → attach it to their beat now.
+        if (req.user?.role === 'salesman') {
+            const salesman = await Salesman.findOne({ where: { user_id: req.user.id } });
+            if (salesman) await attachFieldParty(party, salesman);
+        }
+
         await writeAudit({ userId: req.user?.id, entity: 'Party', entityId: party.id, action: 'create', newValues: party.toJSON() });
         res.status(201).json({ message: 'Party created successfully', party });
     } catch (error) {

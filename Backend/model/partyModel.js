@@ -24,6 +24,11 @@ export const Party = sequelize.define('Party', {
         type: DataTypes.INTEGER,
         allowNull: true
     },
+    // The salesman who registered this shop from the field (null for office-added).
+    added_by_salesman_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
     shop_name: {
         type: DataTypes.STRING,
         allowNull: false

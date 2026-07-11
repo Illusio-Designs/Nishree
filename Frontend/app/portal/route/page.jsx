@@ -99,7 +99,10 @@ export default function RoutePage() {
             <div className="flex items-start gap-3">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-700">{stop.sequence}</span>
               <div>
-                <p className="font-semibold text-ink">{stop.Party?.shop_name}</p>
+                <p className="font-semibold text-ink">
+                  {stop.Party?.shop_name}
+                  {stop.ad_hoc && <span className="ml-2 rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-700 align-middle">New</span>}
+                </p>
                 <p className="text-sm text-muted">{[stop.Party?.address, stop.Party?.city].filter(Boolean).join(', ') || '—'}</p>
                 <div className="mt-1"><StatusPill status={stop.status} />{stop.skip_reason && <span className="ml-2 text-xs text-muted">· {stop.skip_reason}</span>}</div>
               </div>

@@ -100,7 +100,7 @@ export const salesmanRoute = (id) => {
     { id: 101, sequence: 1, status: 'visited', route_date: '2026-01-18', visited_at: d('18'), Party: { id: 1, shop_name: 'Krishna Kirana Store', address: 'Relief Road', city: 'Ahmedabad', phone: '9825022222' } },
     { id: 102, sequence: 2, status: 'visited', route_date: '2026-01-18', visited_at: d('18'), Party: { id: 2, shop_name: 'Spice Bazaar', address: 'Ring Road', city: 'Surat', phone: '9825033333' } },
     { id: 103, sequence: 3, status: 'pending', route_date: '2026-01-18', visited_at: null, Party: { id: 4, shop_name: 'Annapurna Traders', address: 'Station Road', city: 'Ahmedabad', phone: '9825044455' } },
-    { id: 104, sequence: 4, status: 'pending', route_date: '2026-01-18', visited_at: null, Party: { id: 5, shop_name: 'Maa Bhagwati Store', address: 'Market Yard', city: 'Ahmedabad', phone: '9825066677' } },
+    { id: 104, sequence: 4, status: 'pending', route_date: '2026-01-18', visited_at: null, ad_hoc: true, Party: { id: 5, shop_name: 'Maa Bhagwati Store', address: 'Market Yard', city: 'Ahmedabad', phone: '9825066677' } },
     { id: 105, sequence: 5, status: 'skipped', route_date: '2026-01-18', visited_at: null, skip_reason: 'Shop closed', Party: { id: 6, shop_name: 'Gupta General Store', address: 'Gandhi Chowk', city: 'Rajkot', phone: '9825066666' } },
   ];
   const summary = {

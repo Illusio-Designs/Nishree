@@ -39,6 +39,12 @@ export const SalesmanRouteStop = sequelize.define('SalesmanRouteStop', {
     visited_at: {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    // True when the stop was added on the beat (a new party registered in the
+    // field) rather than pre-planned from the zone. Lets the UI badge it "New".
+    ad_hoc: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 }, {
     tableName: 'salesman_route_stops',

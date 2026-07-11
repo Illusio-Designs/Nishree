@@ -238,7 +238,10 @@ function RouteView({ route }) {
               </span>
               <div className="rounded-2xl border border-line bg-white p-3">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-semibold text-ink">{stop.sequence}. {p.shop_name || 'Party'}</p>
+                  <p className="font-semibold text-ink">
+                    {stop.sequence}. {p.shop_name || 'Party'}
+                    {stop.ad_hoc && <span className="ml-2 rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-700">New</span>}
+                  </p>
                   <StatusPill status={stop.status} />
                 </div>
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted">
