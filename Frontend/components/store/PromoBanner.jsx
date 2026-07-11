@@ -14,7 +14,7 @@ export default function PromoBanner() {
             <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm font-semibold">
               <Tag01Icon size={15} strokeWidth={2} /> Limited-time offer
             </span>
-            <h2 className="mt-3 text-2xl font-bold sm:text-3xl">Get 10% off your first spice order</h2>
+            <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl">Get 10% off your first spice order</h2>
             <p className="mt-1 text-white/85">
               Use code <span className="font-bold">SPICE10</span> at checkout. Free delivery over ₹499.
             </p>

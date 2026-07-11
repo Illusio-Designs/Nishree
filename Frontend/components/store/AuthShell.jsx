@@ -18,7 +18,7 @@ export default function AuthShell({ title, subtitle, children, footer }) {
         <div className="relative hidden flex-col justify-between brand-gradient p-10 text-white lg:flex">
           <Logo className="[&_span:last-child]:text-white [&_.text-brand-600]:text-white" />
           <div>
-            <h2 className="text-3xl font-bold leading-tight">Authentic spices, delivered to your kitchen.</h2>
+            <h2 className="text-3xl font-bold leading-tight text-white">Authentic spices, delivered to your kitchen.</h2>
             <ul className="mt-6 space-y-3">
               {PERKS.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-3 text-white/90">

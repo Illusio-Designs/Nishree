@@ -69,10 +69,15 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  color: var(--color-ink);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+/* Kept in @layer base so a heading's own text-color utility (e.g. text-white
+   on a red panel) can still override this default — unlayered CSS would beat
+   Tailwind's utility layer and force every heading dark. */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-ink);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
 }
 
 /* Utility: consistent focus ring in brand */

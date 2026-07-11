@@ -91,7 +91,7 @@ export default function AboutPage() {
       <Container className="py-14">
         <div className="flex flex-col items-center gap-4 rounded-3xl brand-gradient px-8 py-12 text-center text-white">
           <UserGroupIcon size={36} strokeWidth={2} />
-          <h2 className="text-2xl font-bold sm:text-3xl">Join the Nishree family</h2>
+          <h2 className="text-2xl font-bold text-white sm:text-3xl">Join the Nishree family</h2>
           <p className="max-w-xl text-white/85">
             Create an account today and unlock members-only spice deals, faster
             checkout, and exclusive offers.
