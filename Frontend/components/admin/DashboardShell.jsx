@@ -75,13 +75,15 @@ export default function DashboardShell({ children }) {
   const [allowed, setAllowed] = useState(false);
   const [open, setOpen] = useState(false);        // mobile drawer
   const [collapsed, setCollapsed] = useState(false); // desktop collapse
-  const [openSections, setOpenSections] = useState(() =>
-    NAV.reduce((acc, g) => ({ ...acc, [g.section]: true }), {}),
-  );
+  // Accordion: only one section open at a time. Defaults to the section holding
+  // the current route (Store on the dashboard overview).
+  const activeSection =
+    NAV.find((g) => g.items.some((i) => (i.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(i.href))))?.section;
+  const [openSection, setOpenSection] = useState(activeSection || 'Store');
   const [user, setUser] = useState(null);
 
   const toggleSection = (section) =>
-    setOpenSections((s) => ({ ...s, [section]: !s[section] }));
+    setOpenSection((cur) => (cur === section ? null : section));
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -132,7 +134,7 @@ export default function DashboardShell({ children }) {
       </div>
       <nav className="flex-1 overflow-y-auto p-3">
         {NAV.map((group) => {
-          const sectionOpen = openSections[group.section];
+          const sectionOpen = openSection === group.section;
           return (
             <div key={group.section} className="mb-3">
               {mini ? (
