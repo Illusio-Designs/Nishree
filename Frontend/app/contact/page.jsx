@@ -8,6 +8,7 @@ import PageHeader from '@/components/ui/PageHeader';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
+import { createContactMessage } from '@/lib/api';
 
 const INFO = [
   { icon: Location01Icon, title: 'Visit us', lines: ['Ahmedabad, Gujarat', 'India'] },
@@ -21,15 +22,18 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // No public contact endpoint yet — acknowledge locally.
-    setTimeout(() => {
+    try {
+      await createContactMessage(form);
       toast.success("Thanks! We'll get back to you shortly.");
       setForm({ name: '', email: '', subject: '', message: '' });
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Could not send your message. Please try again.');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (

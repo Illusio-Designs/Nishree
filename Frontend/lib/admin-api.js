@@ -162,6 +162,12 @@ export const adminListEnquiries = async () =>
 export const adminSetEnquiryStatus = async (id, status) => (await api.patch(`/api/wholesale-enquiries/${id}/status`, { status })).data;
 export const adminDeleteEnquiry = async (id) => (await api.delete(`/api/wholesale-enquiries/${id}`)).data;
 
+/* -------------------------- Contact messages ------------------------ */
+export const adminListMessages = async () =>
+  listOrDemo(async () => (await api.get('/api/contact')).data, demo.MESSAGES);
+export const adminSetMessageStatus = async (id, status) => (await api.patch(`/api/contact/${id}/status`, { status })).data;
+export const adminDeleteMessage = async (id) => (await api.delete(`/api/contact/${id}`)).data;
+
 /* -------------------------------- helpers ------------------------------- */
 const formHeaders = { headers: { 'Content-Type': 'multipart/form-data' } };
 

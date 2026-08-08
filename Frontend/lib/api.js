@@ -122,6 +122,12 @@ export const submitWholesaleEnquiry = async (payload) => {
   return data;
 };
 
+// Public "Contact us" form submission.
+export const createContactMessage = async (payload) => {
+  const { data } = await api.post('/api/contact', payload);
+  return data;
+};
+
 /* -------------------------------- Auth -------------------------------- */
 
 export const login = async (credentials) => {

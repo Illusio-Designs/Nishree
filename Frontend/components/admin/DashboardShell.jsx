@@ -45,6 +45,7 @@ const NAV = [
     section: 'Content',
     items: [
       { label: 'Recipes & Blog', href: '/dashboard/blog', icon: BookOpen01Icon },
+      { label: 'Messages', href: '/dashboard/messages', icon: Mail01Icon },
     ],
   },
   {

@@ -18,6 +18,8 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
 import { getUser, clearSession, isLoggedIn } from '@/lib/auth';
+import { getMyOrders } from '@/lib/api';
+import { formatPrice } from '@/lib/format';
 
 const TABS = [
   { icon: PackageIcon, label: 'My Orders' },
@@ -29,6 +31,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -37,6 +41,10 @@ export default function ProfilePage() {
     }
     setUser(getUser());
     setReady(true);
+    getMyOrders()
+      .then((list) => setOrders(Array.isArray(list) ? list.slice(0, 5) : []))
+      .catch(() => setOrders([]))
+      .finally(() => setOrdersLoading(false));
   }, [router]);
 
   const onLogout = () => {
@@ -114,9 +122,27 @@ export default function ProfilePage() {
             </Card>
 
             <Card className="p-6">
-              <h2 className="mb-2 text-lg font-bold text-ink">Recent orders</h2>
-              <p className="text-sm text-body">Your order history will appear here.</p>
-              <Button href="/products" className="mt-4">Start shopping</Button>
+              <h2 className="mb-4 text-lg font-bold text-ink">Recent orders</h2>
+              {ordersLoading ? (
+                <div className="flex justify-center py-6"><Spinner size={22} /></div>
+              ) : orders.length === 0 ? (
+                <>
+                  <p className="text-sm text-body">You haven&apos;t placed any orders yet.</p>
+                  <Button href="/products" className="mt-4">Start shopping</Button>
+                </>
+              ) : (
+                <ul className="divide-y divide-line">
+                  {orders.map((o) => (
+                    <li key={o.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                      <div>
+                        <p className="text-sm font-semibold text-ink">{o.order_number || `#${o.id}`}</p>
+                        <p className="text-xs text-muted capitalize">{o.status || 'pending'}</p>
+                      </div>
+                      <span className="text-sm font-bold text-ink">{formatPrice(o.final_amount ?? o.total_amount ?? 0)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </Card>
           </div>
         </div>

@@ -112,6 +112,12 @@ export const salesmanRoute = (id) => {
   return { date: '2026-01-18', salesman_id: id, zone_ids: [1], summary, stops };
 };
 
+export const MESSAGES = [
+  { id: 1, name: 'Ritu Desai', email: 'ritu@example.com', subject: 'Bulk order query', message: 'Do you deliver garam masala in 5kg packs to Pune?', status: 'new', created_at: d('18') },
+  { id: 2, name: 'Aman Shah', email: 'aman@example.com', subject: 'Wrong item received', message: 'I ordered turmeric but received chilli powder.', status: 'read', created_at: d('17') },
+  { id: 3, name: 'Priya Nair', email: 'priya@example.com', subject: 'Recipe help', message: 'Which blend do you recommend for biryani?', status: 'replied', created_at: d('15') },
+];
+
 export const ENQUIRIES = [
   { id: 1, business_name: 'Annapurna Restaurant', contact_person: 'Neha Rao', phone: '9825055555', city: 'Vadodara', state: 'Gujarat', product_interest: 'Garam Masala, Turmeric', quantity_estimate: '50 kg / month', status: 'new', created_at: d('18') },
   { id: 2, business_name: 'Hotel Riverside', contact_person: 'Imran Shaikh', phone: '9825099999', city: 'Ahmedabad', state: 'Gujarat', product_interest: 'Whole spices bulk', quantity_estimate: '120 kg / month', status: 'contacted', created_at: d('16') },
