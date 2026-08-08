@@ -263,8 +263,11 @@ export const getAllProducts = async (req, res) => {
 export const getProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        
-        const product = await Product.findByPk(id, {
+
+        // Accept either a numeric id or a slug (product links use the slug).
+        const where = /^\d+$/.test(String(id)) ? { id } : { slug: id };
+        const product = await Product.findOne({
+            where,
             include: [
                 { model: Category },
                 { model: ProductVariation, as: 'ProductVariations' },
@@ -593,8 +596,11 @@ export const searchProducts = async (req, res) => {
 export const getPublicProductById = async (req, res) => {
     try {
         const { id } = req.params;
-        
-        const product = await Product.findByPk(id, {
+
+        // Accept either a numeric id or a slug (product links use the slug).
+        const where = /^\d+$/.test(String(id)) ? { id } : { slug: id };
+        const product = await Product.findOne({
+            where,
             include: [
                 { model: Category },
                 { model: ProductVariation, as: 'ProductVariations' },
