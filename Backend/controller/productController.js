@@ -17,13 +17,16 @@ const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/products'
 // Helper function to format product response
 const formatProductResponse = (product) => {
     const productData = product.toJSON();
-    
-    // Add image URLs
-    if (productData.images) {
-        productData.images = productData.images.map(img => ({
-            ...img,
-            url: `/uploads/products/${img.imageName}`
-        }));
+
+    // Normalize product images (association alias is `ProductImages`). Expose a
+    // consistent `url` on each image and a top-level primary `image` so the
+    // frontend can render a thumbnail from any of them.
+    const imgs = productData.ProductImages || productData.images || [];
+    if (Array.isArray(imgs) && imgs.length) {
+        const withUrl = imgs.map((img) => ({ ...img, url: img.image_url || img.url }));
+        productData.ProductImages = withUrl;
+        const primary = withUrl.find((i) => i.is_primary) || withUrl[0];
+        productData.image = primary?.url || null;
     }
 
     // Add category details
