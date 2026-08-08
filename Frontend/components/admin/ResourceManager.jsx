@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Add01Icon, Search01Icon } from 'hugeicons-react';
+import { Add01Icon, Search01Icon, ImageAdd02Icon } from 'hugeicons-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
@@ -12,6 +12,7 @@ import Drawer from '@/components/ui/Drawer';
 import VariationsEditor from '@/components/admin/VariationsEditor';
 import LocationSelect from '@/components/ui/LocationSelect';
 import ZoneSelect from '@/components/ui/ZoneSelect';
+import { mediaUrl } from '@/lib/api';
 
 // Config-driven CRUD page. Supply list/create/update/remove + columns + fields and
 // this renders the toolbar, table, and modal form. Omit create/update/remove to
@@ -209,18 +210,7 @@ function FormField({ field, value, onChange }) {
     );
   }
   if (type === 'image') {
-    return (
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-ink">{label}</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => onChange(e.target.files?.[0] || null)}
-          className="block w-full text-sm text-body file:mr-3 file:rounded-full file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
-        />
-        {value && typeof value === 'string' && <p className="mt-1 text-xs text-muted clamp-1">Current: {value}</p>}
-      </div>
-    );
+    return <ImageField label={label} value={value} onChange={onChange} />;
   }
   return (
     <Input
@@ -232,5 +222,42 @@ function FormField({ field, value, onChange }) {
       onChange={(e) => onChange(e.target.value)}
       required={required}
     />
+  );
+}
+
+// Image upload with live preview — shows the current image (string path) or the
+// newly selected file (object URL, revoked on change/unmount).
+function ImageField({ label, value, onChange }) {
+  const [preview, setPreview] = useState('');
+
+  useEffect(() => {
+    if (value instanceof File) {
+      const url = URL.createObjectURL(value);
+      setPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setPreview(typeof value === 'string' && value ? mediaUrl(value) : '');
+  }, [value]);
+
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium text-ink">{label}</label>
+      <div className="flex items-center gap-3">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-soft">
+          {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={preview} alt="preview" className="h-full w-full object-cover" />
+          ) : (
+            <ImageAdd02Icon size={20} strokeWidth={2} className="text-muted" />
+          )}
+        </div>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => onChange(e.target.files?.[0] || null)}
+          className="block w-full text-sm text-body file:mr-3 file:rounded-full file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+        />
+      </div>
+    </div>
   );
 }

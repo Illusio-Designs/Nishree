@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import DataTable from '@/components/admin/DataTable';
 import StatusPill from '@/components/admin/StatusPill';
+import Select from '@/components/ui/Select';
 import { adminListEnquiries, adminSetEnquiryStatus, adminDeleteEnquiry } from '@/lib/admin-api';
 
 const STATUSES = ['new', 'contacted', 'converted', 'closed'];
@@ -79,13 +80,11 @@ export default function WholesaleAdminPage() {
             key: 'status',
             label: 'Status',
             render: (r) => (
-              <select
-                value={r.status}
-                onChange={(e) => changeStatus(r, e.target.value)}
-                className="h-9 rounded-full border border-line bg-white px-3 text-sm capitalize focus-ring cursor-pointer"
-              >
-                {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <div className="w-40">
+                <Select value={r.status} onChange={(e) => changeStatus(r, e.target.value)} className="h-9 capitalize">
+                  {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                </Select>
+              </div>
             ),
           },
           { key: 'created_at', label: 'Date', render: (r) => (r.created_at ? new Date(r.created_at).toLocaleDateString() : '—') },

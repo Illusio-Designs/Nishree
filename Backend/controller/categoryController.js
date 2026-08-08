@@ -75,7 +75,8 @@ const createCategory = async (req, res) => {
                     throw new Error(result.error);
                 }
 
-                image = result.filename;
+                // Store the servable path (matches updateCategory / other resources).
+                image = `/uploads/categories/${result.filename}`;
             } catch (imageError) {
                 console.error('Error processing image:', imageError);
                 return res.status(500).json({ 

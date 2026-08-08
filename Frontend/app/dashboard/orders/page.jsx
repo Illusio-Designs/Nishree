@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import DataTable from '@/components/admin/DataTable';
 import StatusPill from '@/components/admin/StatusPill';
+import Select from '@/components/ui/Select';
 import { formatPrice } from '@/lib/format';
 import { adminListOrders, adminUpdateOrderStatus } from '@/lib/admin-api';
 
@@ -69,15 +70,13 @@ export default function OrdersPage() {
             key: 'status',
             label: 'Status',
             render: (o) => (
-              <select
-                value={o.status}
-                onChange={(e) => changeStatus(o, e.target.value)}
-                className="h-9 rounded-full border border-line bg-white px-3 text-sm capitalize focus-ring cursor-pointer"
-              >
-                {STATUSES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
+              <div className="w-40">
+                <Select value={o.status} onChange={(e) => changeStatus(o, e.target.value)} className="h-9 capitalize">
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </Select>
+              </div>
             ),
           },
           { key: 'created_at', label: 'Date', render: (o) => (o.created_at ? new Date(o.created_at).toLocaleDateString() : '—') },
