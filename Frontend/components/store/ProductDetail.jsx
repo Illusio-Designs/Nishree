@@ -20,7 +20,7 @@ import QuantityStepper from '@/components/ui/QuantityStepper';
 import Skeleton from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import { getProduct, mediaUrl } from '@/lib/api';
-import { productPricing, discountPercent, firstImage } from '@/lib/format';
+import { productPricing, discountPercent, firstImage, variationLabel } from '@/lib/format';
 import { useCart } from '@/lib/cart-context';
 
 const PERKS = [
