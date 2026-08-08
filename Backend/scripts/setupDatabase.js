@@ -129,11 +129,13 @@ export const setupDatabase = async () => {
 		const dependentTableNames = [
 			'Review', 'ReviewImage', 'ProductImage', 'ProductSEO',
 			'ProductVariation', 'AttributeValue',
-			'Order', 'OrderItem', 'OrderStatusHistory',
-			'Payment', 'ShippingAddress', 'Cart', 'CartItem', 'Slider', 'Policy',
-			// ---- B2B management tables (created in dependency order) ----
+			// ---- B2B parent tables must exist BEFORE Order (orders FK to them) ----
 			'Zone', 'Event', 'Offer',
 			'Distributor', 'Salesman', 'Party',
+			// ---- Orders + order-dependent tables ----
+			'Order', 'OrderItem', 'OrderStatusHistory',
+			'Payment', 'ShippingAddress', 'Cart', 'CartItem', 'Slider', 'Policy',
+			// ---- B2B child / join tables (reference the parents above) ----
 			'DistributorState', 'DistributorZone',
 			'SalesmanState', 'SalesmanZone',
 			'SalesmanCheckin', 'SalesmanTarget', 'SalesmanExpense',
