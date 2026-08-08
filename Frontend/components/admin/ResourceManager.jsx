@@ -242,15 +242,18 @@ function ImageField({ label, value, onChange }) {
   return (
     <div>
       <label className="mb-1.5 block text-sm font-medium text-ink">{label}</label>
-      <div className="flex items-center gap-3">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-soft">
-          {preview ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="preview" className="h-full w-full object-cover" />
-          ) : (
-            <ImageAdd02Icon size={20} strokeWidth={2} className="text-muted" />
-          )}
+      {preview && (
+        <div className="mb-3 flex items-center justify-center overflow-hidden rounded-2xl border border-line bg-surface-soft p-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={preview} alt="preview" className="max-h-56 w-auto max-w-full object-contain" />
         </div>
+      )}
+      <div className="flex items-center gap-3">
+        {!preview && (
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-soft">
+            <ImageAdd02Icon size={20} strokeWidth={2} className="text-muted" />
+          </div>
+        )}
         <input
           type="file"
           accept="image/*"
