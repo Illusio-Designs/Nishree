@@ -1,16 +1,4 @@
 import axios from 'axios';
-import {
-  MOCK_CATEGORIES,
-  MOCK_PRODUCTS,
-  findMockProduct,
-  filterMockProducts,
-  filterMockRecipes,
-  findMockRecipe,
-} from '@/lib/mock-data';
-
-// When true, fall back to the demo spice catalogue if the backend has no data or
-// is unreachable. Set NEXT_PUBLIC_DISABLE_DEMO=true to always show live data only.
-export const DEMO_FALLBACK = process.env.NEXT_PUBLIC_DISABLE_DEMO !== 'true';
 
 // Base URL of the Express backend. Public endpoints live under /api/.../public.
 export const API_URL =
@@ -33,7 +21,7 @@ api.interceptors.request.use((config) => {
 // Turn a stored image path into an absolute URL against the backend.
 export const mediaUrl = (path) => {
   if (!path) return '';
-  // Pass through absolute URLs and inline data URIs (used by demo mock images).
+  // Pass through absolute URLs and inline data URIs.
   if (/^https?:\/\//i.test(path) || path.startsWith('data:')) return path;
   return `${API_URL}${path.startsWith('/') ? '' : '/'}${path}`;
 };
@@ -41,12 +29,8 @@ export const mediaUrl = (path) => {
 /* ----------------------------- Public catalogue ----------------------------- */
 
 export const getCategories = async () => {
-  try {
-    const { data } = await api.get('/api/categories/public/categories');
-    const list = data?.data || data?.categories || data || [];
-    if (Array.isArray(list) && list.length) return list;
-  } catch { /* fall through to demo */ }
-  return DEMO_FALLBACK ? MOCK_CATEGORIES : [];
+  const { data } = await api.get('/api/categories/public/categories');
+  return data?.data || data?.categories || data || [];
 };
 
 export const getCategory = async (id) => {
@@ -60,22 +44,14 @@ export const getSliders = async () => {
 };
 
 export const getProducts = async (params = {}) => {
-  try {
-    const qs = new URLSearchParams(params).toString();
-    const { data } = await api.get(`/api/products/public${qs ? `?${qs}` : ''}`);
-    const list = data?.data || data?.products || data || [];
-    if (Array.isArray(list) && list.length) return list;
-  } catch { /* fall through to demo */ }
-  return DEMO_FALLBACK ? filterMockProducts(params) : [];
+  const qs = new URLSearchParams(params).toString();
+  const { data } = await api.get(`/api/products/public${qs ? `?${qs}` : ''}`);
+  return data?.data || data?.products || data || [];
 };
 
 export const getProduct = async (id) => {
-  try {
-    const { data } = await api.get(`/api/products/public/${id}`);
-    const product = data?.data || data?.product || data;
-    if (product && (product.id || product.name)) return product;
-  } catch { /* fall through to demo */ }
-  return DEMO_FALLBACK ? findMockProduct(id) : null;
+  const { data } = await api.get(`/api/products/public/${id}`);
+  return data?.data || data?.product || data || null;
 };
 
 export const getCoupons = async () => {
@@ -99,22 +75,14 @@ export const getPolicies = async () => {
 /* ------------------------- Recipes / Blog + Wholesale ------------------------- */
 
 export const getBlogs = async (params = {}) => {
-  try {
-    const qs = new URLSearchParams(params).toString();
-    const { data } = await api.get(`/api/blogs/public${qs ? `?${qs}` : ''}`);
-    const list = data?.data || data?.blogs || data || [];
-    if (Array.isArray(list) && list.length) return list;
-  } catch { /* fall through */ }
-  return DEMO_FALLBACK ? filterMockRecipes(params) : [];
+  const qs = new URLSearchParams(params).toString();
+  const { data } = await api.get(`/api/blogs/public${qs ? `?${qs}` : ''}`);
+  return data?.data || data?.blogs || data || [];
 };
 
 export const getBlog = async (slug) => {
-  try {
-    const { data } = await api.get(`/api/blogs/public/${slug}`);
-    const blog = data?.data || data?.blog || data;
-    if (blog && (blog.id || blog.title)) return blog;
-  } catch { /* fall through */ }
-  return DEMO_FALLBACK ? findMockRecipe(slug) : null;
+  const { data } = await api.get(`/api/blogs/public/${slug}`);
+  return data?.data || data?.blog || data || null;
 };
 
 export const submitWholesaleEnquiry = async (payload) => {

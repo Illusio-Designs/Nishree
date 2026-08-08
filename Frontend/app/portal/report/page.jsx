@@ -7,7 +7,6 @@ import Spinner from '@/components/ui/Spinner';
 import Badge from '@/components/ui/Badge';
 import { formatPrice } from '@/lib/format';
 import { getVisitReport, getTargetAchievement } from '@/lib/portal-api';
-import { PERFORMANCE } from '@/lib/portal-mock';
 
 export default function ReportPage() {
   const [report, setReport] = useState(null);
@@ -27,13 +26,14 @@ export default function ReportPage() {
   const visits = rows.filter((r) => r.type === 'Visit');
   const revenue = orders.reduce((a, o) => a + (Number(o.amount) || 0), 0);
 
+  const summary = report?.summary || {};
   const kpis = [
-    { icon: Location01Icon, label: 'Visits', value: visits.length || PERFORMANCE.visits },
-    { icon: ShoppingBag02Icon, label: 'Orders', value: orders.length || PERFORMANCE.orders },
-    { icon: MoneyBag02Icon, label: 'Order value', value: formatPrice(revenue || PERFORMANCE.revenue) },
-    { icon: Target02Icon, label: 'Target', value: `${ach?.summary?.overall_percent ?? PERFORMANCE.target_percent}%` },
-    { icon: Route02Icon, label: 'Distance', value: `${PERFORMANCE.distance_km} km` },
-    { icon: Store01Icon, label: 'New parties', value: PERFORMANCE.new_parties },
+    { icon: Location01Icon, label: 'Visits', value: visits.length },
+    { icon: ShoppingBag02Icon, label: 'Orders', value: orders.length },
+    { icon: MoneyBag02Icon, label: 'Order value', value: formatPrice(revenue) },
+    { icon: Target02Icon, label: 'Target', value: `${ach?.summary?.overall_percent ?? 0}%` },
+    { icon: Route02Icon, label: 'Distance', value: `${summary.distance_km ?? 0} km` },
+    { icon: Store01Icon, label: 'New parties', value: summary.new_parties ?? 0 },
   ];
 
   return (

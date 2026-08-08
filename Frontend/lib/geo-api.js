@@ -1,25 +1,19 @@
-import api, { DEMO_FALLBACK } from '@/lib/api';
-import * as gm from '@/lib/geo-mock';
+import api from '@/lib/api';
 import { adminListZones } from '@/lib/admin-api';
 
-const list = async (fn, fallback) => {
+const list = async (fn) => {
   try {
     const data = await fn();
-    if (Array.isArray(data) && data.length) return data;
-  } catch { /* fall through */ }
-  return DEMO_FALLBACK ? fallback : [];
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
 };
 
-export const getCountries = () => list(async () => (await api.get('/api/geo/countries')).data, gm.COUNTRIES);
-export const getStates = () => list(async () => (await api.get('/api/geo/states')).data, gm.STATES);
+export const getCountries = () => list(async () => (await api.get('/api/geo/countries')).data);
+export const getStates = () => list(async () => (await api.get('/api/geo/states')).data);
 export const getCities = (stateName) =>
-  list(async () => (await api.get(`/api/geo/cities?state=${encodeURIComponent(stateName || '')}`)).data, gm.citiesForState(stateName));
+  list(async () => (await api.get(`/api/geo/cities?state=${encodeURIComponent(stateName || '')}`)).data);
 
-// Zones reuse the admin list (already has a demo fallback of its own; add one here too).
-export const getZones = async () => {
-  try {
-    const z = await adminListZones();
-    if (Array.isArray(z) && z.length) return z;
-  } catch { /* fall through */ }
-  return DEMO_FALLBACK ? [{ id: 1, name: 'West Zone' }, { id: 2, name: 'North Zone' }, { id: 3, name: 'South Zone' }] : [];
-};
+// Zones come from the backend zones endpoint.
+export const getZones = () => list(() => adminListZones());
