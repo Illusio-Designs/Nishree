@@ -37,6 +37,7 @@ import wholesaleRoutes from './wholesaleRoutes.js';
 import salesmanRouteRoutes from './salesmanRouteRoutes.js';
 import geoRoutes from './geoRoutes.js';
 import contactRoutes from './contactRoutes.js';
+import dashboardRoutes from './dashboardRoutes.js';
 // import notificationRoutes from './notificationRoutes.js';
 
 // Core Routes
@@ -83,6 +84,7 @@ router.use('/audit-logs', auditLogRoutes);
 router.use('/blogs', blogRoutes);
 router.use('/wholesale-enquiries', wholesaleRoutes);
 router.use('/contact', contactRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 // Notification routes - Temporarily disabled
 // router.use('/notifications', notificationRoutes);
