@@ -29,6 +29,8 @@ router.get('/category/:categoryId', getProductsByCategory);
 router.get('/:id', getProduct);
 
 // Admin routes
+// Full catalogue (all statuses) for the dashboard.
+router.get('/', isAuthenticated, authorize(['admin', 'sales_manager']), getAllProducts);
 router.post('/', isAuthenticated, authorize(['admin']), upload.array('images', 5), createProduct);
 router.put('/:id', isAuthenticated, authorize(['admin']), upload.array('images', 5), updateProduct);
 router.delete('/:id', isAuthenticated, authorize(['admin']), deleteProduct);

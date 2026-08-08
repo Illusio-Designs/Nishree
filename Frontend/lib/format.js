@@ -27,7 +27,8 @@ export const firstImage = (entity) => {
   const imgs = entity.ProductImages || entity.images || entity.product_images;
   if (Array.isArray(imgs) && imgs.length) {
     const f = imgs[0];
-    return f?.url || f?.image || f?.path || '';
+    if (typeof f === 'string') return f;
+    return f?.url || f?.image_url || f?.image || f?.path || '';
   }
   return '';
 };

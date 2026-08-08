@@ -53,7 +53,18 @@ export const adminUpdateCategory = async (id, payload) => {
 export const adminDeleteCategory = async (id) => (await api.delete(`/api/categories/admin/${id}`)).data;
 
 /* ------------------------------- Products ------------------------------- */
-export const adminListProducts = async () => getProducts({ limit: 200 });
+// Admin sees the full catalogue (all statuses) via /api/products; falls back to
+// the public (active-only) list if the admin route is unavailable.
+export const adminListProducts = async () =>
+  listApi(async () => {
+    try {
+      const { data } = await api.get('/api/products?limit=200');
+      const list = data?.products || data?.data?.products || (Array.isArray(data) ? data : []);
+      return list;
+    } catch {
+      return getProducts({ limit: 200 });
+    }
+  });
 export const adminCreateProduct = async (payload) => {
   const { data } = await api.post('/api/products', toFormData(payload), formHeaders);
   return data;

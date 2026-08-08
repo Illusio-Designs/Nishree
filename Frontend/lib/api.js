@@ -46,7 +46,9 @@ export const getSliders = async () => {
 export const getProducts = async (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   const { data } = await api.get(`/api/products/public${qs ? `?${qs}` : ''}`);
-  return data?.data || data?.products || data || [];
+  // Public endpoint returns { data: { products: [...] } }; also tolerate flatter shapes.
+  const d = data?.data ?? data;
+  return d?.products || (Array.isArray(d) ? d : []);
 };
 
 export const getProduct = async (id) => {
