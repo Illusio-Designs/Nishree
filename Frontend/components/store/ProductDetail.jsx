@@ -121,7 +121,7 @@ export default function ProductDetail({ id }) {
             <div className="relative aspect-square overflow-hidden rounded-3xl border border-line bg-surface-soft">
               {images[activeImg] ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={images[activeImg]} alt={product.name} className="h-full w-full object-contain p-3" />
+                <img src={images[activeImg]} alt={product.name} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full items-center justify-center text-muted">No image</div>
               )}

@@ -55,7 +55,7 @@ export default function QuickView({ product, open, onClose }) {
         <div className="relative aspect-square w-full overflow-hidden bg-surface-soft md:aspect-auto md:min-h-[420px]">
           {img ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={img} alt={product.name} className="absolute inset-0 h-full w-full object-contain p-3" />
+            <img src={img} alt={product.name} className="absolute inset-0 h-full w-full object-cover" />
           ) : null}
           {off > 0 && <span className="absolute left-3 top-3 z-10"><Badge tone="brand">{off}% OFF</Badge></span>}
         </div>

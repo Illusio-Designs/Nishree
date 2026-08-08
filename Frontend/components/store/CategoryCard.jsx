@@ -12,17 +12,17 @@ export default function CategoryCard({ category }) {
       href={`/collections/${category.slug || category.id}`}
       className="group flex w-full flex-col items-center rounded-2xl border border-line bg-white p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card"
     >
-      <div className="mb-3 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl bg-surface-tint">
+      <div className="mb-3 flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl">
         {img ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={img}
             alt={category.name}
-            className="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
         ) : (
-          <span className="text-3xl">🌶️</span>
+          <span className="flex h-full w-full items-center justify-center bg-surface-tint text-3xl">🌶️</span>
         )}
       </div>
       <h3 className="text-sm font-semibold text-ink group-hover:text-brand-600 transition-colors">
