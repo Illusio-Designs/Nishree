@@ -23,6 +23,8 @@ import {
   Mail01Icon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
+  ArrowDown01Icon,
+  Image01Icon,
 } from 'hugeicons-react';
 import Logo from '@/components/ui/Logo';
 import Spinner from '@/components/ui/Spinner';
@@ -45,6 +47,7 @@ const NAV = [
     section: 'Content',
     items: [
       { label: 'Recipes & Blog', href: '/dashboard/blog', icon: BookOpen01Icon },
+      { label: 'Sliders', href: '/dashboard/sliders', icon: Image01Icon },
       { label: 'Messages', href: '/dashboard/messages', icon: Mail01Icon },
     ],
   },
@@ -72,7 +75,13 @@ export default function DashboardShell({ children }) {
   const [allowed, setAllowed] = useState(false);
   const [open, setOpen] = useState(false);        // mobile drawer
   const [collapsed, setCollapsed] = useState(false); // desktop collapse
+  const [openSections, setOpenSections] = useState(() =>
+    NAV.reduce((acc, g) => ({ ...acc, [g.section]: true }), {}),
+  );
   const [user, setUser] = useState(null);
+
+  const toggleSection = (section) =>
+    setOpenSections((s) => ({ ...s, [section]: !s[section] }));
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -122,28 +131,46 @@ export default function DashboardShell({ children }) {
         <Logo compact={mini} />
       </div>
       <nav className="flex-1 overflow-y-auto p-3">
-        {NAV.map((group) => (
-          <div key={group.section} className="mb-4">
-            {!mini && <p className="px-3 pb-1 text-xs font-bold uppercase tracking-wide text-muted">{group.section}</p>}
-            {mini && <div className="mx-2 mb-2 border-t border-line" />}
-            {group.items.map(({ label, href, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setOpen(false)}
-                title={mini ? label : undefined}
-                className={cn(
-                  'flex items-center rounded-xl text-sm font-medium transition-colors',
-                  mini ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2.5',
-                  isActive(href) ? 'bg-brand-50 text-brand-700' : 'text-body hover:bg-surface-soft',
-                )}
-              >
-                <Icon size={19} strokeWidth={2} />
-                {!mini && label}
-              </Link>
-            ))}
-          </div>
-        ))}
+        {NAV.map((group) => {
+          const sectionOpen = openSections[group.section];
+          return (
+            <div key={group.section} className="mb-3">
+              {mini ? (
+                <div className="mx-2 mb-2 border-t border-line" />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => toggleSection(group.section)}
+                  aria-expanded={sectionOpen}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-muted transition-colors hover:text-ink cursor-pointer"
+                >
+                  {group.section}
+                  <ArrowDown01Icon size={14} strokeWidth={2} className={cn('transition-transform duration-200', sectionOpen ? '' : '-rotate-90')} />
+                </button>
+              )}
+              {(mini || sectionOpen) && (
+                <div className={mini ? '' : 'mt-1 space-y-0.5'}>
+                  {group.items.map(({ label, href, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setOpen(false)}
+                      title={mini ? label : undefined}
+                      className={cn(
+                        'flex items-center rounded-xl text-sm font-medium transition-colors',
+                        mini ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2.5',
+                        isActive(href) ? 'bg-brand-50 text-brand-700' : 'text-body hover:bg-surface-soft',
+                      )}
+                    >
+                      <Icon size={19} strokeWidth={2} />
+                      {!mini && label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </nav>
       <button
         onClick={onLogout}
