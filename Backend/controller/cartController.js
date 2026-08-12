@@ -1,10 +1,22 @@
 import { Cart, CartItem, Product, ProductImage, ProductVariation } from '../model/associations.js';
 
+// Resolve the cart owner: the signed-in user if present, else a guest id sent
+// via the x-guest-id header (or guest_id in body/query). No auth required.
+const resolveOwner = (req) => {
+	if (req.user?.id) return { user_id: req.user.id };
+	const guest = req.header('x-guest-id') || req.query.guest_id || req.body?.guest_id;
+	return guest ? { guest_id: String(guest) } : null;
+};
+
 // Get user's cart
 export const getUserCart = async (req, res) => {
 	try {
+		const owner = resolveOwner(req);
+		if (!owner) {
+			return res.json({ cart: [], summary: { subtotal: 0, shipping: 0, discount: 0, total: 0 } });
+		}
 		const cart = await Cart.findOne({
-			where: { user_id: req.user.id },
+			where: owner,
 			include: [
 				{
 					model: CartItem,
@@ -122,12 +134,13 @@ export const getUserCart = async (req, res) => {
 // Add item to cart
 export const addToCart = async (req, res) => {
 	try {
-		const userId = req.user.id;
+		const owner = resolveOwner(req);
+		if (!owner) return res.status(400).json({ message: 'No cart session' });
 		const { productId, variationId, quantity, size } = req.body;
 
-		let cart = await Cart.findOne({ where: { user_id: userId } });
+		let cart = await Cart.findOne({ where: owner });
 		if (!cart) {
-			cart = await Cart.create({ user_id: userId });
+			cart = await Cart.create(owner);
 		}
 
 		const where = {
@@ -187,13 +200,14 @@ export const updateCartItem = async (req, res) => {
 	try {
 		const { productId } = req.params;
 		const { quantity, variationId } = req.body;
-		const userId = req.user.id;
 
 		if (quantity < 1) {
 			return res.status(400).json({ success: false, message: 'Quantity must be at least 1.' });
 		}
 
-		const cart = await Cart.findOne({ where: { user_id: userId } });
+		const owner = resolveOwner(req);
+		if (!owner) return res.status(400).json({ success: false, message: 'No cart session' });
+		const cart = await Cart.findOne({ where: owner });
 		if (!cart) {
 			return res.status(404).json({ success: false, message: 'Cart not found.' });
 		}
@@ -227,11 +241,12 @@ export const updateCartItem = async (req, res) => {
 // Remove item from cart
 export const removeFromCart = async (req, res) => {
 	try {
-		const userId = req.user.id;
 		const { productId } = req.params;
 		const variationId = req.params.variationId ?? req.query.variationId;
 
-		const cart = await Cart.findOne({ where: { user_id: userId } });
+		const owner = resolveOwner(req);
+		if (!owner) return res.status(400).json({ message: 'No cart session' });
+		const cart = await Cart.findOne({ where: owner });
 		if (!cart) return res.status(404).json({ message: 'Cart not found' });
 
 		const whereClause = { cartId: cart.id, productId };
@@ -262,9 +277,10 @@ export const removeFromCart = async (req, res) => {
 // Clear cart
 export const clearCart = async (req, res) => {
 	try {
-		const userId = req.user.id;
-		const cart = await Cart.findOne({ where: { user_id: userId } });
-		if (!cart) return res.status(404).json({ message: 'Cart not found' });
+		const owner = resolveOwner(req);
+		if (!owner) return res.json({ success: true });
+		const cart = await Cart.findOne({ where: owner });
+		if (!cart) return res.json({ success: true });
 		await CartItem.destroy({ where: { cartId: cart.id } });
 		res.json({ success: true });
 	} catch (error) {

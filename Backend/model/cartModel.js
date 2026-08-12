@@ -9,13 +9,18 @@ export const Cart = sequelize.define('Cart', {
     },
     user_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: 'users',
             key: 'id'
         },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
+    },
+    // Guest cart identifier (from the x-guest-id header) when there's no user.
+    guest_id: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     status: {
         type: DataTypes.ENUM('active', 'abandoned', 'converted'),
@@ -28,9 +33,7 @@ export const Cart = sequelize.define('Cart', {
     collate: 'utf8mb4_general_ci',
     underscored: true,
     indexes: [
-        {
-            unique: true,
-            fields: ['user_id']
-        }
+        { fields: ['user_id'] },
+        { fields: ['guest_id'] }
     ]
 }); 

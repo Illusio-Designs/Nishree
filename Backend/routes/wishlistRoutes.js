@@ -5,12 +5,12 @@ import {
     addToWishlist,
     removeFromWishlist
 } from '../controller/wishlistController.js';
-import { isAuthenticated } from '../middleware/authMiddleware.js';
+import { optionalAuth } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// All wishlist routes require a logged-in shopper.
-router.use(isAuthenticated);
+// Wishlist works for guests too — user when signed in, x-guest-id otherwise.
+router.use(optionalAuth);
 
 router.get('/', getWishlist);
 router.get('/ids', getWishlistIds);

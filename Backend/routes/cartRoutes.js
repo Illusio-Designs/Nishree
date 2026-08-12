@@ -6,12 +6,12 @@ import {
     removeFromCart,
     clearCart
 } from '../controller/cartController.js';
-import { authenticate } from '../middleware/authMiddleware.js';
+import { optionalAuth } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// All cart routes require authentication
-router.use(authenticate);
+// Cart works for guests too — user when signed in, x-guest-id header otherwise.
+router.use(optionalAuth);
 
 // Get user's cart
 router.get('/', getUserCart);

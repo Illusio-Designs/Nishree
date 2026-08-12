@@ -3,11 +3,20 @@ import { Product } from '../model/productModel.js';
 import { ProductImage } from '../model/productImageModel.js';
 import { ProductVariation } from '../model/productVariationModel.js';
 
+// Resolve the wishlist owner: signed-in user, else a guest id from x-guest-id.
+const resolveOwner = (req) => {
+    if (req.user?.id) return { user_id: req.user.id };
+    const guest = req.header('x-guest-id') || req.query.guest_id || req.body?.guest_id;
+    return guest ? { guest_id: String(guest) } : null;
+};
+
 // Full wishlist with product details (for the wishlist page).
 export const getWishlist = async (req, res) => {
     try {
+        const owner = resolveOwner(req);
+        if (!owner) return res.json([]);
         const rows = await Wishlist.findAll({
-            where: { user_id: req.user.id },
+            where: owner,
             include: [{
                 model: Product,
                 include: [
@@ -28,7 +37,9 @@ export const getWishlist = async (req, res) => {
 // Just the saved product ids (to light up hearts across the store).
 export const getWishlistIds = async (req, res) => {
     try {
-        const rows = await Wishlist.findAll({ where: { user_id: req.user.id }, attributes: ['product_id'] });
+        const owner = resolveOwner(req);
+        if (!owner) return res.json([]);
+        const rows = await Wishlist.findAll({ where: owner, attributes: ['product_id'] });
         res.json(rows.map((r) => r.product_id));
     } catch (error) {
         console.error('Get wishlist ids error:', error);
@@ -38,9 +49,11 @@ export const getWishlistIds = async (req, res) => {
 
 export const addToWishlist = async (req, res) => {
     try {
+        const owner = resolveOwner(req);
+        if (!owner) return res.status(400).json({ message: 'No wishlist session' });
         const product_id = req.body.product_id || req.body.productId;
         if (!product_id) return res.status(400).json({ message: 'product_id is required' });
-        await Wishlist.findOrCreate({ where: { user_id: req.user.id, product_id } });
+        await Wishlist.findOrCreate({ where: { ...owner, product_id } });
         res.status(201).json({ message: 'Added to wishlist' });
     } catch (error) {
         console.error('Add to wishlist error:', error);
@@ -50,7 +63,9 @@ export const addToWishlist = async (req, res) => {
 
 export const removeFromWishlist = async (req, res) => {
     try {
-        await Wishlist.destroy({ where: { user_id: req.user.id, product_id: req.params.productId } });
+        const owner = resolveOwner(req);
+        if (!owner) return res.json({ message: 'Removed from wishlist' });
+        await Wishlist.destroy({ where: { ...owner, product_id: req.params.productId } });
         res.json({ message: 'Removed from wishlist' });
     } catch (error) {
         console.error('Remove from wishlist error:', error);

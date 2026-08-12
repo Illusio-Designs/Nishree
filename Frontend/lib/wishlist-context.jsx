@@ -2,7 +2,6 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
-import { isLoggedIn } from '@/lib/auth';
 import { getWishlistIds, addToWishlist, removeFromWishlist } from '@/lib/wishlist-api';
 
 const WishlistContext = createContext(null);
@@ -11,25 +10,22 @@ export function WishlistProvider({ children }) {
   const [ids, setIds] = useState(() => new Set());
 
   const refresh = useCallback(async () => {
-    if (!isLoggedIn()) {
-      setIds(new Set());
-      return;
-    }
     const list = await getWishlistIds();
     setIds(new Set(list.map(Number)));
   }, []);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => {
+    refresh();
+    const onAuth = () => refresh();
+    window.addEventListener('nishree-auth-change', onAuth);
+    return () => window.removeEventListener('nishree-auth-change', onAuth);
+  }, [refresh]);
 
   const has = useCallback((productId) => ids.has(Number(productId)), [ids]);
 
-  // Toggle a product in the wishlist. Requires a signed-in shopper.
+  // Toggle a product in the wishlist. Works for guests (x-guest-id) too.
   const toggle = useCallback(async (productId) => {
     const pid = Number(productId);
-    if (!isLoggedIn()) {
-      toast.info('Please sign in to save items to your wishlist.');
-      return false;
-    }
     const wasIn = ids.has(pid);
     // Optimistic update.
     setIds((prev) => {

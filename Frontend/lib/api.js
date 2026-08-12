@@ -9,11 +9,23 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach the stored JWT (browser only) to authenticated requests.
+// A stable per-browser id so guests get their own cart/wishlist (no login).
+export const guestId = () => {
+  if (typeof window === 'undefined') return null;
+  let id = localStorage.getItem('nishree_guest_id');
+  if (!id) {
+    id = (window.crypto?.randomUUID?.() || `g-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    localStorage.setItem('nishree_guest_id', id);
+  }
+  return id;
+};
+
+// Attach the stored JWT + guest id (browser only) to requests.
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
+    config.headers['x-guest-id'] = guestId();
   }
   return config;
 });

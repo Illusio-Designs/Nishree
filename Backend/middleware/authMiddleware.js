@@ -28,6 +28,22 @@ export const authenticate = async (req, res, next) => {
 // For backward compatibility
 export const isAuthenticated = authenticate;
 
+// Optional auth: sets req.user when a valid token is present, but never blocks —
+// used by cart/wishlist so guests (no token) can use them too.
+export const optionalAuth = async (req, res, next) => {
+    try {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        if (token) {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = await User.findByPk(decoded.id);
+            if (user) req.user = user;
+        }
+    } catch {
+        /* invalid/expired token → proceed as guest */
+    }
+    next();
+};
+
 // Authorization middleware
 export const authorize = (roles) => {
     return (req, res, next) => {

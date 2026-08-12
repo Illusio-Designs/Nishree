@@ -1,13 +1,11 @@
 'use client';
 
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import api from '@/lib/api';
-import { isLoggedIn } from '@/lib/auth';
 
-// Cart is fully server-backed (/api/cart). It requires a signed-in shopper —
-// there is no local/guest cart. Adding while signed out sends you to login.
+// Cart is fully server-backed (/api/cart) and works for everyone — signed-in
+// shoppers by account, guests by their x-guest-id. No localStorage cart.
 const CartContext = createContext(null);
 
 const mapServer = (list) =>
@@ -22,16 +20,10 @@ const mapServer = (list) =>
   }));
 
 export function CartProvider({ children }) {
-  const router = useRouter();
   const [items, setItems] = useState([]);
   const [ready, setReady] = useState(false);
 
   const load = useCallback(async () => {
-    if (!isLoggedIn()) {
-      setItems([]);
-      setReady(true);
-      return;
-    }
     try {
       const { data } = await api.get('/api/cart');
       setItems(mapServer(data?.cart));
@@ -48,15 +40,7 @@ export function CartProvider({ children }) {
     return () => window.removeEventListener('nishree-auth-change', onAuth);
   }, [load]);
 
-  const requireAuth = useCallback(() => {
-    if (isLoggedIn()) return true;
-    toast.info('Please sign in to use your cart.');
-    router.push('/login?redirect=/products');
-    return false;
-  }, [router]);
-
   const addItem = useCallback(async (product, qty = 1) => {
-    if (!requireAuth()) return;
     // Optimistic bump for a snappy UI; the server response is the source of truth.
     setItems((prev) => {
       const key = product.variationId || product.id;
@@ -71,7 +55,7 @@ export function CartProvider({ children }) {
       toast.error('Could not add to cart');
       load();
     }
-  }, [requireAuth, load]);
+  }, [load]);
 
   const removeItem = useCallback(async (key) => {
     const item = items.find((i) => i.key === key);

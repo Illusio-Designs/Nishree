@@ -11,7 +11,12 @@ export const Wishlist = sequelize.define('Wishlist', {
     },
     user_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
+    },
+    // Guest identifier (from x-guest-id) when there's no signed-in user.
+    guest_id: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     product_id: {
         type: DataTypes.INTEGER,
@@ -22,7 +27,8 @@ export const Wishlist = sequelize.define('Wishlist', {
     timestamps: true,
     underscored: true,
     indexes: [
-        { unique: true, fields: ['user_id', 'product_id'] }
+        { fields: ['user_id'] },
+        { fields: ['guest_id'] }
     ]
 });
 
