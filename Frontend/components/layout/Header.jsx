@@ -7,6 +7,7 @@ import {
   Search01Icon,
   ShoppingCart01Icon,
   UserIcon,
+  FavouriteIcon,
   Menu01Icon,
   Cancel01Icon,
 } from 'hugeicons-react';
@@ -15,6 +16,7 @@ import Logo from '@/components/ui/Logo';
 import IconButton from '@/components/ui/IconButton';
 import CartDrawer from '@/components/layout/CartDrawer';
 import { useCart } from '@/lib/cart-context';
+import { useWishlist } from '@/lib/wishlist-context';
 import { cn } from '@/lib/format';
 
 const NAV = [
@@ -30,6 +32,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { count } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -97,6 +100,7 @@ export default function Header() {
         {/* Actions */}
         <div className="ml-auto flex items-center gap-1 md:ml-0">
           <IconButton icon={Search01Icon} label="Search" href="/products" className="md:hidden" />
+          <IconButton icon={FavouriteIcon} label="Wishlist" href="/wishlist" badge={wishlistCount || undefined} />
           <IconButton icon={UserIcon} label="Account" href="/login" />
           <IconButton icon={ShoppingCart01Icon} label="Cart" badge={count} onClick={() => setCartOpen(true)} />
         </div>
