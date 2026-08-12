@@ -18,6 +18,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// On 401 (missing/expired/invalid token), drop the stale session so the app
+// returns to a signed-out state instead of silently failing every call.
+api.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error?.response?.status === 401 && typeof window !== 'undefined') {
+      if (localStorage.getItem('token')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new Event('nishree-auth-change'));
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 // Turn a stored image path into an absolute URL against the backend.
 export const mediaUrl = (path) => {
   if (!path) return '';
