@@ -21,6 +21,7 @@ import Skeleton from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import { getProduct, mediaUrl } from '@/lib/api';
 import { productPricing, discountPercent, firstImage, variationLabel } from '@/lib/format';
+import { useWishlist } from '@/lib/wishlist-context';
 import { useCart } from '@/lib/cart-context';
 
 const PERKS = [
@@ -31,6 +32,7 @@ const PERKS = [
 
 export default function ProductDetail({ id }) {
   const { addItem } = useCart();
+  const { has, toggle } = useWishlist();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
@@ -72,6 +74,7 @@ export default function ProductDetail({ id }) {
     );
   }
 
+  const saved = has(product.id);
   const variations = product.ProductVariations || product.variations || [];
   const variation = variations[variationIdx] || null;
   const { price, compareAt } = productPricing({ ...product, ProductVariations: variation ? [variation] : variations });
@@ -182,8 +185,8 @@ export default function ProductDetail({ id }) {
               <Button size="lg" icon={ShoppingCart01Icon} onClick={onAdd} disabled={!inStock}>
                 Add to Cart
               </Button>
-              <Button size="lg" variant="secondary" icon={FavouriteIcon} aria-label="Wishlist">
-                Save
+              <Button size="lg" variant="secondary" icon={FavouriteIcon} aria-label="Wishlist" onClick={() => toggle(product.id)}>
+                {saved ? 'Saved' : 'Save'}
               </Button>
             </div>
 

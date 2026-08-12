@@ -10,6 +10,7 @@ import Badge from '@/components/ui/Badge';
 import PriceTag from '@/components/ui/PriceTag';
 import Rating from '@/components/ui/Rating';
 import { useCart } from '@/lib/cart-context';
+import { useWishlist } from '@/lib/wishlist-context';
 import { mediaUrl } from '@/lib/api';
 import { firstImage, productPricing, discountPercent, variationLabel, cn } from '@/lib/format';
 
@@ -17,6 +18,8 @@ import { firstImage, productPricing, discountPercent, variationLabel, cn } from 
 // add-to-cart update to that variation.
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
+  const { has, toggle } = useWishlist();
+  const saved = has(product.id);
   const variations = product.ProductVariations || product.variations || [];
   const hasVariants = variations.length > 1;
 
@@ -78,11 +81,14 @@ export default function ProductCard({ product }) {
             </button>
             <button
               type="button"
-              aria-label="Add to wishlist"
-              onClick={(e) => e.preventDefault()}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft hover:text-brand-600 cursor-pointer"
+              aria-label={saved ? 'Remove from wishlist' : 'Add to wishlist'}
+              onClick={(e) => { e.preventDefault(); toggle(product.id); }}
+              className={cn(
+                'flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-soft hover:text-brand-600 cursor-pointer',
+                saved ? 'text-brand-600' : 'text-ink',
+              )}
             >
-              <FavouriteIcon size={16} strokeWidth={2} />
+              <FavouriteIcon size={16} strokeWidth={2} fill={saved ? 'currentColor' : 'none'} />
             </button>
           </div>
           {/* Floating add-to-cart (adds the selected variation) */}

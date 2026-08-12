@@ -141,7 +141,7 @@ export const setupDatabase = async () => {
 			'SalesmanCheckin', 'SalesmanTarget', 'SalesmanExpense',
 			'SalesmanJourney', 'SalesmanJourneyPoint', 'SalesmanRouteStop',
 			'AuditLog', 'Blog', 'WholesaleEnquiry',
-			'Country', 'State', 'City', 'ContactMessage'
+			'Country', 'State', 'City', 'ContactMessage', 'Wishlist'
 		];
         
 		for (const modelName of dependentTableNames) {

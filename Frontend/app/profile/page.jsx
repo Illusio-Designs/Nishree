@@ -24,7 +24,7 @@ import { formatPrice } from '@/lib/format';
 const TABS = [
   { icon: PackageIcon, label: 'My Orders' },
   { icon: Location01Icon, label: 'Addresses' },
-  { icon: FavouriteIcon, label: 'Wishlist' },
+  { icon: FavouriteIcon, label: 'Wishlist', href: '/wishlist' },
 ];
 
 export default function ProfilePage() {
@@ -79,9 +79,10 @@ export default function ProfilePage() {
               <p className="text-sm text-muted">{email}</p>
             </div>
             <nav className="mt-6 space-y-1">
-              {TABS.map(({ icon: Icon, label }) => (
+              {TABS.map(({ icon: Icon, label, href }) => (
                 <button
                   key={label}
+                  onClick={() => href && router.push(href)}
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-body transition-colors hover:bg-surface-soft cursor-pointer"
                 >
                   <Icon size={18} strokeWidth={2} />

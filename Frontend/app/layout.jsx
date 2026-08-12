@@ -3,6 +3,7 @@ import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { CartProvider } from '@/lib/cart-context';
+import { WishlistProvider } from '@/lib/wishlist-context';
 import StoreChrome from '@/components/layout/StoreChrome';
 
 const inter = Inter({
@@ -65,6 +66,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={inter.variable}>
       <body>
         <CartProvider>
+          <WishlistProvider>
           <StoreChrome>{children}</StoreChrome>
           <ToastContainer
             position="bottom-right"
@@ -76,6 +78,7 @@ export default function RootLayout({ children }) {
             toastClassName="nishree-toast"
             progressClassName="nishree-toast-progress"
           />
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>
