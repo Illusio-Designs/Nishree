@@ -48,6 +48,8 @@ export function CartProvider({ children }) {
       if (ex) return prev.map((i) => (i.key === key ? { ...i, qty: i.qty + qty } : i));
       return [...prev, { key, id: product.id, variationId: product.variationId || null, name: product.name, price: Number(product.price) || 0, image: product.image || '', qty }];
     });
+    // Pop the cart drawer open so the shopper sees the item was added.
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('nishree-open-cart'));
     try {
       await api.post('/api/cart/add', { productId: product.id, variationId: product.variationId || null, quantity: qty });
       await load();

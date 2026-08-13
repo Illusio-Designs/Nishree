@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -36,6 +36,13 @@ export default function Header() {
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
+
+  // Auto-open the cart drawer whenever an item is added anywhere.
+  useEffect(() => {
+    const open = () => setCartOpen(true);
+    window.addEventListener('nishree-open-cart', open);
+    return () => window.removeEventListener('nishree-open-cart', open);
+  }, []);
 
   const isActive = (href) => (href === '/' ? pathname === '/' : pathname.startsWith(href.split('?')[0]));
 

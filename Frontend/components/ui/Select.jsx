@@ -1,8 +1,8 @@
 'use client';
 
-import { Children, isValidElement, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Children, isValidElement, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowDown01Icon, Tick02Icon } from 'hugeicons-react';
+import { ArrowDown01Icon, Tick02Icon, Search01Icon } from 'hugeicons-react';
 import { cn } from '@/lib/format';
 
 // Fully themed dropdown. Keeps the native-<select> API — pass <option> children
@@ -15,6 +15,7 @@ export default function Select({ label, error, className, id, name, value, onCha
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [rect, setRect] = useState(null);
+  const [query, setQuery] = useState('');
   const btnRef = useRef(null);
   const panelRef = useRef(null);
 
@@ -35,26 +36,41 @@ export default function Select({ label, error, className, id, name, value, onCha
   const displayLabel = selected ? selected.label : placeholder;
   const isPlaceholder = !selected || selected.value === '';
 
+  // Show a search box for long lists (e.g. states, cities).
+  const searchable = options.length > 8;
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return options;
+    return options.filter((o) => typeof o.label === 'string' && o.label.toLowerCase().includes(q));
+  }, [options, query]);
+
   const position = () => {
     if (btnRef.current) setRect(btnRef.current.getBoundingClientRect());
   };
 
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open) { setQuery(''); return; }
     position();
-    const close = () => setOpen(false);
+    // Close on outside scroll, but not when scrolling the option list itself.
+    const onScroll = (e) => {
+      if (panelRef.current?.contains(e.target)) return;
+      setOpen(false);
+    };
+    const onResize = () => setOpen(false);
     const onDocClick = (e) => {
       if (btnRef.current?.contains(e.target) || panelRef.current?.contains(e.target)) return;
       setOpen(false);
     };
-    window.addEventListener('scroll', close, true);
-    window.addEventListener('resize', close);
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onResize);
     document.addEventListener('mousedown', onDocClick);
-    document.addEventListener('keydown', (e) => e.key === 'Escape' && setOpen(false));
+    document.addEventListener('keydown', onKey);
     return () => {
-      window.removeEventListener('scroll', close, true);
-      window.removeEventListener('resize', close);
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onResize);
       document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKey);
     };
   }, [open]);
 
@@ -89,34 +105,50 @@ export default function Select({ label, error, className, id, name, value, onCha
       </button>
 
       {mounted && open && rect && createPortal(
-        <ul
+        <div
           ref={panelRef}
-          role="listbox"
-          className="fixed z-[90] max-h-64 overflow-auto rounded-2xl border border-line bg-white p-1.5 shadow-pop"
+          className="fixed z-[90] flex max-h-72 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-pop"
           style={{ top: rect.bottom + 6, left: rect.left, width: rect.width }}
         >
-          {options.length === 0 && <li className="px-3 py-2 text-sm text-muted">No options</li>}
-          {options.map((opt, i) => {
-            const active = String(opt.value) === String(value ?? '');
-            return (
-              <li key={`${opt.value}-${i}`}>
-                <button
-                  type="button"
-                  disabled={opt.disabled}
-                  onClick={() => pick(opt)}
-                  className={cn(
-                    'flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors cursor-pointer',
-                    opt.disabled && 'cursor-not-allowed opacity-50',
-                    active ? 'bg-brand-50 font-semibold text-brand-700' : 'text-body hover:bg-surface-soft',
-                  )}
-                >
-                  <span className="truncate">{opt.label}</span>
-                  {active && <Tick02Icon size={16} strokeWidth={2} className="shrink-0 text-brand-600" />}
-                </button>
-              </li>
-            );
-          })}
-        </ul>,
+          {searchable && (
+            <div className="border-b border-line p-2">
+              <div className="relative">
+                <Search01Icon size={15} strokeWidth={2} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
+                <input
+                  autoFocus
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search…"
+                  className="h-9 w-full rounded-full border border-line bg-white pl-8 pr-3 text-sm text-ink focus-ring"
+                />
+              </div>
+            </div>
+          )}
+          <ul role="listbox" className="overflow-auto p-1.5">
+            {filtered.length === 0 && <li className="px-3 py-2 text-sm text-muted">No matches</li>}
+            {filtered.map((opt, i) => {
+              const active = String(opt.value) === String(value ?? '');
+              return (
+                <li key={`${opt.value}-${i}`}>
+                  <button
+                    type="button"
+                    disabled={opt.disabled}
+                    onClick={() => pick(opt)}
+                    className={cn(
+                      'flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors cursor-pointer',
+                      opt.disabled && 'cursor-not-allowed opacity-50',
+                      active ? 'bg-brand-50 font-semibold text-brand-700' : 'text-body hover:bg-surface-soft',
+                    )}
+                  >
+                    <span className="truncate">{opt.label}</span>
+                    {active && <Tick02Icon size={16} strokeWidth={2} className="shrink-0 text-brand-600" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>,
         document.body,
       )}
 
