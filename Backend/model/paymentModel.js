@@ -24,7 +24,7 @@ export const Payment = sequelize.define('Payment', {
         }
     },
     payment_type: {
-        type: DataTypes.ENUM('cod', 'credit_card', 'debit_card', 'upi', 'wallet'),
+        type: DataTypes.ENUM('cod', 'prepaid', 'credit_card', 'debit_card', 'upi', 'wallet'),
         allowNull: false
     },
     transaction_id: {

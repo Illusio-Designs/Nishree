@@ -53,7 +53,7 @@ export const Order = sequelize.define('Order', {
     payment_type: {
         // 'credit' supports wholesale orders billed against a party/distributor's
         // credit terms rather than paid up front.
-        type: DataTypes.ENUM('cod', 'credit_card', 'debit_card', 'upi', 'wallet', 'credit'),
+        type: DataTypes.ENUM('cod', 'prepaid', 'credit_card', 'debit_card', 'upi', 'wallet', 'credit'),
         allowNull: false
     },
     payment_status: {

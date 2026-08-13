@@ -143,7 +143,7 @@ export const register = async (payload) => {
 // Create a shipping address for the logged-in user; returns the created record.
 export const createShippingAddress = async (payload) => {
   const { data } = await api.post('/api/shipping/addresses', payload);
-  return data?.data || data?.address || data;
+  return data?.shippingAddress || data?.data || data?.address || data;
 };
 
 // Place an order. `items` = [{ product_id, variation_id, quantity }].

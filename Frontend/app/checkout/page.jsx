@@ -18,8 +18,7 @@ import { createShippingAddress, createOrder, createGuestOrder } from '@/lib/api'
 
 const PAYMENTS = [
   { value: 'cod', label: 'Cash on Delivery' },
-  { value: 'upi', label: 'UPI' },
-  { value: 'credit_card', label: 'Card' },
+  { value: 'prepaid', label: 'Prepaid' },
 ];
 
 
@@ -124,7 +123,7 @@ export default function CheckoutPage() {
 
             <Card className="p-6">
               <h2 className="mb-4 text-lg font-bold text-ink">Payment method</h2>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {PAYMENTS.map((p) => (
                   <label
                     key={p.value}
