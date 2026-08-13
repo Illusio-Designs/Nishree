@@ -190,14 +190,16 @@ Payment.belongsTo(Order, {
     onDelete: 'CASCADE'
 });
 
-Order.hasOne(ShippingAddress, { 
+Order.hasOne(ShippingAddress, {
     foreignKey: 'orderId',
     onDelete: 'CASCADE'
 });
-ShippingAddress.belongsTo(Order, { 
+ShippingAddress.belongsTo(Order, {
     foreignKey: 'orderId',
     onDelete: 'CASCADE'
 });
+// The address chosen for an order (via order.shipping_address_id).
+Order.belongsTo(ShippingAddress, { foreignKey: 'shipping_address_id', as: 'ShippingAddressRef' });
 
 // Cart Associations
 Cart.hasMany(CartItem, { 

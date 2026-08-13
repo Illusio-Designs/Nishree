@@ -9,7 +9,7 @@ export const ShippingAddress = sequelize.define('ShippingAddress', {
     },
     user_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true, // null for guest checkout addresses
         field: 'user_id',
         references: {
             model: 'users',

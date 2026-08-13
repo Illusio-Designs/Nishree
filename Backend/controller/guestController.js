@@ -4,6 +4,7 @@ import { OrderStatusHistory } from '../model/orderStatusHistoryModel.js';
 import { Product } from '../model/productModel.js';
 import { ProductVariation } from '../model/productVariationModel.js';
 import { ShippingFee } from '../model/shippingFeeModel.js';
+import { ShippingAddress } from '../model/shippingAddressModel.js';
 import { Payment } from '../model/paymentModel.js';
 import { sequelize } from '../config/db.js';
 
@@ -124,6 +125,17 @@ export const createGuestOrder = async (req, res) => {
         const shippingFee = 0;
         const finalAmount = totalAmount;
 
+        // Persist the guest's shipping address so it shows on the order.
+        const guestAddress = await ShippingAddress.create({
+            user_id: null,
+            address: shipping_address.address,
+            city: shipping_address.city,
+            state: shipping_address.state,
+            postal_code: shipping_address.postal_code,
+            country: shipping_address.country,
+            phone_number: shipping_address.phone_number || guest_phone,
+        }, { transaction });
+
         // Create order with guest information
         const order = await Order.create({
             order_number: generateOrderNumber(),
@@ -132,6 +144,7 @@ export const createGuestOrder = async (req, res) => {
             guest_name,
             guest_email,
             guest_phone,
+            shipping_address_id: guestAddress.id,
             total_amount: totalAmount,
             shipping_fee: shippingFee,
             final_amount: finalAmount,

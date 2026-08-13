@@ -205,21 +205,20 @@ export const getAllOrders = async (req, res) => {
             where: filter,
             include: [
                 { model: User, attributes: ['id', 'username', 'email'] },
-                { 
-                    model: OrderItem, 
+                { model: ShippingAddress, as: 'ShippingAddressRef' },
+                { model: Payment },
+                {
+                    model: OrderItem,
                     include: [
-                        { 
-                            model: Product, 
+                        {
+                            model: Product,
                             as: 'Product',
                             include: [
-                                { 
-                                    model: ProductImage, 
-                                    as: 'ProductImages',
-                                    limit: 1
-                                }
+                                { model: ProductImage, as: 'ProductImages', limit: 1 }
                             ]
-                        }
-                    ] 
+                        },
+                        { model: ProductVariation }
+                    ]
                 }
             ],
             order: [['createdAt', 'DESC']],
