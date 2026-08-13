@@ -22,8 +22,6 @@ const PAYMENTS = [
   { value: 'credit_card', label: 'Card' },
 ];
 
-const SHIPPING_THRESHOLD = 499;
-const SHIPPING_FEE = 49;
 
 export default function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
@@ -33,8 +31,7 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', country: 'India', city: '', state: '', pincode: '' });
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const shipping = subtotal >= SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FEE;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   const placeOrder = async (e) => {
     e.preventDefault();
@@ -164,7 +161,6 @@ export default function CheckoutPage() {
               </ul>
               <div className="mt-5 space-y-2 border-t border-line pt-4 text-sm">
                 <div className="flex justify-between text-body"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-                <div className="flex justify-between text-body"><span>Shipping</span><span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span></div>
                 <div className="flex justify-between border-t border-line pt-2 text-base font-bold text-ink"><span>Total</span><span>{formatPrice(total)}</span></div>
               </div>
               <Button type="submit" fullWidth size="lg" className="mt-5" disabled={placing}>
