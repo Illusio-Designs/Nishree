@@ -217,7 +217,7 @@ export const getAllOrders = async (req, res) => {
                                 { model: ProductImage, as: 'ProductImages', limit: 1 }
                             ]
                         },
-                        { model: ProductVariation }
+                        { model: ProductVariation, as: 'Variation' }
                     ]
                 }
             ],

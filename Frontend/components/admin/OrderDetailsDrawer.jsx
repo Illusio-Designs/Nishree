@@ -68,7 +68,8 @@ export default function OrderDetailsDrawer({ order, open, onClose }) {
           <ul className="space-y-2">
             {items.map((it) => {
               const img = mediaUrl(firstImage(it.Product) || it.image);
-              const vlabel = it.ProductVariation ? variationLabel(it.ProductVariation) : '';
+              const variation = it.Variation || it.ProductVariation;
+              const vlabel = variation ? variationLabel(variation) : '';
               const price = Number(it.price) || 0;
               const qty = it.quantity ?? it.qty ?? 1;
               const sub = Number(it.subtotal) || price * qty;
