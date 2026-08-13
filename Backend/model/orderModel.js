@@ -33,6 +33,11 @@ export const Order = sequelize.define('Order', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    // The chosen shipping address for this order.
+    shipping_address_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
     order_number: {
         type: DataTypes.STRING,
         allowNull: false
