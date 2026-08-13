@@ -1,27 +1,27 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js';
 
+// One line in a cart. Attributes are camelCase; `underscored: true` maps them to
+// snake_case columns (cart_id, product_id, variation_id, selected_size).
 export const CartItem = sequelize.define('CartItem', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    cart_id: {
+    cartId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-            model: 'carts',
-            key: 'id'
-        }
+        references: { model: 'carts', key: 'id' }
     },
-    product_id: {
+    productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-            model: 'products',
-            key: 'id'
-        }
+        references: { model: 'products', key: 'id' }
+    },
+    variationId: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     quantity: {
         type: DataTypes.INTEGER,
@@ -30,18 +30,21 @@ export const CartItem = sequelize.define('CartItem', {
     },
     price: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+        allowNull: false,
+        defaultValue: 0
+    },
+    selected_size: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'cart_items',
     timestamps: true,
     underscored: true,
     indexes: [
-        {
-            fields: ['cart_id']
-        },
-        {
-            fields: ['product_id']
-        }
+        { fields: ['cart_id'] },
+        { fields: ['product_id'] }
     ]
-}); 
+});
+
+export default CartItem;

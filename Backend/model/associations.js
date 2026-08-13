@@ -204,10 +204,14 @@ Cart.hasMany(CartItem, {
     foreignKey: 'cartId',
     onDelete: 'CASCADE'
 });
-CartItem.belongsTo(Cart, { 
+CartItem.belongsTo(Cart, {
     foreignKey: 'cartId',
     onDelete: 'CASCADE'
 });
+// A cart line references the product and (optionally) the chosen variation.
+CartItem.belongsTo(Product, { foreignKey: 'productId' });
+Product.hasMany(CartItem, { foreignKey: 'productId' });
+CartItem.belongsTo(ProductVariation, { foreignKey: 'variationId' });
 
 // Review Associations
 Review.hasMany(ReviewImage, { 
