@@ -9,15 +9,16 @@ export const CartItem = sequelize.define('CartItem', {
         primaryKey: true,
         autoIncrement: true
     },
+    // No DB-level foreign keys on the cart line: it's transient and repeated
+    // schema alters left stale constraints that broke inserts. Integrity is
+    // handled in the controller instead.
     cartId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: { model: 'carts', key: 'id' }
+        allowNull: false
     },
     productId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: { model: 'products', key: 'id' }
+        allowNull: false
     },
     variationId: {
         type: DataTypes.INTEGER,
