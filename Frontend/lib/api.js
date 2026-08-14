@@ -97,6 +97,22 @@ export const getReviews = async (productId, params = {}) => {
   return data?.data || data;
 };
 
+// Submit a public product review (name/email/rating/comment + optional images).
+// Reviews start as 'pending' and appear once an admin approves them.
+export const createReview = async ({ productId, rating, comment, name, email, files = [] }) => {
+  const fd = new FormData();
+  fd.append('productId', productId);
+  fd.append('rating', rating);
+  fd.append('comment', comment);
+  fd.append('name', name);
+  fd.append('email', email);
+  (files || []).forEach((f) => fd.append('files', f));
+  const { data } = await api.post('/api/reviews/public', fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data;
+};
+
 export const getPolicies = async () => {
   const { data } = await api.get('/api/policies');
   return data?.data || data?.policies || data || [];

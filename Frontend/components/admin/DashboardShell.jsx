@@ -26,6 +26,7 @@ import {
   ArrowDown01Icon,
   Image01Icon,
   DocumentValidationIcon,
+  StarIcon,
 } from 'hugeicons-react';
 import Logo from '@/components/ui/Logo';
 import Spinner from '@/components/ui/Spinner';
@@ -41,6 +42,7 @@ const NAV = [
       { label: 'Orders', href: '/dashboard/orders', icon: ShoppingBag02Icon },
       { label: 'Categories', href: '/dashboard/categories', icon: Store01Icon },
       { label: 'Coupons', href: '/dashboard/coupons', icon: DiscountTag02Icon },
+      { label: 'Reviews', href: '/dashboard/reviews', icon: StarIcon },
       { label: 'Customers', href: '/dashboard/users', icon: UserGroupIcon },
     ],
   },

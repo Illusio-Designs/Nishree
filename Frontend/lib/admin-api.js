@@ -91,6 +91,13 @@ export const adminCreateSlider = async (payload) => (await api.post('/api/slider
 export const adminUpdateSlider = async (id, payload) => (await api.put(`/api/sliders/${id}`, toFormData(payload), formHeaders)).data;
 export const adminDeleteSlider = async (id) => (await api.delete(`/api/sliders/${id}`)).data;
 
+/* -------------------------------- Reviews ------------------------------- */
+export const adminListReviews = async () =>
+  listApi(async () => { const { data } = await api.get('/api/reviews/admin/all?limit=200'); return unwrap(data, ['reviews']); });
+export const adminModerateReview = async (id, status) =>
+  (await api.put(`/api/reviews/admin/${id}/moderate`, { status })).data;
+export const adminDeleteReview = async (id) => (await api.delete(`/api/reviews/admin/${id}`)).data;
+
 /* -------------------------------- Policies ------------------------------ */
 export const adminListPolicies = async () =>
   listApi(async () => { const { data } = await api.get('/api/policies'); return unwrap(data, ['policies']); });

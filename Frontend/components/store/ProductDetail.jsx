@@ -19,6 +19,7 @@ import Rating from '@/components/ui/Rating';
 import QuantityStepper from '@/components/ui/QuantityStepper';
 import Skeleton from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
+import ReviewsSection from '@/components/store/ReviewsSection';
 import { getProduct, mediaUrl } from '@/lib/api';
 import { productPricing, discountPercent, firstImage, variationLabel } from '@/lib/format';
 import { useWishlist } from '@/lib/wishlist-context';
@@ -205,6 +206,8 @@ export default function ProductDetail({ id }) {
           </div>
         </div>
       </Container>
+
+      <ReviewsSection productId={product.id} />
     </>
   );
 }
