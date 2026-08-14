@@ -271,6 +271,36 @@ export const createPublicReview = async (req, res) => {
     }
 };
 
+// Get all approved reviews across products (for the homepage reviews section).
+export const getAllPublicReviews = async (req, res) => {
+    try {
+        const { limit = 12 } = req.query;
+        const reviews = await Review.findAll({
+            where: { status: 'approved' },
+            include: [
+                { model: User, as: 'User', attributes: ['id', 'username', 'profileImage'] },
+                { model: Product, as: 'Product', attributes: ['id', 'name', 'slug'] },
+                { model: ReviewImage, as: 'ReviewImages' }
+            ],
+            order: [['createdAt', 'DESC']],
+            limit: parseInt(limit)
+        });
+
+        res.json({
+            success: true,
+            reviews: reviews.map(r => ({
+                ...r.toJSON(),
+                reviewerName: r.User ? r.User.username : r.guestName,
+                productName: r.Product ? r.Product.name : null,
+                productSlug: r.Product ? r.Product.slug : null
+            }))
+        });
+    } catch (error) {
+        console.error('Error getting all public reviews:', error);
+        res.status(500).json({ success: false, message: 'Failed to get reviews', error: error.message });
+    }
+};
+
 // Get public reviews for a product (ONLY APPROVED)
 export const getPublicProductReviews = async (req, res) => {
     try {

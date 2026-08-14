@@ -97,6 +97,13 @@ export const getReviews = async (productId, params = {}) => {
   return data?.data || data;
 };
 
+// All approved reviews across products, for the homepage reviews section.
+export const getAllPublicReviews = async (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  const { data } = await api.get(`/api/reviews/public${qs ? `?${qs}` : ''}`);
+  return data?.reviews || [];
+};
+
 // Submit a public product review (name/email/rating/comment + optional images).
 // Reviews start as 'pending' and appear once an admin approves them.
 export const createReview = async ({ productId, rating, comment, name, email, files = [] }) => {
