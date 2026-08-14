@@ -91,6 +91,13 @@ export const adminCreateSlider = async (payload) => (await api.post('/api/slider
 export const adminUpdateSlider = async (id, payload) => (await api.put(`/api/sliders/${id}`, toFormData(payload), formHeaders)).data;
 export const adminDeleteSlider = async (id) => (await api.delete(`/api/sliders/${id}`)).data;
 
+/* -------------------------------- Policies ------------------------------ */
+export const adminListPolicies = async () =>
+  listApi(async () => { const { data } = await api.get('/api/policies'); return unwrap(data, ['policies']); });
+export const adminCreatePolicy = async (payload) => (await api.post('/api/policies', payload)).data;
+export const adminUpdatePolicy = async (id, payload) => (await api.put(`/api/policies/${id}`, payload)).data;
+export const adminDeletePolicy = async (id) => (await api.delete(`/api/policies/${id}`)).data;
+
 /* --------------------------------- Users -------------------------------- */
 export const adminListUsers = async () =>
   listApi(async () => { const { data } = await api.get('/api/users/all'); return unwrap(data, ['users']); });

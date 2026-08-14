@@ -11,9 +11,9 @@ import Button from '@/components/ui/Button';
 import { createContactMessage } from '@/lib/api';
 
 const INFO = [
-  { icon: Location01Icon, title: 'Visit us', lines: ['Ahmedabad, Gujarat', 'India'] },
-  { icon: Call02Icon, title: 'Call us', lines: ['+91 00000 00000', 'Mon–Sat, 9am–7pm'] },
-  { icon: Mail01Icon, title: 'Email us', lines: ['info@illusiodesigns.agency'] },
+  { icon: Location01Icon, title: 'Visit us', lines: ['Ahmedabad, Gujarat', 'India'], href: 'https://maps.google.com/?q=Ahmedabad,Gujarat,India', external: true },
+  { icon: Call02Icon, title: 'Call us', lines: ['+91 00000 00000', 'Mon–Sat, 9am–7pm'], href: 'tel:+910000000000' },
+  { icon: Mail01Icon, title: 'Email us', lines: ['info@illusiodesigns.agency'], href: 'mailto:info@illusiodesigns.agency' },
   { icon: Clock01Icon, title: 'Working hours', lines: ['Mon–Sat: 9am – 7pm', 'Sunday: Closed'] },
 ];
 
@@ -49,19 +49,29 @@ export default function ContactPage() {
           {/* Info */}
           <div className="lg:col-span-2">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-              {INFO.map(({ icon: Icon, title, lines }) => (
-                <div key={title} className="flex gap-4 rounded-2xl border border-line bg-white p-5">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600">
-                    <Icon size={20} strokeWidth={2} />
-                  </span>
-                  <div>
-                    <p className="font-bold text-ink">{title}</p>
-                    {lines.map((l) => (
-                      <p key={l} className="text-sm text-body">{l}</p>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              {INFO.map(({ icon: Icon, title, lines, href, external }) => {
+                const Wrapper = href ? 'a' : 'div';
+                const wrapperProps = href
+                  ? { href, ...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {}) }
+                  : {};
+                return (
+                  <Wrapper
+                    key={title}
+                    {...wrapperProps}
+                    className={`flex gap-4 rounded-2xl border border-line bg-white p-5 transition-colors ${href ? 'hover:border-brand-300 hover:bg-brand-50/40' : ''}`}
+                  >
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+                      <Icon size={20} strokeWidth={2} />
+                    </span>
+                    <div>
+                      <p className="font-bold text-ink">{title}</p>
+                      {lines.map((l, i) => (
+                        <p key={l} className={`text-sm ${href && i === 0 ? 'font-medium text-brand-600' : 'text-body'}`}>{l}</p>
+                      ))}
+                    </div>
+                  </Wrapper>
+                );
+              })}
             </div>
           </div>
 
