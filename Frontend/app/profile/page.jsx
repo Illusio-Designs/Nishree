@@ -21,8 +21,8 @@ import Spinner from '@/components/ui/Spinner';
 import Badge from '@/components/ui/Badge';
 import AddressForm from '@/components/store/AddressForm';
 import { getUser, clearSession, isLoggedIn } from '@/lib/auth';
-import { getMyOrders, getMyAddresses } from '@/lib/api';
-import { formatPrice, cn } from '@/lib/format';
+import { getMyOrders, getMyAddresses, mediaUrl } from '@/lib/api';
+import { formatPrice, cn, firstImage, variationLabel } from '@/lib/format';
 
 // Sidebar tabs — all switch the panel in-page.
 const TABS = [
@@ -96,6 +96,13 @@ export default function ProfilePage() {
   const name = user?.username || user?.full_name || 'Nishree Customer';
   const email = user?.email || '—';
 
+  const StatusBadge = ({ status }) => (
+    <Badge tone={STATUS_TONE[String(status || 'pending').toLowerCase()] || 'neutral'}>
+      <span className="capitalize">{status || 'pending'}</span>
+    </Badge>
+  );
+
+  // Compact row for the Overview panel.
   const OrderRow = ({ o }) => (
     <li className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
       <div>
@@ -103,15 +110,62 @@ export default function ProfilePage() {
         <p className="text-xs text-muted">{fmtDate(o.createdAt || o.created_at)}</p>
       </div>
       <div className="flex items-center gap-3">
-        <Badge tone={STATUS_TONE[String(o.status || 'pending').toLowerCase()] || 'neutral'}>
-          <span className="capitalize">{o.status || 'pending'}</span>
-        </Badge>
+        <StatusBadge status={o.status} />
         <span className="text-sm font-bold text-ink">
           {formatPrice(o.final_amount ?? o.total_amount ?? 0)}
         </span>
       </div>
     </li>
   );
+
+  // Full card with line items for the My Orders panel.
+  const OrderCard = ({ o }) => {
+    const lines = o.OrderItems || o.items || [];
+    return (
+      <div className="rounded-2xl border border-line p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-ink">{o.order_number || `#${o.id}`}</p>
+            <p className="text-xs text-muted">{fmtDate(o.createdAt || o.created_at)}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <StatusBadge status={o.status} />
+            <span className="text-sm font-bold text-ink">
+              {formatPrice(o.final_amount ?? o.total_amount ?? 0)}
+            </span>
+          </div>
+        </div>
+
+        {lines.length > 0 && (
+          <ul className="mt-3 divide-y divide-line border-t border-line">
+            {lines.map((it) => {
+              const img = mediaUrl(firstImage(it.Product) || it.image);
+              const vlabel = variationLabel(it.Variation || it.ProductVariation);
+              const qty = it.quantity ?? it.qty ?? 1;
+              const price = Number(it.price) || 0;
+              return (
+                <li key={it.id} className="flex items-center gap-3 py-2.5">
+                  <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-surface-soft">
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={img} alt="" className="h-full w-full object-cover" />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="clamp-1 text-sm font-medium text-ink">{it.Product?.name || 'Product'}</p>
+                    <p className="text-xs text-muted">
+                      {vlabel ? `${vlabel} · ` : ''}Qty {qty} × {formatPrice(price)}
+                    </p>
+                  </div>
+                  <span className="text-sm font-semibold text-ink">{formatPrice(price * qty)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -210,7 +264,7 @@ export default function ProfilePage() {
               </>
             )}
 
-            {/* My Orders: full list */}
+            {/* My Orders: full list with line items */}
             {tab === 'orders' && (
               <Card className="p-6">
                 <h2 className="mb-4 text-lg font-bold text-ink">My orders</h2>
@@ -222,9 +276,9 @@ export default function ProfilePage() {
                     <Button href="/products" className="mt-4">Start shopping</Button>
                   </>
                 ) : (
-                  <ul className="divide-y divide-line">
-                    {orders.map((o) => <OrderRow key={o.id} o={o} />)}
-                  </ul>
+                  <div className="space-y-4">
+                    {orders.map((o) => <OrderCard key={o.id} o={o} />)}
+                  </div>
                 )}
               </Card>
             )}

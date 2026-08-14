@@ -259,21 +259,22 @@ export const getUserOrders = async (req, res) => {
         const orders = await Order.findAndCountAll({
             where: filter,
             include: [
-                { 
-                    model: OrderItem, 
+                {
+                    model: OrderItem,
                     include: [
-                        { 
-                            model: Product, 
+                        {
+                            model: Product,
                             as: 'Product',
                             include: [
-                                { 
-                                    model: ProductImage, 
+                                {
+                                    model: ProductImage,
                                     as: 'ProductImages',
                                     limit: 1
                                 }
                             ]
-                        }
-                    ] 
+                        },
+                        { model: ProductVariation, as: 'Variation' }
+                    ]
                 }
             ],
             order: [['createdAt', 'DESC']],
@@ -282,7 +283,7 @@ export const getUserOrders = async (req, res) => {
         });
 
         const totalPages = Math.ceil(orders.count / limit);
-        
+
         res.json({
             orders: orders.rows,
             pagination: {
