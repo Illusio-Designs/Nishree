@@ -152,32 +152,17 @@ export const addToCart = async (req, res) => {
 
 		let item = await CartItem.findOne({ where });
 
-		let stockAvailable = 0;
-		if (variationId) {
-			const variation = await ProductVariation.findByPk(variationId);
-			stockAvailable = variation ? variation.stock : 0;
-		} else {
-			const variation = await ProductVariation.findOne({ where: { productId } });
-			stockAvailable = variation ? variation.stock : 0;
-		}
-
-		const requestedQuantity = item ? item.quantity + quantity : quantity;
-		if (typeof stockAvailable !== 'number' || stockAvailable < requestedQuantity) {
-			return res.status(400).json({ message: 'Product is out of stock or insufficient quantity' });
-		}
+		// Unit price from the chosen variation (or the product's first variation).
+		let price = 0;
+		const variation = variationId
+			? await ProductVariation.findByPk(variationId)
+			: await ProductVariation.findOne({ where: { productId } });
+		if (variation) price = variation.price;
 
 		if (item) {
 			item.quantity += quantity;
 			await item.save();
 		} else {
-			let price = 0;
-			if (variationId) {
-				const variation = await ProductVariation.findByPk(variationId);
-				price = variation ? variation.price : 0;
-			} else {
-				const variation = await ProductVariation.findOne({ where: { productId } });
-				price = variation ? variation.price : 0;
-			}
 			item = await CartItem.create({
 				cartId: cart.id,
 				productId,
