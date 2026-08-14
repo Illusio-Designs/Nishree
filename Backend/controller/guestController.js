@@ -6,6 +6,7 @@ import { ProductVariation } from '../model/productVariationModel.js';
 import { ShippingFee } from '../model/shippingFeeModel.js';
 import { ShippingAddress } from '../model/shippingAddressModel.js';
 import { Payment } from '../model/paymentModel.js';
+import { findValidCoupon } from './couponController.js';
 import { sequelize } from '../config/db.js';
 
 // Generate unique order number
@@ -37,14 +38,15 @@ export const createGuestOrder = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
-        const { 
-            guest_name, 
-            guest_email, 
-            guest_phone, 
-            shipping_address, 
-            items, 
-            payment_type, 
-            notes 
+        const {
+            guest_name,
+            guest_email,
+            guest_phone,
+            shipping_address,
+            items,
+            payment_type,
+            notes,
+            coupon_code
         } = req.body;
 
         // Validate required fields
@@ -123,7 +125,20 @@ export const createGuestOrder = async (req, res) => {
 
         // No shipping fee for prepaid orders
         const shippingFee = 0;
-        const finalAmount = totalAmount;
+
+        // Apply coupon (if any). Guests aren't tracked per-user, but global
+        // limits, the active window and minimum-purchase are still enforced.
+        let discountTotal = 0;
+        if (coupon_code) {
+            const result = await findValidCoupon(coupon_code, totalAmount);
+            if (result.error) {
+                await transaction.rollback();
+                return res.status(400).json({ message: result.error });
+            }
+            discountTotal = result.discountAmount;
+        }
+
+        const finalAmount = Math.max(0, totalAmount - discountTotal) + shippingFee;
 
         // Persist the guest's shipping address so it shows on the order.
         const guestAddress = await ShippingAddress.create({
@@ -147,6 +162,7 @@ export const createGuestOrder = async (req, res) => {
             shipping_address_id: guestAddress.id,
             total_amount: totalAmount,
             shipping_fee: shippingFee,
+            discount_total: discountTotal,
             final_amount: finalAmount,
             payment_type,
             payment_status: payment_type === 'cod' ? 'pending' : 'pending',

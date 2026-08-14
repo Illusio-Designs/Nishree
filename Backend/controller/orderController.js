@@ -8,6 +8,8 @@ import { ShippingAddress } from '../model/shippingAddressModel.js';
 import { ShippingFee } from '../model/shippingFeeModel.js';
 import { Payment } from '../model/paymentModel.js';
 import { User } from '../model/userModel.js';
+import { CouponUsage } from '../model/couponUsageModel.js';
+import { findValidCoupon } from './couponController.js';
 import { Op } from 'sequelize';
 import { sequelize } from '../config/db.js';
 // import { createNotification } from './notificationController.js';
@@ -41,7 +43,7 @@ export const createOrder = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
-        const { shipping_address_id, items, payment_type, notes } = req.body;
+        const { shipping_address_id, items, payment_type, notes, coupon_code } = req.body;
         const userId = req.user.id;
 
         if (!shipping_address_id || !items || !payment_type) {
@@ -115,7 +117,26 @@ export const createOrder = async (req, res) => {
 
         // No shipping fee for prepaid orders
         const shippingFee = payment_type === 'cod' ? await calculateShippingFee(payment_type) : 0;
-        const finalAmount = totalAmount + shippingFee;
+
+        // Apply coupon (if any) against the item subtotal.
+        let discountTotal = 0;
+        let appliedCoupon = null;
+        if (coupon_code) {
+            const result = await findValidCoupon(coupon_code, totalAmount);
+            if (result.error) {
+                await transaction.rollback();
+                return res.status(400).json({ message: result.error });
+            }
+            const already = await CouponUsage.findOne({ where: { couponId: result.coupon.id, userId }, transaction });
+            if (already) {
+                await transaction.rollback();
+                return res.status(400).json({ message: 'You have already used this coupon' });
+            }
+            discountTotal = result.discountAmount;
+            appliedCoupon = result.coupon;
+        }
+
+        const finalAmount = Math.max(0, totalAmount - discountTotal) + shippingFee;
 
         // Create order
         const order = await Order.create({
@@ -124,12 +145,23 @@ export const createOrder = async (req, res) => {
             shipping_address_id: shipping_address_id,
             total_amount: totalAmount,
             shipping_fee: shippingFee,
+            discount_total: discountTotal,
             final_amount: finalAmount,
             payment_type,
             payment_status: payment_type === 'cod' ? 'pending' : 'pending',
             status: 'pending',
             notes: notes || null,
         }, { transaction });
+
+        // Record coupon usage so limits and single-use rules apply.
+        if (appliedCoupon) {
+            await CouponUsage.create({
+                couponId: appliedCoupon.id,
+                userId,
+                orderId: order.id,
+                discountAmount: discountTotal,
+            }, { transaction });
+        }
 
         // Create order items
         for (const item of validatedItems) {

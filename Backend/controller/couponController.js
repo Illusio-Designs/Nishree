@@ -1,6 +1,42 @@
 import { Coupon, CouponUsage } from '../model/associations.js';
 import { Op } from 'sequelize';
 
+// Discount for a coupon against an order amount (shared by validate + checkout).
+export const computeDiscount = (coupon, orderAmount) => {
+    let d = 0;
+    if (coupon.type === 'percentage') {
+        d = (Number(orderAmount) * Number(coupon.value)) / 100;
+        if (coupon.maxDiscount && d > Number(coupon.maxDiscount)) d = Number(coupon.maxDiscount);
+    } else {
+        d = Number(coupon.value);
+    }
+    if (d > Number(orderAmount)) d = Number(orderAmount);
+    return Math.max(0, Math.round(d * 100) / 100);
+};
+
+// Resolve an active coupon and its discount, enforcing window, min-purchase and
+// global usage limit. Returns { coupon, discountAmount } or { error }.
+export const findValidCoupon = async (code, orderAmount) => {
+    if (!code) return { error: 'Coupon code is required' };
+    const coupon = await Coupon.findOne({
+        where: {
+            code: String(code).toUpperCase(),
+            status: 'active',
+            startDate: { [Op.lte]: new Date() },
+            endDate: { [Op.gte]: new Date() }
+        }
+    });
+    if (!coupon) return { error: 'Invalid or expired coupon code' };
+    if (coupon.minPurchase && Number(orderAmount) < Number(coupon.minPurchase)) {
+        return { error: `Order must be at least ₹${coupon.minPurchase} to use this coupon` };
+    }
+    if (coupon.usageLimit) {
+        const totalUsage = await CouponUsage.count({ where: { couponId: coupon.id } });
+        if (totalUsage >= coupon.usageLimit) return { error: 'Coupon has reached maximum usage limit' };
+    }
+    return { coupon, discountAmount: computeDiscount(coupon, orderAmount) };
+};
+
 // Create a new coupon
 export const createCoupon = async (req, res) => {
     try {
@@ -152,68 +188,19 @@ export const validateCoupon = async (req, res) => {
     try {
         const { code, orderAmount, userId } = req.body;
 
-        if (!code) {
-            return res.status(400).json({ message: 'Coupon code is required' });
+        const result = await findValidCoupon(code, orderAmount);
+        if (result.error) {
+            return res.status(400).json({ message: result.error });
         }
+        const { coupon, discountAmount } = result;
 
-        if (!userId) {
-            return res.status(400).json({ message: 'User ID is required' });
-        }
-
-        // Find the coupon
-        const coupon = await Coupon.findOne({
-            where: { 
-                code: code.toUpperCase(),
-                status: 'active',
-                startDate: { [Op.lte]: new Date() },
-                endDate: { [Op.gte]: new Date() }
-            }
-        });
-
-        if (!coupon) {
-            return res.status(404).json({ message: 'Invalid or expired coupon code' });
-        }
-
-        // Check if user has already used this coupon
-        const userUsage = await CouponUsage.findOne({
-            where: {
-                couponId: coupon.id,
-                userId: userId
-            }
-        });
-
-        if (userUsage) {
-            return res.status(400).json({ message: 'You have already used this coupon' });
-        }
-
-        // Check if coupon is already used to its maximum
-        const totalUsage = await CouponUsage.count({
-            where: { couponId: coupon.id }
-        });
-
-        if (coupon.usageLimit && totalUsage >= coupon.usageLimit) {
-            return res.status(400).json({ message: 'Coupon has reached maximum usage limit' });
-        }
-
-        // Check if order meets minimum amount
-        if (orderAmount < coupon.minPurchase) {
-            return res.status(400).json({ 
-                message: `Order must be at least ${coupon.minPurchase} to use this coupon` 
+        // Per-user single-use check only applies to signed-in shoppers.
+        if (userId) {
+            const userUsage = await CouponUsage.findOne({
+                where: { couponId: coupon.id, userId }
             });
-        }
-
-        // Calculate discount amount
-        let discountAmount = 0;
-        if (coupon.type === 'percentage') {
-            discountAmount = (orderAmount * coupon.value) / 100;
-            if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
-                discountAmount = coupon.maxDiscount;
-            }
-        } else {
-            discountAmount = coupon.value;
-            // Ensure discount doesn't exceed order amount
-            if (discountAmount > orderAmount) {
-                discountAmount = orderAmount;
+            if (userUsage) {
+                return res.status(400).json({ message: 'You have already used this coupon' });
             }
         }
 
@@ -221,7 +208,7 @@ export const validateCoupon = async (req, res) => {
             message: 'Coupon is valid',
             coupon,
             discountAmount,
-            finalAmount: orderAmount - discountAmount
+            finalAmount: Number(orderAmount) - discountAmount
         });
     } catch (error) {
         console.error('Error validating coupon:', error);

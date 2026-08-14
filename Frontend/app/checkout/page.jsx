@@ -16,8 +16,8 @@ import EmptyState from '@/components/ui/EmptyState';
 import AddressForm from '@/components/store/AddressForm';
 import { useCart } from '@/lib/cart-context';
 import { formatPrice, cn } from '@/lib/format';
-import { isLoggedIn } from '@/lib/auth';
-import { createOrder, createGuestOrder, getMyAddresses } from '@/lib/api';
+import { isLoggedIn, getUser } from '@/lib/auth';
+import { createOrder, createGuestOrder, getMyAddresses, validateCoupon } from '@/lib/api';
 
 const PAYMENTS = [
   { value: 'cod', label: 'Cash on Delivery' },
@@ -41,7 +41,34 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', country: 'India', city: '', state: '', pincode: '' });
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const total = subtotal;
+  // Coupon
+  const [couponCode, setCouponCode] = useState('');
+  const [coupon, setCoupon] = useState(null); // { code, discount }
+  const [couponBusy, setCouponBusy] = useState(false);
+
+  const discount = coupon?.discount || 0;
+  const total = Math.max(0, subtotal - discount);
+
+  const applyCoupon = async () => {
+    const code = couponCode.trim();
+    if (!code) return;
+    setCouponBusy(true);
+    try {
+      const res = await validateCoupon({ code, orderAmount: subtotal, userId: getUser()?.id });
+      setCoupon({ code: code.toUpperCase(), discount: Number(res?.discountAmount) || 0 });
+      toast.success('Coupon applied');
+    } catch (err) {
+      setCoupon(null);
+      toast.error(err?.response?.data?.message || 'Invalid coupon');
+    } finally {
+      setCouponBusy(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setCouponCode('');
+  };
 
   useEffect(() => {
     const loggedIn = isLoggedIn();
@@ -95,6 +122,7 @@ export default function CheckoutPage() {
           payment_type: payment,
           notes: '',
           items: orderItems,
+          coupon_code: coupon?.code || undefined,
         });
       } else {
         // Guest checkout — no account required.
@@ -112,6 +140,7 @@ export default function CheckoutPage() {
           items: orderItems,
           payment_type: payment,
           notes: '',
+          coupon_code: coupon?.code || undefined,
         });
       }
 
@@ -256,8 +285,39 @@ export default function CheckoutPage() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-5 space-y-2 border-t border-line pt-4 text-sm">
+              {/* Coupon */}
+              <div className="mt-5 border-t border-line pt-4">
+                {coupon ? (
+                  <div className="flex items-center justify-between rounded-xl bg-brand-50 px-3 py-2.5 text-sm">
+                    <span className="font-semibold text-brand-700">
+                      {coupon.code} applied
+                    </span>
+                    <button type="button" onClick={removeCoupon} className="text-xs font-medium text-brand-600 hover:underline cursor-pointer">
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      placeholder="Coupon code"
+                      className="h-10 flex-1 rounded-full border border-line bg-white px-4 text-sm uppercase text-ink placeholder:normal-case placeholder:text-muted focus-ring"
+                    />
+                    <Button type="button" variant="secondary" onClick={applyCoupon} disabled={couponBusy || !couponCode.trim()}>
+                      {couponBusy ? '…' : 'Apply'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 space-y-2 text-sm">
                 <div className="flex justify-between text-body"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-brand-600">
+                    <span>Discount</span><span>−{formatPrice(discount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between border-t border-line pt-2 text-base font-bold text-ink"><span>Total</span><span>{formatPrice(total)}</span></div>
               </div>
               <Button type="submit" fullWidth size="lg" className="mt-5" disabled={placing}>

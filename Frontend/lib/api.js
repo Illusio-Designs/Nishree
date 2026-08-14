@@ -118,6 +118,13 @@ export const getPolicies = async () => {
   return data?.data || data?.policies || data || [];
 };
 
+// Validate a coupon against the current order amount. Returns
+// { coupon, discountAmount, finalAmount }. userId is optional (guests allowed).
+export const validateCoupon = async ({ code, orderAmount, userId }) => {
+  const { data } = await api.post('/api/coupons/validate', { code, orderAmount, userId });
+  return data;
+};
+
 /* ------------------------- Recipes / Blog + Wholesale ------------------------- */
 
 export const getBlogs = async (params = {}) => {
