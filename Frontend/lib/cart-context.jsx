@@ -14,6 +14,7 @@ const mapServer = (list) =>
     id: ci.productId,
     variationId: ci.variationId || null,
     name: ci.name,
+    variant: ci.variant || '',
     price: Number(ci.price) || 0,
     image: ci.image || '',
     qty: ci.quantity,
@@ -46,7 +47,7 @@ export function CartProvider({ children }) {
       const key = product.variationId || product.id;
       const ex = prev.find((i) => i.key === key);
       if (ex) return prev.map((i) => (i.key === key ? { ...i, qty: i.qty + qty } : i));
-      return [...prev, { key, id: product.id, variationId: product.variationId || null, name: product.name, price: Number(product.price) || 0, image: product.image || '', qty }];
+      return [...prev, { key, id: product.id, variationId: product.variationId || null, name: product.name, variant: product.variant || '', price: Number(product.price) || 0, image: product.image || '', qty }];
     });
     // Pop the cart drawer open so the shopper sees the item was added.
     if (typeof window !== 'undefined') window.dispatchEvent(new Event('nishree-open-cart'));

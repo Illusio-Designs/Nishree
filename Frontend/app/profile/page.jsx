@@ -9,9 +9,9 @@ import {
   Call02Icon,
   PackageIcon,
   Location01Icon,
-  FavouriteIcon,
   Logout01Icon,
   DashboardSquare01Icon,
+  Add01Icon,
 } from 'hugeicons-react';
 import Container from '@/components/ui/Container';
 import PageHeader from '@/components/ui/PageHeader';
@@ -19,16 +19,16 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
 import Badge from '@/components/ui/Badge';
+import AddressForm from '@/components/store/AddressForm';
 import { getUser, clearSession, isLoggedIn } from '@/lib/auth';
 import { getMyOrders, getMyAddresses } from '@/lib/api';
 import { formatPrice, cn } from '@/lib/format';
 
-// Sidebar tabs. Wishlist routes out; the rest switch the panel in-page.
+// Sidebar tabs — all switch the panel in-page.
 const TABS = [
   { key: 'overview', icon: DashboardSquare01Icon, label: 'Overview' },
   { key: 'orders', icon: PackageIcon, label: 'My Orders' },
   { key: 'addresses', icon: Location01Icon, label: 'Addresses' },
-  { key: 'wishlist', icon: FavouriteIcon, label: 'Wishlist', href: '/wishlist' },
 ];
 
 const STATUS_TONE = {
@@ -58,6 +58,7 @@ export default function ProfilePage() {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [addresses, setAddresses] = useState([]);
   const [addressesLoading, setAddressesLoading] = useState(true);
+  const [addingAddress, setAddingAddress] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -231,30 +232,51 @@ export default function ProfilePage() {
             {/* Addresses */}
             {tab === 'addresses' && (
               <Card className="p-6">
-                <h2 className="mb-4 text-lg font-bold text-ink">Saved addresses</h2>
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-ink">Saved addresses</h2>
+                  {!addingAddress && (
+                    <Button size="sm" icon={Add01Icon} onClick={() => setAddingAddress(true)}>
+                      Add address
+                    </Button>
+                  )}
+                </div>
+
+                {addingAddress && (
+                  <div className="mb-6 rounded-2xl border border-line p-4">
+                    <h3 className="mb-3 text-sm font-bold text-ink">New address</h3>
+                    <AddressForm
+                      onSaved={(addr) => {
+                        if (addr) setAddresses((prev) => [addr, ...prev]);
+                        setAddingAddress(false);
+                      }}
+                      onCancel={() => setAddingAddress(false)}
+                    />
+                  </div>
+                )}
+
                 {addressesLoading ? (
                   <div className="flex justify-center py-6"><Spinner size={22} /></div>
                 ) : addresses.length === 0 ? (
-                  <p className="text-sm text-body">
-                    You have no saved addresses yet. They&apos;ll appear here after you place an order.
-                  </p>
+                  !addingAddress && (
+                    <p className="text-sm text-body">
+                      You have no saved addresses yet. Add one to speed up checkout.
+                    </p>
+                  )
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
                     {addresses.map((a) => (
                       <div key={a.id} className="rounded-2xl border border-line p-4">
                         <div className="mb-1 flex items-center justify-between">
-                          <p className="text-sm font-semibold text-ink">
-                            {a.full_name || a.name || name}
-                          </p>
+                          <p className="text-sm font-semibold text-ink">{name}</p>
                           {a.is_default && <Badge tone="brand">Default</Badge>}
                         </div>
                         <p className="text-sm text-body">
-                          {[a.address_line1 || a.address, a.address_line2, a.city, a.state, a.postal_code || a.pincode]
+                          {[a.address, a.city, a.state, a.postal_code, a.country]
                             .filter(Boolean)
                             .join(', ')}
                         </p>
-                        {(a.phone || a.phone_number) && (
-                          <p className="mt-1 text-xs text-muted">Phone: {a.phone || a.phone_number}</p>
+                        {a.phone_number && (
+                          <p className="mt-1 text-xs text-muted">Phone: {a.phone_number}</p>
                         )}
                       </div>
                     ))}

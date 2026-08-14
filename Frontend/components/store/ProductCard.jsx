@@ -44,7 +44,8 @@ export default function ProductCard({ product }) {
       {
         id: product.id,
         variationId: active?.id || null,
-        name: label ? `${product.name} (${label})` : product.name,
+        name: product.name,
+        variant: label,
         price,
         image: img,
       },

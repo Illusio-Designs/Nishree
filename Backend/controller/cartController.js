@@ -1,5 +1,26 @@
 import { Cart, CartItem, Product, ProductImage, ProductVariation } from '../model/associations.js';
 
+// Parse a JSON column value into an object, tolerating double-encoded strings.
+const parseAttrs = (a) => {
+	let v = a;
+	for (let i = 0; i < 4 && typeof v === 'string'; i++) {
+		try { v = JSON.parse(v); } catch { return {}; }
+	}
+	return v && typeof v === 'object' ? v : {};
+};
+
+// Human pack-size label for a variation (e.g. "100g"), never the SKU code.
+const packLabel = (variation) => {
+	if (!variation) return '';
+	const attrs = parseAttrs(variation.attributes);
+	const val = attrs.weight || attrs.size || attrs.pack || attrs.title;
+	if (val && String(val).toLowerCase() !== 'default') return String(val);
+	if (variation.weight != null && variation.weight !== '') {
+		return `${Number(variation.weight)}${variation.weightUnit || 'g'}`;
+	}
+	return '';
+};
+
 // Resolve the cart owner: the signed-in user if present, else a guest id sent
 // via the x-guest-id header (or guest_id in body/query). No auth required.
 const resolveOwner = (req) => {
@@ -111,6 +132,7 @@ export const getUserCart = async (req, res) => {
 				images,
 				price,
 				quantity: item.quantity,
+				variant: packLabel(variation),
 				size: item.selected_size || null,
 				color: attributes?.color || null,
 				stock: variation ? variation.stock : product ? product.stock_quantity : 0,

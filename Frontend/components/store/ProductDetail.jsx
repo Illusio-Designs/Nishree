@@ -99,6 +99,7 @@ export default function ProductDetail({ id }) {
         id: product.id,
         variationId: variation?.id || null,
         name: product.name,
+        variant: variation ? variationLabel(variation) : '',
         price,
         image: images[0] || '',
       },

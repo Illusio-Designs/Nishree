@@ -42,7 +42,7 @@ export default function QuickView({ product, open, onClose }) {
 
   const onAdd = () => {
     const label = active ? variationLabel(active) : '';
-    addItem({ id: product.id, variationId: active?.id || null, name: label ? `${product.name} (${label})` : product.name, price, image: img }, 1);
+    addItem({ id: product.id, variationId: active?.id || null, name: product.name, variant: label, price, image: img }, 1);
     toast.success('Added to cart');
   };
 

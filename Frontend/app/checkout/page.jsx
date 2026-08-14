@@ -1,40 +1,78 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { UserIcon, Mail01Icon, Call02Icon, Location01Icon, ShoppingBag02Icon } from 'hugeicons-react';
+import { UserIcon, Mail01Icon, Call02Icon, Location01Icon, ShoppingBag02Icon, Add01Icon } from 'hugeicons-react';
 import Container from '@/components/ui/Container';
 import PageHeader from '@/components/ui/PageHeader';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import Spinner from '@/components/ui/Spinner';
+import Badge from '@/components/ui/Badge';
 import LocationSelect from '@/components/ui/LocationSelect';
 import EmptyState from '@/components/ui/EmptyState';
+import AddressForm from '@/components/store/AddressForm';
 import { useCart } from '@/lib/cart-context';
-import { formatPrice } from '@/lib/format';
+import { formatPrice, cn } from '@/lib/format';
 import { isLoggedIn } from '@/lib/auth';
-import { createShippingAddress, createOrder, createGuestOrder } from '@/lib/api';
+import { createOrder, createGuestOrder, getMyAddresses } from '@/lib/api';
 
 const PAYMENTS = [
   { value: 'cod', label: 'Cash on Delivery' },
   { value: 'prepaid', label: 'Prepaid' },
 ];
 
-
 export default function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const router = useRouter();
   const [payment, setPayment] = useState('cod');
   const [placing, setPlacing] = useState(false);
+
+  // Signed-in address flow
+  const [authed, setAuthed] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [addingAddress, setAddingAddress] = useState(false);
+
+  // Guest form
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', country: 'India', city: '', state: '', pincode: '' });
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const total = subtotal;
 
+  useEffect(() => {
+    const loggedIn = isLoggedIn();
+    setAuthed(loggedIn);
+    if (!loggedIn) {
+      setReady(true);
+      return;
+    }
+    getMyAddresses()
+      .then((list) => {
+        const arr = Array.isArray(list) ? list : [];
+        setAddresses(arr);
+        const def = arr.find((a) => a.is_default) || arr[0];
+        setSelectedId(def?.id ?? null);
+        // No saved address yet → open the add-address form straight away.
+        if (arr.length === 0) setAddingAddress(true);
+      })
+      .catch(() => setAddingAddress(true))
+      .finally(() => setReady(true));
+  }, []);
+
+  const onAddressSaved = (addr) => {
+    if (addr) {
+      setAddresses((prev) => [addr, ...prev.filter((a) => a.id !== addr.id)]);
+      setSelectedId(addr.id);
+    }
+    setAddingAddress(false);
+  };
+
   const placeOrder = async (e) => {
     e.preventDefault();
-    setPlacing(true);
 
     const orderItems = items.map((i) => ({
       product_id: i.id,
@@ -42,20 +80,18 @@ export default function CheckoutPage() {
       quantity: i.qty,
     }));
 
+    if (authed && !selectedId) {
+      toast.error('Please select or add a delivery address.');
+      return;
+    }
+
+    setPlacing(true);
     try {
       let order;
-      if (isLoggedIn()) {
-        // Signed-in flow: save an address on the account, then place the order.
-        const address = await createShippingAddress({
-          address: form.address,
-          city: form.city,
-          state: form.state,
-          postal_code: form.pincode,
-          country: form.country || 'India',
-          phone_number: form.phone,
-        });
+      if (authed) {
+        // Signed-in flow: use the chosen saved address.
         order = await createOrder({
-          shipping_address_id: address.id,
+          shipping_address_id: selectedId,
           payment_type: payment,
           notes: '',
           items: orderItems,
@@ -108,17 +144,77 @@ export default function CheckoutPage() {
           {/* Details */}
           <div className="space-y-6">
             <Card className="p-6">
-              <h2 className="mb-4 text-lg font-bold text-ink">Shipping details</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Input label="Full name" name="name" icon={UserIcon} value={form.name} onChange={onChange} required />
-                <Input label="Phone" name="phone" icon={Call02Icon} value={form.phone} onChange={onChange} required />
-                <Input label="Email" name="email" type="email" icon={Mail01Icon} value={form.email} onChange={onChange} containerClassName="sm:col-span-2" required />
-                <Input label="Address" name="address" icon={Location01Icon} value={form.address} onChange={onChange} containerClassName="sm:col-span-2" required />
-                <div className="sm:col-span-2">
-                  <LocationSelect value={{ country: form.country, state: form.state, city: form.city }} onChange={(v) => setForm((f) => ({ ...f, ...v }))} required />
-                </div>
-                <Input label="Pincode" name="pincode" value={form.pincode} onChange={onChange} required />
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-ink">Delivery address</h2>
+                {authed && !addingAddress && (
+                  <Button size="sm" icon={Add01Icon} onClick={() => setAddingAddress(true)}>
+                    Add new address
+                  </Button>
+                )}
               </div>
+
+              {/* Signed-in: pick a saved address */}
+              {authed ? (
+                !ready ? (
+                  <div className="flex justify-center py-6"><Spinner size={22} /></div>
+                ) : (
+                  <div className="space-y-4">
+                    {addresses.length > 0 && (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {addresses.map((a) => (
+                          <label
+                            key={a.id}
+                            className={cn(
+                              'flex cursor-pointer flex-col gap-1 rounded-2xl border p-4 text-sm transition-colors',
+                              selectedId === a.id ? 'border-brand-600 bg-brand-50' : 'border-line hover:border-brand-300',
+                            )}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="inline-flex items-center gap-2 font-semibold text-ink">
+                                <input
+                                  type="radio"
+                                  name="address"
+                                  className="accent-brand-600"
+                                  checked={selectedId === a.id}
+                                  onChange={() => setSelectedId(a.id)}
+                                />
+                                {a.city || 'Address'}
+                              </span>
+                              {a.is_default && <Badge tone="brand">Default</Badge>}
+                            </div>
+                            <span className="text-body">
+                              {[a.address, a.city, a.state, a.postal_code, a.country].filter(Boolean).join(', ')}
+                            </span>
+                            {a.phone_number && <span className="text-xs text-muted">Phone: {a.phone_number}</span>}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+
+                    {addingAddress && (
+                      <div className="rounded-2xl border border-line p-4">
+                        <h3 className="mb-3 text-sm font-bold text-ink">New address</h3>
+                        <AddressForm
+                          onSaved={onAddressSaved}
+                          onCancel={addresses.length > 0 ? () => setAddingAddress(false) : undefined}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )
+              ) : (
+                /* Guest: fill in shipping details */
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input label="Full name" name="name" icon={UserIcon} value={form.name} onChange={onChange} required />
+                  <Input label="Phone" name="phone" icon={Call02Icon} value={form.phone} onChange={onChange} required />
+                  <Input label="Email" name="email" type="email" icon={Mail01Icon} value={form.email} onChange={onChange} containerClassName="sm:col-span-2" required />
+                  <Input label="Address" name="address" icon={Location01Icon} value={form.address} onChange={onChange} containerClassName="sm:col-span-2" required />
+                  <div className="sm:col-span-2">
+                    <LocationSelect value={{ country: form.country, state: form.state, city: form.city }} onChange={(v) => setForm((f) => ({ ...f, ...v }))} required />
+                  </div>
+                  <Input label="Pincode" name="pincode" value={form.pincode} onChange={onChange} required />
+                </div>
+              )}
             </Card>
 
             <Card className="p-6">
@@ -152,7 +248,9 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-1">
                       <p className="clamp-1 text-sm font-medium text-ink">{item.name}</p>
-                      <p className="text-xs text-muted">Qty {item.qty}</p>
+                      <p className="text-xs text-muted">
+                        {item.variant ? `${item.variant} · ` : ''}Qty {item.qty}
+                      </p>
                     </div>
                     <span className="text-sm font-semibold text-ink">{formatPrice(item.price * item.qty)}</span>
                   </li>

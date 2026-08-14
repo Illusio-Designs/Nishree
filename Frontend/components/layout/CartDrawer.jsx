@@ -34,7 +34,10 @@ export default function CartDrawer({ open, onClose }) {
                 </div>
                 <div className="flex flex-1 flex-col">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="clamp-2 text-sm font-semibold text-ink">{item.name}</p>
+                    <div className="min-w-0">
+                      <p className="clamp-2 text-sm font-semibold text-ink">{item.name}</p>
+                      {item.variant && <p className="text-xs text-muted">{item.variant}</p>}
+                    </div>
                     <button
                       type="button"
                       aria-label="Remove item"
