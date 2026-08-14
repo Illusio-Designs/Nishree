@@ -53,8 +53,9 @@ export function CartProvider({ children }) {
     try {
       await api.post('/api/cart/add', { productId: product.id, variationId: product.variationId || null, quantity: qty });
       await load();
-    } catch {
-      toast.error('Could not add to cart');
+    } catch (err) {
+      // Surface the real server error so schema/DB issues are visible.
+      toast.error(err?.response?.data?.error || err?.response?.data?.message || 'Could not add to cart');
       load();
     }
   }, [load]);
