@@ -199,7 +199,7 @@ ShippingAddress.belongsTo(Order, {
     onDelete: 'CASCADE'
 });
 // The address chosen for an order (via order.shipping_address_id).
-Order.belongsTo(ShippingAddress, { foreignKey: 'shipping_address_id', as: 'ShippingAddressRef' });
+Order.belongsTo(ShippingAddress, { foreignKey: 'shipping_address_id', as: 'ShippingAddressRef', constraints: false });
 
 // Cart Associations
 // Cart associations use constraints:false — no DB-level foreign keys on the
