@@ -48,23 +48,23 @@ export default function RecipeArticle({ slug }) {
             )}
             {post.author && <span className="text-sm text-muted">· {post.author}</span>}
           </div>
-          <h1 className="mt-3 max-w-3xl text-3xl font-bold text-ink sm:text-4xl">{post.title}</h1>
-          {post.excerpt && <p className="mt-3 max-w-2xl text-lg text-body">{post.excerpt}</p>}
+          <h1 className="mt-3 text-3xl font-bold text-ink sm:text-4xl">{post.title}</h1>
+          {post.excerpt && <p className="mt-3 text-lg text-body">{post.excerpt}</p>}
         </Container>
       </div>
 
       <Container className="pt-8">
         {img && (
-          <div className="mb-8 overflow-hidden rounded-3xl">
+          <div className="mb-8 flex justify-center overflow-hidden rounded-3xl bg-surface-soft">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={img} alt={post.title} className="max-h-[420px] w-full object-cover" />
+            <img src={img} alt={post.title} className="h-auto w-full object-contain" />
           </div>
         )}
         <div
-          className="prose prose-sm mx-auto max-w-3xl text-body leading-relaxed [&_h2]:text-ink [&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-ink [&_li]:my-1 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_p]:my-3"
+          className="prose prose-sm max-w-none text-body leading-relaxed [&_h2]:text-ink [&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-ink [&_li]:my-1 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_p]:my-3"
           dangerouslySetInnerHTML={{ __html: post.content || '<p>Full recipe coming soon.</p>' }}
         />
-        <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-line bg-surface-soft p-6 text-center">
+        <div className="mt-10 rounded-2xl border border-line bg-surface-soft p-6 text-center">
           <p className="font-semibold text-ink">Cook this with fresh Nishree spices</p>
           <Button href="/products" className="mt-3">Shop Spices</Button>
         </div>

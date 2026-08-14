@@ -12,7 +12,7 @@ export default function RecipeCard({ post }) {
       <Link href={href} className="relative block aspect-[16/10] overflow-hidden bg-surface-soft">
         {img ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={img} alt={post.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+          <img src={img} alt={post.title} className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy" />
         ) : null}
         {post.category && <span className="absolute left-3 top-3"><Badge tone="brand">{post.category}</Badge></span>}
       </Link>
