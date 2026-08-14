@@ -178,6 +178,31 @@ export const setupDatabase = async () => {
 			}
 		}
         
+        // Step 2.6: Drop any stale foreign keys on the transient cart tables.
+        // Repeated alters left FK constraints that break add-to-cart inserts;
+        // the cart associations use constraints:false, so no FKs are needed.
+        console.log('Step 2.6: Dropping stale foreign keys on cart tables...');
+        for (const table of ['cart_items', 'carts']) {
+            try {
+                const [fks] = await sequelize.query(
+                    `SELECT constraint_name AS name FROM information_schema.table_constraints
+                     WHERE table_schema = DATABASE() AND table_name = '${table}' AND constraint_type = 'FOREIGN KEY'`
+                );
+                for (const fk of fks) {
+                    const name = fk.name || fk.constraint_name || fk.CONSTRAINT_NAME;
+                    if (!name) continue;
+                    try {
+                        await sequelize.query(`ALTER TABLE \`${table}\` DROP FOREIGN KEY \`${name}\``);
+                        console.log(`  Dropped FK ${table}.${name}`);
+                    } catch (e) {
+                        console.warn(`  Could not drop FK ${table}.${name}: ${e.message}`);
+                    }
+                }
+            } catch (e) {
+                console.warn(`  Could not inspect FKs on ${table}: ${e.message}`);
+            }
+        }
+
         // Step 3: Add specific essential indexes (those not handled by Sequelize's default unique constraints or model indexes)
         console.log('Step 3: Adding specific essential database indexes...');
             const executeQuery = async (query) => {
