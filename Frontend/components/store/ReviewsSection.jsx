@@ -123,9 +123,9 @@ export default function ReviewsSection({ productId }) {
   return (
     <section className="border-t border-line bg-surface-soft">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold text-ink">Customer Reviews</h2>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <h2 className="text-xl font-bold text-ink sm:text-2xl">Customer Reviews</h2>
             {stats.total > 0 && (
               <span className="inline-flex items-center gap-2">
                 <Rating value={stats.average} />

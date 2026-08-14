@@ -123,8 +123,8 @@ export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-surface-tint">
       <Container className="py-6 lg:py-8">
-        <div className="relative overflow-hidden rounded-[2rem] bg-surface-soft shadow-soft">
-          <div className="relative aspect-[16/8] w-full sm:aspect-[16/6]">
+        <div className="relative overflow-hidden rounded-2xl bg-surface-soft shadow-soft sm:rounded-[2rem]">
+          <div className="relative aspect-[4/3] w-full sm:aspect-[16/7] lg:aspect-[16/6]">
             {slides.map((s, i) => (
               <div
                 key={s.id || i}
@@ -143,17 +143,17 @@ export default function Hero() {
                 {/* readability overlay */}
                 <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
                 <div className="absolute inset-0 flex items-center">
-                  <div className="max-w-xl p-6 text-white sm:p-10 lg:p-14">
+                  <div className="max-w-xl p-5 text-white sm:p-10 lg:p-14">
                     {s.title && (
-                      <h1 className="text-3xl font-extrabold leading-tight drop-shadow sm:text-5xl">
+                      <h1 className="clamp-2 text-xl font-extrabold leading-tight drop-shadow sm:text-4xl lg:text-5xl">
                         {s.title}
                       </h1>
                     )}
                     {s.description && (
-                      <p className="mt-3 max-w-md text-sm text-white/90 sm:text-lg">{s.description}</p>
+                      <p className="mt-2 hidden max-w-md text-sm text-white/90 sm:mt-3 sm:block sm:text-lg">{s.description}</p>
                     )}
                     {(s.buttonText || s.link) && (
-                      <Button href={s.link || '/products'} size="lg" className="mt-6" iconRight={ArrowRight01Icon}>
+                      <Button href={s.link || '/products'} className="mt-4 sm:mt-6 sm:h-12 sm:px-7 sm:text-base" iconRight={ArrowRight01Icon}>
                         {s.buttonText || 'Shop Now'}
                       </Button>
                     )}
