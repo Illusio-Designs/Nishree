@@ -17,7 +17,7 @@ import AddressForm from '@/components/store/AddressForm';
 import { useCart } from '@/lib/cart-context';
 import { formatPrice, cn } from '@/lib/format';
 import { isLoggedIn, getUser } from '@/lib/auth';
-import { createOrder, createGuestOrder, getMyAddresses, validateCoupon } from '@/lib/api';
+import { createOrder, createGuestOrder, getMyAddresses, validateCoupon, getPublicCoupons } from '@/lib/api';
 
 const PAYMENTS = [
   { value: 'cod', label: 'Cash on Delivery' },
@@ -45,20 +45,27 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [coupon, setCoupon] = useState(null); // { code, discount }
   const [couponBusy, setCouponBusy] = useState(false);
+  const [available, setAvailable] = useState([]);
 
   const discount = coupon?.discount || 0;
   const total = Math.max(0, subtotal - discount);
 
-  const applyCoupon = async () => {
-    const code = couponCode.trim();
+  useEffect(() => {
+    getPublicCoupons()
+      .then((list) => setAvailable(Array.isArray(list) ? list : []))
+      .catch(() => setAvailable([]));
+  }, []);
+
+  const applyCode = async (rawCode) => {
+    const code = String(rawCode || '').trim();
     if (!code) return;
     setCouponBusy(true);
     try {
       const res = await validateCoupon({ code, orderAmount: subtotal, userId: getUser()?.id });
       setCoupon({ code: code.toUpperCase(), discount: Number(res?.discountAmount) || 0 });
+      setCouponCode('');
       toast.success('Coupon applied');
     } catch (err) {
-      setCoupon(null);
       toast.error(err?.response?.data?.message || 'Invalid coupon');
     } finally {
       setCouponBusy(false);
@@ -69,6 +76,10 @@ export default function CheckoutPage() {
     setCoupon(null);
     setCouponCode('');
   };
+
+  // Short human label for a coupon offer, e.g. "20% OFF" or "₹50 OFF".
+  const couponOffer = (c) =>
+    c.type === 'percentage' ? `${Number(c.value)}% OFF` : `${formatPrice(c.value)} OFF`;
 
   useEffect(() => {
     const loggedIn = isLoggedIn();
@@ -297,17 +308,44 @@ export default function CheckoutPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
-                    <input
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      placeholder="Coupon code"
-                      className="h-10 flex-1 rounded-full border border-line bg-white px-4 text-sm uppercase text-ink placeholder:normal-case placeholder:text-muted focus-ring"
-                    />
-                    <Button type="button" variant="secondary" onClick={applyCoupon} disabled={couponBusy || !couponCode.trim()}>
-                      {couponBusy ? '…' : 'Apply'}
-                    </Button>
-                  </div>
+                  <>
+                    <div className="flex gap-2">
+                      <input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        placeholder="Coupon code"
+                        className="h-10 flex-1 rounded-full border border-line bg-white px-4 text-sm uppercase text-ink placeholder:normal-case placeholder:text-muted focus-ring"
+                      />
+                      <Button type="button" variant="secondary" onClick={() => applyCode(couponCode)} disabled={couponBusy || !couponCode.trim()}>
+                        {couponBusy ? '…' : 'Apply'}
+                      </Button>
+                    </div>
+
+                    {/* Available coupons */}
+                    {available.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        <p className="text-xs font-semibold text-muted">Available offers</p>
+                        {available.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => applyCode(c.code)}
+                            disabled={couponBusy}
+                            className="flex w-full items-center justify-between gap-3 rounded-xl border border-dashed border-brand-300 bg-brand-50/50 px-3 py-2 text-left transition-colors hover:bg-brand-50 disabled:opacity-60 cursor-pointer"
+                          >
+                            <span className="min-w-0">
+                              <span className="block text-sm font-bold text-brand-700">{c.code}</span>
+                              <span className="block text-xs text-muted">
+                                {couponOffer(c)}
+                                {Number(c.minPurchase) > 0 ? ` · min ${formatPrice(c.minPurchase)}` : ''}
+                              </span>
+                            </span>
+                            <span className="shrink-0 text-xs font-semibold text-brand-600">Apply</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

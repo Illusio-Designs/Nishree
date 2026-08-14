@@ -132,6 +132,12 @@ export const validateCoupon = async ({ code, orderAmount, userId }) => {
   return data;
 };
 
+// Active coupons available to show at checkout.
+export const getPublicCoupons = async () => {
+  const { data } = await api.get('/api/coupons/public');
+  return data?.coupons || data?.data || [];
+};
+
 /* ------------------------- Recipes / Blog + Wholesale ------------------------- */
 
 export const getBlogs = async (params = {}) => {

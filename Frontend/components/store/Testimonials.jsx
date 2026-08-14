@@ -1,11 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { QuoteDownIcon } from 'hugeicons-react';
 import Container from '@/components/ui/Container';
 import SectionHeading from '@/components/ui/SectionHeading';
-import Rating from '@/components/ui/Rating';
-import Card from '@/components/ui/Card';
+import ReviewCard from '@/components/store/ReviewCard';
 import { getAllPublicReviews } from '@/lib/api';
 
 // Shown until real reviews exist, so the section never looks empty.
@@ -31,20 +29,7 @@ export default function Testimonials() {
       <SectionHeading title="Loved by home cooks" subtitle="What our customers say about cooking with Nishree." center />
       <div className="grid gap-5 md:grid-cols-3">
         {reviews.slice(0, 6).map((r) => (
-          <Card key={r.id} className="flex flex-col gap-4 p-6">
-            <QuoteDownIcon size={28} strokeWidth={2} className="text-brand-200" />
-            <p className="clamp-4 flex-1 text-body">{r.review}</p>
-            <Rating value={r.rating} />
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white">
-                {String(r.reviewerName || 'A').charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-ink">{r.reviewerName || 'Anonymous'}</p>
-                {r.productName && <p className="text-xs text-muted">on {r.productName}</p>}
-              </div>
-            </div>
-          </Card>
+          <ReviewCard key={r.id} review={r} />
         ))}
       </div>
     </Container>

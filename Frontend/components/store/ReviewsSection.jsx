@@ -8,13 +8,8 @@ import Rating from '@/components/ui/Rating';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
-import { getReviews, createReview, mediaUrl } from '@/lib/api';
-
-const fmtDate = (v) => {
-  if (!v) return '';
-  const d = new Date(v);
-  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-};
+import ReviewCard from '@/components/store/ReviewCard';
+import { getReviews, createReview } from '@/lib/api';
 
 // Clickable star input for the review form.
 function StarPicker({ value, onChange }) {
@@ -148,38 +143,11 @@ export default function ReviewsSection({ productId }) {
         ) : reviews.length === 0 ? (
           <p className="text-sm text-body">No reviews yet. Be the first to review this product!</p>
         ) : (
-          <ul className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3">
             {reviews.map((r) => (
-              <li key={r.id} className="rounded-2xl border border-line bg-white p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full brand-gradient text-sm font-bold text-white">
-                      {String(r.reviewerName || 'A').charAt(0).toUpperCase()}
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold text-ink">{r.reviewerName || 'Anonymous'}</p>
-                      <p className="text-xs text-muted">{fmtDate(r.createdAt)}</p>
-                    </div>
-                  </div>
-                  <Rating value={r.rating} />
-                </div>
-                {r.review && <p className="mt-3 text-sm text-body">{r.review}</p>}
-                {Array.isArray(r.ReviewImages) && r.ReviewImages.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {r.ReviewImages.map((img) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={img.id}
-                        src={mediaUrl(`/uploads/reviews/${img.fileName}`)}
-                        alt=""
-                        className="h-16 w-16 rounded-lg object-cover"
-                      />
-                    ))}
-                  </div>
-                )}
-              </li>
+              <ReviewCard key={r.id} review={r} />
             ))}
-          </ul>
+          </div>
         )}
       </div>
 
