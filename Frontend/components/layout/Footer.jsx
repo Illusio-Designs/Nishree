@@ -6,13 +6,9 @@ import {
   Facebook01Icon,
   InstagramIcon,
   NewTwitterIcon,
-  Mail02Icon,
-  DeliveryTruck01Icon,
-  CreditCardIcon,
 } from 'hugeicons-react';
 import Container from '@/components/ui/Container';
 import Logo from '@/components/ui/Logo';
-import NewsletterForm from '@/components/layout/NewsletterForm';
 
 const COLS = [
   {
@@ -52,48 +48,14 @@ const SOCIAL = [
 export default function Footer() {
   return (
     <footer className="mt-16 border-t border-line bg-surface-soft">
-      {/* Newsletter band */}
-      <div className="border-b border-line">
-        <Container className="flex flex-col items-start justify-between gap-6 py-8 lg:flex-row lg:items-center">
-          <div className="flex items-start gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600">
-              <Mail02Icon size={20} strokeWidth={2} />
-            </span>
-            <div>
-              <h3 className="text-lg font-bold text-ink">Join the Nishree kitchen</h3>
-              <p className="text-sm text-body">Recipes, spice tips and subscriber-only offers — straight to your inbox.</p>
-            </div>
-          </div>
-          <NewsletterForm />
-        </Container>
-      </div>
-
       {/* Main columns */}
-      <Container className="grid grid-cols-2 gap-8 py-12 sm:grid-cols-3 lg:grid-cols-5">
+      <Container className="grid grid-cols-2 gap-8 py-12 sm:grid-cols-3 lg:grid-cols-6">
         <div className="col-span-2 sm:col-span-3 lg:col-span-2">
           <Logo />
           <p className="mt-4 max-w-sm text-sm text-body">
             Authentic, freshly-ground spices and masalas at honest prices,
             delivered to your doorstep.
           </p>
-          <ul className="mt-5 space-y-2.5 text-sm text-body">
-            <li className="flex items-start gap-2.5">
-              <Location01Icon size={17} strokeWidth={2} className="mt-0.5 shrink-0 text-brand-600" />
-              Ahmedabad, Gujarat, India
-            </li>
-            <li>
-              <a href="tel:+910000000000" className="flex items-center gap-2.5 transition-colors hover:text-brand-600">
-                <Call02Icon size={17} strokeWidth={2} className="shrink-0 text-brand-600" />
-                +91 00000 00000
-              </a>
-            </li>
-            <li>
-              <a href="mailto:info@illusiodesigns.agency" className="flex items-center gap-2.5 transition-colors hover:text-brand-600">
-                <Mail01Icon size={17} strokeWidth={2} className="shrink-0 text-brand-600" />
-                info@illusiodesigns.agency
-              </a>
-            </li>
-          </ul>
 
           <div className="mt-5 flex items-center gap-2">
             {SOCIAL.map(({ icon: Icon, label, href }) => (
@@ -123,24 +85,48 @@ export default function Footer() {
             </ul>
           </div>
         ))}
+
+        {/* Contact column */}
+        <div>
+          <h4 className="mb-4 text-sm font-bold text-ink">Contact</h4>
+          <ul className="space-y-2.5 text-sm text-body">
+            <li className="flex items-start gap-2.5">
+              <Location01Icon size={17} strokeWidth={2} className="mt-0.5 shrink-0 text-brand-600" />
+              Ahmedabad, Gujarat, India
+            </li>
+            <li>
+              <a href="tel:+910000000000" className="flex items-center gap-2.5 transition-colors hover:text-brand-600">
+                <Call02Icon size={17} strokeWidth={2} className="shrink-0 text-brand-600" />
+                +91 00000 00000
+              </a>
+            </li>
+            <li>
+              <a href="mailto:info@illusiodesigns.agency" className="flex items-start gap-2.5 break-all transition-colors hover:text-brand-600">
+                <Mail01Icon size={17} strokeWidth={2} className="mt-0.5 shrink-0 text-brand-600" />
+                info@illusiodesigns.agency
+              </a>
+            </li>
+          </ul>
+        </div>
       </Container>
 
       {/* Bottom bar */}
       <div className="border-t border-line">
-        <Container className="flex flex-col items-center justify-between gap-4 py-5 sm:flex-row">
+        <Container className="flex flex-col items-center justify-between gap-3 py-5 sm:flex-row">
           <p className="text-center text-sm text-muted sm:text-left">
             © {new Date().getFullYear()} Nishree. All rights reserved.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium text-muted">
-            <span className="inline-flex items-center gap-1.5">
-              <DeliveryTruck01Icon size={15} strokeWidth={2} className="text-brand-600" />
-              Cash on Delivery
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CreditCardIcon size={15} strokeWidth={2} className="text-brand-600" />
-              Prepaid / UPI
-            </span>
-          </div>
+          <p className="text-center text-sm text-muted sm:text-right">
+            Made with <span className="text-brand-600">❤</span> by{' '}
+            <a
+              href="https://finvera.solutions"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-ink transition-colors hover:text-brand-600"
+            >
+              Finvera.solutions
+            </a>
+          </p>
         </Container>
       </div>
     </footer>
