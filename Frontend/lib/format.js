@@ -39,8 +39,10 @@ export const firstImage = (entity) => {
 export const variationLabel = (v) => {
   if (!v) return '';
   let attrs = v.attributes;
-  if (typeof attrs === 'string') {
-    try { attrs = JSON.parse(attrs); } catch { attrs = null; }
+  // Parse repeatedly: some legacy rows were double-encoded, so one parse still
+  // leaves a string.
+  for (let i = 0; i < 4 && typeof attrs === 'string'; i++) {
+    try { attrs = JSON.parse(attrs); } catch { attrs = null; break; }
   }
   if (attrs && typeof attrs === 'object') {
     const val = attrs.weight || attrs.size || attrs.pack || attrs.title || Object.values(attrs)[0];

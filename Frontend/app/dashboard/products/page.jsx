@@ -73,7 +73,10 @@ export default function ProductsPage() {
         images: firstImage(p),
         variations: (p.ProductVariations || p.variations || []).map((vr) => {
           let attrs = vr.attributes;
-          if (typeof attrs === 'string') { try { attrs = JSON.parse(attrs); } catch { attrs = {}; } }
+          // Parse repeatedly — legacy rows may be double-encoded JSON strings.
+          for (let i = 0; i < 4 && typeof attrs === 'string'; i++) {
+            try { attrs = JSON.parse(attrs); } catch { attrs = {}; break; }
+          }
           return {
             id: vr.id,
             // Show the exact pack label in the editor; treat the placeholder

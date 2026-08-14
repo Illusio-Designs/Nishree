@@ -14,9 +14,37 @@ const __dirname = path.dirname(__filename);
 // Initialize image handler
 const imageHandler = new ImageHandler(path.join(__dirname, '../uploads/products'));
 
+// Coerce a value into a plain object/array for a JSON column. Accepts an object
+// (returned as-is) or a JSON string, and unwraps double-encoded strings left by
+// older code that stringified before insert. Returns undefined when empty.
+const parseMaybeJson = (value) => {
+    if (value == null || value === '') return undefined;
+    let v = value;
+    for (let i = 0; i < 4 && typeof v === 'string'; i++) {
+        try { v = JSON.parse(v); } catch { return undefined; }
+    }
+    return typeof v === 'object' ? v : undefined;
+};
+
+// Normalize a variation's attributes to a real object on the way out, repairing
+// any double-encoded rows so the frontend can read attributes.weight, etc.
+const normalizeVariationAttributes = (variation) => {
+    if (!variation || typeof variation !== 'object') return variation;
+    const attrs = parseMaybeJson(variation.attributes);
+    if (attrs !== undefined) variation.attributes = attrs;
+    const dims = parseMaybeJson(variation.dimensions);
+    if (dims !== undefined) variation.dimensions = dims;
+    return variation;
+};
+
 // Helper function to format product response
 const formatProductResponse = (product) => {
     const productData = product.toJSON();
+
+    // Repair/normalize variation JSON (attributes, dimensions) so double-encoded
+    // legacy rows still expose their pack label to the client.
+    const vars = productData.ProductVariations || productData.variations;
+    if (Array.isArray(vars)) vars.forEach(normalizeVariationAttributes);
 
     // Normalize product images (association alias is `ProductImages`). Expose a
     // consistent `url` on each image and a top-level primary `image` so the
@@ -143,11 +171,11 @@ export const createProduct = async (req, res) => {
                     wholesalePrice: variation.wholesalePrice ? Number(variation.wholesalePrice) : null,
                     priceTiers: variation.priceTiers || null,
                     stock: Number(variation.stock || 0),
-                    weight: variation.weight ? Number(variation.weight) : null,
+                    weight: variation.weight && !isNaN(Number(variation.weight)) ? Number(variation.weight) : null,
                     weightUnit: variation.weightUnit || 'g',
-                    dimensions: variation.dimensions || null,
+                    dimensions: parseMaybeJson(variation.dimensions) ?? null,
                     dimensionUnit: variation.dimensionUnit || 'cm',
-                    attributes: variation.attributes || {}
+                    attributes: parseMaybeJson(variation.attributes) ?? {}
                 }, { transaction });
                 console.log('Variation created with ID:', variationRecord.id);
             }
@@ -364,11 +392,13 @@ export const updateProduct = async (req, res) => {
                     wholesalePrice: variation.wholesalePrice ?? null,
                     priceTiers: variation.priceTiers ?? null,
                     stock: variation.stock ?? 0,
-                    weight: variation.weight ?? null,
+                    weight: variation.weight && !isNaN(Number(variation.weight)) ? Number(variation.weight) : null,
                     weightUnit: variation.weightUnit || 'g',
-                    dimensions: variation.dimensions ? (typeof variation.dimensions === 'string' ? variation.dimensions : JSON.stringify(variation.dimensions)) : null,
+                    // Pass plain objects to the JSON columns — Sequelize serializes
+                    // them once. Stringifying here double-encodes and breaks reads.
+                    dimensions: parseMaybeJson(variation.dimensions) ?? null,
                     dimensionUnit: variation.dimensionUnit || 'cm',
-                    attributes: typeof variation.attributes === 'string' ? variation.attributes : JSON.stringify(variation.attributes || {})
+                    attributes: parseMaybeJson(variation.attributes) ?? {}
                 }, { transaction });
             }
         }
