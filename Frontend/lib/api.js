@@ -165,4 +165,10 @@ export const getMyOrders = async () => {
   return data?.data || data?.orders || data || [];
 };
 
+// The logged-in user's saved shipping addresses.
+export const getMyAddresses = async () => {
+  const { data } = await api.get('/api/shipping/addresses');
+  return data?.shippingAddresses || data?.data || data || [];
+};
+
 export default api;

@@ -76,7 +76,9 @@ export default function ProductsPage() {
           if (typeof attrs === 'string') { try { attrs = JSON.parse(attrs); } catch { attrs = {}; } }
           return {
             id: vr.id,
-            weight: attrs?.weight || variationLabel(vr),
+            // Show the exact pack label in the editor; treat the placeholder
+            // 'Default' as empty so it prompts a real value (e.g. "100g").
+            weight: attrs?.weight && attrs.weight !== 'Default' ? attrs.weight : variationLabel(vr),
             price: vr.price ?? '',
             comparePrice: vr.comparePrice ?? '',
             wholesalePrice: vr.wholesalePrice ?? '',

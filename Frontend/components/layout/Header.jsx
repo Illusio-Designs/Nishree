@@ -17,6 +17,7 @@ import IconButton from '@/components/ui/IconButton';
 import CartDrawer from '@/components/layout/CartDrawer';
 import { useCart } from '@/lib/cart-context';
 import { useWishlist } from '@/lib/wishlist-context';
+import { isLoggedIn } from '@/lib/auth';
 import { cn } from '@/lib/format';
 
 const NAV = [
@@ -36,12 +37,23 @@ export default function Header() {
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [authed, setAuthed] = useState(false);
 
   // Auto-open the cart drawer whenever an item is added anywhere.
   useEffect(() => {
     const open = () => setCartOpen(true);
     window.addEventListener('nishree-open-cart', open);
     return () => window.removeEventListener('nishree-open-cart', open);
+  }, []);
+
+  // Track sign-in so the account icon jumps straight to the profile once
+  // logged in (never back to the login screen). Read after mount to avoid a
+  // hydration mismatch, and re-check on auth changes.
+  useEffect(() => {
+    const sync = () => setAuthed(isLoggedIn());
+    sync();
+    window.addEventListener('nishree-auth-change', sync);
+    return () => window.removeEventListener('nishree-auth-change', sync);
   }, []);
 
   const isActive = (href) => (href === '/' ? pathname === '/' : pathname.startsWith(href.split('?')[0]));
@@ -108,7 +120,7 @@ export default function Header() {
         <div className="ml-auto flex items-center gap-1 md:ml-0">
           <IconButton icon={Search01Icon} label="Search" href="/products" className="md:hidden" />
           <IconButton icon={FavouriteIcon} label="Wishlist" href="/wishlist" badge={wishlistCount || undefined} />
-          <IconButton icon={UserIcon} label="Account" href="/login" />
+          <IconButton icon={UserIcon} label="Account" href={authed ? '/profile' : '/login'} />
           <IconButton icon={ShoppingCart01Icon} label="Cart" badge={count} onClick={() => setCartOpen(true)} />
         </div>
       </Container>
