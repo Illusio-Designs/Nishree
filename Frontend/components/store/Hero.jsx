@@ -1,13 +1,19 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
 import {
   DeliveryTruck01Icon,
   Tag01Icon,
   Plant01Icon,
   ArrowRight01Icon,
+  ArrowLeft01Icon,
   Award01Icon,
 } from 'hugeicons-react';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import { getSliders, mediaUrl } from '@/lib/api';
+import { cn } from '@/lib/format';
 
 const FEATURES = [
   { icon: DeliveryTruck01Icon, title: 'Free Delivery', note: 'On orders above ₹499' },
@@ -15,10 +21,29 @@ const FEATURES = [
   { icon: Plant01Icon, title: 'Farm Fresh', note: '100% pure & natural' },
 ];
 
-export default function Hero() {
+// Trust/feature strip shown under both the slider and the static hero.
+function FeatureStrip({ className }) {
+  return (
+    <div className={cn('grid grid-cols-1 gap-4 sm:grid-cols-3', className)}>
+      {FEATURES.map(({ icon: Icon, title, note }) => (
+        <div key={title} className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-brand-600 shadow-soft">
+            <Icon size={20} strokeWidth={2} />
+          </span>
+          <div>
+            <p className="text-sm font-bold text-ink">{title}</p>
+            <p className="text-xs text-muted">{note}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Fallback hero used before the sliders load and when none are configured.
+function StaticHero() {
   return (
     <section className="relative overflow-hidden bg-surface-tint">
-      {/* soft brand glow */}
       <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand-100 blur-3xl opacity-60" />
       <Container className="relative grid items-center gap-10 py-12 lg:grid-cols-2 lg:py-16">
         <div>
@@ -42,23 +67,9 @@ export default function Hero() {
               Explore Deals
             </Button>
           </div>
-
-          <div className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {FEATURES.map(({ icon: Icon, title, note }) => (
-              <div key={title} className="flex items-center gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-brand-600 shadow-soft">
-                  <Icon size={20} strokeWidth={2} />
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-ink">{title}</p>
-                  <p className="text-xs text-muted">{note}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <FeatureStrip className="mt-9" />
         </div>
 
-        {/* Visual */}
         <div className="relative hidden lg:block">
           <div className="relative mx-auto flex h-[420px] w-full max-w-md items-center justify-center rounded-[2rem] brand-gradient text-white shadow-pop">
             <div className="text-center">
@@ -74,6 +85,121 @@ export default function Hero() {
             </span>
           </div>
         </div>
+      </Container>
+    </section>
+  );
+}
+
+export default function Hero() {
+  const [slides, setSlides] = useState([]);
+  const [idx, setIdx] = useState(0);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    getSliders()
+      .then((list) => setSlides(Array.isArray(list) ? list : []))
+      .catch(() => setSlides([]))
+      .finally(() => setReady(true));
+  }, []);
+
+  const count = slides.length;
+  const go = useCallback((n) => setIdx((i) => (count ? (n + count) % count : 0)), [count]);
+
+  // Auto-advance when there's more than one slide.
+  useEffect(() => {
+    if (count < 2) return undefined;
+    const t = setInterval(() => setIdx((i) => (i + 1) % count), 5000);
+    return () => clearInterval(t);
+  }, [count]);
+
+  // Keep the index in range if the slide list changes.
+  useEffect(() => {
+    if (idx >= count) setIdx(0);
+  }, [count, idx]);
+
+  // Until loaded, and whenever no sliders are configured, show the static hero.
+  if (!ready || count === 0) return <StaticHero />;
+
+  return (
+    <section className="relative overflow-hidden bg-surface-tint">
+      <Container className="py-6 lg:py-8">
+        <div className="relative overflow-hidden rounded-[2rem] bg-surface-soft shadow-soft">
+          <div className="relative aspect-[16/8] w-full sm:aspect-[16/6]">
+            {slides.map((s, i) => (
+              <div
+                key={s.id || i}
+                className={cn(
+                  'absolute inset-0 transition-opacity duration-700',
+                  i === idx ? 'opacity-100' : 'pointer-events-none opacity-0',
+                )}
+                aria-hidden={i !== idx}
+              >
+                {s.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={mediaUrl(s.image)} alt={s.title || 'Banner'} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full brand-gradient" />
+                )}
+                {/* readability overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
+                <div className="absolute inset-0 flex items-center">
+                  <div className="max-w-xl p-6 text-white sm:p-10 lg:p-14">
+                    {s.title && (
+                      <h1 className="text-3xl font-extrabold leading-tight drop-shadow sm:text-5xl">
+                        {s.title}
+                      </h1>
+                    )}
+                    {s.description && (
+                      <p className="mt-3 max-w-md text-sm text-white/90 sm:text-lg">{s.description}</p>
+                    )}
+                    {(s.buttonText || s.link) && (
+                      <Button href={s.link || '/products'} size="lg" className="mt-6" iconRight={ArrowRight01Icon}>
+                        {s.buttonText || 'Shop Now'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {count > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Previous slide"
+                  onClick={() => go(idx - 1)}
+                  className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-ink shadow-soft transition hover:bg-white cursor-pointer sm:left-5"
+                >
+                  <ArrowLeft01Icon size={20} strokeWidth={2} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next slide"
+                  onClick={() => go(idx + 1)}
+                  className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-ink shadow-soft transition hover:bg-white cursor-pointer sm:right-5"
+                >
+                  <ArrowRight01Icon size={20} strokeWidth={2} />
+                </button>
+                <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+                  {slides.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`Go to slide ${i + 1}`}
+                      onClick={() => setIdx(i)}
+                      className={cn(
+                        'h-2 rounded-full transition-all',
+                        i === idx ? 'w-6 bg-white' : 'w-2 bg-white/60 hover:bg-white/80',
+                      )}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <FeatureStrip className="mt-8" />
       </Container>
     </section>
   );

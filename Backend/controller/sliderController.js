@@ -243,13 +243,17 @@ export const getPublicSliders = async (req, res) => {
                 attributes: ['id', 'name', 'slug']
             }],
             order: [['position', 'ASC']],
-            attributes: ['id', 'title', 'description', 'buttonText', 'image', 'categoryId']
+            attributes: ['id', 'title', 'description', 'buttonText', 'image', 'link', 'categoryId', 'position']
         });
 
         const slidersResponse = sliders.map(slider => {
             const sliderData = slider.toJSON();
             sliderData.categoryName = slider.category ? slider.category.name : null;
             sliderData.categorySlug = slider.category ? slider.category.slug : null;
+            // Fall back to the linked category page when no explicit link is set.
+            if (!sliderData.link && sliderData.categorySlug) {
+                sliderData.link = `/products?category=${sliderData.categorySlug}`;
+            }
             delete sliderData.category;
             return sliderData;
         });
