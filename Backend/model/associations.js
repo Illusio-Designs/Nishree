@@ -202,18 +202,14 @@ ShippingAddress.belongsTo(Order, {
 Order.belongsTo(ShippingAddress, { foreignKey: 'shipping_address_id', as: 'ShippingAddressRef' });
 
 // Cart Associations
-Cart.hasMany(CartItem, { 
-    foreignKey: 'cartId',
-    onDelete: 'CASCADE'
-});
-CartItem.belongsTo(Cart, {
-    foreignKey: 'cartId',
-    onDelete: 'CASCADE'
-});
-// A cart line references the product and (optionally) the chosen variation.
-CartItem.belongsTo(Product, { foreignKey: 'productId' });
-Product.hasMany(CartItem, { foreignKey: 'productId' });
-CartItem.belongsTo(ProductVariation, { foreignKey: 'variationId' });
+// Cart associations use constraints:false — no DB-level foreign keys on the
+// transient cart tables (repeated alters left stale/failing FKs). The
+// associations still power includes; integrity is handled in the controller.
+Cart.hasMany(CartItem, { foreignKey: 'cartId', onDelete: 'CASCADE', constraints: false });
+CartItem.belongsTo(Cart, { foreignKey: 'cartId', onDelete: 'CASCADE', constraints: false });
+CartItem.belongsTo(Product, { foreignKey: 'productId', constraints: false });
+Product.hasMany(CartItem, { foreignKey: 'productId', constraints: false });
+CartItem.belongsTo(ProductVariation, { foreignKey: 'variationId', constraints: false });
 
 // Review Associations
 Review.hasMany(ReviewImage, { 
