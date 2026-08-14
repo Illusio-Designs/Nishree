@@ -16,7 +16,9 @@ import { firstImage, productPricing, discountPercent, variationLabel, cn } from 
 // Fast product preview modal opened from the card's eye icon.
 export default function QuickView({ product, open, onClose }) {
   const { addItem } = useCart();
-  const variations = product?.ProductVariations || product?.variations || [];
+  const allVariations = product?.ProductVariations || product?.variations || [];
+  // Hide variations with no real label (they'd show a random SKU code).
+  const variations = allVariations.filter((v) => variationLabel(v).trim() !== '');
   const hasVariants = variations.length > 1;
   const [idx, setIdx] = useState(0);
 

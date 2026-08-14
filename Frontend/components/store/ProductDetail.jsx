@@ -75,9 +75,11 @@ export default function ProductDetail({ id }) {
   }
 
   const saved = has(product.id);
-  const variations = product.ProductVariations || product.variations || [];
+  const allVariations = product.ProductVariations || product.variations || [];
+  // Hide variations with no real label (they'd show a random SKU code).
+  const variations = allVariations.filter((v) => variationLabel(v).trim() !== '');
   const variation = variations[variationIdx] || null;
-  const { price, compareAt } = productPricing({ ...product, ProductVariations: variation ? [variation] : variations });
+  const { price, compareAt } = productPricing({ ...product, ProductVariations: variation ? [variation] : allVariations });
   const off = discountPercent(price, compareAt);
 
   const images =

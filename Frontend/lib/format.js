@@ -33,8 +33,9 @@ export const firstImage = (entity) => {
   return '';
 };
 
-// Human label for a variation (e.g. its weight/size), tolerant of JSON-string
-// attributes and falling back to the SKU suffix.
+// Human label for a variation (e.g. its weight/size). Prefers a real
+// weight/size, never the random SKU suffix. Returns '' when there's nothing
+// meaningful to show, so callers can hide an unlabelled chip.
 export const variationLabel = (v) => {
   if (!v) return '';
   let attrs = v.attributes;
@@ -45,12 +46,14 @@ export const variationLabel = (v) => {
     const val = attrs.weight || attrs.size || attrs.pack || attrs.title || Object.values(attrs)[0];
     if (val && String(val).toLowerCase() !== 'default') return String(val);
   }
-  if (v.sku) {
-    const parts = String(v.sku).split('-');
-    const last = parts[parts.length - 1];
-    if (last && /\d/.test(last)) return last.toLowerCase();
+  // Real weight column, e.g. 50 + "g" -> "50g", 1 + "kg" -> "1kg".
+  if (v.weight != null && v.weight !== '') {
+    const n = Number(v.weight);
+    const num = Number.isFinite(n) ? (Number.isInteger(n) ? n : n) : v.weight;
+    return `${num}${v.weightUnit || 'g'}`;
   }
-  return v.name || 'Default';
+  const name = v.name && String(v.name).toLowerCase() !== 'default' ? String(v.name) : '';
+  return name;
 };
 
 // A product's selling price + compare-at, tolerant of variation shapes.

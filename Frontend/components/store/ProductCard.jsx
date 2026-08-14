@@ -20,7 +20,10 @@ export default function ProductCard({ product }) {
   const { addItem } = useCart();
   const { has, toggle } = useWishlist();
   const saved = has(product.id);
-  const variations = product.ProductVariations || product.variations || [];
+  const allVariations = product.ProductVariations || product.variations || [];
+  // Only keep variations that have a real, human label (weight/size). Ones that
+  // would fall back to a random SKU code are hidden — no gibberish chips.
+  const variations = allVariations.filter((v) => variationLabel(v).trim() !== '');
   const hasVariants = variations.length > 1;
 
   const [idx, setIdx] = useState(0);
@@ -112,9 +115,8 @@ export default function ProductCard({ product }) {
           </h3>
         </Link>
 
-        {/* Price — prefixed "From" when there are multiple pack sizes */}
+        {/* Price */}
         <div className="flex items-baseline gap-1.5">
-          {hasVariants && <span className="text-xs text-muted">From</span>}
           <PriceTag price={price} compareAt={compareAt} size="sm" />
         </div>
 
