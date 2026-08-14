@@ -121,6 +121,7 @@ export const createOrder = async (req, res) => {
         const order = await Order.create({
             order_number: generateOrderNumber(),
             user_id: userId,
+            shipping_address_id: shipping_address_id,
             total_amount: totalAmount,
             shipping_fee: shippingFee,
             final_amount: finalAmount,
