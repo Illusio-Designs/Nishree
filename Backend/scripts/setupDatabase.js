@@ -32,16 +32,20 @@ const sequelize = new Sequelize(
 
 export const setupDatabase = async () => {
     try {
-        // First, try to connect without selecting a database
-        const tempSequelize = new Sequelize('', process.env.DB_USER, process.env.DB_PASSWORD, {
-            host: process.env.DB_HOST,
-            dialect: process.env.DB_DIALECT || 'mysql',
-            logging: false
-        });
-
-        // Create database if it doesn't exist with proper collation
-        await tempSequelize.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || process.env.DB_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`);
-        await tempSequelize.close();
+        // Try to create the database. On managed/shared hosting the DB is
+        // pre-provisioned and the app user lacks the CREATE privilege — that's
+        // fine, so treat a permission/exists error as a warning and continue.
+        try {
+            const tempSequelize = new Sequelize('', process.env.DB_USER, process.env.DB_PASSWORD, {
+                host: process.env.DB_HOST,
+                dialect: process.env.DB_DIALECT || 'mysql',
+                logging: false
+            });
+            await tempSequelize.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || process.env.DB_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`);
+            await tempSequelize.close();
+        } catch (dbErr) {
+            console.warn(`[setup] Skipping CREATE DATABASE (${dbErr.original?.code || dbErr.message}). Assuming the database already exists.`);
+        }
 
         // Now connect to the specific database
         await sequelize.authenticate();
