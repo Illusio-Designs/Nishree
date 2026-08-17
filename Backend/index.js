@@ -32,15 +32,21 @@ const app = express();
 const allowedOrigins = [
     'https://nishree.com',
     'https://www.nishree.com',
+    'https://nishree.vercel.app',
     'http://localhost:3000',
     ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map((s) => s.trim()) : [])
 ];
+
+// Any Vercel deployment/preview URL for this project (e.g.
+// nishree-git-branch-user.vercel.app) is also allowed.
+const isAllowedOrigin = (origin) =>
+    allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin);
 
 // Middleware
 app.use(cors({
     origin: (origin, callback) => {
         // Allow non-browser requests (curl, server-to-server) with no origin.
-        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        if (!origin || isAllowedOrigin(origin)) return callback(null, true);
         return callback(null, false);
     },
     credentials: true,
