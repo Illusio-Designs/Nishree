@@ -12,6 +12,8 @@ import {
   Logout01Icon,
   DashboardSquare01Icon,
   Add01Icon,
+  PencilEdit02Icon,
+  Delete02Icon,
 } from 'hugeicons-react';
 import Container from '@/components/ui/Container';
 import PageHeader from '@/components/ui/PageHeader';
@@ -21,7 +23,7 @@ import Spinner from '@/components/ui/Spinner';
 import Badge from '@/components/ui/Badge';
 import AddressForm from '@/components/store/AddressForm';
 import { getUser, clearSession, isLoggedIn } from '@/lib/auth';
-import { getMyOrders, getMyAddresses, mediaUrl } from '@/lib/api';
+import { getMyOrders, getMyAddresses, deleteShippingAddress, setDefaultShippingAddress, mediaUrl } from '@/lib/api';
 import { formatPrice, cn, firstImage, variationLabel } from '@/lib/format';
 
 // Sidebar tabs — all switch the panel in-page.
@@ -59,6 +61,13 @@ export default function ProfilePage() {
   const [addresses, setAddresses] = useState([]);
   const [addressesLoading, setAddressesLoading] = useState(true);
   const [addingAddress, setAddingAddress] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+
+  const loadAddresses = () =>
+    getMyAddresses()
+      .then((list) => setAddresses(Array.isArray(list) ? list : []))
+      .catch(() => setAddresses([]))
+      .finally(() => setAddressesLoading(false));
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -73,11 +82,29 @@ export default function ProfilePage() {
       .catch(() => setOrders([]))
       .finally(() => setOrdersLoading(false));
 
-    getMyAddresses()
-      .then((list) => setAddresses(Array.isArray(list) ? list : []))
-      .catch(() => setAddresses([]))
-      .finally(() => setAddressesLoading(false));
+    loadAddresses();
   }, [router]);
+
+  const removeAddress = async (a) => {
+    if (!window.confirm('Delete this address?')) return;
+    try {
+      await deleteShippingAddress(a.id);
+      setAddresses((prev) => prev.filter((x) => x.id !== a.id));
+      toast.success('Address deleted');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Could not delete address');
+    }
+  };
+
+  const makeDefault = async (a) => {
+    try {
+      await setDefaultShippingAddress(a.id);
+      setAddresses((prev) => prev.map((x) => ({ ...x, is_default: x.id === a.id })));
+      toast.success('Default address updated');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Could not set default');
+    }
+  };
 
   const onLogout = () => {
     clearSession();
@@ -288,22 +315,20 @@ export default function ProfilePage() {
               <Card className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-lg font-bold text-ink">Saved addresses</h2>
-                  {!addingAddress && (
+                  {!addingAddress && !editingAddress && (
                     <Button size="sm" icon={Add01Icon} onClick={() => setAddingAddress(true)}>
                       Add address
                     </Button>
                   )}
                 </div>
 
-                {addingAddress && (
+                {(addingAddress || editingAddress) && (
                   <div className="mb-6 rounded-2xl border border-line p-4">
-                    <h3 className="mb-3 text-sm font-bold text-ink">New address</h3>
+                    <h3 className="mb-3 text-sm font-bold text-ink">{editingAddress ? 'Edit address' : 'New address'}</h3>
                     <AddressForm
-                      onSaved={(addr) => {
-                        if (addr) setAddresses((prev) => [addr, ...prev]);
-                        setAddingAddress(false);
-                      }}
-                      onCancel={() => setAddingAddress(false)}
+                      address={editingAddress || undefined}
+                      onSaved={() => { setAddingAddress(false); setEditingAddress(null); loadAddresses(); }}
+                      onCancel={() => { setAddingAddress(false); setEditingAddress(null); }}
                     />
                   </div>
                 )}
@@ -319,7 +344,7 @@ export default function ProfilePage() {
                 ) : (
                   <div className="grid gap-4 sm:grid-cols-2">
                     {addresses.map((a) => (
-                      <div key={a.id} className="rounded-2xl border border-line p-4">
+                      <div key={a.id} className="flex flex-col rounded-2xl border border-line p-4">
                         <div className="mb-1 flex items-center justify-between">
                           <p className="text-sm font-semibold text-ink">{name}</p>
                           {a.is_default && <Badge tone="brand">Default</Badge>}
@@ -332,6 +357,19 @@ export default function ProfilePage() {
                         {a.phone_number && (
                           <p className="mt-1 text-xs text-muted">Phone: {a.phone_number}</p>
                         )}
+                        <div className="mt-3 flex items-center gap-3 border-t border-line pt-3 text-xs font-semibold">
+                          {!a.is_default && (
+                            <button type="button" onClick={() => makeDefault(a)} className="text-brand-600 hover:underline cursor-pointer">
+                              Set default
+                            </button>
+                          )}
+                          <button type="button" onClick={() => { setEditingAddress(a); setAddingAddress(false); }} className="inline-flex items-center gap-1 text-body hover:text-brand-600 cursor-pointer">
+                            <PencilEdit02Icon size={14} strokeWidth={2} /> Edit
+                          </button>
+                          <button type="button" onClick={() => removeAddress(a)} className="ml-auto inline-flex items-center gap-1 text-danger hover:underline cursor-pointer">
+                            <Delete02Icon size={14} strokeWidth={2} /> Delete
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

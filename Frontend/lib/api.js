@@ -207,4 +207,14 @@ export const getMyAddresses = async () => {
   return data?.shippingAddresses || data?.data || data || [];
 };
 
+export const updateShippingAddress = async (id, payload) => {
+  const { data } = await api.put(`/api/shipping/addresses/${id}`, payload);
+  return data?.shippingAddress || data?.data || data;
+};
+
+export const deleteShippingAddress = async (id) => (await api.delete(`/api/shipping/addresses/${id}`)).data;
+
+export const setDefaultShippingAddress = async (id) =>
+  (await api.put(`/api/shipping/addresses/${id}/default`)).data;
+
 export default api;
