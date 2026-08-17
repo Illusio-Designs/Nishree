@@ -29,6 +29,22 @@ export const setStopStatus = async (id, status, skip_reason) =>
 export const createParty = async (payload) => (await api.post('/api/parties', payload)).data;
 export const createCheckin = async (payload) => (await api.post('/api/salesman-checkins', payload)).data;
 
+/* --------------------------- Parties (for orders) -------------------------- */
+// Parties the salesman can order for (they're authorized on /api/parties).
+export const getPartiesForOrder = () => call(async () => (await api.get('/api/parties')).data, []);
+
+/* -------------------------------- Expenses -------------------------------- */
+export const getMyExpenses = () => call(async () => (await api.get('/api/salesman-expenses')).data, []);
+export const createExpense = async ({ amount, category, expense_date, description, receipt }) => {
+  const fd = new FormData();
+  fd.append('amount', amount);
+  fd.append('expense_date', expense_date);
+  if (category) fd.append('category', category);
+  if (description) fd.append('description', description);
+  if (receipt) fd.append('receipt', receipt);
+  return (await api.post('/api/salesman-expenses', fd, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
+};
+
 /* -------------------------- Targets & reports -------------------------- */
 export const getMyTargets = () => call(async () => (await api.get('/api/salesman-targets')).data, []);
 export const getTargetAchievement = () =>

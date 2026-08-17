@@ -27,6 +27,9 @@ import {
   Image01Icon,
   DocumentValidationIcon,
   StarIcon,
+  MapsLocation01Icon,
+  Target01Icon,
+  Wallet01Icon,
 } from 'hugeicons-react';
 import Logo from '@/components/ui/Logo';
 import Spinner from '@/components/ui/Spinner';
@@ -58,9 +61,12 @@ const NAV = [
   {
     section: 'B2B',
     items: [
+      { label: 'Zones', href: '/dashboard/zones', icon: MapsLocation01Icon },
       { label: 'Parties', href: '/dashboard/parties', icon: Store01Icon },
       { label: 'Distributors', href: '/dashboard/distributors', icon: Building01Icon },
       { label: 'Salesmen', href: '/dashboard/salesmen', icon: UserMultiple02Icon },
+      { label: 'Targets', href: '/dashboard/targets', icon: Target01Icon },
+      { label: 'Expenses', href: '/dashboard/expenses', icon: Wallet01Icon },
       { label: 'Journeys', href: '/dashboard/journeys', icon: Route02Icon },
       { label: 'B2B Orders', href: '/dashboard/b2b-orders', icon: DeliveryTruck01Icon },
       { label: 'Wholesale Leads', href: '/dashboard/wholesale', icon: Mail01Icon },

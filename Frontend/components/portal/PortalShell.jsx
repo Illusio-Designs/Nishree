@@ -10,6 +10,8 @@ import {
   Target02Icon,
   ChartLineData01Icon,
   ShoppingBag02Icon,
+  ShoppingCart01Icon,
+  Wallet01Icon,
   UserIcon,
   Store01Icon,
   Menu01Icon,
@@ -25,10 +27,12 @@ const NAV_BY_ROLE = {
   salesman: [
     { label: 'Home', href: '/portal', icon: DashboardSquare01Icon },
     { label: 'My Route', href: '/portal/route', icon: Route02Icon },
+    { label: 'New Order', href: '/portal/orders/new', icon: ShoppingCart01Icon },
+    { label: 'My Orders', href: '/portal/orders', icon: ShoppingBag02Icon },
     { label: 'Journey', href: '/portal/journey', icon: MapsLocation01Icon },
+    { label: 'Expenses', href: '/portal/expenses', icon: Wallet01Icon },
     { label: 'Targets', href: '/portal/targets', icon: Target02Icon },
     { label: 'Performance', href: '/portal/report', icon: ChartLineData01Icon },
-    { label: 'My Orders', href: '/portal/orders', icon: ShoppingBag02Icon },
     { label: 'Profile', href: '/portal/profile', icon: UserIcon },
   ],
   party: [

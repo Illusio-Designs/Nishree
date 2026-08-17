@@ -174,6 +174,23 @@ export const adminListB2BOrders = async (params = {}) => {
   return listApi(async () => (await api.get(`/api/b2b-orders${qs ? `?${qs}` : ''}`)).data);
 };
 
+/* -------------------------- Salesman targets ------------------------ */
+export const adminListTargets = async (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return listApi(async () => (await api.get(`/api/salesman-targets${qs ? `?${qs}` : ''}`)).data);
+};
+export const adminCreateTarget = async (p) => (await api.post('/api/salesman-targets', p)).data;
+export const adminUpdateTarget = async (id, p) => (await api.put(`/api/salesman-targets/${id}`, p)).data;
+export const adminDeleteTarget = async (id) => (await api.delete(`/api/salesman-targets/${id}`)).data;
+
+/* -------------------------- Salesman expenses ----------------------- */
+export const adminListExpenses = async (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return listApi(async () => (await api.get(`/api/salesman-expenses${qs ? `?${qs}` : ''}`)).data);
+};
+export const adminSetExpenseStatus = async (id, status) => (await api.patch(`/api/salesman-expenses/${id}/status`, { status })).data;
+export const adminDeleteExpense = async (id) => (await api.delete(`/api/salesman-expenses/${id}`)).data;
+
 /* -------------------------- Blog / Recipes -------------------------- */
 export const adminListBlogs = async () =>
   listApi(async () => (await api.get('/api/blogs')).data);
