@@ -28,9 +28,21 @@ dotenv.config();
 
 const app = express();
 
+// Allowed frontend origins. FRONTEND_URL (comma-separated) extends the list.
+const allowedOrigins = [
+    'https://nishree.com',
+    'https://www.nishree.com',
+    'http://localhost:3000',
+    ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map((s) => s.trim()) : [])
+];
+
 // Middleware
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+        // Allow non-browser requests (curl, server-to-server) with no origin.
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        return callback(null, false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'x-guest-id'],
