@@ -216,22 +216,35 @@ export const setupDatabase = async () => {
                 return await sequelize.query(query);
             };
 
-        // Manually ensure Foreign Keys for 'reviews' table
+        // Add a named foreign key only if it doesn't already exist. `ADD
+        // CONSTRAINT IF NOT EXISTS` is invalid on MariaDB, so we check
+        // information_schema first and issue a plain ADD CONSTRAINT — works on
+        // both MySQL and MariaDB and is idempotent across restarts.
+        const addFkIfMissing = async (table, name, ddl) => {
+            try {
+                const [rows] = await sequelize.query(
+                    `SELECT COUNT(*) AS c FROM information_schema.TABLE_CONSTRAINTS
+                     WHERE table_schema = DATABASE() AND table_name = '${table}' AND constraint_name = '${name}'`
+                );
+                const count = Array.isArray(rows) ? Number(rows[0]?.c) : Number(rows?.c);
+                if (count > 0) return;
+                await sequelize.query(ddl);
+            } catch (err) {
+                console.warn(`Warning: Could not create ${name}:`, err.original ? err.original.sqlMessage : err.message);
+            }
+        };
+
         console.log('Ensuring Foreign Key for reviews.productId to products.id...');
-        await executeQuery(
-            `ALTER TABLE reviews ADD CONSTRAINT IF NOT EXISTS fk_reviews_product FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE ON UPDATE CASCADE`
-        ).catch(err => console.warn('Warning: Could not create fk_reviews_product:', err.original ? err.original.sqlMessage : err.message));
+        await addFkIfMissing('reviews', 'fk_reviews_product',
+            `ALTER TABLE reviews ADD CONSTRAINT fk_reviews_product FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE ON UPDATE CASCADE`);
 
         console.log('Ensuring Foreign Key for reviews.userId to users.id...');
-        await executeQuery(
-            `ALTER TABLE reviews ADD CONSTRAINT IF NOT EXISTS fk_reviews_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE`
-        ).catch(err => console.warn('Warning: Could not create fk_reviews_user:', err.original ? err.original.sqlMessage : err.message));
+        await addFkIfMissing('reviews', 'fk_reviews_user',
+            `ALTER TABLE reviews ADD CONSTRAINT fk_reviews_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE`);
 
-        // Add other critical FKs manually if needed, e.g., for ReviewImage
         console.log('Ensuring Foreign Key for review_images.reviewId to reviews.id...');
-        await executeQuery(
-            `ALTER TABLE review_images ADD CONSTRAINT IF NOT EXISTS fk_review_images_review FOREIGN KEY (reviewId) REFERENCES reviews(id) ON DELETE CASCADE ON UPDATE CASCADE`
-        ).catch(err => console.warn('Warning: Could not create fk_review_images_review:', err.original ? err.original.sqlMessage : err.message));
+        await addFkIfMissing('review_images', 'fk_review_images_review',
+            `ALTER TABLE review_images ADD CONSTRAINT fk_review_images_review FOREIGN KEY (reviewId) REFERENCES reviews(id) ON DELETE CASCADE ON UPDATE CASCADE`);
         
         // Add essential indexes using IF NOT EXISTS
         await executeQuery(`ALTER TABLE users ADD UNIQUE INDEX IF NOT EXISTS idx_users_email (email)`).catch(err => console.warn('Idx users.email:', err.original ? err.original.sqlMessage : err.message));
