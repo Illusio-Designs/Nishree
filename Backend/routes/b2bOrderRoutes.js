@@ -2,7 +2,8 @@ import express from 'express';
 import {
     createB2BOrder,
     getB2BOrders,
-    getMyB2BOrders
+    getMyB2BOrders,
+    updateB2BOrderStatus
 } from '../controller/b2bOrderController.js';
 import { isAuthenticated, authorize } from '../middleware/authMiddleware.js';
 
@@ -18,5 +19,8 @@ router.post('/', isAuthenticated, authorize([...MANAGERS, 'salesman', 'party', '
 
 // Management listing of all B2B orders.
 router.get('/', isAuthenticated, authorize(MANAGERS), getB2BOrders);
+
+// Update a B2B order's status / payment status.
+router.patch('/:id/status', isAuthenticated, authorize(MANAGERS), updateB2BOrderStatus);
 
 export default router;

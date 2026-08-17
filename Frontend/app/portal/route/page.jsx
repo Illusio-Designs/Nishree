@@ -22,15 +22,17 @@ export default function RoutePage() {
   };
   useEffect(load, []);
 
-  // Optimistically update a stop locally, then persist best-effort (keeps the
-  // demo interactive even without a backend).
+  // Optimistically update a stop locally, then persist — surfacing a toast if
+  // the server rejects it so the rep knows it didn't save.
   const updateStop = (stop, status, extra = {}) => {
     setRoute((r) => ({
       ...r,
       stops: r.stops.map((s) => (s.id === stop.id ? { ...s, status, ...extra } : s)),
       summary: recomputeSummary(r.stops.map((s) => (s.id === stop.id ? { ...s, status } : s))),
     }));
-    setStopStatus(stop.id, status, extra.skip_reason).catch(() => {});
+    setStopStatus(stop.id, status, extra.skip_reason).catch((err) => {
+      toast.error(err?.response?.data?.message || "Couldn't save — will retry when back online");
+    });
   };
 
   const recomputeSummary = (stops) => ({
@@ -41,13 +43,18 @@ export default function RoutePage() {
   });
 
   const checkIn = (stop) => {
-    const done = (coords) => {
-      createCheckin({ party_id: stop.Party?.id, latitude: coords?.latitude, longitude: coords?.longitude, reason: 'Route visit' }).catch(() => {});
-      updateStop(stop, 'visited', { visited_at: new Date().toISOString() });
-      toast.success(`Checked in at ${stop.Party?.shop_name}`);
+    const done = async (coords) => {
+      try {
+        // The backend verifies the geofence and rejects an off-site check-in.
+        await createCheckin({ party_id: stop.Party?.id, latitude: coords?.latitude, longitude: coords?.longitude, reason: 'Route visit' });
+        updateStop(stop, 'visited', { visited_at: new Date().toISOString() });
+        toast.success(`Checked in at ${stop.Party?.shop_name}`);
+      } catch (err) {
+        toast.error(err?.response?.data?.message || 'Check-in failed');
+      }
     };
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => done(pos.coords), () => done(null), { timeout: 6000 });
+      navigator.geolocation.getCurrentPosition((pos) => done(pos.coords), () => done(null), { enableHighAccuracy: true, timeout: 8000 });
     } else done(null);
   };
 

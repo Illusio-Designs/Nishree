@@ -30,6 +30,7 @@ import {
   MapsLocation01Icon,
   Target01Icon,
   Wallet01Icon,
+  Notebook01Icon,
 } from 'hugeicons-react';
 import Logo from '@/components/ui/Logo';
 import Spinner from '@/components/ui/Spinner';
@@ -72,6 +73,7 @@ const NAV = [
       { label: 'Wholesale Leads', href: '/dashboard/wholesale', icon: Mail01Icon },
       { label: 'Offers', href: '/dashboard/offers', icon: Tag01Icon },
       { label: 'Events', href: '/dashboard/events', icon: Calendar03Icon },
+      { label: 'Audit Logs', href: '/dashboard/audit-logs', icon: Notebook01Icon },
     ],
   },
 ];

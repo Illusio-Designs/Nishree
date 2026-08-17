@@ -173,6 +173,13 @@ export const adminListB2BOrders = async (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return listApi(async () => (await api.get(`/api/b2b-orders${qs ? `?${qs}` : ''}`)).data);
 };
+export const adminUpdateB2BOrderStatus = async (id, status) => (await api.patch(`/api/b2b-orders/${id}/status`, { status })).data;
+
+/* ---------------------------- Audit logs ---------------------------- */
+export const adminListAuditLogs = async (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return listApi(async () => { const { data } = await api.get(`/api/audit-logs${qs ? `?${qs}` : ''}`); return unwrap(data, ['logs', 'auditLogs', 'rows']); });
+};
 
 /* -------------------------- Salesman targets ------------------------ */
 export const adminListTargets = async (params = {}) => {

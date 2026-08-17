@@ -12,6 +12,10 @@ import { sequelize } from '../config/db.js';
 import { resolveWholesalePrice } from '../utils/b2bPricing.js';
 import { evaluateGeofence, getGeofenceRadiusM } from '../utils/geo.js';
 import { geocodeAddress } from '../utils/geocode.js';
+import { writeAudit } from '../utils/audit.js';
+
+const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+const PAYMENT_STATUSES = ['pending', 'paid', 'failed', 'refunded'];
 
 const B2B_ORDER_TYPES = ['party_order', 'distributor_order', 'event_order', 'visit_order', 'whatsapp_order'];
 
@@ -219,6 +223,52 @@ export const getB2BOrders = async (req, res) => {
     } catch (error) {
         console.error('Get B2B orders error:', error);
         res.status(500).json({ message: 'Failed to fetch B2B orders', error: error.message });
+    }
+};
+
+// Update a B2B order's status / payment status (managers).
+export const updateB2BOrderStatus = async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+        const { id } = req.params;
+        const { status, payment_status } = req.body;
+
+        const order = await Order.findOne({ where: { id, channel: 'b2b' }, transaction });
+        if (!order) { await transaction.rollback(); return res.status(404).json({ message: 'B2B order not found' }); }
+
+        const oldValues = { status: order.status, payment_status: order.payment_status };
+
+        if (status) {
+            if (!ORDER_STATUSES.includes(status)) {
+                await transaction.rollback();
+                return res.status(400).json({ message: `status must be one of: ${ORDER_STATUSES.join(', ')}` });
+            }
+            order.status = status;
+        }
+        if (payment_status) {
+            if (!PAYMENT_STATUSES.includes(payment_status)) {
+                await transaction.rollback();
+                return res.status(400).json({ message: `payment_status must be one of: ${PAYMENT_STATUSES.join(', ')}` });
+            }
+            order.payment_status = payment_status;
+        }
+
+        await order.save({ transaction });
+        if (status) {
+            await OrderStatusHistory.create({ order_id: order.id, status, updated_by: req.user.id }, { transaction });
+        }
+        await transaction.commit();
+
+        await writeAudit({
+            userId: req.user?.id, entity: 'Order', entityId: order.id, action: 'update',
+            oldValues, newValues: { status: order.status, payment_status: order.payment_status }
+        });
+
+        res.json({ message: 'Order updated', order });
+    } catch (error) {
+        await transaction.rollback();
+        console.error('Update B2B order status error:', error);
+        res.status(500).json({ message: 'Failed to update order', error: error.message });
     }
 };
 
