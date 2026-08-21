@@ -101,6 +101,16 @@ body {
 .clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .clamp-4 { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
+/* Greyscale shimmer loading placeholder — a light sweep over a grey block. */
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.shimmer { position: relative; overflow: hidden; background-color: var(--color-surface-soft, #f1efec); }
+.shimmer::after {
+  content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent 0, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.05) 60%, transparent 100%);
+  animation: shimmer 1.4s infinite;
+}
+@media (prefers-reduced-motion: reduce) { .shimmer::after { animation: none; } }
+
 /* Seamless infinite marquee for the reviews slider (track holds two copies). */
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .animate-marquee { animation: marquee var(--marquee-duration, 30s) linear infinite; }

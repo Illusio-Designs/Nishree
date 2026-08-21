@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Container from '@/components/ui/Container';
 import SectionHeading from '@/components/ui/SectionHeading';
+import Skeleton from '@/components/ui/Skeleton';
 import ReviewCard from '@/components/store/ReviewCard';
 import { getAllPublicReviews } from '@/lib/api';
 
@@ -11,12 +12,14 @@ import { getAllPublicReviews } from '@/lib/api';
 // desktop shows 3 (slides at >3), tablet 2, mobile 1 (slides at >1).
 export default function Testimonials() {
   const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [perView, setPerView] = useState(3);
 
   useEffect(() => {
     getAllPublicReviews({ limit: 12 })
       .then((list) => setReviews(Array.isArray(list) ? list : []))
-      .catch(() => setReviews([]));
+      .catch(() => setReviews([]))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -29,6 +32,20 @@ export default function Testimonials() {
     return () => window.removeEventListener('resize', compute);
   }, []);
 
+  // Shimmer while the API is in flight; hide the section only once it resolves
+  // with no reviews — never show sample/dummy quotes.
+  if (loading) {
+    return (
+      <Container className="py-14">
+        <SectionHeading title="Loved by home cooks" subtitle="What our customers say about cooking with Nishree." center />
+        <div className="flex flex-wrap justify-center gap-5">
+          {Array.from({ length: perView }).map((_, i) => (
+            <Skeleton key={i} className="h-52 w-full max-w-[380px] sm:w-[44%] lg:w-[30%]" />
+          ))}
+        </div>
+      </Container>
+    );
+  }
   if (!reviews.length) return null;
 
   const slide = reviews.length > perView;

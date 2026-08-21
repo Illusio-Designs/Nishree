@@ -85,6 +85,28 @@ function StaticHero() {
   );
 }
 
+// Greyscale shimmer shown while the sliders API is in flight.
+function HeroSkeleton() {
+  return (
+    <section className="bg-surface-tint">
+      <Container className="py-6 lg:py-8">
+        <div className="shimmer aspect-[4/3] w-full rounded-2xl sm:aspect-[16/7] sm:rounded-[2rem] lg:aspect-[16/6]" />
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="shimmer h-11 w-11 shrink-0 rounded-full" />
+              <div className="flex-1 space-y-1.5">
+                <div className="shimmer h-3 w-24 rounded" />
+                <div className="shimmer h-2.5 w-32 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
 export default function Hero() {
   const [slides, setSlides] = useState([]);
   const [idx, setIdx] = useState(0);
@@ -112,8 +134,10 @@ export default function Hero() {
     if (idx >= count) setIdx(0);
   }, [count, idx]);
 
-  // Until loaded, and whenever no sliders are configured, show the static hero.
-  if (!ready || count === 0) return <StaticHero />;
+  // While the sliders API is loading, show a greyscale shimmer — never dummy
+  // content. Only after it resolves with no sliders do we fall back.
+  if (!ready) return <HeroSkeleton />;
+  if (count === 0) return <StaticHero />;
 
   return (
     <section className="relative overflow-hidden bg-surface-tint">
