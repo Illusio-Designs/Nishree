@@ -15,7 +15,7 @@ const fmtDate = (v) => {
 export default function ReviewCard({ review: r }) {
   const images = Array.isArray(r.ReviewImages) ? r.ReviewImages : [];
   return (
-    <Card className="flex flex-col gap-4 p-6">
+    <Card className="flex h-full flex-col gap-4 p-6">
       <QuoteDownIcon size={28} strokeWidth={2} className="text-brand-200" />
       <p className="clamp-4 flex-1 text-body">{r.review}</p>
 

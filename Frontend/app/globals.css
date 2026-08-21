@@ -101,6 +101,12 @@ body {
 .clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .clamp-4 { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
+/* Seamless infinite marquee for the reviews slider (track holds two copies). */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.animate-marquee { animation: marquee var(--marquee-duration, 30s) linear infinite; }
+.marquee-mask { -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent); }
+@media (prefers-reduced-motion: reduce) { .animate-marquee { animation: none; } }
+
 /* ------------------------------------------------------------------ *
  * Motion — scroll reveal + micro entrance animations
  * ------------------------------------------------------------------ */

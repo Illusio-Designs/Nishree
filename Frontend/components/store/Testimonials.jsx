@@ -6,32 +6,61 @@ import SectionHeading from '@/components/ui/SectionHeading';
 import ReviewCard from '@/components/store/ReviewCard';
 import { getAllPublicReviews } from '@/lib/api';
 
-// Shown until real reviews exist, so the section never looks empty.
-const FALLBACK = [
-  { id: 'f1', reviewerName: 'Priya S.', productName: 'Garam Masala', rating: 5, review: 'The garam masala is unbelievably fresh — you can smell it the moment you open the pack. My curries have never tasted better.' },
-  { id: 'f2', reviewerName: 'Rahul M.', productName: 'Kashmiri Chilli', rating: 5, review: 'Switched from a supermarket brand and there is no going back. The Kashmiri chilli gives such a beautiful colour.' },
-  { id: 'f3', reviewerName: 'Anjali K.', productName: 'Spice Box', rating: 4, review: 'Great quality and fast delivery. Love that I can buy small packs to try and bulk packs for regulars.' },
-];
-
+// Real approved reviews only — the section hides itself when there are none.
+// It auto-slides infinitely once there are more reviews than fit on screen:
+// desktop shows 3 (slides at >3), tablet 2, mobile 1 (slides at >1).
 export default function Testimonials() {
-  const [reviews, setReviews] = useState(FALLBACK);
+  const [reviews, setReviews] = useState([]);
+  const [perView, setPerView] = useState(3);
 
   useEffect(() => {
-    getAllPublicReviews({ limit: 6 })
-      .then((list) => {
-        if (Array.isArray(list) && list.length) setReviews(list);
-      })
-      .catch(() => {});
+    getAllPublicReviews({ limit: 12 })
+      .then((list) => setReviews(Array.isArray(list) ? list : []))
+      .catch(() => setReviews([]));
   }, []);
+
+  useEffect(() => {
+    const compute = () => {
+      const w = window.innerWidth;
+      setPerView(w >= 1024 ? 3 : w >= 640 ? 2 : 1);
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, []);
+
+  if (!reviews.length) return null;
+
+  const slide = reviews.length > perView;
+  const items = slide ? [...reviews, ...reviews] : reviews;
+  const duration = Math.max(20, reviews.length * 6);
 
   return (
     <Container className="py-14">
       <SectionHeading title="Loved by home cooks" subtitle="What our customers say about cooking with Nishree." center />
-      <div className="grid gap-5 md:grid-cols-3">
-        {reviews.slice(0, 6).map((r) => (
-          <ReviewCard key={r.id} review={r} />
-        ))}
-      </div>
+
+      {slide ? (
+        <div className="group marquee-mask overflow-hidden">
+          <ul
+            className="flex w-max animate-marquee will-change-transform group-hover:[animation-play-state:paused]"
+            style={{ '--marquee-duration': `${duration}s` }}
+          >
+            {items.map((r, i) => (
+              <li key={`${r.id}-${i}`} className="w-[82vw] max-w-[380px] shrink-0 pr-5 sm:w-[44vw] lg:w-[30vw]">
+                <ReviewCard review={r} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div className="flex flex-wrap justify-center gap-5">
+          {reviews.map((r) => (
+            <div key={r.id} className="w-full max-w-[380px] sm:w-[44%] lg:w-[30%]">
+              <ReviewCard review={r} />
+            </div>
+          ))}
+        </div>
+      )}
     </Container>
   );
 }
