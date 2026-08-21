@@ -71,18 +71,13 @@ function StaticHero() {
         </div>
 
         <div className="relative hidden lg:block">
-          <div className="relative mx-auto flex h-[420px] w-full max-w-md items-center justify-center rounded-[2rem] brand-gradient text-white shadow-pop">
-            <div className="text-center">
-              <p className="text-7xl font-black">50%</p>
-              <p className="mt-1 text-xl font-semibold tracking-wide">UP TO OFF</p>
-              <p className="mt-4 text-sm text-white/80">On your first spice order</p>
+          <div className="relative mx-auto flex h-[420px] w-full max-w-md items-center justify-center rounded-[2rem] border border-line bg-white p-10 shadow-pop">
+            <div className="flex flex-col items-center text-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/RTHSRT.png" alt="Nishree" className="h-28 w-auto" />
+              <p className="mt-6 text-xl font-semibold tracking-wide text-ink">Pure spices, freshly packed</p>
+              <p className="mt-2 text-sm text-muted">From the source to your kitchen.</p>
             </div>
-            <span className="animate-floaty absolute right-6 top-6 flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-2xl backdrop-blur">
-              🌶️
-            </span>
-            <span className="animate-floaty absolute bottom-6 left-6 flex h-14 w-14 items-center justify-center rounded-full bg-white/15 text-2xl backdrop-blur" style={{ animationDelay: '1.5s' }}>
-              🧂
-            </span>
           </div>
         </div>
       </Container>
@@ -141,16 +136,16 @@ export default function Hero() {
                   <div className="h-full w-full brand-gradient" />
                 )}
                 {/* readability overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/10" />
                 <div className="absolute inset-0 flex items-center">
-                  <div className="max-w-xl p-5 text-white sm:p-10 lg:p-14">
+                  <div className="max-w-xl p-6 text-white sm:p-10 lg:p-14">
                     {s.title && (
-                      <h1 className="clamp-2 text-xl font-extrabold leading-tight drop-shadow sm:text-4xl lg:text-5xl">
+                      <h1 className="clamp-2 text-2xl font-extrabold leading-tight text-white drop-shadow-lg sm:text-4xl lg:text-5xl">
                         {s.title}
                       </h1>
                     )}
                     {s.description && (
-                      <p className="mt-2 hidden max-w-md text-sm text-white/90 sm:mt-3 sm:block sm:text-lg">{s.description}</p>
+                      <p className="clamp-2 mt-2 max-w-md text-sm text-white/90 drop-shadow sm:mt-3 sm:text-lg">{s.description}</p>
                     )}
                     {(s.buttonText || s.link) && (
                       <Button href={s.link || '/products'} className="mt-4 sm:mt-6 sm:h-12 sm:px-7 sm:text-base" iconRight={ArrowRight01Icon}>
